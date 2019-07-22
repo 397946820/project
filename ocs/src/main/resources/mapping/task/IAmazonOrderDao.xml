@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IAmazonOrderDao">
+	<resultMap type="com.it.ocs.task.model.AmazonOrderModel" id="amazonOrderResult">
+		<id column="ID" property="id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="CHANNEL" property="channel"  />
+		<result column="ORDER_ID" property="order_id"  />
+		<result column="STATUS" property="status"  />
+		<result column="PAYMENT_METHOD" property="payment_method"  />
+		<result column="PURCHASE_AT" property="purchase_at"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="AMAZON_UPDATED_AT" property="amazon_updated_at"  />
+		<result column="LASTEST_SHIP_DATE" property="lastest_ship_date"  />
+		<result column="LASTEST_DELIVERY_DATE" property="lastest_delivery_date"  />
+		<result column="CUSTOMER_NAME" property="customer_name"  />
+		<result column="EMAIL" property="email"  />
+		<result column="AMOUNT" property="amount"  />
+		<result column="CURRENCY_CODE" property="currency_code"  />
+		<result column="COUNTRY_CODE" property="country_code"  />
+		<result column="NAME" property="name"  />
+		<result column="STATE_OR_REGION" property="state_or_region"  />
+		<result column="POSTAL_CODE" property="postal_code"  />
+		<result column="PHONE" property="phone"  />
+		<result column="CITY" property="city"  />
+		<result column="STREET" property="street"  />
+	</resultMap>
+	
+	<select id="getOrderSeqs"  resultType="java.lang.Long">
+		select total_order_seq.nextval sql from (select 1 from amazon_order where <![CDATA[rownum <= ${size}]]>)
+	</select>
+	<select id="getOrderItemSeqs" resultType="java.lang.Long">
+		select TOTAL_ORDER_ITEM_SEQ.nextval sq from (select 1 from amazon_order where <![CDATA[rownum <= ${size}]]>)
+	</select>
+	<insert id="insertAmazonOrders" parameterType="java.util.List">
+		INSERT INTO amazon_order (
+			ID,
+			PLATFORM,
+			CHANNEL,
+			ORDER_ID,
+			STATUS,
+			PAYMENT_METHOD,
+			PURCHASE_AT,
+			CREATED_AT,
+			UPDATED_AT,
+			AMAZON_UPDATED_AT,
+			LASTEST_SHIP_DATE,
+			LASTEST_DELIVERY_DATE,
+			CUSTOMER_NAME,
+			EMAIL,
+			AMOUNT,
+			CURRENCY_CODE,
+			COUNTRY_CODE,
+			NAME,
+			STATE_OR_REGION,
+			POSTAL_CODE,
+			PHONE,
+			CITY,
+			STREET)   
+		select c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.id,jdbcType=BIGINT},
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.channel,jdbcType=VARCHAR},
+				#{item.order_id,jdbcType=VARCHAR},
+				#{item.status,jdbcType=VARCHAR},
+				#{item.payment_method,jdbcType=VARCHAR},
+				#{item.purchase_at,jdbcType=TIMESTAMP},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.amazon_updated_at,jdbcType=TIMESTAMP},
+				#{item.lastest_ship_date,jdbcType=TIMESTAMP},
+				#{item.lastest_delivery_date,jdbcType=TIMESTAMP},
+				#{item.customer_name,jdbcType=VARCHAR},
+				#{item.email,jdbcType=VARCHAR},
+				#{item.amount,jdbcType=DOUBLE},
+				#{item.currency_code,jdbcType=VARCHAR},
+				#{item.country_code,jdbcType=VARCHAR},
+				#{item.name,jdbcType=VARCHAR},
+				#{item.state_or_region,jdbcType=VARCHAR},
+				#{item.postal_code,jdbcType=VARCHAR},
+				#{item.phone,jdbcType=VARCHAR},
+				#{item.city,jdbcType=VARCHAR},
+				#{item.street,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="selectMaxCreatedAt" resultType="java.lang.String">
+		select to_char(max(updated_at) ,'yyyy-mm-dd HH24:mi:ss') from amazon_order
+	</select>
+	<select id="findAmazonOrders" resultMap="amazonOrderResult" parameterType="java.util.List">
+		 select ORDER_ID,ID from AMAZON_ORDER
+		 where ORDER_ID IN  
+        <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.order_id}  
+        </foreach> 
+	</select>
+	
+	<update id="updateAmazonOrders" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update amazon_order bao 
+	   	set
+	  		PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			CHANNEL = #{item.channel,jdbcType=VARCHAR},
+			STATUS = #{item.status,jdbcType=VARCHAR},
+			PAYMENT_METHOD = #{item.payment_method,jdbcType=VARCHAR},
+			PURCHASE_AT = #{item.purchase_at,jdbcType=TIMESTAMP},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP},
+			AMAZON_UPDATED_AT = #{item.amazon_updated_at,jdbcType=TIMESTAMP},
+			LASTEST_SHIP_DATE = #{item.lastest_ship_date,jdbcType=TIMESTAMP},
+			LASTEST_DELIVERY_DATE = #{item.lastest_delivery_date,jdbcType=TIMESTAMP},
+			CUSTOMER_NAME = #{item.customer_name,jdbcType=VARCHAR},
+			EMAIL = #{item.email,jdbcType=VARCHAR},
+			AMOUNT = #{item.amount,jdbcType=DOUBLE},
+			CURRENCY_CODE = #{item.currency_code,jdbcType=VARCHAR},
+			COUNTRY_CODE = #{item.country_code,jdbcType=VARCHAR},
+			NAME = #{item.name,jdbcType=VARCHAR},
+			STATE_OR_REGION = #{item.state_or_region,jdbcType=VARCHAR},
+			POSTAL_CODE = #{item.postal_code,jdbcType=VARCHAR},
+			PHONE = #{item.phone,jdbcType=VARCHAR},
+			CITY = #{item.city,jdbcType=VARCHAR},
+			STREET = #{item.street,jdbcType=VARCHAR}
+	   where bao.ORDER_ID = #{item.order_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+	
+	<update id="handleReissueTranNumber" parameterType="java.util.HashMap">
+		update sys_return_order_final f 
+		set f.tarcking_num=#{param.tarckingNum,jdbcType=VARCHAR},
+			f.tarcking_service=#{param.tarckingService,jdbcType=VARCHAR},
+			f.update_date=sysdate
+		where f.platform = #{param.platform,jdbcType=VARCHAR} and f.account = #{param.account,jdbcType=VARCHAR}
+			and f.order_id = #{param.orderId,jdbcType=VARCHAR} and f.times = #{param.times}
+	</update>
+</mapper>

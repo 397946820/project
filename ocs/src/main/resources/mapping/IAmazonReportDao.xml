@@ -1,0 +1,878 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.amazon.dao.IAmazonReportDao">
+	<update id="saveData">
+		DECLARE
+		  N_EXIST NUMBER;
+		  N_IS_GET_DATA NUMBER;
+		BEGIN
+		  SELECT COUNT(*)INTO N_EXIST FROM AMAZON_REPORTS_REQUEST WHERE REPORT_REQUEST_ID = #{ReportRequestId,jdbcType=VARCHAR};
+		  IF N_EXIST = 0 THEN
+		    INSERT INTO AMAZON_REPORTS_REQUEST(
+		       ID,
+		       REPORT_TYPE,
+		       SCHEDULED,
+		       REPORT_REQUEST_ID,
+		       GENERATED_REPORT_ID,
+		       REPORT_PROCESSING_STATUS,
+		       SUBMITTED_DATE,
+		       COMPLETED_DATE,
+		       START_DATE,
+		       END_DATE,
+		       PLATFORM,
+		       AMAZON_ACCOUNT
+		    )VALUES(
+		       AMAZON_REPORTS_REQUEST_SEQ.NEXTVAL,
+		       #{ReportType,jdbcType=VARCHAR},
+		       #{Scheduled,jdbcType=VARCHAR},
+		       #{ReportRequestId,jdbcType=VARCHAR},
+		       #{GeneratedReportId,jdbcType=VARCHAR},
+		       #{ReportProcessingStatus,jdbcType=VARCHAR},
+		       to_date(#{SubmittedDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		       to_date(#{CompletedDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		       to_date(#{StartDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		       to_date(#{EndDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		       #{platform,jdbcType=VARCHAR},
+		       #{account,jdbcType=VARCHAR}
+		    );
+		  ELSE
+		    SELECT IS_GET_DATA INTO N_IS_GET_DATA FROM AMAZON_REPORTS_REQUEST WHERE REPORT_REQUEST_ID = #{ReportRequestId,jdbcType=VARCHAR};
+		    IF N_IS_GET_DATA = 0 THEN
+		      UPDATE AMAZON_REPORTS_REQUEST SET
+		         SCHEDULED = #{Scheduled,jdbcType=VARCHAR},
+		         GENERATED_REPORT_ID = #{GeneratedReportId,jdbcType=VARCHAR},
+		         REPORT_PROCESSING_STATUS = #{ReportProcessingStatus,jdbcType=VARCHAR},
+		         COMPLETED_DATE = to_date(#{CompletedDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		         START_DATE = to_date(#{StartDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		         END_DATE = to_date(#{EndDate,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		         UPDATE_DATE = SYSDATE
+		      WHERE REPORT_REQUEST_ID = #{ReportRequestId,jdbcType=VARCHAR};
+		    END IF;
+		  END IF;
+		END;
+	</update>
+	
+	<update id="saveRequest">
+		merge into amazon_reports_request a
+		using (select #{request.ReportType} as rt, #{request.Scheduled} as scheduled, #{request.ReportRequestId} as rrid,
+					  to_date(#{request.SubmittedDate,jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss') as subd,
+		              to_date(#{request.StartDate,jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss') as sd,
+		              to_date(#{request.EndDate,jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss') as ed, 
+		              #{request.platform} as platform, #{request.account} as acc, #{request.site} as site, #{request.generateMode} as generate_mode
+		      from dual ) b on (a.report_request_id = b.rrid)
+		when  not matched then 
+		      insert (id, report_type, scheduled, report_request_id, submitted_date, start_date, end_date, platform, amazon_account, create_date, update_date, site, generate_mode) 
+		      values(AMAZON_REPORTS_REQUEST_SEQ.NEXTVAL, b.rt, b.scheduled, b.rrid, b.subd, b.sd, b.ed, b.platform, b.acc, sysdate, sysdate, b.site, b.generate_mode)
+		when  matched then 
+		      update set update_date=sysdate where report_request_id=b.rrid
+	</update>
+	<select id="getUnaskRequestByTime" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		select R.ID id,R.GENERATED_REPORT_ID reportGetId,R.PLATFORM platform, r.site, 
+		R.REPORT_TYPE as reportType, r.generate_mode as generateMode,
+		to_char(r.end_date,'yyyy-MM-dd hh24:mi:ss') endDate
+		from AMAZON_REPORTS_REQUEST r
+		where r.REPORT_TYPE=#{ReportType}
+		AND R.REPORT_PROCESSING_STATUS is null
+		and r.platform = #{PlateForm}
+		and r.generate_mode='sys_auto'
+		and rownum=1 order by r.end_date desc
+	</select>
+	<select id="getLastDoneReportByParam" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		select R.ID id,R.GENERATED_REPORT_ID reportGetId,R.PLATFORM platform, r.site, 
+		R.REPORT_TYPE as reportType, r.generate_mode as generateMode,
+		to_char(r.end_date,'yyyy-MM-dd hh24:mi:ss') endDate
+		from AMAZON_REPORTS_REQUEST r
+		where r.REPORT_TYPE=#{ReportType}
+		AND (R.REPORT_PROCESSING_STATUS = '_DONE_' or R.REPORT_PROCESSING_STATUS='_DONE_NO_DATA_')
+		and r.platform = #{PlateForm}
+		and r.generate_mode='sys_auto'
+		and rownum=1 order by r.end_date desc
+	</select>
+	<select id="getDownloadReportByAccount" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		select R.ID id,R.GENERATED_REPORT_ID reportGetId,R.PLATFORM platform, r.site, R.REPORT_TYPE as reportType, r.generate_mode as generateMode
+		from AMAZON_REPORTS_REQUEST r,AMAZON_REPORTS_SET S
+		where R.REPORT_TYPE = S.REPORT_TYPE 
+		AND r.file_name is null
+		and r.is_get_data = 0
+		AND R.REPORT_PROCESSING_STATUS = '_DONE_'
+		AND ((TO_CHAR(r.submitted_date, 'hh24:mi:ss') BETWEEN S.SUBMMIT_START AND  S.SUBMMIT_END)or(r.IS_DIFF = 1) or (r.generate_mode='sys_auto')) 
+		and r.platform = #{platform}
+	</select>
+	<update id="updateReportRequest">
+		UPDATE AMAZON_REPORTS_REQUEST T SET
+		T.IS_GET_DATA = 1,
+		T.FILE_NAME = #{filePathName,jdbcType=VARCHAR},
+		T.UPDATE_DATE = SYSDATE
+		WHERE T.ID = #{id}
+	</update>
+	<select id="getParseReport" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		select r.id,r.generated_report_id reportGetId,r.file_name filePathName,r.platform,r.site
+		  from AMAZON_REPORTS_REQUEST r
+		 where r.report_type = #{reportType}
+		 <if test="site !=null and site !=''">
+			and r.site = #{site}
+		</if>
+		 <if test="platform !=null and platform !=''">
+			and r.platform = #{platform}
+		</if>
+		 and r.is_get_data = 1
+		 and r.is_parse_data = 0
+	</select>
+	<select id="getParsedReport" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		 select a.is_get_data isGetData,a.is_parse_data isParse,
+		 a.site,a.platform,a.generated_report_id reportGetId,
+		 to_char(a.start_date,'yyyy-MM-dd hh24:mm:ss') startDate,
+		 to_char(a.end_date,'yyyy-MM-dd hh24:mm:ss') endDate from ocs_ebay.amazon_reports_request a where 
+ 	a.report_type in ('_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_')
+       and a.site=#{site}
+      and a.is_get_data=1
+      and (a.is_diff=1 or a.generate_mode='sys_auto')
+      and a.is_parse_data=1
+      and a.start_date >= to_date(#{startTime},'yyyy-MM-dd hh24:mi:ss')
+      and a.end_date <![CDATA[<= ]]> to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+	</select>
+	<select id="getParseStart" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		 select *
+		   from (
+				select r.id,
+				       r.generated_report_id reportGetId,
+				       r.file_name           filePathName,
+				       r.platform,
+				       r.is_get_data         isGetData,
+				       r.is_parse_data       isParse,
+				       r.site,
+				       to_char(r.start_date,'yyyy-MM-dd hh24:mi:ss') startDate,
+				       to_char(r.end_date,'yyyy-MM-dd hh24:mi:ss') endDate
+				  from AMAZON_REPORTS_REQUEST r, AMAZON_REPORTS_SET S
+				 where r.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+           		   AND R.REPORT_PROCESSING_STATUS = '_DONE_'
+				   AND ((TO_CHAR(r.submitted_date, 'hh24:mi:ss') BETWEEN S.SUBMMIT_START AND S.SUBMMIT_END) or (r.IS_DIFF = 1))
+				   and r.site = #{site}
+				   and r.is_parse_data = 0
+				   order by r.is_get_data desc ,r.start_date asc
+			)
+			where  rownum = 1
+	</select>
+	<select id="getNextParseReport" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		 select *
+		   from (
+				select r.id,
+				       r.generated_report_id reportGetId,
+				       r.file_name           filePathName,
+				       r.platform,
+				       r.is_get_data         isGetData,
+				       r.is_parse_data       isParse,
+				       r.site,
+				       to_char(r.start_date,'yyyy-MM-dd hh24:mi:ss') startDate,
+				       to_char(r.end_date,'yyyy-MM-dd hh24:mi:ss') endDate
+				  from AMAZON_REPORTS_REQUEST r
+				 where r.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+				   and r.start_date = to_date(#{startDate},'yyyy-MM-dd hh24:mi:ss')
+				   and r.site = #{site}
+				   and r.end_date = to_date(#{endDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+				   order by r.is_get_data desc 
+			)
+			where  rownum = 1
+	</select>
+	<select id="isBreakOff" resultType="int">
+		select count(*)
+		from AMAZON_REPORTS_REQUEST r,AMAZON_REPORTS_SET S
+		where R.REPORT_TYPE = S.REPORT_TYPE 
+		AND R.REPORT_PROCESSING_STATUS = '_DONE_'
+		AND R.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+		AND ((TO_CHAR(r.submitted_date, 'hh24:mi:ss') BETWEEN S.SUBMMIT_START AND  S.SUBMMIT_END)) 
+		and r.site = #{site}
+        <![CDATA[and r.start_date >= to_date(#{startTime},'yyyy-MM-dd hh24:mi:ss')]]>
+	</select>
+	<select id="getEndTime" resultType="java.lang.String">		   
+		  select to_char(min(endDate),'yyyy-MM-dd hh24:mi:ss') endDate 
+		  from (select min(r.end_date) endDate
+		          from AMAZON_REPORTS_REQUEST r, AMAZON_REPORTS_SET S
+		         where R.REPORT_TYPE = S.REPORT_TYPE
+		           AND R.REPORT_PROCESSING_STATUS = '_DONE_'
+		           AND R.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+		           AND ((TO_CHAR(r.submitted_date, 'hh24:mi:ss') BETWEEN
+		               S.SUBMMIT_START AND S.SUBMMIT_END)or r.is_diff = 1)
+		           and r.site = #{site}
+		           <![CDATA[and r.end_date >to_date(#{startDate}, 'yyyy-MM-dd hh24:mi:ss')  
+		        union all
+		        select min(r.start_date) endDate
+		          from AMAZON_REPORTS_REQUEST r, AMAZON_REPORTS_SET S
+		         where R.REPORT_TYPE = S.REPORT_TYPE
+		           AND R.REPORT_PROCESSING_STATUS = '_DONE_'
+		           AND R.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+		           AND ((TO_CHAR(r.submitted_date, 'hh24:mi:ss') BETWEEN
+		               S.SUBMMIT_START AND S.SUBMMIT_END)or r.is_diff = 1)
+		           and r.site = #{site}
+		           and r.start_date >to_date(#{startDate}, 'yyyy-MM-dd hh24:mi:ss')
+		           )]]>
+	</select>
+	<update id="dataRangeReportMonthU">
+		update ocs_ebay.amazon_report_order_data set month=#{month} where 
+		site=#{site} and 
+		report_id in 
+		<foreach collection="reportIds" item="reportId" open="(" close=")" separator=",">
+			#{reportId}
+		</foreach>
+	</update>
+	<update id="chooseByRequestList">
+		update AMAZON_REPORTS_REQUEST r
+		   set r.is_diff = 1
+	     where r.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+	       and R.REPORT_PROCESSING_STATUS = '_DONE_'
+	       <![CDATA[and r.start_date >= to_date(#{startDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+	       and r.end_date <= to_date(#{endDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')]]>
+	       and r.platform = #{platform,jdbcType=VARCHAR}
+	</update>
+	<insert id="addOrderReportException">
+		declare
+		  N_EXIST NUMBER;
+		begin
+		  SELECT COUNT(*) INTO N_EXIST FROM AMAZON_REPORT_EXCEPTION WHERE SITE = #{site} AND START_TIME = #{startDate} AND END_TIME = #{endDate};
+		  IF N_EXIST = 0 THEN
+		    INSERT INTO AMAZON_REPORT_EXCEPTION(SITE,START_TIME,END_TIME)VALUES(#{site},#{startDate},#{endDate});
+		  END IF;
+		end;
+	</insert>
+	<select id="getColumnData" resultType="com.it.ocs.amazon.model.ColumnData">
+		select t.id,
+		       t.report_type reportType,
+		       t.column_name columnName,
+		       t.link_name   linkName,
+		       t.site_name site,
+		       t.column_type columnType
+		  from ocs_ebay.AMAZON_REPORT_COLUMN_SET t
+		 where t.site_name = #{site}
+		 and t.report_type = #{reportType}
+	</select>
+	<select id="getPlatformBySite" resultType="string">
+	  select distinct platform from AMAZON_REPORT_COLUMN_SET where site_name=#{site,jdbcType=VARCHAR}
+	</select>
+	<select id="getExceptionTimeData" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		select site, 
+		       start_time startDate, 
+		       end_time endDate
+		  from AMAZON_REPORT_EXCEPTION
+		 where is_ok = 0
+		   and site = #{site}
+	</select>
+	<update id="updateReportExceptionStatus">
+		update AMAZON_REPORT_EXCEPTION  set is_ok = 1 where site = #{site} and start_time = #{startDate} and end_time = #{endDate}
+	</update>
+	<select id="getAllBetweenData" resultType="com.it.ocs.amazon.model.ReportRequestListModel">
+		select r.id,
+		       r.generated_report_id reportGetId,
+		       r.file_name           filePathName,
+		       r.platform,
+		       r.is_get_data         isGetData,
+		       r.is_parse_data       isParse,
+		       r.site,
+		       to_char(r.start_date,'yyyy-MM-dd hh24:mi:ss') startDate,
+		       to_char(r.end_date,'yyyy-MM-dd hh24:mi:ss') endDate
+		  from AMAZON_REPORTS_REQUEST r
+		 where r.report_type = '_GET_DATE_RANGE_FINANCIAL_TRANSACTION_DATA_'
+		   and r.REPORT_PROCESSING_STATUS = '_DONE_'
+		    <![CDATA[and r.start_date >= to_date(#{startDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+	       and r.end_date <= to_date(#{endDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')]]>
+		   and r.site = #{site}
+		   and r.is_get_data = 1
+	</select>
+	<select id="isExist" resultType="int">
+		select count(*) from AMAZON_REPORT_ORDER_DATA where order_id = #{order_id,jdbcType=VARCHAR}
+	</select>
+	<insert id="addOrderReport" >
+		insert into AMAZON_REPORT_ORDER_DATA(
+		  id,
+		  date_time,
+		  settlement_id,
+		  type,
+		  order_id,
+		  sku,
+		  description,
+		  quantity,
+		  marketplace,
+		  fulfillment,
+		  order_city,
+		  order_state,
+		  order_postal,
+		  product_sales,
+		  shipping_credits,
+		  gift_wrap_credits,
+		  promotional_rebates,
+		  sales_tax_collected,
+		  selling_fees,
+		  fba_fees,
+		  other_transaction_fees,
+		  other,
+		  total,
+		  report_id,
+		  platform,
+		  site,
+		  self_date,
+		  MARKETPLACE_FACILITATOR_TAX
+		)values(
+		  AMAZON_REPORT_ORDER_DATA_SEQ.NEXTVAL,
+		  to_date(#{date_time,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		  #{settlement_id,jdbcType=VARCHAR},
+		  #{type,jdbcType=VARCHAR},
+		  #{order_id,jdbcType=VARCHAR},
+		  #{sku,jdbcType=VARCHAR},
+		  #{description,jdbcType=VARCHAR},
+		  #{quantity,jdbcType=VARCHAR},
+		  #{marketplace,jdbcType=VARCHAR},
+		  #{fulfillment,jdbcType=VARCHAR},
+		  #{order_city,jdbcType=VARCHAR},
+		  #{order_state,jdbcType=VARCHAR},
+		  #{order_postal,jdbcType=VARCHAR},
+		  #{product_sales,jdbcType=VARCHAR},
+		  #{shipping_credits,jdbcType=VARCHAR},
+		  #{gift_wrap_credits,jdbcType=VARCHAR},
+		  #{promotional_rebates,jdbcType=VARCHAR},
+		  #{sales_tax_collected,jdbcType=VARCHAR},
+		  #{selling_fees,jdbcType=VARCHAR},
+		  #{fba_fees,jdbcType=VARCHAR},
+		  #{other_transaction_fees,jdbcType=VARCHAR},
+		  #{other,jdbcType=VARCHAR},
+		  #{total,jdbcType=VARCHAR},
+		  #{report_id,jdbcType=VARCHAR},
+		  #{platform,jdbcType=VARCHAR},
+		  #{site,jdbcType=VARCHAR},
+		  to_date(#{self_date,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		  #{marketplace_facilitator_tax,jdbcType=VARCHAR}
+		)
+	</insert>
+	<delete id="deleteReportDataById">
+		delete AMAZON_REPORT_ORDER_DATA where report_id = #{report_id,jdbcType=VARCHAR}
+	</delete>
+	<update id="updateParseStatus">
+		UPDATE AMAZON_REPORTS_REQUEST T SET
+		T.is_parse_data = 1,
+		T.UPDATE_DATE = SYSDATE
+		WHERE T.ID = #{id}
+	</update>
+	<update id="updateRequestSite">
+		UPDATE AMAZON_REPORTS_REQUEST T SET
+		T.site = #{site,jdbcType=VARCHAR}
+		WHERE T.ID = #{id}
+	</update>
+	<sql id="query_base">
+		select t.id,
+		       to_char(t.self_date,'yyyy-MM-dd hh24:mi:ss') selfDate,
+		       t.settlement_id settlementId,
+		       t.type,
+		       t.order_id orderId,
+		       t.sku,
+		       t.description,
+		       t.quantity,
+		       t.marketplace,
+		       t.fulfillment,
+		       t.order_city orderCity,
+		       t.order_state orderState,
+		       t.order_postal orderPostal,
+		       t.product_sales productSales,
+		       t.shipping_credits shippingCredits,
+		       t.gift_wrap_credits giftWrapCredits,
+		       t.promotional_rebates promotionalRebates,
+		       t.sales_tax_collected salesTaxCollected,
+		       t.selling_fees sellingFees,
+		       t.fba_fees fbaFees,
+		       t.other_transaction_fees otherTransactionFees,
+		       t.other,
+		       t.total,
+		       t.report_id reportId,
+		       t.platform
+		  from AMAZON_REPORT_ORDER_DATA t
+		  where 1 = 1
+	</sql>
+	<sql id="query_condition">
+		<if test="param.orderId !=null and param.orderId !=''">
+			and t.order_id = #{param.orderId}
+		</if>
+		<if test="param.marketplace !=null and param.marketplace !=''">
+			and t.site = #{param.marketplace}
+		</if>
+		<if test="param.sku !=null and param.sku !=''">
+			and t.sku = #{param.sku}
+		</if>
+		<if test="param.orderType !=null and param.orderType !=''">
+			and t.type = #{param.orderType}
+		</if>
+		<if test="param.startTime != null and param.startTime != ''">
+			 <![CDATA[and t.self_date >= to_date(#{param.startTime},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.endTime != null and param.endTime != ''">
+			 <![CDATA[and t.self_date < to_date(#{param.endTime},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+	</sql>
+	<select id="queryOrderReportByPage" resultType="com.it.ocs.amazon.model.OrderReportVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="query_base"></include>
+				<include refid="query_condition"></include>
+				order by t.self_date desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countOrderReport" resultType="int">
+		select count(*) from (
+			<include refid="query_base"></include>
+			<include refid="query_condition"></include>
+		)
+	</select>
+	<select id="getExportDataByParam" resultType="java.util.HashMap">
+		<include refid="query_base"></include>
+		<include refid="query_condition"></include>
+		order by t.self_date asc
+	</select>
+	<select id = "getAmazonChangeData" resultType="java.util.HashMap">
+		select  m.id,
+		        m.account,
+		        m.site,
+		        m.status,
+		        to_char(m.change_day,'yyyy-MM-dd') changeDay,
+		        m.date_type  dateType,
+		        m.sku
+		   from sale_order_middle m
+		  where m.is_item = 1
+		    and m.is_opt = 0
+		    <![CDATA[and rownum < 1001]]>
+	</select>
+	<sql id="countAmazonDataTop">
+		begin
+		   delete SALE_ORDER_REPORT r 
+		   where r.terrace = 'amazon' 
+		   and r.sku = #{SKU,jdbcType=VARCHAR}
+		   and r.account = #{ACCOUNT,jdbcType=VARCHAR}
+		   and r.site =#{SITE,jdbcType=VARCHAR}
+		   and r.status = #{STATUS,jdbcType=VARCHAR}
+		   and r.order_day = to_date(#{CHANGEDAY,jdbcType=VARCHAR},'yyyy-MM-dd')
+		   and r.date_type = #{DATETYPE,jdbcType=BIGINT};
+		   INSERT INTO SALE_ORDER_REPORT
+		     (ID,
+		      TERRACE,
+		      SKU,
+		      ASIN,
+		      ACCOUNT,
+		      SITE,
+		      QTY,
+		      CURRENCYCODE,
+		      DEDUCTION,
+		      TAXRATE,
+		      PRICE,
+		      COUNT,
+		      STATUS,
+		      ORDER_DAY,
+		      DATE_TYPE)
+		     SELECT SALE_ORDER_REPORTR_SEQ.NEXTVAL,
+		            'amazon',
+		            #{SKU,jdbcType=VARCHAR},
+		            C.ASIN,
+		            #{ACCOUNT,jdbcType=VARCHAR},
+		            #{SITE,jdbcType=VARCHAR},
+		            C.QTY,
+		            C.CURRENCYCODE,
+		            C.DEDUCTION,
+		            C.TAXRATE,
+		            C.PRICE,
+		            C.COUNT,
+		            #{STATUS,jdbcType=VARCHAR},
+		            to_date(#{CHANGEDAY,jdbcType=VARCHAR},'YYYY-MM-DD'),
+		            #{DATETYPE,jdbcType=BIGINT}
+		       FROM (SELECT COUNT(*) QTY,
+		                    MAX(A.CURRENCY_CODE) CURRENCYCODE,
+		                    MAX(B.ASIN) ASIN,
+		                    SUM(B.PROMOTION_DISCOUNT) DEDUCTION,
+		                    SUM(B.TAX) TAXRATE,
+		                    SUM(B.PRICE) PRICE,
+		                    SUM(B.QTY) COUNT
+		               FROM AMAZON_ORDER A, AMAZON_ORDER_ITEM B
+		              WHERE A.ID = B.PARENT_ID
+		                AND A.PLATFORM = #{ACCOUNT,jdbcType=VARCHAR}
+		                AND A.CHANNEL = #{SITE,jdbcType=VARCHAR}
+		                AND A.STATUS = #{STATUS,jdbcType=VARCHAR}
+	</sql>
+	<sql id="countAmazonDataFooter">
+		AND B.SKU = #{SKU,jdbcType=VARCHAR}) C
+		where C.COUNT is not null;
+		     update sale_order_middle m set m.is_opt = 1 where m.id = #{ID,jdbcType=BIGINT};
+		 end;
+	</sql>
+	<insert id="countAmazonDataByCreateTime">
+		<include refid="countAmazonDataTop"></include>    
+        AND TRUNC(A.PURCHASE_AT +(SELECT NVL(MAX(OFFSET), 0) FROM AMAMZON_TIMEZONE_T WHERE SITE = #{SITE,jdbcType=VARCHAR}) / 24) = TO_DATE(#{CHANGEDAY,jdbcType=VARCHAR}, 'YYYY-MM-DD')
+        <include refid="countAmazonDataFooter"></include> 
+	</insert>
+	<insert id="countAmazonDataByUpdateTime">
+		<include refid="countAmazonDataTop"></include>    
+        AND TRUNC(A.AMAZON_UPDATED_AT +(SELECT NVL(MAX(OFFSET), 0) FROM AMAMZON_TIMEZONE_T WHERE SITE = #{SITE,jdbcType=VARCHAR}) / 24) = TO_DATE(#{CHANGEDAY,jdbcType=VARCHAR}, 'YYYY-MM-DD')
+        <include refid="countAmazonDataFooter"></include> 
+	</insert>
+	<insert id="countAmazonDataByShipTime">
+		<include refid="countAmazonDataTop"></include>    
+		AND A.LASTEST_SHIP_DATE IS NOT NULL
+        AND TRUNC(A.LASTEST_SHIP_DATE +(SELECT NVL(MAX(OFFSET), 0) FROM AMAMZON_TIMEZONE_T WHERE SITE = #{SITE,jdbcType=VARCHAR}) / 24) = TO_DATE(#{CHANGEDAY,jdbcType=VARCHAR}, 'YYYY-MM-DD')
+        <include refid="countAmazonDataFooter"></include>       
+	</insert>
+	<select id="getOrderTypeBySite" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select type value, type displayName
+		  from (select distinct type
+		          from amazon_report_order_data
+		         where site = #{site,jdbcType=VARCHAR}
+		         and type is not null)
+	</select>
+	<select id="getTotalByContry" resultType="java.util.HashMap">
+		select t.site marketplace, 
+		       sum(to_number(t.quantity)) quantity,
+		       sum(to_number(t.product_sales)) productSales,
+		       sum(to_number(t.shipping_credits)) shippingCredits,
+		       sum(to_number(t.gift_wrap_credits)) giftWrapCredits,
+		       sum(to_number(t.promotional_rebates)) promotionalRebates,
+		       sum(to_number(nvl(t.sales_tax_collected,'0'))) salesTaxCollected,
+		       sum(to_number(t.selling_fees)) sellingFees,
+		       sum(to_number(t.fba_fees)) fbaFees,
+		       sum(to_number(t.other_transaction_fees)) otherTransactionFees,
+		       sum(to_number(t.other)) other,
+		       sum(to_number(t.total)) total
+		  from amazon_report_order_data t
+		  where 1 = 1
+		  <include refid="query_condition"></include>
+		 group by t.site
+	</select>
+	<select id="getTotalByType" resultType="java.util.HashMap">
+		select t.type marketplace, 
+		       sum(to_number(t.quantity)) quantity,
+		       sum(to_number(t.product_sales)) productSales,
+		       sum(to_number(t.shipping_credits)) shippingCredits,
+		       sum(to_number(t.gift_wrap_credits)) giftWrapCredits,
+		       sum(to_number(t.promotional_rebates)) promotionalRebates,
+		       sum(to_number(nvl(t.sales_tax_collected,'0'))) salesTaxCollected,
+		       sum(to_number(t.selling_fees)) sellingFees,
+		       sum(to_number(t.fba_fees)) fbaFees,
+		       sum(to_number(t.other_transaction_fees)) otherTransactionFees,
+		       sum(to_number(t.other)) other,
+		       sum(to_number(t.total)) total
+		  from amazon_report_order_data t
+		  where 1 = 1
+		  <include refid="query_condition"></include>
+		 group by t.type
+	</select>
+	<select id="countThisReportData" resultType="int">
+		select count(*) from amazon_report_order_data d where d.report_id = #{reportGetId,jdbcType=VARCHAR}
+	</select>
+
+	<resultMap type="com.it.ocs.amazon.model.MyiUnsuppressedVO" id="myiUnsuppressedResult">
+		<result column="ID" property="id"  />
+		<result column="sku" property="sku"  />
+		<result column="fnsku" property="fnsku"  />
+		<result column="asin" property="asin"  />
+		<result column="product_name" property="product_name"  />
+		<result column="condition" property="condition"  />
+		<result column="your_price" property="your_price"  />
+		<result column="mfn_listing_exists" property="mfn_listing_exists"  />
+		<result column="mfn_fulfillable_quantity" property="mfn_fulfillable_quantity"  />
+		<result column="afn_listing_exists" property="afn_listing_exists"  />
+		<result column="afn_warehouse_quantity" property="afn_warehouse_quantity"  />
+		<result column="afn_fulfillable_quantity" property="afn_fulfillable_quantity"  />
+		<result column="afn_unsellable_quantity" property="afn_unsellable_quantity"  />
+		<result column="afn_reserved_quantity" property="afn_reserved_quantity"  />
+		<result column="afn_total_quantity" property="afn_total_quantity"  />
+		<result column="per_unit_volume" property="per_unit_volume"  />
+		<result column="afn_inbound_working_quantity" property="afn_inbound_working_quantity"  />
+		<result column="afn_inbound_shipped_quantity" property="afn_inbound_shipped_quantity"  />
+		<result column="afn_inbound_receiving_quantity" property="afn_inbound_receiving_quantity"  />
+		<result column="created_at" property="created_at"  />
+		<result column="updated_at" property="updated_at"  />
+		<result column="enabled_flag" property="enabled_flag"  />
+		<result column="REPORT_ID" property="report_id"  />
+		<result column="SITE" property="site"  />
+		<result column="reserved_fc_transfers" property="reserved_fc_transfers"  />
+		<result column="request_created_at" property="request_created_at"  />
+		<result column="request_updated_at" property="request_updated_at"  />
+	</resultMap>
+	
+	<sql id="fba_inventory_query_base">
+		select a.*, b.reserved_fc_transfers
+		from (select irl.sku, max(irl.id) as id, wm_concat(irl.fnsku) as fnsku, wm_concat(asin) as asin, max(irl.product_name) as product_name
+		             , sum(irl.your_price) as your_price, max(irl.mfn_listing_exists) as mfn_listing_exists, sum(irl.mfn_fulfillable_quantity) as mfn_fulfillable_quantity
+		             , max(irl.afn_listing_exists) as afn_listing_exists, sum(irl.afn_fulfillable_quantity) as afn_fulfillable_quantity, sum(irl.per_unit_volume) as per_unit_volume
+		             , sum(irl.afn_inbound_working_quantity) as afn_inbound_working_quantity, sum(irl.afn_inbound_shipped_quantity) as afn_inbound_shipped_quantity
+		             , sum(irl.afn_inbound_receiving_quantity) as afn_inbound_receiving_quantity, irl.site, max(irl.enabled_flag) as enabled_flag, irl.report_id
+		             , max(irl.created_at) as created_at, max(irl.updated_at) as updated_at, max(irl.afn_total_quantity) as afn_total_quantity
+		             , max(irl.afn_reserved_quantity) as afn_reserved_quantity, max(irl.afn_warehouse_quantity) as afn_warehouse_quantity
+		             , max(irl.afn_unsellable_quantity) as afn_unsellable_quantity
+		             , min(irl.request_created_at) as request_created_at, min(irl.request_updated_at) as request_updated_at
+		      from (select nvl(l.sku, i.sku) as sku, i.id, i.fnsku, i.asin, i.product_name, i.condition, i.your_price, i.mfn_listing_exists, i.afn_listing_exists
+		                   , case when l.sku is null then to_number(i.mfn_fulfillable_quantity) else to_number(i.mfn_fulfillable_quantity) * nvl(l.qty, 1) end as mfn_fulfillable_quantity
+		                   , case when l.sku is null then to_number(i.afn_warehouse_quantity) else to_number(i.afn_warehouse_quantity) * nvl(l.qty, 1) end as afn_warehouse_quantity
+		                   , case when l.sku is null then to_number(i.afn_fulfillable_quantity) else to_number(i.afn_fulfillable_quantity) * nvl(l.qty, 1) end as afn_fulfillable_quantity
+		                   , case when l.sku is null then to_number(i.afn_unsellable_quantity) else to_number(i.afn_unsellable_quantity) * nvl(l.qty, 1) end as afn_unsellable_quantity
+		                   , case when l.sku is null then to_number(i.afn_reserved_quantity) else to_number(i.afn_reserved_quantity) * nvl(l.qty, 1) end as afn_reserved_quantity
+		                   , case when l.sku is null then to_number(i.afn_total_quantity) else to_number(i.afn_total_quantity) * nvl(l.qty, 1) end as afn_total_quantity
+		                   , case when l.sku is null then to_number(i.afn_inbound_working_quantity) else to_number(i.afn_inbound_working_quantity) * nvl(l.qty, 1) end as afn_inbound_working_quantity
+		                   , case when l.sku is null then to_number(i.afn_inbound_shipped_quantity) else to_number(i.afn_inbound_shipped_quantity) * nvl(l.qty, 1) end as afn_inbound_shipped_quantity
+		                   , case when l.sku is null then to_number(i.afn_inbound_receiving_quantity) else to_number(i.afn_inbound_receiving_quantity) * nvl(l.qty, 1) end as afn_inbound_receiving_quantity
+		                   , i.per_unit_volume, i.enabled_flag, i.site as site, i.REPORT_ID as report_id
+		                   , to_char(i.created_at, 'yyyy-MM-dd hh24:mi:ss') as created_at, to_char(i.updated_at, 'yyyy-MM-dd hh24:mi:ss') as updated_at
+                       	   , to_char(ir.create_date, 'yyyy-MM-dd hh24:mi:ss') as request_created_at, to_char(ir.update_date, 'yyyy-MM-dd hh24:mi:ss') as request_updated_at
+		            from amazon_fba_inventory_report i, 
+	                     (select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA_' and t.site='amazon.com' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA_' and t.site='amazon.de' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA_' and t.site='amazon.jp' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA_' and t.site='amazon.com.au' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA_' and t.site='amazon.ca' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1) ir, sys_sku_link l 
+		            where i.report_id=ir.generated_report_id and i.sku=l.p_sku(+)
+					<if test="param.marketplace != null and param.marketplace != ''">
+						and i.site = #{param.marketplace}
+					</if>
+					<if test="param.sku != null and param.sku != ''">
+						and (i.sku like concat(concat('%',#{param.sku}),'%') or l.sku like concat(concat('%',#{param.sku}),'%'))
+					</if>
+					<!-- 
+					<if test="param.startTime != null and param.startTime != ''">
+						 <![CDATA[and ir.create_date >= to_date(CONCAT(#{param.startTime}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+					</if>
+					<if test="param.endTime != null and param.endTime != ''">
+						 <![CDATA[and ir.create_date <= to_date(CONCAT(#{param.endTime}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+					</if>
+					 -->
+		           ) irl group by irl.sku, irl.site, irl.report_id
+		     ) a,
+		     (select rrl.sku, sum(rrl.reserved_fc_transfers) as reserved_fc_transfers, rrl.site
+		      from (select nvl(l.sku, r.sku) as sku, r.site, r.report_id
+                   		   , case when l.sku is null then to_number(r.reserved_fc_transfers) else to_number(r.reserved_fc_transfers) * nvl(l.qty, 1) end as reserved_fc_transfers
+		            from amazon_fba_inventory_reserved r, 
+	                     (select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_RESERVED_INVENTORY_DATA_' and t.site='amazon.com' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_RESERVED_INVENTORY_DATA_' and t.site='amazon.de' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_RESERVED_INVENTORY_DATA_' and t.site='amazon.jp' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_RESERVED_INVENTORY_DATA_' and t.site='amazon.com.au' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1
+              			  union all
+    					  select * from (select * from amazon_reports_request t 
+	                      where t.report_type='_GET_RESERVED_INVENTORY_DATA_' and t.site='amazon.ca' and t.generate_mode='sys_auto' and t.is_parse_data=1
+						  <if test="param.requestMarketplace != null and param.requestMarketplace != ''">
+								and t.site = #{param.requestMarketplace}
+					      </if>
+						  <if test="param.startTime != null and param.startTime != ''">
+						 		<![CDATA[and to_char(t.create_date, 'yyyy-MM-dd') = #{param.startTime}]]>
+						  </if>
+						  order by create_date desc) where rownum=1) rr, sys_sku_link l 
+		            where r.report_id=rr.generated_report_id and r.sku=l.p_sku(+)
+					<if test="param.marketplace != null and param.marketplace != ''">
+						and r.site = #{param.marketplace}
+					</if>
+					<if test="param.sku != null and param.sku != ''">
+						and (r.sku like concat(concat('%',#{param.sku}),'%') or l.sku like concat(concat('%',#{param.sku}),'%'))
+					</if>
+					<!-- 
+					<if test="param.startTime != null and param.startTime != ''">
+						 <![CDATA[and rr.create_date >= to_date(CONCAT(#{param.startTime}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+					</if>
+					<if test="param.endTime != null and param.endTime != ''">
+						 <![CDATA[and rr.create_date <= to_date(CONCAT(#{param.endTime}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+					</if> 
+					-->
+		            ) rrl group by rrl.sku, rrl.site, rrl.report_id
+		     ) b
+		where a.sku=b.sku(+) and a.site=b.site(+)
+	</sql>
+	
+	<select id="findMyiUnsuppressed" resultMap="myiUnsuppressedResult">
+		select tbl.* from (
+			select s.*,ROWNUM RN from (<include refid="fba_inventory_query_base"></include> order by a.created_at desc) s 
+		<![CDATA[) tbl WHERE tbl.RN<=#{end} and tbl.RN>=#{start}]]>
+	</select>
+	
+	<select id="countMyiUnsuppressed" resultType="int">
+		select count(*) from (
+			<include refid="fba_inventory_query_base"></include>
+		)
+	</select>
+	
+	<select id="getMyiUnsuppressedExportData" resultType="java.util.HashMap">
+		<include refid="fba_inventory_query_base"></include>
+		order by a.created_at desc
+	</select>
+
+	<delete id="deleteInventoryReportDataById">
+		delete amazon_fba_Inventory_Report f where f.report_id = #{reportGetId}
+	</delete>
+	<insert id="inventorySave">
+		 insert into amazon_fba_Inventory_Report(
+			  ID,
+			  SKU,
+			  FNSKU,
+			  ASIN,
+			  PRODUCT_NAME,
+			  CONDITION,
+			  YOUR_PRICE,
+			  MFN_LISTING_EXISTS,
+			  MFN_FULFILLABLE_QUANTITY,
+			  AFN_LISTING_EXISTS,
+			  AFN_WAREHOUSE_QUANTITY,
+			  AFN_FULFILLABLE_QUANTITY,
+			  AFN_UNSELLABLE_QUANTITY,
+			  AFN_RESERVED_QUANTITY,
+			  AFN_TOTAL_QUANTITY,
+			  PER_UNIT_VOLUME,
+			  AFN_INBOUND_WORKING_QUANTITY,
+			  AFN_INBOUND_SHIPPED_QUANTITY,
+			  AFN_INBOUND_RECEIVING_QUANTITY,
+			  REPORT_ID,
+			  SITE,
+			  CREATED_AT,
+			  UPDATED_AT
+			  )values(
+			  AMAZON_FBA_INVENTORY_R_SEQ.NEXTVAL,
+			  #{SKU,jdbcType=VARCHAR},
+			  #{FNSKU,jdbcType=VARCHAR},
+			  #{ASIN,jdbcType=VARCHAR},
+			  #{PRODUCT_NAME,jdbcType=VARCHAR},
+			  #{CONDITION,jdbcType=VARCHAR},
+			  #{YOUR_PRICE,jdbcType=VARCHAR},
+			  #{MFN_LISTING_EXISTS,jdbcType=VARCHAR},
+			  #{MFN_FULFILLABLE_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_LISTING_EXISTS,jdbcType=VARCHAR},
+			  #{AFN_WAREHOUSE_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_FULFILLABLE_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_UNSELLABLE_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_RESERVED_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_TOTAL_QUANTITY,jdbcType=VARCHAR},
+			  #{PER_UNIT_VOLUME,jdbcType=VARCHAR},
+			  #{AFN_INBOUND_WORKING_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_INBOUND_SHIPPED_QUANTITY,jdbcType=VARCHAR},
+			  #{AFN_INBOUND_RECEIVING_QUANTITY,jdbcType=VARCHAR},
+			  #{REPORT_ID,jdbcType=VARCHAR},
+			  #{SITE,jdbcType=VARCHAR},
+			  sysdate,
+			  sysdate
+			  )
+	</insert>
+	<select id="countThisInventoryReportData" resultType="int">
+		select count(*) from amazon_fba_Inventory_Report d where d.report_id = #{reportGetId,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteInventoryReservedReportDataById">
+		delete AMAZON_FBA_INVENTORY_RESERVED f where f.report_id = #{reportGetId}
+	</delete>
+	<select id="countThisInventoryReservedReportData" resultType="int">
+		select count(*) from AMAZON_FBA_INVENTORY_RESERVED d where d.report_id = #{reportGetId,jdbcType=VARCHAR}
+	</select>
+	<insert id="inventoryReservedSave">
+		insert into AMAZON_FBA_INVENTORY_RESERVED(
+		ID,
+		SKU,
+		FNSKU,
+		ASIN,
+		PRODUCT_NAME,
+		RESERVED_QTY,
+		RESERVED_CUSTOMERORDERS,
+		RESERVED_FC_TRANSFERS,
+		RESERVED_FC_PROCESSING,
+		REPORT_ID,
+		SITE)
+		values(
+		AMAZON_FBA_INVENTORY_R_SEQ.NEXTVAL,
+		#{SKU,jdbcType=VARCHAR},
+		#{FNSKU,jdbcType=VARCHAR},
+		#{ASIN,jdbcType=VARCHAR},
+		#{PRODUCT_NAME,jdbcType=VARCHAR},
+		#{RESERVED_QTY,jdbcType=VARCHAR},
+		#{RESERVED_CUSTOMERORDERS,jdbcType=VARCHAR},
+		#{RESERVED_FC_TRANSFERS,jdbcType=VARCHAR},
+		#{RESERVED_FC_PROCESSING,jdbcType=VARCHAR},
+		#{REPORT_ID,jdbcType=VARCHAR},
+		#{SITE,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="refreshReportUKSiste">
+		update amazon_fba_inventory_report r set r.site='amazon.co.uk' where r.sku like '%-UK%' and r.site='amazon.de'
+	</update>
+	
+	<update id="refreshReservedUKSiste">
+		update amazon_fba_inventory_reserved r set r.site='amazon.co.uk' where r.sku like '%-UK%' and r.site='amazon.de'
+	</update>
+</mapper>

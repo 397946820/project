@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IOtherDAO">
+	<resultMap type="com.it.ocs.publication.model.OtherModel" id="otherResult">
+		<id property="id" column="OTHER_ID" jdbcType="DECIMAL" />
+		<result property="tag" column="TAG" jdbcType="VARCHAR" />
+		<result property="description" column="DESCRIPTION" jdbcType="VARCHAR" />
+		<result property="onlinePubCount" column="ONLINE_PUB_COUNT" jdbcType="VARCHAR" />
+		<result property="salesTax" column="SALES_TAX" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_OTHER where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<select id="getById" resultMap="otherResult">
+		<include refid="select_base" /> where OTHER_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="otherResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			OTHER_ID id,
+			TAG  tag,
+			DESCRIPTION description,
+			ONLINE_PUB_COUNT onlinePubCount,
+			SALES_TAX salesTax,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_OTHER
+	</sql>
+	<select id="query" resultMap="otherResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.OtherModel">
+		insert into EBAY_OTHER
+		(
+			OTHER_ID,
+			TAG,
+			DESCRIPTION,
+			ONLINE_PUB_COUNT,
+			SALES_TAX,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{tag},
+			#{description},
+			#{onlinePubCount},
+			#{salesTax},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.OtherModel">
+		update EBAY_OTHER set 
+			TAG=#{tag},
+			DESCRIPTION=#{description},
+			ONLINE_PUB_COUNT=#{onlinePubCount},
+			SALES_TAX=#{salesTax},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where OTHER_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_OTHER set ENABLED_FLAG='N' where OTHER_ID=#{id}
+	</update>
+	<select id="getItemDataStructureXML" resultType="com.it.ocs.publication.model.ItemDataStructureModel">
+		select id id,content_xml contentXML from ebay_add_item_structure where name = #{setName}
+	</select>
+	<select id="getDataStructureId" resultType="java.lang.Long" >
+		select ebay_add_item_structure_SEQ.Nextval from dual
+	</select>
+	<insert id="saveItemDataStructure">
+		<foreach collection="list" item="item" index="index" open="begin" close="end;">
+			insert into ebay_add_item_structure(id,name,parent_id,path,status,update_date)values(#{item.id},#{item.name},#{item.parentId},#{item.path},1,sysdate);
+		</foreach>
+	</insert>
+	<select id="getChildrenCount" resultType="int">
+		select count(*)
+		  from ebay_add_item_structure
+		 where parent_id in
+		       (select id from ebay_add_item_structure where name =  #{name})
+		
+	</select>
+</mapper>

@@ -1,0 +1,88 @@
+body,html{margin:0;padding:0;}
+
+.left{float:left;}
+.right{float:right;}
+.after:after{
+	content:"";
+	display:none;
+	clear:both;
+}
+.header{
+	width:90%;
+	height:40px;
+	border-bottom:5px solid #dddddd;
+	margin:10px 20px 20px 60px;
+}
+.addContent{
+	width:90%;
+	margin:10px 20px 20px 60px;
+}
+.header-text{
+	color:#66b04d;
+	line-height: 30px;
+}
+.title_wrap{
+    width:inherit;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.field_title{
+    width: 80px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    font-size: 16px;
+    color: #333; 
+    background-color: #fff;
+    border: 1px solid #ddd;  
+    border-radius: 4px;
+    border-bottom: 0;
+   	margin-bottom: -2px;
+}
+.inp_wrap{
+    width: 300px;
+    margin: 0 20px 10px 0;
+    float: left;
+
+}
+label{
+	width: 200px;
+    text-align: right;
+    margin-right: 20px;
+    font-weight: bold;
+}
+.sku{padding-left:20px;}
+.one{padding-left:36px;}
+.two{padding-left:24px;}
+.three{padding-left:10px;}
+.five{margin-left:-24px;}
+.peu{margin-left:-12px;}
+.group{
+	overflow: hidden;
+}
+.essential{
+     color: red;
+}
+#checkbox{
+	text-align: center;
+}
+.btn-success{
+	margin-right:10px;
+}
+#product,#productCost,#productOther{
+	margin-top:30px;
+}
+.tips{
+	margin-top:50px;
+	font-size:12px;
+	line-height:0;
+}
+.group{width:1280px;}
+
+#productEntityForm .group{
+	width:900px;
+}
+#productEntityForm .inp_wrap{
+	width:205px;
+}

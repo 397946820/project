@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.api.dao.IDeInOrderDao">
+	<resultMap type="com.it.ocs.api.model.DeInWmsOrderMainModel" id="inOrderMainModel">
+		<result column="ID" property="id"  />
+		<result column="OWNER_CODE" property="ownerCode"  />
+		<result column="STORE_CODE" property="storeCode"  />
+		<result column="WAREHOUSE_ID" property="warehouseId"  />
+		<result column="ORDER_TYPE" property="orderType"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="ACCOUNT" property="account"  />
+		<result column="CREATED_DATE" property="createDate"  />
+		<result column="CREATE_BY" property="createBy"  />
+		<result column="ORDER_ID" property="orderId"  />
+		<result column="TRACKING_NUMBER" property="trackingNumber"  />
+		<result column="NEW_TRACKING_NUMBER" property="newTrackingNumber"  />
+		<result column="REMARK" property="remark"  />
+		<result column="RMA" property="rma"  />
+		<result column="WAIT_CLAIM" property="waitClaim"  />
+		<result column="IS_SEND_WMS" property="isSendWms"/>
+		<result column="RETURN_ORDER_ID" property="returnOrderId"/>
+		<result column="UPDATE_DATE" property="updateDate"/>
+		<result column="send_date" property="sendDate"/>
+		<result column="feedback_date" property="feedbackDate"/>
+		<result column="claim_id" property="claimId"/>
+	</resultMap>
+	
+	<resultMap type="com.it.ocs.api.vo.InOrderVO" id="inOrderVO">
+		<result column="ID" property="id"  />
+		<result column="OWNER_CODE" property="ownerCode"  />
+		<result column="STORE_CODE" property="storeCode"  />
+		<result column="WAREHOUSE_ID" property="warehouseId"  />
+		<result column="ORDER_TYPE" property="orderType"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="ACCOUNT" property="account"  />
+		<result column="CREATED_DATE" property="createDate"  />
+		<result column="UPDATE_DATE" property="updateDate"  />
+		<result column="CREATE_BY" property="createBy"  />
+		<result column="ORDER_ID" property="orderId"  />
+		<result column="TRACKING_NUMBER" property="trackingNumber"  />
+		<result column="NEW_TRACKING_NUMBER" property="newTrackingNumber"  />
+		<result column="REMARK" property="remark"  />
+		<result column="RMA" property="rma"  />
+		<result column="WAIT_CLAIM" property="waitClaim"  />
+		<result column="IS_SEND_WMS" property="isSendWms"/>
+		<result column="RETURN_ORDER_ID" property="returnOrderId"/>
+		<result column="send_date" property="sendDate"/>
+		<result column="claim_id" property="claimId"/>
+		<result column="feedback_date" property="feedbackDate"/>
+		<result column="detail_id" property="detailId"  />
+		<result column="SKU" property="sku"  />
+		<result column="QTY" property="qty"  />
+		<result column="PACKAGE_CODE" property="packageCode"  />
+		<result column="UNIT" property="unit"  />
+		<result column="SKU_PROPERTY" property="skuProperty"  />
+		<result column="RETURN_REASON" property="returnReason"  />
+		<result column="ITEM_NUMBER" property="itemNumber"  />
+		<result column="CUSTOMER_NAME" property="customerName"  />
+		<result column="MOBILE" property="mobile"  />
+		<result column="ADDRESS" property="address"  />
+		<result column="PIC_URL" property="picUrl"  />
+		<result column="BAD_REASON" property="badReason"  />
+		<result column="ITEM" property="item"  />
+		<result column="ACTUAL_QTY" property="actualQty"  />
+		<result column="order_ocs_id" property="orderOcsId"  />	
+	</resultMap>
+	
+	<sql id="base_query_inorder">
+		select 	a.*, b.order_ocs_id
+		from wms_de_in_order a, 
+			 (select io.id, o.id as order_ocs_id
+			  from wms_de_in_order io, wms_de_in_order_detail iod, 
+			 	   (select id, order_id, created_time as cd from ebay_order 
+			 	    union all 
+			 	    select entity_id as id, order_id, light_created_at as cd from light_order 
+			 	    union all 
+			 	    select id, order_id, created_at as cd from amazon_order) o
+			  where io.id=iod.parent_id and io.order_id=o.order_id and io.return_order_id is not null and io.wait_claim in ('oms_nonclaim', 'oms_bindclaim')
+			  <if test="param.id != null">
+					and io.id=#{param.id}
+			  </if>
+			  <if test="param.orderId != null and param.orderId != ''">
+			  		and #{param.orderId} like '%' || io.order_id || '%'
+			  </if>
+			  <if test="param.orderOcsId != null and param.orderOcsId != ''">
+			  		and #{param.orderOcsId} like '%' || to_char(o.id) || '%'
+			  </if>
+			  <if test="param.platform != null and param.platform != ''">
+			  		and io.platform=#{param.platform}
+			  </if>
+			  <if test="param.orderType != null and param.orderType != ''">
+			  		and io.order_type=#{param.orderType}
+			  </if>
+			  <if test="param.isSendWms != null and param.isSendWms != ''">
+			  		and io.is_send_wms=#{param.isSendWms}
+			  </if>
+			  <if test="param.waitClaim != null and param.waitClaim != ''">
+			  		and io.wait_claim=#{param.waitClaim}
+			  </if>
+			  <if test="param.sku != null and param.sku != ''">
+			  		and iod.sku like concat(concat('%',#{param.sku}),'%')
+			  </if>
+			  <if test="param.rma != null and param.rma != ''">
+					and (io.rma like '%' || #{param.rma} || '%' or #{param.rma} like '%' || io.rma || '%')
+			  </if>
+			  <if test="param.startOcsOrderCreateDate != null and param.startOcsOrderCreateDate != ''">
+				 <![CDATA[and o.cd >= to_date(CONCAT(#{param.startOcsOrderCreateDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.endOcsOrderCreateDate != null and param.endOcsOrderCreateDate != ''">
+				 <![CDATA[and o.cd <= to_date(CONCAT(#{param.endOcsOrderCreateDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.startSendDate != null and param.startSendDate != ''">
+				 <![CDATA[and io.send_date >= to_date(CONCAT(#{param.startSendDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.endSendDate != null and param.endSendDate != ''">
+				 <![CDATA[and io.send_date <= to_date(CONCAT(#{param.endSendDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.startFeedbackDate != null and param.startFeedbackDate != ''">
+				 <![CDATA[and io.feedback_date >= to_date(CONCAT(#{param.startFeedbackDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.endFeedbackDate != null and param.endFeedbackDate != ''">
+				 <![CDATA[and io.feedback_date <= to_date(CONCAT(#{param.endFeedbackDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  group by io.id, o.id) b
+		where a.id=b.id
+		<if test="(param.startAbnormalDate != null and param.startAbnormalDate != '') or (param.endAbnormalDate != null and param.endAbnormalDate != '')">
+			  and a.id in (select distinct r.parent_id from wms_de_abnormal_reason r where r.parent_type='in'
+			  	<if test="param.startAbnormalDate != null and param.startAbnormalDate != ''">
+				<![CDATA[and r.created_at >= to_date(CONCAT(#{param.startAbnormalDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  	</if>
+			  	<if test="param.endAbnormalDate != null and param.endAbnormalDate != ''">
+				<![CDATA[and r.created_at <= to_date(CONCAT(#{param.endAbnormalDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  	</if>
+			  )
+		</if>
+	</sql>
+	
+	<select id="countInOrder" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_query_inorder" />) t
+	</select>
+	
+	<select id="queryInOrderByPage" resultMap="inOrderVO" parameterType="java.util.HashMap">
+		select t3.*, t4.*, t4.id as detail_id
+		from (select * 
+			  from (select t.*, rownum rn from (<include refid="base_query_inorder" /> order by a.created_date desc) t 
+			  <![CDATA[ 
+			  where rownum<=#{end}) t2 where t2.rn>=#{start}
+			  ]]>
+			  ) t3, wms_de_in_order_detail t4
+		where t3.id = t4.parent_id
+		order by t3.created_date desc, t3.id desc
+	</select>
+	
+	<select id="getDeInOrderExportData" resultType="java.util.HashMap">
+		select t3.*, t4.*, t4.id as detail_id
+		from (<include refid="base_query_inorder" />) t3, wms_de_in_order_detail t4
+		where t3.id = t4.parent_id
+		order by t3.created_date desc, t3.id desc
+	</select>
+		
+	<select id="queryInOrderOne" resultMap="inOrderMainModel" parameterType="java.util.HashMap">
+		<include refid="base_query_inorder" /> and rownum=1
+	</select>
+	
+	<update id="updateMain">
+		update wms_de_in_order io 
+		set
+		<if test="param.isSendWms != null and param.isSendWms != ''">
+			io.is_send_wms=#{param.isSendWms, jdbcType=VARCHAR},
+		</if>
+		<if test="param.sendDate != null and param.sendDate != ''">
+			io.send_date=#{param.sendDate, jdbcType=VARCHAR},
+		</if>
+		<if test="param.feedbackDate != null and param.feedbackDate != ''">
+			io.feedback_date=#{param.feedbackDate, jdbcType=VARCHAR},
+		</if>
+		<if test="param.waitClaim != null and param.waitClaim != ''">
+			io.wait_claim=#{param.waitClaim, jdbcType=VARCHAR},
+		</if>
+		<if test="param.claimId != null">
+			io.claim_id=#{param.claimId, jdbcType=VARCHAR},
+		</if>
+			update_date=sysdate
+		where io.id=#{param.id,jdbcType=NUMERIC}
+		<if test="param.orderId != null and param.orderId != ''">
+			  and io.order_id=#{param.orderId, jdbcType=VARCHAR}
+		</if>
+	</update>
+	
+	<select id="getDeInOrder" parameterType="java.util.Map" resultType="java.util.Map">
+		select 	OWNER_CODE, STORE_CODE, WAREHOUSE_ID, ID, IS_SEND_WMS, ORDER_TYPE, PLATFORM, to_char(CREATED_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATED_DATE, 
+				CREATE_BY, ORDER_ID, TRACKING_NUMBER, NEW_TRACKING_NUMBER, REMARK, RMA, WAIT_CLAIM
+		from 	WMS_DE_IN_ORDER io
+		where  	io.id=#{param.id,jdbcType=NUMERIC} and io.ORDER_ID=#{param.orderId,jdbcType=VARCHAR}
+				and io.return_order_id is not null and io.wait_claim in ('oms_nonclaim', 'oms_bindclaim')
+	</select>
+	
+	<select id="getOmsInOrder" resultMap="inOrderMainModel">
+		select o.* from wms_de_in_order o 
+		where o.return_order_id is not null and o.wait_claim in ('oms_nonclaim', 'oms_bindclaim')
+		<if test="rma != null and rma != ''">
+		and o.rma = #{rma}
+		</if>
+	</select>
+	
+	<select id="getWmsClaimOrder" resultMap="inOrderMainModel">
+		select o.* from wms_de_in_order o where o.return_order_id is null and o.wait_claim in ('wms_unclaimed', 'wms_claimed')
+		<if test="warehouseId != null and warehouseId != ''">
+			and o.warehouse_id = #{warehouseId}
+		</if>
+		<if test="rma != null and rma != ''">
+			and o.rma = #{rma}
+		</if>
+	</select>
+	
+	<sql id="base_query_inorder_wms_claim">
+		select distinct a.* from wms_de_in_order a, wms_de_in_order_detail b where a.id=b.parent_id and a.return_order_id is null and a.wait_claim in ('wms_unclaimed', 'wms_claimed')
+		<if test="param.id != null">
+			and a.id=#{param.id}
+		</if>
+		<if test="param.waitClaim != null and param.waitClaim != ''">
+			and a.wait_claim=#{param.waitClaim}
+		</if>
+		<if test="param.rma != null and param.rma != ''">
+			and (b.rma like '%' || #{param.rma} || '%' or #{param.rma} like '%' || b.rma || '%')
+		</if>
+		<if test="param.sku != null and param.sku != ''">
+			and (b.sku like '%' || #{param.sku} || '%' or #{param.sku} like '%' || b.sku || '%')
+		</if>
+	</sql>
+	
+	<select id="countWmsClaimOrder" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_query_inorder_wms_claim" />) t
+	</select>
+	
+	<select id="queryWmsClaimOrderByPage" resultMap="inOrderVO" parameterType="java.util.HashMap">
+		select t3.*, t4.*, t4.id as detail_id
+		from (select * 
+			  from (select t.*, rownum rn from (<include refid="base_query_inorder_wms_claim" /> order by a.created_date desc) t 
+			  <![CDATA[ 
+			  where rownum<=#{end}) t2 where t2.rn>=#{start}
+			  ]]>
+			  ) t3, wms_de_in_order_detail t4
+		where t3.id = t4.parent_id
+		order by t3.created_date desc, t3.id desc
+	</select>
+	
+	<select id="queryClaimOrderOne" resultMap="inOrderMainModel" parameterType="java.util.HashMap">
+		<include refid="base_query_inorder_wms_claim" /> and rownum=1
+	</select>
+</mapper>

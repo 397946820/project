@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.ukinventory.dao.IInventoryUKDAO">
+	<resultMap type="com.it.ocs.ukinventory.model.InventoryUKModel"
+		id="inventory2Result">
+		<id property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="wmcode" column="WMCODE" jdbcType="VARCHAR" />
+		<result property="sku" column="SKU" jdbcType="VARCHAR" />
+		<result property="qty" column="QTY" jdbcType="DECIMAL" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="uploadDate" column="CREATE_AT" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="UPDATE_AT"
+			jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="where">
+		where 1=1
+		<if test="param != null">
+			<if test="param.sku!=null and param.sku!=''">
+				and SKU=#{param.sku,jdbcType=VARCHAR}
+			</if>
+			<if test="param.inventoryUploadDate!=null and param.inventoryUploadDate!=''">
+				<![CDATA[ and trunc(CREATE_AT) =to_date(#{param.inventoryUploadDate},'yyyy-mm-dd')]]>
+			</if>
+		</if>
+	</sql>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from UK_INVENTORY
+		<include refid="where" />
+	</select>
+	<select id="queryByPage" resultMap="inventory2Result">
+		select * from
+		(
+		select S.*,ROWNUM RN from (
+		<include refid="select_base" />
+		<include refid="where" />
+		) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="query" resultMap="inventory2Result">
+		<include refid="select_base" />
+		<include refid="where" />
+	</select>
+	<sql id="select_base">
+		select * from UK_INVENTORY
+	</sql>
+	<delete id="delete">
+		delete UK_INVENTORY a where a.ID=#{id}
+	</delete>
+	<insert id="batchInsert">
+		insert into UK_INVENTORY(ID,CREATE_AT,UPDATE_AT,CREATE_BY,UPDATE_BY,WMCODE,QTY,SKU)
+		select UK_INVENTORY_SEQ.Nextval,sysdate,sysdate,c.* from (
+		<foreach collection="list" item="row" index="index" open="(" close=")" separator="union">
+			select #{row.createBy},#{row.lastUpdateBy},'UK02',#{row.qty},#{row.sku}
+			 from dual
+		</foreach>
+		) c
+		
+	</insert>
+</mapper>

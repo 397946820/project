@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.customerCenter.dao.ICustomerProductDao">
+	
+	<resultMap type="com.it.ocs.customerCenter.model.CustomerProductModel" id="customerProductResult">
+		<id column="PRODUCT_ID" property="product_id"  />
+		<result column="SITE" property="site"  />
+		<result column="ORDERS" property="orders"  />
+		<result column="SKU" property="sku"  />
+		<result column="PRODUCT_GRADE" property="product_grade"  />
+		<result column="PROBLEM_TYPE" property="problem_type"  />
+		<result column="SOLUTION_DATE" property="solution_date"  />
+		<result column="PRESENT_PEOPLE" property="present_people"  />
+		<result column="SOLUTION" property="solution"  />
+		<result column="CHINESE_TRANSLATION" property="chinese_translation"  />
+		<result column="COMMENT_CONTENT" property="comment_content"  />
+		<result column="CATAGORIES" property="catagories"/>
+		<result column="PARENT_CATEGORY" property="parent_category" />
+	</resultMap>
+	
+	<sql id="base_conditions">
+		<choose>
+			<when test="order!=null and order!=''">
+			   order by 'cp.'||${sort} ${order}
+			</when>
+			<otherwise>
+				order by cp.create_date desc
+			</otherwise>
+		</choose>
+	</sql>
+	<sql id="select_base">
+		cp.PRODUCT_ID,
+		cp.SITE,
+		cp.ORDERS,
+		cp.SKU,
+		cp.PRODUCT_GRADE,
+		cp.PROBLEM_TYPE,
+		to_char(cp.SOLUTION_DATE,'yyyy-mm-dd') solution_date,
+		cp.PRESENT_PEOPLE,
+		cp.SOLUTION,
+		cp.CATAGORIES,
+		cp.PARENT_CATEGORY,
+		cp.CHINESE_TRANSLATION,
+		cp.COMMENT_CONTENT
+	</sql>
+	<sql id="base_map_conditions">
+		<if test="product.sku !=null and product.sku !=''"> 
+			and cp.SKU like '%'||#{product.sku}||'%'
+		</if>
+		<if test="product.comment_content !=null and product.comment_content !=''"> 
+			and dbms_lob.instr(cp.comment_content, #{product.comment_content}, 1, 1) > 0
+		</if>
+		<if test="product.orders !=null and product.orders !=''"> 
+			and cp.ORDERS like '%'||#{product.orders}||'%'
+		</if>
+		<if test="product.startDate !=null and product.startDate !=''"> 
+			and cp.SOLUTION_DATE >= to_date('${product.startDate}','YYYY-MM-DD')
+		</if>
+		<if test="product.endDate !=null and product.endDate !=''"> 
+			and cp.SOLUTION_DATE <![CDATA[<=]]> to_date('${product.endDate}','YYYY-MM-DD')
+		</if>
+	</sql>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from CUSTOMER_PRODUCT cp where ENABLED_FLAG='Y' <include refid="base_map_conditions" />
+	</select>
+	<insert id="insertProducts" parameterType="java.util.List">
+		INSERT INTO CUSTOMER_PRODUCT(
+			PRODUCT_ID,
+			SITE,
+			ORDERS,
+			SKU,
+			PRODUCT_GRADE,
+			PROBLEM_TYPE,
+			SOLUTION_DATE,
+			PRESENT_PEOPLE,
+			SOLUTION,
+			CHINESE_TRANSLATION,
+			COMMENT_CONTENT,
+			CATAGORIES,
+			PARENT_CATEGORY,
+			CREATE_DATE,
+			UPDATE_DATE)  
+		select CUSTOMER_PRODUCT_SEQ.NEXTVAL,c.*,sysdate,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.site,jdbcType=VARCHAR},
+				#{item.orders,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.product_grade,jdbcType=VARCHAR},
+				#{item.problem_type,jdbcType=VARCHAR},
+				to_date(#{item.solution_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.present_people,jdbcType=VARCHAR},
+				#{item.solution,jdbcType=VARCHAR},
+				#{item.chinese_translation,jdbcType=VARCHAR},
+				#{item.comment_content,jdbcType=VARCHAR},
+				#{item.catagories,jdbcType=VARCHAR},
+				#{item.parent_category,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="selectCustomerPR" resultMap="customerProductResult">
+		select <include refid="select_base"/> from CUSTOMER_PRODUCT cp where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+	</select>
+	<update id="updateProducts" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			update CUSTOMER_PRODUCT baoi
+			set 
+			SITE = #{item.site,jdbcType=VARCHAR},
+			ORDERS = #{item.orders,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			PRODUCT_GRADE = #{item.product_grade,jdbcType=VARCHAR},
+			PROBLEM_TYPE = #{item.problem_type,jdbcType=VARCHAR},
+			SOLUTION_DATE = to_date(#{item.solution_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			PRESENT_PEOPLE = #{item.present_people,jdbcType=VARCHAR},
+			SOLUTION = #{item.solution,jdbcType=VARCHAR},
+			CHINESE_TRANSLATION = #{item.chinese_translation,jdbcType=VARCHAR},
+			COMMENT_CONTENT = #{item.comment_content,jdbcType=VARCHAR},
+			CATAGORIES = #{item.catagories,jdbcType=VARCHAR},
+			PARENT_CATEGORY = #{item.parent_category,jdbcType=VARCHAR},
+			UPDATE_DATE = #{item.lastUpdationDate,jdbcType=TIMESTAMP}
+			where baoi.PRODUCT_ID = #{item.product_id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+	<select id="selectCustomerProduct" resultMap="customerProductResult">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  <include refid="select_base"/>  from CUSTOMER_PRODUCT cp where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+					  <include refid="base_conditions"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	<update id="remove">
+		update CUSTOMER_PRODUCT set ENABLED_FLAG='N' where PRODUCT_ID=#{product_id,jdbcType=BIGINT}
+	</update>
+	
+</mapper>

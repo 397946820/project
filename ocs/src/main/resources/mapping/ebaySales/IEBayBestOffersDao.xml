@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.ebaySales.dao.IEBayBestOffersDao">
+		<resultMap type="com.it.ocs.ebaySales.model.EBayBestOffersModel" id="EbayBestOffersResult">
+				<result column="ID" property="id"  />
+				<result column="ITEM_ID" property="item_id"  />
+				<result column="BEST_OFFER_ID" property="best_offer_id"  />
+				<result column="EXPIRATION_TIME" property="expiration_time"  />
+				<result column="BEST_OFFER_CODE_TYPE" property="best_offer_code_type"  />
+				<result column="STARTUS" property="startus"  />
+				<result column="QUANTITY" property="quantity"  />
+				<result column="PRICE" property="price"  />
+				<result column="CURRENCY" property="currency"  />
+				<result column="EMAIL" property="email"  />
+				<result column="USER_ID" property="user_id"  />
+				<result column="FEED_BACK_SCORE" property="feed_back_score"  />
+				<result column="REGISTRATION_DATE" property="registration_date"  />
+				<result column="STATE_OR_PROVINCE" property="state_or_province"  />
+				<result column="COUNTRY_NAME" property="country_name"  />
+				<result column="POSTAL_CODE" property="postal_code"  />
+				<result column="IS_DELETED" property="is_deleted"  />
+				<result column="SITEID" property="siteid"  />
+				<result column="BUYIT_NOW_PRICE" property="buyit_now_price"  />
+				<result column="SHIPPING_ADDRESS" property="shipping_address"  />
+				<result column="BUYER_MESSAGE" property="buyer_message"  />
+				<result column="SELLER_MESSAGE" property="seller_message"  />
+				<result column="TITEL" property="titel"  />
+				
+		</resultMap>
+		<sql id="select_base_condition">
+			<if test="ct.conditions!='main' and ct.conditions!='' and ct.conditions!=null">
+				
+			</if>
+			<choose>
+				<when test="ct.conditions=='main'"></when>
+				<when test="ct.conditions=='Pending'">
+				 and STARTUS='Pending' and best_offer_code_type!='SellerCounterOffer'
+				</when>
+				<when test="ct.conditions=='Countered'">
+				and STARTUS='Countered' or (best_offer_code_type='SellerCounterOffer' and STARTUS='Pending')
+				</when>
+				<otherwise>
+				 and STARTUS=#{ct.conditions,jdbcType=VARCHAR}
+				</otherwise>
+			</choose>
+			<if test="ct.seller_id!=null and ct.seller_id!=''">
+				and SITEID like '%'||#{ct.seller_id}||'%'
+			</if>
+			<if test="ct.item_id!=null and ct.item_id!=''">
+				and ITEM_ID like '%'||#{ct.item_id}||'%'
+			</if>
+			<if test="ct.email!=null and ct.email!=''">
+				and EMAIL like '%'||#{ct.email}||'%'
+			</if>
+			<if test="ct.user_id!=null and ct.user_id!=''">
+				and USER_ID like '%'||#{ct.user_id}||'%'
+			</if>
+			<if test="ct.titel!=null and ct.titel!=''">
+				and TITEL like '%'||#{ct.titel}||'%'
+			</if>
+		</sql>
+		<sql id="base_order_by">
+		  order by  EXPIRATION_TIME desc
+		  <!-- <trim suffix=" " suffixOverrides="," >
+		  	  
+			  <if test="ct.siteIdSort!='' and ct.siteIdSort!=null">
+			  		SITEID ${ct.siteIdSort},
+			  </if>
+			   <if test="ct.itemIdSort!='' and ct.itemIdSort!=null">
+			  		ITEM_ID ${ct.itemIdSort},
+			  </if>
+			   <if test="ct.endTimeSort!='' and ct.endTimeSort!=null">
+			  		EXPIRATION_TIME ${ct.endTimeSort},
+			  </if>
+		  </trim> -->
+		</sql>
+		<sql id="select_base">
+			select * from (select ebo.*, epi.ebay_images image, epi.ebay_product_url productUrl, epi.sku
+		  from ebay_Best_offers  ebo
+		  left join ebay_publication_line epi
+		    on ebo.item_id = epi.item_id)
+		</sql>
+		<select id="getTotal"  resultType="java.lang.Integer">
+			select  count(*) from ebay_Best_offers where ENABLED_FLAG='Y' <include refid="select_base_condition"/>
+		</select>
+		<select id="selectGroupbyBestOffers" resultMap="EbayBestOffersResult">
+			select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					<include refid="select_base"/> where ENABLED_FLAG='Y' <include refid="select_base_condition"/>
+					 <include refid="base_order_by"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+		</select>
+		<select id="interiorSelectBestOfferByBestId" resultMap="EbayBestOffersResult">
+			select ID,ITEM_ID,BEST_OFFER_ID,EXPIRATION_TIME from EBAY_BEST_OFFERS where BEST_OFFER_ID = #{bestOfferId,jdbcType=VARCHAR}
+		</select>
+		<select id="selectBestOfferPendingByUserId" resultMap="EbayBestOffersResult">
+		  select ITEM_ID,BEST_OFFER_ID,SITEID from EBAY_BEST_OFFERS WHERE SITEID=#{userId} and STARTUS='Pending'
+	    </select>
+		<insert id="insertEBayBestOffers" parameterType="java.util.List">
+			INSERT INTO ebay_Best_offers(
+				ID,
+				ITEM_ID,
+				BEST_OFFER_ID,
+				EXPIRATION_TIME,
+				BEST_OFFER_CODE_TYPE,
+				STARTUS,
+				QUANTITY,
+				PRICE,
+				CURRENCY,
+				EMAIL,
+				USER_ID,
+				FEED_BACK_SCORE,
+				REGISTRATION_DATE,
+				STATE_OR_PROVINCE,
+				COUNTRY_NAME,
+				POSTAL_CODE,
+				IS_DELETED,
+				SITEID,
+				BUYIT_NOW_PRICE,
+				SHIPPING_ADDRESS,
+				BUYER_MESSAGE,
+				SELLER_MESSAGE,
+				TITEL,
+				CREATION_DATE)  
+			select ebay_Best_offers_seq.Nextval,c.*,sysdate from(
+			<foreach collection="list" index="index" item="item"
+				separator="union all">
+				select
+					#{item.item_id,jdbcType=VARCHAR},
+					#{item.best_offer_id,jdbcType=VARCHAR},
+					#{item.expiration_time,jdbcType=TIMESTAMP},
+					#{item.best_offer_code_type,jdbcType=VARCHAR},
+					#{item.startus,jdbcType=VARCHAR},
+					#{item.quantity,jdbcType=BIGINT},
+					#{item.price,jdbcType=BIGINT},
+					#{item.currency,jdbcType=VARCHAR},
+					#{item.email,jdbcType=VARCHAR},
+					#{item.user_id,jdbcType=VARCHAR},
+					#{item.feed_back_score,jdbcType=BIGINT},
+					#{item.registration_date,jdbcType=TIMESTAMP},
+					#{item.state_or_province,jdbcType=VARCHAR},
+					#{item.country_name,jdbcType=VARCHAR},
+					#{item.postal_code,jdbcType=VARCHAR},
+					#{item.is_deleted,jdbcType=VARCHAR},
+					#{item.siteid,jdbcType=VARCHAR},
+					#{item.buyit_now_price,jdbcType=BIGINT},
+					#{item.shipping_address,jdbcType=VARCHAR},
+					#{item.buyer_message,jdbcType=VARCHAR},
+					#{item.seller_message,jdbcType=VARCHAR},
+					#{item.titel,jdbcType=VARCHAR}
+				from dual
+			</foreach>
+			) c
+		</insert>
+		<update id="updateEBayBestOffers" parameterType="java.util.List">
+		 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update EBAY_BEST_OFFERS bao 
+		   	set
+				
+				EXPIRATION_TIME = #{item.expiration_time,jdbcType=TIMESTAMP},
+				BEST_OFFER_CODE_TYPE = #{item.best_offer_code_type,jdbcType=VARCHAR},
+				STARTUS = #{item.startus,jdbcType=VARCHAR},
+				QUANTITY = #{item.quantity,jdbcType=BIGINT},
+				PRICE = #{item.price,jdbcType=BIGINT},
+				CURRENCY = #{item.currency,jdbcType=VARCHAR},
+				EMAIL = #{item.email,jdbcType=VARCHAR},
+				USER_ID = #{item.user_id,jdbcType=VARCHAR},
+				FEED_BACK_SCORE = #{item.feed_back_score,jdbcType=BIGINT},
+				REGISTRATION_DATE = #{item.registration_date,jdbcType=TIMESTAMP},
+				STATE_OR_PROVINCE = #{item.state_or_province,jdbcType=VARCHAR},
+				COUNTRY_NAME = #{item.country_name,jdbcType=VARCHAR},
+				POSTAL_CODE = #{item.postal_code,jdbcType=VARCHAR},
+				IS_DELETED = #{item.is_deleted,jdbcType=VARCHAR},
+				SITEID = #{item.siteid,jdbcType=VARCHAR},
+				BUYIT_NOW_PRICE = #{item.buyit_now_price,jdbcType=BIGINT},
+				SHIPPING_ADDRESS = #{item.shipping_address,jdbcType=VARCHAR},
+				BUYER_MESSAGE = #{item.buyer_message,jdbcType=VARCHAR},
+				LAST_UPDATE_DATE = #{item.update_date},
+				TITEL = #{item.titel,jdbcType=VARCHAR},
+				ITEM_ID = #{item.item_id,jdbcType=VARCHAR}
+		   where BEST_OFFER_ID = #{item.best_offer_id,jdbcType=VARCHAR} and (bao.sys_startus != 'Countered' or bao.sys_startus is null)
+		   </foreach>
+		</update>
+		
+		<update id="updateEnabledFlagByBestId" parameterType="com.it.ocs.ebaySales.model.EBayBestOffersModel">
+		 update EBAY_BEST_OFFERS set ENABLED_FLAG = #{enabled_flag,jdbcType=VARCHAR} where BEST_OFFER_ID = #{best_offer_id,jdbcType=VARCHAR}
+		</update>
+		<update id="updateEbayBestOfferByBest">
+		update EBAY_BEST_OFFERS set sys_startus=#{startus,jdbcType=VARCHAR} ,STARTUS = #{startus,jdbcType=VARCHAR},SELLER_MESSAGE= #{seller_message,jdbcType=VARCHAR} where BEST_OFFER_ID = #{best_offer_id,jdbcType=VARCHAR}
+		</update>
+		<select id="selectEBayBestOffersByItemId" parameterType="java.util.Map" resultMap="EbayBestOffersResult">
+				  select * from ebay_Best_offers where  ENABLED_FLAG='Y' <include refid="select_base_condition"/>
+		</select>
+		<select id="selectRecycleEBayBestOffersByItemId" resultMap="EbayBestOffersResult">
+			select * from ebay_Best_offers where ITEM_ID=#{itemId,jdbcType=VARCHAR} and ENABLED_FLAG='N'
+		</select>
+		<select id="exist" resultType="int">
+			select count(*) from EBAY_BEST_OFFERS e where e.BEST_OFFER_ID = #{BestOfferID,jdbcType=VARCHAR} and e.SITEID=#{account,jdbcType=VARCHAR}
+		</select>
+		<insert id="addOffer">
+			INSERT INTO ebay_Best_offers(
+				ID,
+				ITEM_ID,
+				BEST_OFFER_ID,
+				EXPIRATION_TIME,
+				BEST_OFFER_CODE_TYPE,
+				STARTUS,
+				QUANTITY,
+				PRICE,
+				CURRENCY,
+				EMAIL,
+				USER_ID,
+				FEED_BACK_SCORE,
+				REGISTRATION_DATE,
+				STATE_OR_PROVINCE,
+				COUNTRY_NAME,
+				POSTAL_CODE,
+				SITEID,
+				BUYIT_NOW_PRICE,
+				BUYER_MESSAGE,
+				SELLER_MESSAGE,
+				TITEL,
+				CREATION_DATE,
+				ROLE)
+				values(
+				ebay_Best_offers_seq.Nextval,
+				#{ItemID,jdbcType=VARCHAR},
+				#{BestOfferID,jdbcType=VARCHAR},
+				to_timestamp(#{ExpirationTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+				#{BestOfferCodeType,jdbcType=VARCHAR},
+				#{Status,jdbcType=VARCHAR},
+				#{Quantity,jdbcType=BIGINT},
+				#{Price,jdbcType=DOUBLE},
+				#{currencyID,jdbcType=VARCHAR},
+				#{Email,jdbcType=VARCHAR},
+				#{UserID,jdbcType=VARCHAR},
+				#{FeedbackScore,jdbcType=BIGINT},
+				to_timestamp(#{RegistrationDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+				#{StateOrProvince,jdbcType=VARCHAR},
+				#{CountryName,jdbcType=VARCHAR},
+				#{PostalCode,jdbcType=VARCHAR},
+				#{account,jdbcType=VARCHAR},
+				#{BuyItNowPrice,jdbcType=DOUBLE},
+				#{BuyerMessage,jdbcType=VARCHAR},
+				#{SellerMessage,jdbcType=VARCHAR},
+				#{Title,jdbcType=VARCHAR},
+				sysdate,
+				#{Role,jdbcType=VARCHAR}
+				)
+		</insert>
+		<update id="updateOffer">
+			update  ebay_Best_offers set
+				EXPIRATION_TIME = to_timestamp(#{ExpirationTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+				BEST_OFFER_CODE_TYPE = #{BestOfferCodeType,jdbcType=VARCHAR},
+				STARTUS = #{Status,jdbcType=VARCHAR},
+				QUANTITY = #{Quantity,jdbcType=BIGINT},
+				PRICE = #{Price,jdbcType=DOUBLE},
+				CURRENCY = #{currencyID,jdbcType=VARCHAR},
+				EMAIL = #{Email,jdbcType=VARCHAR},
+				USER_ID = #{UserID,jdbcType=VARCHAR},
+				FEED_BACK_SCORE = #{FeedbackScore,jdbcType=BIGINT},
+				REGISTRATION_DATE = to_timestamp(#{RegistrationDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+				STATE_OR_PROVINCE = #{StateOrProvince,jdbcType=VARCHAR},
+				COUNTRY_NAME = #{CountryName,jdbcType=VARCHAR},
+				POSTAL_CODE = #{PostalCode,jdbcType=VARCHAR},
+				SITEID = #{account,jdbcType=VARCHAR},
+				BUYIT_NOW_PRICE = #{BuyItNowPrice,jdbcType=DOUBLE},
+				BUYER_MESSAGE = #{BuyerMessage,jdbcType=VARCHAR},
+				SELLER_MESSAGE = #{SellerMessage,jdbcType=VARCHAR},
+				TITEL = #{Title,jdbcType=VARCHAR},
+				LAST_UPDATE_DATE = sysdate
+				where ITEM_ID = #{ItemID,jdbcType=VARCHAR} 
+				and BEST_OFFER_ID = #{BestOfferID,jdbcType=VARCHAR}
+		</update>
+		<select id="getActiveOfferByAccount" resultType="java.util.HashMap">
+			select ITEM_ID itemId,BEST_OFFER_ID bestOfferId from EBAY_BEST_OFFERS WHERE SITEID=#{account} and STARTUS='Pending'
+		</select>
+</mapper>

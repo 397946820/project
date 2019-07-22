@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ICalculateDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.CalculateModel">
+		<result column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+		<result column="SKU" property="sku" jdbcType="VARCHAR" />
+		<result column="SHIPPING_TYPE" property="shippingType" jdbcType="VARCHAR" />
+		<result column="PROFIT_RATE_ACTION" property="profitRateAction" jdbcType="DECIMAL" />
+		<result column="FINAL_PRICE" property="finalPrice" jdbcType="DECIMAL" />
+		<result column="USER_ID" property="userId" jdbcType="DECIMAL" />
+		<result column="BATCH_NUMBER" property="batchNumber" jdbcType="VARCHAR" />
+		<result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<insert id="add" parameterType="com.it.ocs.cal.model.CalculateModel">
+		insert into CAL_CALCULATE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			
+				ENTITY_ID,
+			
+			<if test="countryId != null">
+				COUNTRY_ID,
+			</if>
+			<if test="sku != null">
+				SKU,
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE,
+			</if>
+			<if test="profitRateAction != null">
+				PROFIT_RATE_ACTION,
+			</if>
+			<if test="finalPrice != null">
+				FINAL_PRICE,
+			</if>
+			<if test="userId != null">
+				USER_ID,
+			</if>
+			<if test="batchNumber != null">
+				BATCH_NUMBER,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			
+				CAL_CALCULATE_SEQ.NEXTVAL,
+			
+			<if test="countryId != null">
+				#{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="sku != null">
+				#{sku,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				#{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="profitRateAction != null">
+				#{profitRateAction,jdbcType=DECIMAL},
+			</if>
+			<if test="finalPrice != null">
+				#{finalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=DECIMAL},
+			</if>
+			<if test="batchNumber != null">
+				#{batchNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+</mapper>

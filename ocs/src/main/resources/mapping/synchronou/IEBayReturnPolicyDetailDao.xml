@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayReturnPolicyDetailDao">
+	<resultMap type="com.it.ocs.synchronou.model.EBayReturnPolicyDetailModel" id="ebayReturnPolicyDetailResult">
+		<result column="ID" property="id"  />
+		<result column="REFUND" property="refund"  />
+		<result column="RETURNS_WITHIN" property="returns_within"  />
+		<result column="DESCRIPTION" property="description"  />
+		<result column="SHIPPINGCOST_PAIDBY" property="shippingcost_paidby"  />
+		<result column="RESTOCKING_FEEVALUE" property="restocking_feevalue"  />
+		<result column="RETURNS_ACCEPTED" property="returns_accepted"  />
+		<result column="SITE_ID" property="site_id"  />
+	</resultMap>
+	<sql id="select_base">
+			ID,
+			REFUND,
+			RETURNS_WITHIN,
+			DESCRIPTION,
+			SHIPPINGCOST_PAIDBY,
+			RESTOCKING_FEEVALUE,
+			RETURNS_ACCEPTED,
+			SITE_ID
+
+	</sql>
+
+	<insert id="insertReturnPolicyDetail" parameterType="com.it.ocs.synchronou.model.EBayReturnPolicyDetailModel">
+		INSERT INTO EBAY_RETURN_POLICY_DETAIL(
+			ID,
+			REFUND,
+			RETURNS_WITHIN,
+			DESCRIPTION,
+			SHIPPINGCOST_PAIDBY,
+			RESTOCKING_FEEVALUE,
+			RETURNS_ACCEPTED,
+			SITE_ID,
+			CREATION_DATE
+		)
+		values(
+			ebay_return_policy_detail_SEQ.Nextval,
+			#{refund,jdbcType=VARCHAR},
+			#{returns_within,jdbcType=VARCHAR},
+			#{description,jdbcType=VARCHAR},
+			#{shippingcost_paidby,jdbcType=VARCHAR},
+			#{restocking_feevalue,jdbcType=VARCHAR},
+			#{returns_accepted,jdbcType=VARCHAR},
+			#{site_id,jdbcType=BIGINT},
+			sysdate
+		)
+		
+	</insert>
+	<select id="selectReturnPolicySiteIds"  resultMap="ebayReturnPolicyDetailResult">
+		select SITE_ID from EBAY_RETURN_POLICY_DETAIL
+	</select>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(ID) from EBAY_RETURN_POLICY_DETAIL
+	</select>
+	<select id="selectReturnPolicyDetails" resultMap="ebayReturnPolicyDetailResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from EBAY_RETURN_POLICY_DETAIL  
+				
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<update id="updateReturnPolicyDetail" parameterType="com.it.ocs.synchronou.model.EBayReturnPolicyDetailModel">
+		update EBAY_RETURN_POLICY_DETAIL
+		set 
+		REFUND = #{refund,jdbcType=VARCHAR},
+		RETURNS_WITHIN = #{returns_within,jdbcType=VARCHAR},
+		DESCRIPTION = #{description,jdbcType=VARCHAR},
+		SHIPPINGCOST_PAIDBY = #{shippingcost_paidby,jdbcType=VARCHAR},
+		RESTOCKING_FEEVALUE = #{restocking_feevalue,jdbcType=VARCHAR},
+		RETURNS_ACCEPTED = #{returns_accepted,jdbcType=VARCHAR},
+		LAST_UPDATE_DATE = sysdate
+		where SITE_ID=#{site_id,jdbcType=BIGINT},
+	</update>
+	<select id="selectReturnPolicysBySiteId" resultMap="ebayReturnPolicyDetailResult">
+		select <include refid="select_base" /> from EBAY_RETURN_POLICY_DETAIL
+	</select>
+</mapper>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ICurrencyRateDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.CurrencyRateModel">
+		<id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+		<result column="CURRENCY_CODE" property="currencyCode" jdbcType="VARCHAR" />
+		<result column="CURRENCY_SYMBOL" property="currencySymbol" jdbcType="VARCHAR" />
+		<result column="CURRENCY_RATE" property="currencyRate" jdbcType="DECIMAL" />
+		<result column="RISK_FACTOR" property="riskFactor" jdbcType="DECIMAL" />
+		<result column="SORT_ORDER" property="sortOrder" jdbcType="DECIMAL" />
+		<result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="baseSql">
+		select ENTITY_ID as entityId,
+			   COUNTRY_ID as countryId,
+			   CURRENCY_CODE as currencyCode,
+			   CURRENCY_SYMBOL as currencySymbol,
+			   CURRENCY_RATE as currencyRate,
+			   RISK_FACTOR as riskFactor,
+			   CREATED_AT as createdAt,
+			   SORT_ORDER as sortOrder,
+			   UPDATED_AT as updatedAt
+		from CAL_CURRENCY_RATE
+	</sql>
+	
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.countryId != '' and param.countryId != null">
+					and COUNTRY_ID = #{param.countryId}
+				</if>
+				<if test="param.currencyCode != '' and param.currencyCode != null">
+					and CURRENCY_CODE like '%${param.currencyCode}%'
+				</if>
+				<if test="param.currencySymbol != '' and param.currencySymbol != null">
+					and CURRENCY_SYMBOL like '%${param.currencySymbol}%'
+				</if>
+				<if test="param.riskFactor != '' and param.riskFactor != null or param.riskFactor == 0">
+					and RISK_FACTOR = #{param.riskFactor}
+				</if>
+				<include refid="com.it.ocs.cal.dao.IFbaRuleDao.sql_time"/>
+			</where>
+		</if>
+	</sql>
+	
+	<!-- 排序 -->
+	<sql id="order_sql">
+		<if test="sort!= null and order!=null">
+			order by ${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			order by entity_id desc
+		</if>
+	</sql>
+
+	<!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<include refid="sql_where"/>
+		<include refid="order_sql"/>
+	</select>
+	
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from CAL_CURRENCY_RATE
+		<include refid="sql_where"/>
+	</select>
+	
+	<select id="getCurrencyRateByCountry" resultType="java.lang.Double">
+		SELECT DISTINCT CURRENCY_RATE FROM CAL_CURRENCY_RATE WHERE COUNTRY_ID = #{country}
+	</select>
+	
+	<!-- 导出查询 -->
+	<select id="findByTemplate"  resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		order by entity_id desc
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="add" parameterType="com.it.ocs.cal.model.CurrencyRateModel">
+		insert into CAL_CURRENCY_RATE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			ENTITY_ID,
+			<if test="countryId != null">
+				COUNTRY_ID,
+			</if>
+			<if test="currencyCode != null">
+				CURRENCY_CODE,
+			</if>
+			<if test="currencySymbol != null">
+				CURRENCY_SYMBOL,
+			</if>
+			<if test="currencyRate != null">
+				CURRENCY_RATE,
+			</if>
+			<if test="riskFactor != null">
+				RISK_FACTOR,
+			</if>
+			<if test="sortOrder != null">
+				SORT_ORDER,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+		
+			CAL_CURRENCY_RATE_SEQ.NEXTVAL,
+			
+			<if test="countryId != null">
+				#{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="currencyCode != null">
+				#{currencyCode,jdbcType=VARCHAR},
+			</if>
+			<if test="currencySymbol != null">
+				#{currencySymbol,jdbcType=VARCHAR},
+			</if>
+			<if test="currencyRate != null">
+				#{currencyRate,jdbcType=DECIMAL},
+			</if>
+			<if test="riskFactor != null">
+				#{riskFactor,jdbcType=DECIMAL},
+			</if>
+			<if test="sortOrder != null">
+				#{sortOrder,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt},
+			</if>
+		</trim>
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.it.ocs.cal.model.CurrencyRateModel">
+		update CAL_CURRENCY_RATE
+		<set>
+			<if test="countryId != null">
+				COUNTRY_ID = #{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="currencyCode != null">
+				CURRENCY_CODE = #{currencyCode,jdbcType=VARCHAR},
+			</if>
+			<if test="currencySymbol != null">
+				CURRENCY_SYMBOL = #{currencySymbol,jdbcType=VARCHAR},
+			</if>
+			<if test="currencyRate != null">
+				CURRENCY_RATE = #{currencyRate,jdbcType=DECIMAL},
+			</if>
+			<if test="riskFactor != null">
+				RISK_FACTOR = #{riskFactor,jdbcType=DECIMAL},
+			</if>
+			<if test="sortOrder != null">
+				SORT_ORDER = #{sortOrder,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt},
+			</if>
+		</set>
+		where entity_id = #{entityId}
+	</update>
+</mapper>

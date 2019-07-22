@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IProductCommentDAO">
+	<resultMap type="com.it.ocs.publication.model.ProductCommentModel" id="productResult">
+		<id property="id" column="COMMENT_ID" jdbcType="DECIMAL" />
+		<result property="topPromotionType" column="TOP_PROMOTION_TYPE" jdbcType="VARCHAR" />
+		<result property="footerPromotionType" column="FOOTER_PROMOTION_TYPE" jdbcType="VARCHAR" />
+		<result property="counterType" column="COUNTER_TYPE" jdbcType="VARCHAR" />
+		<result property="openPageProtect" column="OPEN_PAGE_PROTECT" jdbcType="VARCHAR" />
+		<result property="templateTitle" column="TEMPLATE_TITLE" jdbcType="VARCHAR" />
+		<result property="ebayImgs" column="EBAY_IMG" jdbcType="VARCHAR" />
+		<result property="templateImgs" column="TEMPLATE_IMG" jdbcType="VARCHAR" />
+		<result property="appComment" column="APP_PRODUCT_COMMENT" jdbcType="VARCHAR" />
+		<result property="comments" column="PRODUCT_COMMENT" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_PRODUCT_COMMENT where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<select id="getById" resultMap="productResult">
+		<include refid="select_base" /> where COMMENT_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="productResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			COMMENT_ID id,
+			TOP_PROMOTION_TYPE topPromotionType,
+			FOOTER_PROMOTION_TYPE footerPromotionType,
+			COUNTER_TYPE counterType,
+			OPEN_PAGE_PROTECT openPageProtect,
+			TEMPLATE_TITLE templateTitle,
+			EBAY_IMG ebayImgs,
+			TEMPLATE_IMG templateImgs,
+			APP_PRODUCT_COMMENT appComment,
+			PRODUCT_COMMENT comments,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_PRODUCT_COMMENT
+	</sql>
+	<select id="query" resultMap="productResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.ProductCommentModel">
+		insert into EBAY_PRODUCT_COMMENT
+		(
+			COMMENT_ID,
+			TOP_PROMOTION_TYPE,
+			FOOTER_PROMOTION_TYPE,
+			COUNTER_TYPE,
+			OPEN_PAGE_PROTECT,
+			TEMPLATE_TITLE,
+			EBAY_IMG,
+			TEMPLATE_IMG,
+			APP_PRODUCT_COMMENT,
+			PRODUCT_COMMENT,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{topPromotionType},
+			#{footerPromotionType},
+			#{counterType},
+			#{openPageProtect},
+			#{templateTitle},
+			#{ebayImgs},
+			#{templateImgs},
+			#{appComment},
+			#{comments},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.ProductCommentModel">
+		update EBAY_PRODUCT_COMMENT set 
+			TOP_PROMOTION_TYPE=#{topPromotionType},
+			FOOTER_PROMOTION_TYPE=#{footerPromotionType},
+			COUNTER_TYPE=#{counterType},
+			OPEN_PAGE_PROTECT=#{openPageProtect},
+			TEMPLATE_TITLE=#{templateTitle},
+			EBAY_IMG=#{ebayImgs},
+			TEMPLATE_IMG=#{templateImgs},
+			APP_PRODUCT_COMMENT=#{appComment},
+			PRODUCT_COMMENT=#{comments},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where COMMENT_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_PRODUCT_COMMENT set ENABLED_FLAG='N' where COMMENT_ID=#{id}
+	</update>
+</mapper>

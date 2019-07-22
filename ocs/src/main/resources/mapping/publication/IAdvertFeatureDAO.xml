@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IAdvertFeatureDAO">
+	<resultMap type="com.it.ocs.publication.model.AdvertFeatureModel" id="advertResult">
+		<id property="id" column="FEATURE_ID" jdbcType="DECIMAL" />
+		<result property="featureType" column="FEATURE_PROPERTY" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_ADVERTISING_FEATURES where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<select id="getById" resultMap="advertResult">
+		<include refid="select_base" /> where FEATURE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="advertResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			FEATURE_ID id,
+			FEATURE_PROPERTY  featureType,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_ADVERTISING_FEATURES
+	</sql>
+	<select id="query" resultMap="advertResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.AdvertFeatureModel">
+		insert into EBAY_ADVERTISING_FEATURES
+		(
+			FEATURE_ID,
+			FEATURE_PROPERTY,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{featureType},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.AdvertFeatureModel">
+		update EBAY_ADVERTISING_FEATURES set 
+			FEATURE_PROPERTY=#{featureType},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where FEATURE_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_ADVERTISING_FEATURES set ENABLED_FLAG='N' where FEATURE_ID=#{id}
+	</update>
+</mapper>

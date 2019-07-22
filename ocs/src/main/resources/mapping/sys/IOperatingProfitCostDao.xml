@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitCostDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID,
+			   COST,
+			   METER,
+			   MONTH_OF_YEAR MONTHOFYEAR,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+    	FROM SYS_OPERATING_PROFIT_COST
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitCostModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.sys.dao.IOperatingProfitSkuDao.order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.sys.model.OperatingProfitCostModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+	</select>
+	
+	<insert id="add">
+	    insert into SYS_OPERATING_PROFIT_COST
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	     
+	      <if test="cost != null" >
+	        COST,
+	      </if>
+	      <if test="meter != null" >
+	        METER,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_OPERATING_PROFIT_COST_SEQ.NEXTVAL,
+	      
+	      <if test="cost != null" >
+	        #{cost,jdbcType=DECIMAL},
+	      </if>
+	      <if test="meter != null" >
+	        #{meter,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>	
+	
+	<update id="update">
+		update SYS_OPERATING_PROFIT_COST
+	    <set >
+	      <if test="cost != null" >
+	        COST = #{cost,jdbcType=DECIMAL},
+	      </if>
+	      <if test="meter != null" >
+	        METER = #{meter,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.task.dao.IAmazonReportsBestsellerDao">
+	<resultMap type="com.it.ocs.task.model.AmazonReportsBestsellerModel" id="amazonReportsBestsellerResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="URL" property="url"  />
+		<result column="CATEGORY_NAME" property="category_name"  />
+		<result column="CATEGORY_NAME_CN" property="category_name_cn"  />
+		<result column="TOP_HUNDRED" property="top_hundred"  />
+		<result column="TOP_TWENTY" property="top_twenty"  />
+		<result column="TOP_TEN" property="top_ten"  />
+		<result column="TOP_FIVE" property="top_five"  />
+		<result column="BRAND_DISTRIBUTION" property="brand_distribution"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="URL_PRODUCT" property="url_product"  />
+		<result column="CATEGORY_RANKING" property="category_ranking"  />
+		<result column="AVERAGE_RATE" property="average_rate"  />
+		<result column="REVIEWS_TOTAL" property="reviews_total"  />
+		<result column="ASIN" property="asin"  />
+		<result column="BRAND_NAME" property="brand_name"  />
+		<result column="PRICE" property="price"  />
+		<result column="BESTSELLER_CREATED" property="bestseller_created"  />
+		<result column="BESTSELLER_PRODUCT_CREATED" property="bestseller_product_created"  />
+		<result column="BESTSELLER_CREATED_AT" property="bestseller_created_at"  />
+		<result column="BESTSELLER_PRODUCT_CREATED_AT" property="bestseller_product_created_at"  />
+		<result column="TOP_ASIN" property="top_asin"  />
+		<result column="PIC" property="pic"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="SOURCE_ID" property="source_id"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(UPDATED_AT) ,'yyyy-mm-dd HH24:mi:ss') from amazon_reports_bestseller
+	</select>
+	<select id="selectMySqlDate" resultMap="amazonReportsBestsellerResult">
+		select * from amazon_reports_bestseller aba where aba.updated_at>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectAmazonReportsBestsellerModels" resultMap="amazonReportsBestsellerResult" parameterType="java.util.List">
+		select SOURCE_ID from amazon_reports_bestseller 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id}  
+        </foreach> 
+	</select>
+	<update id="updateAmazonReportsBestsellers" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_reports_bestseller baoi 
+	   	 set
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			URL = #{item.url,jdbcType=VARCHAR},
+			CATEGORY_NAME = #{item.category_name,jdbcType=VARCHAR},
+			CATEGORY_NAME_CN = #{item.category_name_cn,jdbcType=VARCHAR},
+			TOP_HUNDRED = #{item.top_hundred,jdbcType=VARCHAR},
+			TOP_TWENTY = #{item.top_twenty,jdbcType=VARCHAR},
+			TOP_TEN = #{item.top_ten,jdbcType=VARCHAR},
+			TOP_FIVE = #{item.top_five,jdbcType=VARCHAR},
+			BRAND_DISTRIBUTION = #{item.brand_distribution,jdbcType=VARCHAR},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP},
+			URL_PRODUCT = #{item.url_product,jdbcType=VARCHAR},
+			CATEGORY_RANKING = #{item.category_ranking,jdbcType=VARCHAR},
+			AVERAGE_RATE = #{item.average_rate,jdbcType=VARCHAR},
+			REVIEWS_TOTAL = #{item.reviews_total,jdbcType=VARCHAR},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			BRAND_NAME = #{item.brand_name,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=VARCHAR},
+			BESTSELLER_CREATED = #{item.bestseller_created,jdbcType=BIGINT},
+			BESTSELLER_PRODUCT_CREATED = #{item.bestseller_product_created,jdbcType=BIGINT},
+			BESTSELLER_CREATED_AT = #{item.bestseller_created_at,jdbcType=TIMESTAMP},
+			BESTSELLER_PRODUCT_CREATED_AT = #{item.bestseller_product_created_at,jdbcType=TIMESTAMP},
+			TOP_ASIN = #{item.top_asin,jdbcType=VARCHAR},
+			PIC = #{item.pic,jdbcType=VARCHAR},
+			LAST_UPDATE_DATE = #{item.last_update_date}	
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+	<insert id="insertAmazonReportsBestsellers" parameterType="java.util.List">
+		INSERT INTO amazon_reports_bestseller (
+			ENTITY_ID,
+			PLATFORM,
+			URL,
+			CATEGORY_NAME,
+			CATEGORY_NAME_CN,
+			TOP_HUNDRED,
+			TOP_TWENTY,
+			TOP_TEN,
+			TOP_FIVE,
+			BRAND_DISTRIBUTION,
+			CREATED_AT,
+			UPDATED_AT,
+			URL_PRODUCT,
+			CATEGORY_RANKING,
+			AVERAGE_RATE,
+			REVIEWS_TOTAL,
+			ASIN,
+			BRAND_NAME,
+			PRICE,
+			BESTSELLER_CREATED,
+			BESTSELLER_PRODUCT_CREATED,
+			BESTSELLER_CREATED_AT,
+			BESTSELLER_PRODUCT_CREATED_AT,
+			TOP_ASIN,
+			PIC,
+			SOURCE_ID,
+			CREATION_DATE)   
+		select amazon_reports_bestseller_seq.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.url,jdbcType=VARCHAR},
+				#{item.category_name,jdbcType=VARCHAR},
+				#{item.category_name_cn,jdbcType=VARCHAR},
+				#{item.top_hundred,jdbcType=VARCHAR},
+				#{item.top_twenty,jdbcType=VARCHAR},
+				#{item.top_ten,jdbcType=VARCHAR},
+				#{item.top_five,jdbcType=VARCHAR},
+				#{item.brand_distribution,jdbcType=VARCHAR},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.url_product,jdbcType=VARCHAR},
+				#{item.category_ranking,jdbcType=VARCHAR},
+				#{item.average_rate,jdbcType=VARCHAR},
+				#{item.reviews_total,jdbcType=VARCHAR},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.brand_name,jdbcType=VARCHAR},
+				#{item.price,jdbcType=VARCHAR},
+				#{item.bestseller_created,jdbcType=BIGINT},
+				#{item.bestseller_product_created,jdbcType=BIGINT},
+				#{item.bestseller_created_at,jdbcType=TIMESTAMP},
+				#{item.bestseller_product_created_at,jdbcType=TIMESTAMP},
+				#{item.top_asin,jdbcType=VARCHAR},
+				#{item.pic,jdbcType=VARCHAR},
+				#{item.entity_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateInsertData" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_reports_bestseller baoi 
+	   	 set
+			BRAND_DISTRIBUTION = #{item.brand_distribution,jdbcType=VARCHAR},
+			URL_PRODUCT = #{item.url_product,jdbcType=VARCHAR},
+			CATEGORY_RANKING = #{item.category_ranking,jdbcType=VARCHAR},
+			TOP_ASIN = #{item.top_asin,jdbcType=VARCHAR}
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+</mapper>

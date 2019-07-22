@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitFeeDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID, 
+			   FREIGHT_US FREIGHTUS, 
+			   FREIGHT_UK FREIGHTUK, 
+			   FREIGHT_DE FREIGHTDE, 
+			   CUSTOMER_FEE1 CUSTOMERFEE1, 
+			   CUSTOMER_FEE2 CUSTOMERFEE2, 
+			   CUSTOMER_FEE3 CUSTOMERFEE3, 
+			   CUSTOMER_FEE4 CUSTOMERFEE4,
+			   CUSTOMER_FEE5 CUSTOMERFEE5, 
+			   FEE_EBAY FEEEBAY, 
+			   PACKING_CHARGE PACKINGCHARGE, 
+			   CLEAR_FEE CLEARFEE, 
+			   OTHER_FEE OTHERFEE, 
+			   MONTH_OF_YEAR MONTHOFYEAR, 
+			   CREATED_AT CREATEDAT, 
+			   UPDATED_AT UPDATEDAT
+    	FROM SYS_OPERATING_PROFIT_FEE
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitFeeModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.sys.dao.IOperatingProfitSkuDao.order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.sys.model.OperatingProfitFeeModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+	</select>
+	
+	<insert id="add">
+	    insert into SYS_OPERATING_PROFIT_FEE
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="freightUs != null" >
+	        FREIGHT_US,
+	      </if>
+	      <if test="freightUk != null" >
+	        FREIGHT_UK,
+	      </if>
+	      <if test="freightDe != null" >
+	        FREIGHT_DE,
+	      </if>
+	      <if test="customerFee1 != null" >
+	        CUSTOMER_FEE1,
+	      </if>
+	      <if test="customerFee2 != null" >
+	        CUSTOMER_FEE2,
+	      </if>
+	      <if test="customerFee3 != null" >
+	        CUSTOMER_FEE3,
+	      </if>
+	      <if test="customerFee4 != null" >
+	        CUSTOMER_FEE4,
+	      </if>
+	      <if test="customerFee5 != null" >
+	        CUSTOMER_FEE5,
+	      </if>
+	      <if test="feeEbay != null" >
+	        FEE_EBAY,
+	      </if>
+	      <if test="packingCharge != null" >
+	        PACKING_CHARGE,
+	      </if>
+	      <if test="clearFee != null" >
+	        CLEAR_FEE,
+	      </if>
+	      <if test="otherFee != null" >
+	        OTHER_FEE,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_OPERATING_PROFIT_FEE_SEQ.NEXTVAL,
+	      
+	      <if test="freightUs != null" >
+	        #{freightUs,jdbcType=DECIMAL},
+	      </if>
+	      <if test="freightUk != null" >
+	        #{freightUk,jdbcType=DECIMAL},
+	      </if>
+	      <if test="freightDe != null" >
+	        #{freightDe,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee1 != null" >
+	        #{customerFee1,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee2 != null" >
+	        #{customerFee2,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee3 != null" >
+	        #{customerFee3,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee4 != null" >
+	        #{customerFee4,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee5 != null" >
+	        #{customerFee5,jdbcType=DECIMAL},
+	      </if>
+	      <if test="feeEbay != null" >
+	        #{feeEbay,jdbcType=DECIMAL},
+	      </if>
+	      <if test="packingCharge != null" >
+	        #{packingCharge,jdbcType=DECIMAL},
+	      </if>
+	      <if test="clearFee != null" >
+	        #{clearFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="otherFee != null" >
+	        #{otherFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>	
+	
+	<update id="update">
+		update SYS_OPERATING_PROFIT_FEE
+	    <set >
+	      <if test="freightUs != null" >
+	        FREIGHT_US = #{freightUs,jdbcType=DECIMAL},
+	      </if>
+	      <if test="freightUk != null" >
+	        FREIGHT_UK = #{freightUk,jdbcType=DECIMAL},
+	      </if>
+	      <if test="freightDe != null" >
+	        FREIGHT_DE = #{freightDe,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee1 != null" >
+	        CUSTOMER_FEE1 = #{customerFee1,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee2 != null" >
+	        CUSTOMER_FEE2 = #{customerFee2,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee3 != null" >
+	        CUSTOMER_FEE3 = #{customerFee3,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee4 != null" >
+	        CUSTOMER_FEE4 = #{customerFee4,jdbcType=DECIMAL},
+	      </if>
+	      <if test="customerFee5 != null" >
+	        CUSTOMER_FEE5 = #{customerFee5,jdbcType=DECIMAL},
+	      </if>
+	      <if test="feeEbay != null" >
+	        FEE_EBAY = #{feeEbay,jdbcType=DECIMAL},
+	      </if>
+	      <if test="packingCharge != null" >
+	        PACKING_CHARGE = #{packingCharge,jdbcType=DECIMAL},
+	      </if>
+	      <if test="clearFee != null" >
+	        CLEAR_FEE = #{clearFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="otherFee != null" >
+	        OTHER_FEE = #{otherFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IBuyerRequireDAO">
+	<resultMap type="com.it.ocs.publication.model.BuyerRequireModel" id="buyerResult">
+		<id property="id" column="BUYER_REQUIRE_ID" jdbcType="DECIMAL" />
+		<result property="allowAllBuyer" column="ALLOW_ALL_BUBER" jdbcType="VARCHAR" />
+		<result property="buyerRule" column="BUYER_RULE" jdbcType="DECIMAL" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_BUYER_REQUIRE where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select ebay_buyer_require_SEQ.Nextval from dual
+	</select>
+	<select id="getById" resultMap="buyerResult">
+		<include refid="select_base" /> where BUYER_REQUIRE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="buyerResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			BUYER_REQUIRE_ID id,
+			ALLOW_ALL_BUBER  allowAllBuyer,
+			BUYER_RULE buyerRule,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_BUYER_REQUIRE
+	</sql>
+	<select id="query" resultMap="buyerResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.BuyerRequireModel">
+		insert into EBAY_BUYER_REQUIRE
+		(
+			BUYER_REQUIRE_ID,
+			ALLOW_ALL_BUBER,
+			BUYER_RULE,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{allowAllBuyer},
+			#{buyerRule},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.BuyerRequireModel">
+		update EBAY_BUYER_REQUIRE set 
+			ALLOW_ALL_BUBER=#{allowAllBuyer},
+			BUYER_RULE=#{buyerRule},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where BUYER_REQUIRE_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_BUYER_REQUIRE set ENABLED_FLAG='N' where BUYER_REQUIRE_ID=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.seller.dao.IEBayItemPromoteDao">
+
+	<sql id="select_base">
+	select 
+	   template_id id,
+       template_name templateName,
+       item_id itemId,
+       site_id siteId,
+       account account,
+       promote_type promoteType,
+       data_type dataType,
+       rules rules,
+       create_by createUser,
+       to_char(create_date,'yyyy-MM-dd hh24:mi:ss') createDate,
+       update_by updateUser,
+       to_char(update_date,'yyyy-MM-dd hh24:mi:ss') updateDate
+       from ebay_promote_template  
+	where ENABLED_FLAG='Y' 
+	</sql>
+	<select id="queryByPage" resultType="com.it.ocs.seller.model.EBayItemPromoteModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" /> 
+				order by create_date desc 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from ebay_promote_template where ENABLED_FLAG='Y'
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.seller.model.EBayItemPromoteModel">
+		insert into ebay_promote_template
+		  (template_id,
+		   template_name,
+		   item_id,
+		   promote_type,
+		   site_id,
+		   account,
+		   create_by,
+		   create_date,
+		   update_by,
+		   update_date,
+		   data_type,
+		   rules)
+		values
+		  (ebay_promote_SEQ.Nextval, 
+		  #{templateName}, 
+		  #{itemId,jdbcType=VARCHAR}, 
+		  #{promoteType},
+		  #{siteId},
+		  #{account,jdbcType=VARCHAR},
+		  #{createBy},
+		  sysdate,
+		   #{createBy},
+		  sysdate,
+		  #{dataType,jdbcType=VARCHAR},
+		  #{rules,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<update id="update"  parameterType="com.it.ocs.seller.model.EBayItemPromoteModel">
+		  update ebay_promote_template set 
+		   template_name =#{templateName},
+		   item_id =#{itemId,jdbcType=VARCHAR},
+		   promote_type =#{promoteType},
+		   site_id = #{siteId},
+		   account = #{account,jdbcType=VARCHAR},
+		   data_type = #{dataType,jdbcType=VARCHAR},
+		   rules = #{rules,jdbcType=VARCHAR},
+		   update_by =#{lastUpdateBy},
+		   update_date = sysdate
+		where template_id =#{id}
+	</update>
+	
+	<update id="deleteItemPromoteByIds"  parameterType="java.util.List">
+		update ebay_promote_template set ENABLED_FLAG='N',UPDATE_DATE=sysdate where template_id in (
+		<foreach collection="list" item="ids" index="index" separator=",">#{ids}</foreach>
+		)
+	</update>
+	<sql id="search_condition">
+		<if test="pubModel.templateName !=null and pubModel.templateName !=''">
+			and template_name like '%'||#{pubModel.templateName}||'%'
+		</if>
+		<if test="pubModel.siteId !=null and  pubModel.siteId !='' ">
+			and site_id = #{pubModel.siteId}
+		</if>
+		<if test="pubModel.templateSKU !=null and pubModel.templateSKU !=''">
+			and sku like '%'||#{pubModel.templateSKU}||'%'
+		</if>
+		<if test="pubModel.account !=null and pubModel.account !=''">
+			and EBAY_ACCOUNT = #{pubModel.account}
+		</if>
+		<if test="pubModel.templateItemId !=null and pubModel.templateItemId !=''">
+			and ITEM_ID = #{pubModel.templateItemId}
+		</if>
+		<if test="pubModel.templateField !=null and pubModel.templateField !=''">
+			and PRODUCT_FIRST_CATEGORY_ID = #{pubModel.templateField}
+		</if>
+	</sql>
+	<select id="searchProduct" resultType="com.it.ocs.publication.model.PublicationModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select item_Id                   itemId,
+				       template_name             templateName,
+				       ebay_product_url          ebayProductURL,
+				       sku,
+				       PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+				       EBAY_IMAGES               ebayImages,
+				       PRODUCT_QUANTITY_SOLD             quantity_sold,
+				       PUBLICATION_TYPE          publicationType,
+				       PRICE                     price
+				  from ebay_publication_line
+				 where item_id is not null
+				 and ENABLED_FLAG='Y'
+				 <![CDATA[
+				  and END_PUBLICATION_DATE > sysdate
+				  ]]>
+				<include refid="search_condition"></include>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]>
+	</select>
+	
+	<select id="searchCount" resultType="java.lang.Integer">
+		select count(1) from (
+			select item_Id itemId,template_name templateName,ebay_product_url ebayProductURL 
+			from ebay_publication_line 
+			where item_id is not null
+			 and ENABLED_FLAG='Y'
+		  <![CDATA[
+			  and END_PUBLICATION_DATE > sysdate
+			  ]]>
+			<include refid="search_condition"></include>
+				)
+	</select>
+	<select id="getPromoteItemIds" resultType="java.lang.String">
+		select item_id from ebay_promote_template where template_id = #{temId} 
+	</select>
+	<select id="getProductInfo" resultType="com.it.ocs.publication.model.PublicationModel">
+		select item_Id                   itemId,
+		       template_name             templateName,
+		       ebay_product_url          ebayProductURL,
+		       sku,
+		       PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+		       EBAY_IMAGES               ebayImages,
+		       PRODUCT_QUANTITY_SOLD             quantity_sold,
+		       PUBLICATION_TYPE          publicationType,
+		       PRICE                     price
+		  from ebay_publication_line
+		 where item_id in(
+			<foreach collection="list" index="index" item="item" separator=",">
+				#{item}
+			</foreach>
+		)
+	</select>
+	<update id="saveItems">
+		update ebay_promote_template set item_id = #{itemId} where TEMPLATE_ID = #{templateId}
+	</update>
+	<sql id="rule_item_condition">
+		<if test="param.siteId != null and param.siteId != ''">
+			and site_id = #{param.siteId}
+		</if>
+		<if test="param.account != null and param.account != ''">
+			and ebay_account = #{param.account}
+		</if>
+		<if test="param.itemStore != null and param.itemStore != ''">
+			and STORE_FIRST_CATEGORY_ID = #{param.itemStore}
+		</if>
+		<if test="param.itemType != null and param.itemType != ''">
+			and PRODUCT_FIRST_CATEGORY_ID = #{param.itemType}
+		</if>
+		<if test="param.publictionType !=null and param.publictionType != ''">
+			and #{param.publictionType} like '%'||PUBLICATION_TYPE||';%'  
+		</if>
+		<if test="param.priceEnd != null and param.priceEnd != ''">
+			<![CDATA[and to_number(PRICE) <= #{param.priceEnd}]]>
+		</if>
+		<if test="param.priceStart != null and param.priceStart != ''">
+			<![CDATA[and to_number(PRICE) >= #{param.priceStart}]]>
+		</if>
+		<if test="param.keyword !=null and param.keyword != ''">
+			<![CDATA[and  REGEXP_LIKE(PRODUCT_TITLE,'('||#{param.keyword}||')+')]]>
+		</if>
+	</sql>
+	<sql id="rule_item_condition1">
+		<if test="param.siteId != null and param.siteId != ''">
+			and l.site_id = #{param.siteId}
+		</if>
+		<if test="param.account != null and param.account != ''">
+			and l.ebay_account = #{param.account}
+		</if>
+		<if test="param.itemStore != null and param.itemStore != ''">
+			and l.STORE_FIRST_CATEGORY_ID = #{param.itemStore}
+		</if>
+		<if test="param.itemType != null and param.itemType != ''">
+			and l.PRODUCT_FIRST_CATEGORY_ID = #{param.itemType}
+		</if>
+		<if test="param.publictionType !=null and param.publictionType != ''">
+			and #{param.publictionType} like '%'||l.PUBLICATION_TYPE||';%'  
+		</if>
+		<if test="param.priceEnd != null and param.priceEnd != ''">
+			<![CDATA[and to_number(l.PRICE) <= #{param.priceEnd}]]>
+		</if>
+		<if test="param.priceStart != null and param.priceStart != ''">
+			<![CDATA[and to_number(l.PRICE) >= #{param.priceStart}]]>
+		</if>
+		<if test="param.keyword !=null and param.keyword != ''">
+			<![CDATA[and  REGEXP_LIKE(l.PRODUCT_TITLE,'('||#{param.keyword}||')+')]]>
+		</if>
+	</sql>
+	<sql id="rule_item_order">
+		<choose>
+			<when test="param.orderKey == 0">
+				
+			</when>
+			<when test="param.orderKey == 1">
+				order by to_number(nvl(PRODUCT_QUANTITY_SOLD,'0')) asc
+			</when>
+			<when test="param.orderKey == 2">
+				order by TIMING_PUBLICATION_DATE desc
+			</when>
+			<when test="param.orderKey == 3">
+				<![CDATA[and END_PUBLICATION_DATE > sysdate - 8/24
+				and END_PUBLICATION_DATE < sysdate + 7 -8/24
+				]]>
+				order by END_PUBLICATION_DATE asc
+			</when>
+			<otherwise></otherwise>
+		</choose>
+	</sql>
+	<select id="getItemsByHot" resultType="com.it.ocs.publication.model.PublicationModel">
+		select itemId,templateName,ebayProductURL,sku,productFirstCategoryId,ebayImages,quantity_sold,publicationType,price
+		  from (select l.item_Id                   itemId,
+			       l.template_name             templateName,
+			       l.ebay_product_url          ebayProductURL,
+			       l.sku,
+			       l.PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+			       l.EBAY_IMAGES               ebayImages,
+			       l.PRODUCT_QUANTITY_SOLD             quantity_sold,
+			       l.PUBLICATION_TYPE          publicationType,
+			       l.PRICE                     price, 
+			       k.qty
+		          from ebay_publication_line l,
+		               (select i.item_id, sum(to_number(i.quantity_purchased)) qty
+		                  from ebay_order o, ebay_order_item i
+		                 where o.id = i.parent_id
+		                <![CDATA[   and o.paid_time > sysdate - 8 / 24 - 30 ]]>
+		                 group by i.item_id) k
+		         where l.item_id = k.item_id
+		          and l.ENABLED_FLAG='Y'
+				  and l.product_title is not null
+				  <![CDATA[
+				  and l.END_PUBLICATION_DATE > sysdate
+				  ]]>
+		          <include refid="rule_item_condition1"></include>
+		         order by k.qty desc)
+		 <![CDATA[ where rownum < 9]]>
+	</select>
+	<select id="getItemsByRule" resultType="com.it.ocs.publication.model.PublicationModel">
+		select *
+		from (
+			select item_Id                   itemId,
+			       template_name             templateName,
+			       ebay_product_url          ebayProductURL,
+			       sku,
+			       PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+			       EBAY_IMAGES               ebayImages,
+			       PRODUCT_QUANTITY_SOLD             quantity_sold,
+			       PUBLICATION_TYPE          publicationType,
+			       PRICE                     price
+			  from ebay_publication_line
+			  where ENABLED_FLAG='Y'
+			  and product_title is not null
+			  <![CDATA[
+			  and END_PUBLICATION_DATE > sysdate
+			  ]]>
+			  <include refid="rule_item_condition"></include>
+			  <include refid="rule_item_order"></include>
+			 )
+		<![CDATA[where rownum < 9]]>
+	</select>
+	<select id="getItemType" resultType="com.it.ocs.seller.model.ComboTreeModel">
+		 select c.category_id        id,
+              c.category_name      text,
+              c.parent_category_id parentId
+         from ebay_category_info c
+        where c.marketplace_id = #{siteId}
+        and c.enabled_flag = 'Y'
+        and c.parent_category_id is not null
+	</select>
+	<select id="getItemStoreType" resultType="com.it.ocs.seller.model.ComboTreeModel">
+		select c.category_id        id,
+              c.name               text,
+              c.parent_category_id parentId
+         from ebay_store_category_info c
+        where c.marketplace_id = #{siteId}
+        and c.enabled_flag = 'Y'
+        and c.parent_category_id is not null
+	</select>
+</mapper>

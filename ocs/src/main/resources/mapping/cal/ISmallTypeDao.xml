@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ISmallTypeDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID,
+			   TYPE_NAME TYPENAME,
+			   GST,
+			   TARIFF_RATE TARIFFRATE,
+			   CLEAR_PRICE_ADJUSTMENT_RATIO CLEARPRICEADJUSTMENTRATIO,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+	    FROM CAL_SMALL_TYPE
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.typeName != '' and param.typeName != null">
+					AND TYPE_NAME = #{param.typeName}
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<select id="query" resultType="com.it.ocs.cal.model.SmallTypeModel">
+		<include refid="base_sql" />
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.cal.dao.ILightEbayTaxDao.sql_order" />
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.cal.model.SmallTypeModel">
+		<include refid="base_sql" />
+		<include refid="where_sql"/>
+	</select>
+	
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.SmallTypeModel" >
+	    insert into CAL_SMALL_TYPE
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="typeName != null" >
+	        TYPE_NAME,
+	      </if>
+	      <if test="gst != null" >
+	        GST,
+	      </if>
+	      <if test="tariffRate != null" >
+	        TARIFF_RATE,
+	      </if>
+	      <if test="clearPriceAdjustmentRatio != null" >
+	        CLEAR_PRICE_ADJUSTMENT_RATIO,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	      CAL_SMALL_TYPE_SEQ.NEXTVAL,
+	      
+	      <if test="typeName != null" >
+	        #{typeName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="gst != null" >
+	        #{gst,jdbcType=DECIMAL},
+	      </if>
+	      <if test="tariffRate != null" >
+	        #{tariffRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="clearPriceAdjustmentRatio != null" >
+	        #{clearPriceAdjustmentRatio,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	  </insert>
+	  
+	  <update id="update" parameterType="com.it.ocs.cal.model.SmallTypeModel" >
+	    update CAL_SMALL_TYPE
+	    <set >
+	      <if test="typeName != null" >
+	        TYPE_NAME = #{typeName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="gst != null" >
+	        GST = #{gst,jdbcType=DECIMAL},
+	      </if>
+	      <if test="tariffRate != null" >
+	        TARIFF_RATE = #{tariffRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="clearPriceAdjustmentRatio != null" >
+	        CLEAR_PRICE_ADJUSTMENT_RATIO = #{clearPriceAdjustmentRatio,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	  </update>
+</mapper>

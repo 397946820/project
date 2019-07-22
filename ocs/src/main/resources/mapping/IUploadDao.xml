@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.upload.dao.IUploadDao">
+	<select id="getImgId" resultType="long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<insert id="addEbayImages">
+		insert into EBAY_PIC_INFO
+		(
+			PIC_ID,
+			NAME,
+			REAL_NAME,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+     		FILE_SIZE,
+     		SAVE_PATH
+		) 
+		values
+		(
+			#{id},
+			#{name,jdbcType=VARCHAR},
+			#{name,jdbcType=VARCHAR},
+			'Y',
+			#{user,jdbcType=BIGINT},
+			sysdate,
+			#{size,jdbcType=VARCHAR},
+			#{savePath,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="updateEbayImageInfo">
+		update EBAY_PIC_INFO set name = #{resetName},CATEGORY_ID = #{fieldId}
+		where pic_id = #{id}
+	</update>
+	<select id="getImgPathById" resultType="java.lang.String">
+		select p.save_path from EBAY_PIC_INFO p where p.pic_id = #{id}
+	</select>
+	<update id="updateUploadResult">
+		update EBAY_PIC_INFO set SERVER_URL = #{serverUrl,jdbcType=VARCHAR},IS_UPLOAD = #{isUpload,jdbcType=BIGINT}
+		where pic_id = #{id}
+	</update>
+	<update id="updateImageInfo">
+		update EBAY_PIC_INFO set REAL_URL = #{ebayUrl,jdbcType=VARCHAR},REAL_URL_INFO = #{ebayReturnInfo,jdbcType=VARCHAR}
+		where pic_id = #{id}
+	</update>
+	<update id="imageDelete">
+		update EBAY_PIC_INFO set ENABLED_FLAG = 'N' where pic_id in
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</update>
+</mapper>

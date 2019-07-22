@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.task.dao.IAmazonOfferDao">
+	<resultMap type="com.it.ocs.task.model.AmazonOfferModel" id="amazonOfferModelResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="ASIN" property="asin"  />
+		<result column="TOTAL" property="total"  />
+		<result column="PRICE" property="price"  />
+		<result column="SOLD_BY" property="sold_by"  />
+		<result column="SOLD_URL" property="sold_url"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="IS_DELETE" property="is_delete"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="SOURCE_ID" property="source_id"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(updated_at),'yyyy-mm-dd HH24:mi:ss') from AMAZON_OFFER 
+	</select>
+	<select id="selectMySqlDate" resultMap="amazonOfferModelResult">
+		select * from amazon_offer ao where ao.UPDATED_AT>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectAmazonOfferModels" resultMap="amazonOfferModelResult">
+		select SOURCE_ID from AMAZON_OFFER 
+		where SOURCE_ID IN
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item.entity_id}  
+		</foreach>
+	</select>
+	<update id="updateAmazonOffers" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			update AMAZON_OFFER baoi
+			set 
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			TOTAL = #{item.total,jdbcType=BIGINT},
+			PRICE = #{item.price,jdbcType=BIGINT},
+			SOLD_BY = #{item.sold_by,jdbcType=VARCHAR},
+			SOLD_URL = #{item.sold_url,jdbcType=VARCHAR},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP},
+			IS_DELETE = #{item.is_delete,jdbcType=BIGINT},
+			LAST_UPDATE_DATE = #{item.last_update_date}
+			where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+	<insert id="insertAmazonOffers" parameterType="java.util.List">
+		INSERT INTO AMAZON_OFFER(
+		ENTITY_ID,
+		PLATFORM,
+		ASIN,
+		TOTAL,
+		PRICE,
+		SOLD_BY,
+		SOLD_URL,
+		CREATED_AT,
+		UPDATED_AT,
+		IS_DELETE,
+		SOURCE_ID,
+		CREATION_DATE
+		)
+	select AMAZON_OFFER_SEQ.NEXTVAL,c.*,sysdate from (
+			<foreach collection="list" index="index" item="item" separator="union all">
+				select 
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.total,jdbcType=BIGINT},
+				#{item.price,jdbcType=BIGINT},
+				#{item.sold_by,jdbcType=VARCHAR},
+				#{item.sold_url,jdbcType=VARCHAR},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.is_delete,jdbcType=BIGINT},
+				#{item.entity_id,jdbcType=BIGINT}
+				from dual
+			</foreach>
+		)c
+	</insert>
+</mapper>

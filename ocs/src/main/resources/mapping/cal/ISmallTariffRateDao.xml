@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ISmallTariffRateDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID,
+			   FROM_WEIGHT FROMWEIGHT,
+			   TO_WEIGHT TOWEIGHT,
+			   MINIMUM_DECLARED_PRICE MINIMUMDECLAREDPRICE,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+	    FROM CAL_SMALL_TARIFF_RATE
+	</sql>
+	
+	<select id="query" resultType="com.it.ocs.cal.model.SmallTariffRateModel">
+		<include refid="base_sql" />
+		<include refid="com.it.ocs.cal.dao.ILightEbayTaxDao.sql_order" />
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.SmallTariffRateModel" >
+	    insert into CAL_SMALL_TARIFF_RATE
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="fromWeight != null" >
+	        FROM_WEIGHT,
+	      </if>
+	      <if test="toWeight != null" >
+	        TO_WEIGHT,
+	      </if>
+	      <if test="minimumDeclaredPrice != null" >
+	        MINIMUM_DECLARED_PRICE,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        CAL_SMALL_TARIFF_RATE_SEQ.NEXTVAL,
+	      
+	      <if test="fromWeight != null" >
+	        #{fromWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="toWeight != null" >
+	        #{toWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="minimumDeclaredPrice != null" >
+	        #{minimumDeclaredPrice,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>
+	  
+	<update id="update" parameterType="com.it.ocs.cal.model.SmallTariffRateModel" >
+	    update CAL_SMALL_TARIFF_RATE
+	    <set >
+	      <if test="fromWeight != null" >
+	        FROM_WEIGHT = #{fromWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="toWeight != null" >
+	        TO_WEIGHT = #{toWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="minimumDeclaredPrice != null" >
+	        MINIMUM_DECLARED_PRICE = #{minimumDeclaredPrice,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

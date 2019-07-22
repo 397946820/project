@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ILightEbayCustomerDao">
+	<sql id="base_sql">
+		SELECT ENTITY_ID entityId,
+			   COUNTRY,
+			   REGION,
+			   SHIPPING_TYPE shippingType,
+			   FROM_WEIGHT fromWeight,
+			   TO_WEIGHT toWeight,
+			   UNIT_PRICE unitPrice,
+			   CURRENCY_CODE currencyCode,
+			   VOLUME_WEIGHT_COEFFICIENT volumeWeightCoefficient,
+			   REMARKS,
+			   CREATED_AT createdAt,
+			   UPDATED_AT updatedAt
+		FROM LIGHT_EBAY_CUSTOMER
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.country != null and param.country != ''">
+					AND COUNTRY = #{param.country}
+				</if>
+				<if test="param.region != null and param.region != ''">
+					AND REGION = #{param.region}
+				</if>
+				<if test="param.shippingType != null and param.shippingType != ''">
+					AND SHIPPING_TYPE = #{param.shippingType}
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<!-- 分页以及条件查询 -->
+	<select id="query" resultType="com.it.ocs.cal.model.LightEbayCustomerModel">
+		<include refid="base_sql" />
+		<include refid="where_sql" />
+		ORDER BY ENTITY_ID
+	</select>
+	
+	<select id="queryByObject" resultType="java.util.Map">
+		<include refid="base_sql" />
+		<include refid="where_sql" />
+		ORDER BY ENTITY_ID
+	</select>
+
+	<insert id="add" parameterType="com.it.ocs.cal.model.LightEbayCustomerModel">
+		INSERT INTO LIGHT_EBAY_CUSTOMER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			ENTITY_ID,
+
+			<if test="country != null">
+				COUNTRY,
+			</if>
+			<if test="region != null">
+				REGION,
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE,
+			</if>
+			<if test="fromWeight != null">
+				FROM_WEIGHT,
+			</if>
+			<if test="toWeight != null">
+				TO_WEIGHT,
+			</if>
+			<if test="unitPrice != null">
+				UNIT_PRICE,
+			</if>
+			<if test="currencyCode != null">
+				CURRENCY_CODE,
+			</if>
+			<if test="volumeWeightCoefficient != null">
+				VOLUME_WEIGHT_COEFFICIENT,
+			</if>
+			<if test="remarks != null">
+				REMARKS,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			LIGHT_EBAY_CUSTOMER_SEQ.NEXTVAL,
+
+			<if test="country != null">
+				#{country,jdbcType=VARCHAR},
+			</if>
+			<if test="region != null">
+				#{region,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				#{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="fromWeight != null">
+				#{fromWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="toWeight != null">
+				#{toWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="unitPrice != null">
+				#{unitPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="currencyCode != null">
+				#{currencyCode,jdbcType=VARCHAR},
+			</if>
+			<if test="volumeWeightCoefficient != null">
+				#{volumeWeightCoefficient,jdbcType=DECIMAL},
+			</if>
+			<if test="remarks != null">
+				#{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="com.it.ocs.cal.model.LightEbayCustomerModel">
+		UPDATE LIGHT_EBAY_CUSTOMER
+		<set>
+			<if test="country != null">
+				COUNTRY = #{country,jdbcType=VARCHAR},
+			</if>
+			<if test="region != null">
+				REGION = #{region,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE = #{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="fromWeight != null">
+				FROM_WEIGHT = #{fromWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="toWeight != null">
+				TO_WEIGHT = #{toWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="unitPrice != null">
+				UNIT_PRICE = #{unitPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="currencyCode != null">
+				CURRENCY_CODE = #{currencyCode,jdbcType=VARCHAR},
+			</if>
+			<if test="volumeWeightCoefficient != null">
+				VOLUME_WEIGHT_COEFFICIENT =
+				#{volumeWeightCoefficient,jdbcType=DECIMAL},
+			</if>
+			<if test="remarks != null">
+				REMARKS = #{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+http://www.springframework.org/schema/aop 
+http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+http://www.springframework.org/schema/context   
+http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+	<context:component-scan base-package="com.it.ocs.*.**" >
+	 	<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	<!-- 引入属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+<!-- 	<bean id="propertyConfigurer" class="com.it.ocs.api.utils.SpringPropertyUtil">
+		<property name="locations">
+			<list>
+				<value>classpath:conf/basic.properties</value>
+			</list>
+		</property>
+		<property name="fileEncoding" value="utf-8" />
+	</bean> -->
+	
+	<!-- 配置数据源 -->
+	<!--
+	<bean id="dataSourceSlave" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="filters" value="stat" />
+		<property name="maxActive" value="1000" />
+		<property name="initialSize" value="1" />
+		<property name="maxWait" value="60000" />
+		<property name="minIdle" value="1" />
+		<property name="timeBetweenEvictionRunsMillis" value="3000" />
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+	</bean> -->
+  	<bean id="dataSourceMaster" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="url" value="${mysql.jdcb.url}" />
+		<property name="username" value="${mysql.jdbc.username}" />
+		<property name="password" value="${mysql.jdbc.password}" />
+		<property name="filters" value="stat" />
+		<property name="maxActive" value="20" />
+		<property name="initialSize" value="1" />
+		<property name="maxWait" value="60000" />
+		<property name="minIdle" value="1" />
+		<property name="timeBetweenEvictionRunsMillis" value="3000" />
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+	</bean>
+	<bean id="dataSource" class="com.it.ocs.common.util.ThreadLocalRountingDataSource">
+        <property name="defaultTargetDataSource" ref="dataSourceMaster" />
+        <property name="targetDataSources">
+            <map key-type="com.it.ocs.common.enums.DataSources">
+                <entry key="MASTER" value-ref="dataSourceMaster"/>
+               <!--  <entry key="SLAVE" value-ref="dataSourceSlave"/> -->
+                <!-- 这里还可以加多个dataSource -->
+            </map>
+        </property>
+    </bean>   
+	<!-- myBatis文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 自动扫描entity目录，省掉Configuration.xml里的手工配置 -->
+		<property name="mapperLocations">
+			<list>
+				<value>classpath:mapping/*.xml</value>
+				<value>classpath:mapping/publication/*.xml</value>
+				<value>classpath:mapping/task/*.xml</value>
+				<value>classpath:mapping/sys/*.xml</value>
+				<value>classpath:mapping/cal/*.xml</value>
+				<value>classpath:mapping/synchronou/*.xml</value>
+				<value>classpath:mapping/seller/*.xml</value>
+				<value>classpath:mapping/ebaySales/*.xml</value>
+				<value>classpath:mapping/customerCenter/*.xml</value>
+				<value>classpath:mapping/eda/*.xml</value>
+				<value>classpath:mapping/compare/*.xml</value>
+				<value>classpath:mapping/payment/*.xml</value>
+				<value>classpath:mapping/api/*.xml</value>
+				<value>classpath:mapping/fourPX/*.xml</value>
+			</list>
+		</property>
+		
+		<property name="configLocation" value="classpath:mybatis-configuration.xml"/>
+		
+		<property name="plugins">
+            <bean class="com.github.pagehelper.PageHelper">
+                <property name="properties">
+                    <value>
+                        dialect=oracle
+                    </value>
+                </property>
+            </bean>
+        </property> 
+         
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.it.ocs.*.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+     <import resource="classpath:/bootstrap/server-bootstrap-*.xml"/>
+     
+	<!-- scheduler -->
+    <bean id="schedulerFactoryBean" lazy-init="false" scope="singleton" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    	<property name="triggers">
+			<list>
+			</list>
+		</property>
+    	<property name="configLocation" value="classpath:quartz.properties"/>
+    </bean>
+    <bean id="springUtils" class="com.it.ocs.task.support.spring.SpringUtils" />
+    <bean  class="com.it.ocs.task.core.BeanPostProcessorImpl"/>
+    
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"> 
+	    <!-- 核心线程数  -->  
+	    <property name="corePoolSize" value="40" />  
+	    <!-- 最大线程数 -->  
+	    <property name="maxPoolSize" value="50" />  
+	    <!-- 队列最大长度 >=mainExecutor.maxSize -->  
+	    <property name="queueCapacity" value="10" />  
+	    <!-- 线程池维护线程所允许的空闲时间 -->  
+	    <property name="keepAliveSeconds" value="2000" />  
+	    <property name="rejectedExecutionHandler">  
+	      <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />  
+	    </property>
+	</bean>
+	<bean id="syncOrderServiceUS" class="com.it.ocs.synchronou.service.impl.SyncAmazonOrderServiceSupport" lazy-init="false"></bean>
+	<bean id="syncOrderServiceDE" class="com.it.ocs.synchronou.service.impl.SyncAmazonOrderServiceSupport" lazy-init="false"></bean>
+	<bean id="syncOrderServiceCA" class="com.it.ocs.synchronou.service.impl.SyncAmazonOrderServiceSupport" lazy-init="false"></bean>
+	<bean id="syncOrderServiceJP" class="com.it.ocs.synchronou.service.impl.SyncAmazonOrderServiceSupport" lazy-init="false"></bean>
+</beans>
+    

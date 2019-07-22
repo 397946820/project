@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.ISyncLightingOrderDao">
+	<select id="getLightAccount" resultType="com.it.ocs.synchronou.model.LightAccountModel">
+		select la.id, la.platform, la.account, la.secret, la.url, la.site_id siteId
+		  from light_account_manager la
+		 where la.status = 1
+	</select>
+	<select id="getLightAccountByPlatform" resultType="com.it.ocs.synchronou.model.LightAccountModel">
+		select la.id, la.platform, la.account, la.secret, la.url, la.site_id siteId
+		  from light_account_manager la
+		 where la.status = 1 and la.platform = #{platform}
+	</select>
+	<select id="getId" resultType="int">
+		select total_order_seq.nextval from dual
+	</select>
+	<select id="getIdByOrderId" resultType="int">
+		select lo.entity_id from light_order lo where lo.order_id = #{order_id} and lo.platform = #{platform}
+	</select>
+	<insert id="insertOrderData">
+		begin
+		insert into light_order
+		  (entity_id,
+		   platform,
+		   order_id,
+		   state,
+		   status,
+		   discount_amount,
+		   subtotal,
+		   grand_total,
+		   shipping_amount,
+		   tax_amount,
+		   total_canceled,
+		   total_invoiced,
+		   total_paid,
+		   total_qty_ordered,
+		   total_refunded,
+		   gift_message,
+		   weight,
+		   customer_email,
+		   customer_firstname,
+		   customer_lastname,
+		   customer_middlename,
+		   global_currency_code,
+		   order_currency_code,
+		   remote_ip,
+		   shipping_method,
+		   light_created_at,
+		   light_updated_at,
+		   created_at,
+		   updated_at,
+		   avs,
+		   method,
+		   shipping_description)
+		values
+		  (#{entity_id,jdbcType=BIGINT},
+		   #{platform,jdbcType=VARCHAR},
+		   #{order_id,jdbcType=VARCHAR},
+		   #{state,jdbcType=VARCHAR},
+		   #{status,jdbcType=VARCHAR},
+		   #{discount_amount,jdbcType=BIGINT},
+		   #{subtotal,jdbcType=BIGINT},
+		   #{grand_total,jdbcType=BIGINT},
+		   #{shipping_amount,jdbcType=BIGINT},
+		   #{tax_amount,jdbcType=BIGINT},
+		   #{total_canceled,jdbcType=BIGINT},
+		   #{total_invoiced,jdbcType=BIGINT},
+		   #{total_paid,jdbcType=BIGINT},
+		   #{total_qty_ordered,jdbcType=BIGINT},
+		   #{total_refunded,jdbcType=BIGINT},
+		   #{gift_message,jdbcType=VARCHAR},
+		   #{weight,jdbcType=BIGINT},
+		   #{customer_email,jdbcType=VARCHAR},
+		   #{customer_firstname,jdbcType=VARCHAR},
+		   #{customer_lastname,jdbcType=VARCHAR},
+		   #{customer_middlename,jdbcType=VARCHAR},
+		   #{global_currency_code,jdbcType=VARCHAR},
+		   #{order_currency_code,jdbcType=VARCHAR},
+		   #{remote_ip,jdbcType=VARCHAR},
+		   #{shipping_method,jdbcType=VARCHAR},
+		   to_timestamp(#{light_created_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   to_timestamp(#{light_updated_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   sysdate -8/24,
+		   sysdate -8/24,
+		   #{avs,jdbcType=VARCHAR},
+		   #{method,jdbcType=VARCHAR},
+		   #{shipping_description,jdbcType=VARCHAR}
+		  );
+		  insert into light_order_sub
+			  (id, 
+			  parent_id, 
+			  customer_note, 
+			  order_id)
+			values
+			  (total_order_sub_seq.nextval,
+			  #{entity_id,jdbcType=BIGINT},
+			  #{customer_note,jdbcType=VARCHAR},
+			  #{order_id,jdbcType=VARCHAR}
+			  );
+		end;
+	</insert>
+	<update id="updateOrderData">
+		begin
+			update light_order set
+			  platform = #{platform,jdbcType=VARCHAR},
+			  order_id = #{order_id,jdbcType=VARCHAR},
+			  state = #{state,jdbcType=VARCHAR},
+			  status = #{status,jdbcType=VARCHAR},
+			  discount_amount = #{discount_amount,jdbcType=BIGINT},
+			  subtotal = #{subtotal,jdbcType=BIGINT},
+			  grand_total = #{grand_total,jdbcType=BIGINT},
+			  shipping_amount = #{shipping_amount,jdbcType=BIGINT},
+			  tax_amount = #{tax_amount,jdbcType=BIGINT},
+			  total_canceled = #{total_canceled,jdbcType=BIGINT},
+			  total_invoiced = #{total_invoiced,jdbcType=BIGINT},
+			  total_paid = #{total_paid,jdbcType=BIGINT},
+			  total_qty_ordered = #{total_qty_ordered,jdbcType=BIGINT},
+			  total_refunded = #{total_refunded,jdbcType=BIGINT},
+			  gift_message = #{gift_message,jdbcType=VARCHAR},
+			  weight = #{weight,jdbcType=BIGINT},
+			  customer_email = #{customer_email,jdbcType=VARCHAR},
+			  customer_firstname = #{customer_firstname,jdbcType=VARCHAR},
+			  customer_lastname = #{customer_lastname,jdbcType=VARCHAR},
+			  customer_middlename = #{customer_middlename,jdbcType=VARCHAR},
+			  global_currency_code = #{global_currency_code,jdbcType=VARCHAR},
+			  order_currency_code = #{order_currency_code,jdbcType=VARCHAR},
+			  remote_ip = #{remote_ip,jdbcType=VARCHAR},
+			  shipping_method = #{shipping_method,jdbcType=VARCHAR},
+			  light_created_at = to_timestamp(#{light_created_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			  light_updated_at = to_timestamp(#{light_updated_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			  updated_at = sysdate - 8/24,
+			  avs = #{avs,jdbcType=VARCHAR},
+		      method = #{method,jdbcType=VARCHAR},
+		      shipping_description = #{shipping_description,jdbcType=VARCHAR}
+			   where entity_id =  #{entity_id,jdbcType=BIGINT};
+			
+			update light_order_sub set
+			  customer_note = #{customer_note,jdbcType=VARCHAR},
+			  order_id = #{order_id,jdbcType=VARCHAR}
+			where parent_id =  #{entity_id,jdbcType=BIGINT};
+		end;
+	</update>
+	<select id="getIdByOrderItemId" resultType="int">
+		select loi.entity_id from light_order_item loi 
+		where (loi.light_item_id = #{light_item_id} or (loi.sku = #{sku,jdbcType=VARCHAR} and loi.PRICE = #{price,jdbcType=BIGINT})) 
+		and loi.parent_id = #{parent_id}
+	</select>
+	<select id="countBySKU" resultType="int">
+		select count(*) from light_order_item loi 
+		where loi.PRICE = #{price,jdbcType=BIGINT} 
+		and loi.parent_id = #{parent_id}
+		and loi.sku = #{sku,jdbcType=VARCHAR}
+	</select>
+	<select id="orderSkuHasExist" resultType="int">
+		select count(*) from light_order_item loi 
+		where loi.parent_id = #{parent_id}
+		and loi.sku = #{sku,jdbcType=VARCHAR}
+	</select>
+	<select id="getIdByOrderItemIdForBSKU" resultType="int">
+		select loi.entity_id from light_order_item_b loi 
+		where (loi.light_item_id = #{light_item_id} or loi.sku = #{sku,jdbcType=VARCHAR}) 
+		and loi.parent_id = #{parent_id}
+	</select>
+	<select id="hasOldAdd" resultType="int">
+		select count(*) from light_order_item loi 
+		where (loi.light_item_id = #{light_item_id} or loi.sku = #{sku,jdbcType=VARCHAR}) 
+		and loi.parent_id = #{parent_id}
+		and loi.QTY_ORDERED =  #{qty_ordered,jdbcType=BIGINT}
+		and loi.PRICE = #{price,jdbcType=BIGINT}
+	</select>
+	<select id="getOrderItemId" resultType="int">
+		select total_order_item_seq.nextval from dual
+	</select>
+	<insert id="insertOrderItemData">
+		 insert into light_order_item
+		     (entity_id,
+		      parent_id,
+		      weight,
+		      sku,
+		      name,
+		      free_shipping,
+		      is_qty_decimal,
+		      no_discount,
+		      qty_canceled,
+		      qty_invoiced,
+		      qty_ordered,
+		      qty_refunded,
+		      qty_shipped,
+		      price,
+		      base_price,
+		      original_price,
+		      tax_percent,
+		      tax_amount,
+		      tax_invoiced,
+		      discount_percent,
+		      discount_amount,
+		      amount_refunded,
+		      row_total,
+		      gift_message_id,
+		      postcode,
+		      region,
+		      city,
+		      street,
+		      gift_message,
+		      light_created_at,
+		      light_updated_at,
+		      push_status,
+		      created_at,
+		      updated_at,
+		      light_item_id,
+		      SHIPPING_FIRSTNAME,
+		      SHIPPING_MIDDLENAME,
+		      SHIPPING_LASTNAME,
+		      TELEPHONE,
+		      SHIP_AT,
+		      price_incl_tax,
+		      row_total_incl_tax,
+		      COUNTRY_ID,
+		      COMPANY)
+		   values
+		     (
+		      #{entity_id,jdbcType=BIGINT},
+		      #{parent_id,jdbcType=BIGINT},
+		      #{weight,jdbcType=BIGINT},
+		      #{sku,jdbcType=VARCHAR},
+		      #{name,jdbcType=VARCHAR},
+		      #{free_shipping,jdbcType=BIGINT},
+		      #{is_qty_decimal,jdbcType=BIGINT},
+		      #{no_discount,jdbcType=BIGINT},
+		      #{qty_canceled,jdbcType=BIGINT},
+		      #{qty_invoiced,jdbcType=BIGINT},
+		      #{qty_ordered,jdbcType=BIGINT},
+		      #{qty_refunded,jdbcType=BIGINT},
+		      #{qty_shipped,jdbcType=BIGINT},
+		      #{price,jdbcType=BIGINT},
+		      #{base_price,jdbcType=BIGINT},
+		      #{original_price,jdbcType=BIGINT},
+		      #{tax_percent,jdbcType=BIGINT},
+		      #{tax_amount,jdbcType=BIGINT},
+		      #{tax_invoiced,jdbcType=BIGINT},
+		      #{discount_percent,jdbcType=BIGINT},
+		      #{discount_amount,jdbcType=BIGINT},
+		      #{amount_refunded,jdbcType=BIGINT},
+		      #{row_total,jdbcType=BIGINT},
+		      #{gift_message_id,jdbcType=BIGINT},
+		      #{postcode,jdbcType=VARCHAR},
+		      #{region,jdbcType=VARCHAR},
+		      #{city,jdbcType=VARCHAR},
+		      #{street,jdbcType=VARCHAR},
+		      #{gift_message,jdbcType=BIGINT},
+		      to_timestamp(#{light_created_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		      to_timestamp(#{light_updated_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		      0,
+		      sysdate - 8/24,
+		      sysdate - 8/24,
+		      #{light_item_id,jdbcType=BIGINT},
+		      #{shipping_firstname,jdbcType=VARCHAR},
+		      #{shipping_middlename,jdbcType=VARCHAR},
+		      #{shipping_lastname,jdbcType=VARCHAR},
+		      #{telephone,jdbcType=VARCHAR},
+		      to_date(#{ship_at,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		      #{price_incl_tax,jdbcType=BIGINT},
+		      #{row_total_incl_tax,jdbcType=BIGINT},
+		      #{country_id,jdbcType=VARCHAR},
+		      #{company,jdbcType=VARCHAR}
+		     )
+	</insert>
+	<insert id="insertOrderItemDataForBSKU">
+			 insert into light_order_item_b
+		     (entity_id,
+		      parent_id,
+		      weight,
+		      sku,
+		      name,
+		      free_shipping,
+		      is_qty_decimal,
+		      no_discount,
+		      qty_canceled,
+		      qty_invoiced,
+		      qty_ordered,
+		      qty_refunded,
+		      qty_shipped,
+		      price,
+		      base_price,
+		      original_price,
+		      tax_percent,
+		      tax_amount,
+		      tax_invoiced,
+		      discount_percent,
+		      discount_amount,
+		      amount_refunded,
+		      row_total,
+		      gift_message_id,
+		      postcode,
+		      region,
+		      city,
+		      street,
+		      gift_message,
+		      light_created_at,
+		      light_updated_at,
+		      push_status,
+		      created_at,
+		      updated_at,
+		      light_item_id,
+		      SHIPPING_FIRSTNAME,
+		      SHIPPING_MIDDLENAME,
+		      SHIPPING_LASTNAME,
+		      TELEPHONE,
+		      SHIP_AT,
+		      price_incl_tax,
+		      row_total_incl_tax,
+		      COUNTRY_ID,
+		      COMPANY,
+		      PARENT_ITEM_ID)
+		   values
+		     (
+		      #{entity_id,jdbcType=BIGINT},
+		      #{parent_id,jdbcType=BIGINT},
+		      #{weight,jdbcType=BIGINT},
+		      #{sku,jdbcType=VARCHAR},
+		      #{name,jdbcType=VARCHAR},
+		      #{free_shipping,jdbcType=BIGINT},
+		      #{is_qty_decimal,jdbcType=BIGINT},
+		      #{no_discount,jdbcType=BIGINT},
+		      #{qty_canceled,jdbcType=BIGINT},
+		      #{qty_invoiced,jdbcType=BIGINT},
+		      #{qty_ordered,jdbcType=BIGINT},
+		      #{qty_refunded,jdbcType=BIGINT},
+		      #{qty_shipped,jdbcType=BIGINT},
+		      #{price,jdbcType=BIGINT},
+		      #{base_price,jdbcType=BIGINT},
+		      #{original_price,jdbcType=BIGINT},
+		      #{tax_percent,jdbcType=BIGINT},
+		      #{tax_amount,jdbcType=BIGINT},
+		      #{tax_invoiced,jdbcType=BIGINT},
+		      #{discount_percent,jdbcType=BIGINT},
+		      #{discount_amount,jdbcType=BIGINT},
+		      #{amount_refunded,jdbcType=BIGINT},
+		      #{row_total,jdbcType=BIGINT},
+		      #{gift_message_id,jdbcType=BIGINT},
+		      #{postcode,jdbcType=VARCHAR},
+		      #{region,jdbcType=VARCHAR},
+		      #{city,jdbcType=VARCHAR},
+		      #{street,jdbcType=VARCHAR},
+		      #{gift_message,jdbcType=BIGINT},
+		      to_timestamp(#{light_created_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		      to_timestamp(#{light_updated_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		      0,
+		      sysdate - 8/24,
+		      sysdate - 8/24,
+		      #{light_item_id,jdbcType=BIGINT},
+		      #{shipping_firstname,jdbcType=VARCHAR},
+		      #{shipping_middlename,jdbcType=VARCHAR},
+		      #{shipping_lastname,jdbcType=VARCHAR},
+		      #{telephone,jdbcType=VARCHAR},
+		      to_date(#{ship_at,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		      #{price_incl_tax,jdbcType=BIGINT},
+		      #{row_total_incl_tax,jdbcType=BIGINT},
+		      #{country_id,jdbcType=VARCHAR},
+		      #{company,jdbcType=VARCHAR},
+		      #{parent_item_id,jdbcType=BIGINT}
+		     )
+	</insert>
+	<update id="updateOrderItemData">
+		 update light_order_item set 
+		     parent_id=#{parent_id,jdbcType=BIGINT},
+		     weight = #{weight,jdbcType=BIGINT},
+		     sku = #{sku,jdbcType=VARCHAR},
+		     name = #{name,jdbcType=VARCHAR},
+		     free_shipping = #{free_shipping,jdbcType=BIGINT},
+		     is_qty_decimal = #{is_qty_decimal,jdbcType=BIGINT},
+		     no_discount = #{no_discount,jdbcType=BIGINT},
+		     qty_canceled = #{qty_canceled,jdbcType=BIGINT},
+		     qty_invoiced = #{qty_invoiced,jdbcType=BIGINT},
+		     qty_ordered = #{qty_ordered,jdbcType=BIGINT},
+		     qty_refunded = #{qty_refunded,jdbcType=BIGINT},
+		     qty_shipped = #{qty_shipped,jdbcType=BIGINT},
+		     price = #{price,jdbcType=BIGINT},
+		     base_price = #{base_price,jdbcType=BIGINT},
+		     original_price = #{original_price,jdbcType=BIGINT},
+		     tax_percent = #{tax_percent,jdbcType=BIGINT},
+		     tax_amount = #{tax_amount,jdbcType=BIGINT},
+		     tax_invoiced = #{tax_invoiced,jdbcType=BIGINT},
+		     discount_percent = #{discount_percent,jdbcType=BIGINT},
+		     discount_amount = #{discount_amount,jdbcType=BIGINT},
+		     amount_refunded = #{amount_refunded,jdbcType=BIGINT},
+		     row_total = #{row_total,jdbcType=BIGINT},
+		     gift_message_id = #{gift_message_id,jdbcType=BIGINT},
+		     postcode = #{postcode,jdbcType=VARCHAR},
+		     region = #{region,jdbcType=VARCHAR},
+		     city = #{city,jdbcType=VARCHAR},
+		     street = #{street,jdbcType=VARCHAR},
+		     gift_message = #{gift_message,jdbcType=BIGINT},
+		     light_updated_at = to_timestamp(#{light_updated_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		     updated_at = sysdate -8/24,
+		     shipping_firstname =#{shipping_firstname,jdbcType=VARCHAR},
+		     shipping_middlename =#{shipping_middlename,jdbcType=VARCHAR},
+		     shipping_lastname =#{shipping_lastname,jdbcType=VARCHAR},
+		     telephone =#{telephone,jdbcType=VARCHAR},
+		     ship_at = to_date(#{ship_at,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		     price_incl_tax = #{price_incl_tax,jdbcType=BIGINT},
+		     row_total_incl_tax = #{row_total_incl_tax,jdbcType=BIGINT},
+		     country_id = #{country_id,jdbcType=VARCHAR},
+		     COMPANY = #{company,jdbcType=VARCHAR}
+		   where entity_id = #{entity_id,jdbcType=BIGINT}
+	</update>
+	<update id="updateOrderItemDataForBSKU">
+				 update light_order_item_b set 
+		     parent_id=#{parent_id,jdbcType=BIGINT},
+		     weight = #{weight,jdbcType=BIGINT},
+		     sku = #{sku,jdbcType=VARCHAR},
+		     name = #{name,jdbcType=VARCHAR},
+		     free_shipping = #{free_shipping,jdbcType=BIGINT},
+		     is_qty_decimal = #{is_qty_decimal,jdbcType=BIGINT},
+		     no_discount = #{no_discount,jdbcType=BIGINT},
+		     qty_canceled = #{qty_canceled,jdbcType=BIGINT},
+		     qty_invoiced = #{qty_invoiced,jdbcType=BIGINT},
+		     qty_ordered = #{qty_ordered,jdbcType=BIGINT},
+		     qty_refunded = #{qty_refunded,jdbcType=BIGINT},
+		     qty_shipped = #{qty_shipped,jdbcType=BIGINT},
+		     price = #{price,jdbcType=BIGINT},
+		     base_price = #{base_price,jdbcType=BIGINT},
+		     original_price = #{original_price,jdbcType=BIGINT},
+		     tax_percent = #{tax_percent,jdbcType=BIGINT},
+		     tax_amount = #{tax_amount,jdbcType=BIGINT},
+		     tax_invoiced = #{tax_invoiced,jdbcType=BIGINT},
+		     discount_percent = #{discount_percent,jdbcType=BIGINT},
+		     discount_amount = #{discount_amount,jdbcType=BIGINT},
+		     amount_refunded = #{amount_refunded,jdbcType=BIGINT},
+		     row_total = #{row_total,jdbcType=BIGINT},
+		     gift_message_id = #{gift_message_id,jdbcType=BIGINT},
+		     postcode = #{postcode,jdbcType=VARCHAR},
+		     region = #{region,jdbcType=VARCHAR},
+		     city = #{city,jdbcType=VARCHAR},
+		     street = #{street,jdbcType=VARCHAR},
+		     gift_message = #{gift_message,jdbcType=BIGINT},
+		     light_updated_at = to_timestamp(#{light_updated_at,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		     updated_at = sysdate -8/24,
+		     shipping_firstname =#{shipping_firstname,jdbcType=VARCHAR},
+		     shipping_middlename =#{shipping_middlename,jdbcType=VARCHAR},
+		     shipping_lastname =#{shipping_lastname,jdbcType=VARCHAR},
+		     telephone =#{telephone,jdbcType=VARCHAR},
+		     ship_at = to_date(#{ship_at,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		     price_incl_tax = #{price_incl_tax,jdbcType=BIGINT},
+		     row_total_incl_tax = #{row_total_incl_tax,jdbcType=BIGINT},
+		     country_id = #{country_id,jdbcType=VARCHAR},
+		     COMPANY = #{company,jdbcType=VARCHAR},
+		     parent_item_id = #{parent_item_id,jdbcType=BIGINT}
+		   where entity_id = #{entity_id,jdbcType=BIGINT}
+	</update>
+	<select id="getLastUpdateDate" resultType="java.lang.String">
+		select to_char(max(l.light_updated_at),'yyyy-MM-dd hh24:mi:ss') lastDate from light_order l where l.platform = #{platform}
+	</select>
+	<select id="getTimeSetStartTime" resultType="java.lang.String">
+		select to_char(max(to_time), 'yyyy-MM-dd hh24:mi:ss') lastTime
+		  from sys_order_synctime
+		 where platform = 'light'
+		   and type = 1
+		   and account = #{platform}
+	</select>
+	<select id="getTimeSetId" resultType="int">
+		select sys_order_synctime_seq.nextval from dual
+	</select>
+	<insert id="addTimeSet">
+		insert into sys_order_synctime
+		  (id, from_time, platform, type, account, create_date)
+		values
+		  (#{id}, to_timestamp(#{fromTime},'yyyy-MM-dd HH24:MI:ss.ff'), 'light', 1, #{account}, sysdate - 8 / 24)
+	</insert>
+	<update id="updateTimeSet">
+		update sys_order_synctime set to_time = to_timestamp(#{toTime},'yyyy-MM-dd HH24:MI:ss.ff') where id = #{id}
+	</update>
+</mapper> 

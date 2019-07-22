@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.IProductCostDao">
+	
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.ProductCostModel" >
+	     <id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		 <result column="PARENT_ID" property="parentId" jdbcType="DECIMAL" />
+		 <result column="CURRENCY" property="currency" jdbcType="VARCHAR" />
+		 <result column="USERNAME" property="username" jdbcType="VARCHAR" />
+		 <result column="SKU" property="sku" jdbcType="VARCHAR" />
+		 <result column="PRICE" property="price" jdbcType="DECIMAL" />
+		 <result column="TAX_REBATE_RATE" property="taxRebateRate" jdbcType="DECIMAL" />
+		 <result column="INTEREST_RATE" property="interestRate" jdbcType="DECIMAL" />
+		 <result column="USER_ID" property="userId" jdbcType="DECIMAL" />
+	    <result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+	    <result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	    <result column="UPDATED_BY" property="updatedBy" jdbcType="DECIMAL" />
+   </resultMap>
+   
+   <sql id="baseSql">
+   		select t.ENTITY_ID as entityId,
+   			   p.SKU as sku,
+   			   u.USERNAME as username,
+   			   t.PARENT_ID as parentId,
+   			   t.CURRENCY as currency,
+   			   t.PRICE as price,
+   			   t.TAX_REBATE_RATE as taxRebateRate,
+   			   t.INTEREST_RATE as interestRate,
+   			   p.USER_ID as userId,
+   			   t.CREATED_AT as createdAt,
+   			   t.UPDATED_AT as updatedAt
+   		FROM CAL_PRODUCT_ENTITY_COST t,SYS_USER u ,CAL_PRODUCT_ENTITY p
+   		where t.PARENT_ID = p.entity_id and u.user_id = p.user_id 
+   </sql>
+   
+   <sql id="sql_where">
+   		<if test="param != null">
+   			<if test="param.userId != '' and param.userId != null">
+				and p.USER_ID = #{param.userId}
+			</if>
+   			<if test="param.sku != '' and param.sku != null">
+				and p.SKU like '%${param.sku}%'
+			</if>
+			<if test="param.username != '' and param.username != null">
+				and u.USERNAME like '%${param.username}%'
+			</if>
+			<if test="param.price != '' and param.price != null or param.price == 0">
+				and t.PRICE = #{param.price}
+			</if>
+			<include refid="com.it.ocs.cal.dao.IProductOtherDao.sql_time"/>
+   		</if>
+   </sql>
+   
+   <!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="baseSql" />
+				<include refid="sql_where" />
+				<include refid="com.it.ocs.cal.dao.IProductOtherDao.order_sql"/>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) FROM CAL_PRODUCT_ENTITY_COST T ,CAL_PRODUCT_ENTITY P , SYS_USER U
+   		where t.PARENT_ID = p.entity_id and p.user_id = u.user_id
+		<include refid="sql_where" />
+	</select>
+	
+	<!-- 导出查询 -->
+	<select id="findByUserId"  resultMap="BaseResultMap">
+		<include refid="baseSql" /> 
+		<if test="userId != -1">
+			and p.user_id = #{userId}
+		</if>
+		order by t.entity_id desc
+	</select>
+   
+   <select id="findCountByParent" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		select count(1) from CAL_PRODUCT_ENTITY_COST where parent_id = #{parentId}
+	</select>
+	
+   <select id="findIdByParentId" parameterType="java.lang.Long" resultType="java.lang.Long">
+		select entity_id from CAL_PRODUCT_ENTITY_COST where parent_id = #{parentId}
+	</select>
+	
+   <select id="findByParentId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		select * from cal_product_entity_cost where parent_id = #{parentId}
+	</select>
+   
+   <update id="update" parameterType="com.it.ocs.cal.model.ProductCostModel">
+	 	update CAL_PRODUCT_ENTITY_COST
+	    <set >
+	      <if test="parentId != null" >
+	        PARENT_ID = #{parentId,jdbcType=DECIMAL},
+	      </if>
+	      <if test="currency != null" >
+	        CURRENCY = #{currency,jdbcType=VARCHAR},
+	      </if>
+	      <if test="price != null" >
+	        PRICE = #{price,jdbcType=DECIMAL},
+	      </if>
+	      <if test="taxRebateRate != null" >
+	        TAX_REBATE_RATE = #{taxRebateRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="interestRate != null" >
+	        INTEREST_RATE = #{interestRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt},
+	      </if>
+	      </set>
+	      where entity_id = #{entityId}
+	 </update>
+   	 
+	<insert id="recordCostChangeLog" parameterType="com.it.ocs.cal.model.ProductCostModel">
+		insert into cal_product_entity_cost_log(id, parent_id, currency, price, tax_rebate_rate, interest_rate, updated_by)
+		values(CAL_PRODUCT_COST_SEQ.NEXTVAL, #{log.parentId,jdbcType=DECIMAL}, #{log.currency,jdbcType=VARCHAR},#{log.price,jdbcType=DECIMAL},#{log.taxRebateRate,jdbcType=DECIMAL},#{log.interestRate,jdbcType=DECIMAL},#{log.updatedBy})
+	</insert>
+   	 
+   <update id="updateByParentId">
+	 	update CAL_PRODUCT_ENTITY_COST
+	 	set
+		<if test="cost.currency != null" >
+		  	CURRENCY = #{cost.currency,jdbcType=VARCHAR},
+		</if>
+		<if test="cost.price != null" >
+		  	PRICE = #{cost.price,jdbcType=DECIMAL},
+		</if>
+		<if test="cost.taxRebateRate != null" >
+		  	TAX_REBATE_RATE = #{cost.taxRebateRate,jdbcType=DECIMAL},
+		</if>
+		<if test="cost.interestRate != null" >
+		  	INTEREST_RATE = #{cost.interestRate,jdbcType=DECIMAL},
+		</if>
+		<if test="cost.updatedBy != null" >
+		  	updated_by = #{cost.updatedBy},
+		</if>
+			UPDATED_AT = sysdate
+		where parent_id = #{cost.parentId,jdbcType=DECIMAL}
+	 </update>
+   	 <insert id="add" parameterType="com.it.ocs.cal.model.ProductCostModel">
+	 	insert into CAL_PRODUCT_ENTITY_COST
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	     
+	        ENTITY_ID,
+	        
+	        PARENT_ID,
+	        
+	      <if test="currency != null" >
+	        CURRENCY,
+	      </if>
+	      <if test="price != null" >
+	        PRICE,
+	      </if>
+	      <if test="taxRebateRate != null" >
+	        TAX_REBATE_RATE,
+	      </if>
+	      <if test="interestRate != null" >
+	        INTEREST_RATE,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    	
+	      CAL_PRODUCT_COST_SEQ.NEXTVAL,
+	      
+	      <if test="parentId != null" >
+	        #{parentId,jdbcType=DECIMAL},
+	      </if>
+	      
+	      <if test="parentId == null" >
+	      	CAL_PRODUCT_ENTITY_SEQ.CURRVAL,
+	      </if>
+	      
+	      <if test="currency != null" >
+	        #{currency,jdbcType=VARCHAR},
+	      </if>
+	      <if test="price != null" >
+	        #{price,jdbcType=DECIMAL},
+	      </if>
+	      <if test="taxRebateRate != null" >
+	        #{taxRebateRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="interestRate != null" >
+	        #{interestRate,jdbcType=DECIMAL},
+	      </if>
+	     <if test="createdAt != null">
+			#{createdAt},
+		 </if>
+		 <if test="updatedAt != null">
+			#{updatedAt},
+		 </if>
+	    </trim>
+	 </insert>
+   	 <select id="getIdBySKU" resultType="int">
+   	   select entity_id
+   	   from (
+   	 	select p.entity_id from cal_product_entity p where p.sku = #{sku} 
+   	 	and p.is_active = 1 and status = 1
+   	   ) where rownum = 1
+   	 </select>
+   	 <update id="updateInfo">
+   	 	declare
+		    is_exist number;
+		begin
+		  update cal_product_entity_cost c set c.interest_rate = #{capitalOccupancyRate} where c.parent_id = #{parentId};
+		  select count(*) into is_exist from CAL_PRODUCT_ENTITY_OTHER o where o.parent_id = #{parentId} and o.country_id = #{country};
+		  if is_exist > 0 then
+		    update CAL_PRODUCT_ENTITY_OTHER co set 
+		    co.category = #{category},
+		    co.unfulliable_rate = #{unavailability},
+		    co.replacement_rate = #{rechargeRate},
+		    co.returnRate = #{returnRate},
+		    co.updated_at = sysdate
+		    where co.parent_id = #{parentId} and co.country_id = #{country};
+		  else
+		    insert into CAL_PRODUCT_ENTITY_OTHER(Entity_Id,Parent_Id,Country_Id,Category,Turnover_Rate,Qty_Ordered,Unfulliable_Rate,Replacement_Rate,Returnrate,Created_At,Updated_At)
+		    values (CAL_PRODUCT_OTHER_SEQ.NEXTVAL,#{parentId},#{country},#{category},60,1,#{unavailability},#{rechargeRate},#{returnRate},sysdate,sysdate);
+		  end if;
+		end;
+   	 </update>
+   	 <update id="updateAvgMonth">
+   	 	 update CAL_PRODUCT_ENTITY_OTHER co set 
+		    co.AVERAGE_MONTH = #{avgMonth},
+		    co.updated_at = sysdate
+		    where co.parent_id = #{parentId} 
+		    and co.country_id = #{country}
+   	 </update>
+</mapper>

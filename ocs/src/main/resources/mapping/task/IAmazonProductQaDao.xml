@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IAmazonProductQaDao">
+	<resultMap type="com.it.ocs.task.model.AmazonProductQaModel" id="amazonProductQaResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="ASIN" property="asin"  />
+		<result column="PRODUCT_ID" property="product_id"  />
+		<result column="QUESTION" property="question"  />
+		<result column="FORUM" property="forum"  />
+		<result column="ANSWERS" property="answers"  />
+		<result column="ANSWER_TOTAL" property="answer_total"  />
+		<result column="ANSWER_UPDATED_AT" property="answer_updated_at"  />
+		<result column="HAS_NEW" property="has_new"  />
+		<result column="QA_TOTAL" property="qa_total"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="SOURCE_ID" property="source_id"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(UPDATED_AT) ,'yyyy-mm-dd HH24:mi:ss') from amazon_product_qa
+	</select>
+	<select id="selectMySqlDate" resultMap="amazonProductQaResult">
+		select * from amazon_product_qa aba where aba.UPDATED_AT>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectAmazonProductQaModels" resultMap="amazonProductQaResult" parameterType="java.util.List">
+		select SOURCE_ID from amazon_product_qa 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id}  
+        </foreach> 
+	</select>
+	<update id="updateAmazonProductQas" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_product_qa baoi 
+	   	 set
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			PRODUCT_ID = #{item.product_id,jdbcType=BIGINT},
+			QUESTION = #{item.question,jdbcType=VARCHAR},
+			FORUM = #{item.forum,jdbcType=VARCHAR},
+			ANSWERS = #{item.answers,jdbcType=VARCHAR},
+			ANSWER_TOTAL = #{item.answer_total,jdbcType=BIGINT},
+			ANSWER_UPDATED_AT = #{item.answer_updated_at,jdbcType=TIMESTAMP},
+			HAS_NEW = #{item.has_new,jdbcType=BIGINT},
+			QA_TOTAL = #{item.qa_total,jdbcType=BIGINT},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP},
+			LAST_UPDATE_DATE = #{item.last_update_date}	
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+	<insert id="insertAmazonProductQas" parameterType="java.util.List">
+		INSERT INTO amazon_product_qa (
+			ENTITY_ID,
+			PLATFORM,
+			ASIN,
+			PRODUCT_ID,
+			QUESTION,
+			FORUM,
+			ANSWERS,
+			ANSWER_TOTAL,
+			ANSWER_UPDATED_AT,
+			HAS_NEW,
+			QA_TOTAL,
+			CREATED_AT,
+			UPDATED_AT,
+			SOURCE_ID,
+			CREATION_DATE
+			)   
+		select amazon_product_qa_seq.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.product_id,jdbcType=BIGINT},
+				#{item.question,jdbcType=VARCHAR},
+				#{item.forum,jdbcType=VARCHAR},
+				#{item.answers,jdbcType=VARCHAR},
+				#{item.answer_total,jdbcType=BIGINT},
+				#{item.answer_updated_at,jdbcType=TIMESTAMP},
+				#{item.has_new,jdbcType=BIGINT},
+				#{item.qa_total,jdbcType=BIGINT},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.entity_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+</mapper>

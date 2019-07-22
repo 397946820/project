@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IProjectInfoDAO">
+	<resultMap type="com.it.ocs.sys.model.ProjectInfoModel" id="projectResult">
+		<id property="id" column="PROJECT_ID" jdbcType="DECIMAL" />
+		<result property="name" column="NAME" jdbcType="DECIMAL" />
+		<result property="code" column="CODE" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="where">
+		where ENABLED_FLAG='Y' 
+		<if test="param != null">
+			<if test="param.name!=null">
+				and NAME=#{param.name,jdbcType=VARCHAR}
+			</if>
+			<if test="param.code!=null">
+				and CODE=#{param.code,jdbcType=VARCHAR}
+			</if>
+		</if>
+		
+	</sql>
+	<select id="queryByIds" resultMap="projectResult">
+		<include refid="select_base" /> where PROJECT_ID in 
+		<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+	<select id="getByParam" resultMap="projectResult">
+		<include refid="select_base" />
+		<include refid="where" />
+	</select>
+	<select id="getByProjectCode" resultMap="projectResult">
+		<include refid="select_base" /> where ENABLED_FLAG='Y' and CODE=#{projectCode}
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from SYS_PROJECT_INFO where ENABLED_FLAG='Y'
+	</select>
+	<select id="getById" resultMap="projectResult">
+		<include refid="select_base" /> where PROJECT_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="projectResult">
+		<include refid="select_base" />
+		<include refid="where" />  order by CREATION_DATE asc limit #{starRow},#{endRow}
+	</select>
+	<sql id="select_base">
+		select 
+			PROJECT_ID id,
+			NAME  name,
+			CODE code,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from SYS_PROJECT_INFO
+	</sql>
+	
+	<select id="query" resultMap="projectResult" parameterType="com.it.ocs.sys.model.ProjectInfoModel">
+		 <include refid="select_base" />
+		 <include refid="where" /> order by CREATION_DATE asc
+	</select>
+	<insert id="add" parameterType="com.it.ocs.sys.model.ProjectInfoModel">
+		insert into SYS_PROJECT_INFO
+		(
+			NAME,
+			CODE,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{name},
+			#{code},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.sys.model.ProjectInfoModel">
+		update SYS_PROJECT_INFO set 
+			NAME=#{name},
+			CODE=#{code},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where PROJECT_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update SYS_PROJECT_INFO set ENABLED_FLAG='N' where PROJECT_ID=#{id}
+	</update>
+</mapper>

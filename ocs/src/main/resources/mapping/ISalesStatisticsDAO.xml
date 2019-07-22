@@ -1,0 +1,1249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.ISalesStatisticsDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.salesStatistics.model.SalesStatisticsModel">
+		<result column="SKU" property="sku" jdbcType="VARCHAR" />
+		<result column="ASIN" property="asin" jdbcType="VARCHAR" />
+		<result column="PLATFORM" property="platform" jdbcType="VARCHAR" />
+		<result column="STATION" property="station" jdbcType="VARCHAR" />
+		<result column="ACCOUNT" property="account" jdbcType="VARCHAR" />
+		<result column="COUNT" property="count" jdbcType="DECIMAL" />
+		<result column="TEMPCOUNT" property="tempCount" jdbcType="DECIMAL" />
+		<result column="PARENTID" property="parentId" jdbcType="DECIMAL" />
+		<result column="UNITPRICE" property="unitprice" jdbcType="DECIMAL" />
+		<result column="CURRENCYCODE" property="currencycode" jdbcType="VARCHAR" />
+		<result column="DEDUCTION" property="deduction" jdbcType="DECIMAL" />
+		<result column="TAXRATE" property="taxrate" jdbcType="DECIMAL" />
+		<result column="PRICE" property="price" jdbcType="DECIMAL" />
+		<result column="STATUS" property="status" jdbcType="VARCHAR" />
+		<result column="ORDER_ID" property="orderId" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="CUSTOMERNAME" property="customerName" jdbcType="VARCHAR" />
+		<result column="ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="AMOUNT" property="amount" jdbcType="DECIMAL" />
+		<result column="AMOUNTPAID" property="amountPaid" jdbcType="VARCHAR" />
+		<result column="ITEMID" property="itemId" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="STATEORREGION" property="stateOrRegion" jdbcType="VARCHAR" />
+		<result column="POSTALCODE" property="postalCode" jdbcType="VARCHAR" />
+		<result column="PHONE" property="phone" jdbcType="VARCHAR" />
+		<result column="CITY" property="city" jdbcType="VARCHAR" />
+		<result column="STREET" property="street" jdbcType="VARCHAR" />
+		<result column="ITEMUPDATEDAT" property="itemUpdatedat" jdbcType="TIMESTAMP" />
+		<result column="PURCHASEAT" property="purchaseat" jdbcType="TIMESTAMP" /> 
+		<result column="LASTESTSHIPDATE" property="lastestshipdate" jdbcType="TIMESTAMP" /> 
+		<result column="UPDATEDAT" property="updatedat" jdbcType="TIMESTAMP" /> 
+		<result column="LASTFETCHTIME" property="lastfetchtime" jdbcType="TIMESTAMP" /> 
+		<result column="PAIDTIME" property="paidtime" jdbcType="TIMESTAMP" /> 
+		<result column="CREATEDAT" property="createdat" jdbcType="TIMESTAMP" /> 
+		<result column="sametermrate" property="sametermrate" jdbcType="DECIMAL" /> 
+		<result column="monthrate" property="monthrate" jdbcType="DECIMAL" /> 
+		<result column="weekrate" property="weekrate" jdbcType="DECIMAL" /> 
+		<result column="lastYearPrice" property="lastYearPrice" jdbcType="DECIMAL" /> 
+		<result column="lastMonthPrice" property="lastMonthPrice" jdbcType="DECIMAL" /> 
+		<result column="lastWeekPrice" property="lastWeekPrice" jdbcType="DECIMAL" /> 
+		<result column="productImg" property="productImg" jdbcType="VARCHAR" /> 
+		<result column="url" property="url" jdbcType="VARCHAR" /> 
+		<result column="shipping_type" property="type" jdbcType="VARCHAR" /> 
+		<result column="shipmenttrackingnumber" property="shipmentTrackingNumber" jdbcType="VARCHAR" /> 
+	</resultMap>
+
+	<sql id="amazon_group_by">
+		group by sku,account, site, status
+	</sql>
+	<sql id="footer_group_by">
+		group by account,site
+	</sql>
+	
+	<sql id="base_cloum">
+	   a2.lastWeekPrice,
+       a3.lastMonthPrice,
+       a4.lastYearPrice,
+       round((case
+               when a2.lastWeekPrice > 0 then
+                (a1.price - a2.lastWeekPrice) / a2.lastWeekPrice
+               else
+                0
+             end),
+             4) as weekrate,
+       round((case
+               when a3.lastMonthPrice > 0 then
+                (a1.price - a3.lastMonthPrice) / a3.lastMonthPrice
+               else
+                0
+             end),
+             4) as monthrate,
+       round((case
+               when a4.lastYearPrice > 0 then
+                (a1.price - a4.lastYearPrice) / a4.lastYearPrice
+               else
+                0
+             end),
+             4) as sametermrate,
+	</sql>
+	
+	<sql id="query_amazon_base_all">
+		select s1.* from (
+			select <include refid="base_cloum"/>
+				   a1.sku,
+	       		   a1.asin,
+				   a1.account as platform,
+			       a1.site as station,
+			       a1.currencycode,
+			       a1.status,
+			       a1.qty,
+			       a1.count,
+			       a1.deduction,
+			       a1.price,
+			       a1.taxrate,
+			       (a1.price * 0.15) as af,
+	        	   (a1.price * 0.22) as sf,
+	         	   (a1.price * 0.15) as co
+			  from (<include refid="query_base"/>
+			  		<include refid="where_base"/>
+			  		<include refid="now_time"/>
+			        <include refid="amazon_group_by"/>) a1,
+			       (select sum(price) lastWeekPrice, 
+			       		   sku, 
+			       		   account, 
+			       		   site, 
+			       		   status
+			          from SALE_ORDER_REPORT
+			        <include refid="where_base"/>
+			  		<include refid="last_week_time"/>
+			        <include refid="amazon_group_by"/>) a2,
+			       
+			       (select sum(price) lastMonthPrice,
+			               sku,
+			               account,
+			               site,
+			               status
+			          from SALE_ORDER_REPORT
+			        <include refid="where_base"/>
+			  		<include refid="last_month_time"/>
+			        <include refid="amazon_group_by"/>) a3,
+			       
+			       (select sum(price) lastYearPrice,
+			               sku,
+			               account,
+			               site,
+			               status
+			          from SALE_ORDER_REPORT
+			       <include refid="where_base"/>
+			  	   <include refid="last_year_time"/>
+			       <include refid="amazon_group_by"/>) a4
+			 where a1.sku = a2.sku(+)
+			   and a1.account = a2.account(+)
+			   and a1.site = a2.site(+)
+			   and a1.status = a2.status(+)
+			   and a1.sku = a3.sku(+)
+			   and a1.account = a3.account(+)
+			   and a1.site = a3.site(+)
+			   and a1.status = a3.status(+)
+			   and a1.sku = a4.sku(+)
+			   and a1.account = a4.account(+)
+			   and a1.site = a4.site(+)
+			   and a1.status = a4.status(+) ) s1
+		<include refid="order_where"/>
+	</sql>
+	
+	<sql id="query_base">
+		select 
+			   sku,
+       		   min(asin) as asin,
+			   account,
+		       site,
+		       min(currencycode) as currencycode,
+		       status,
+		       sum(qty) as qty,
+		       sum(count) as count,
+		       sum(deduction) as deduction,
+		       sum(price) as price,
+		       sum(taxrate) as taxrate
+  		from SALE_ORDER_REPORT
+	</sql>
+	
+	<sql id="sku_asin_where">
+		<if test="param.sku != '' and param.sku != null">
+			and sku like '${param.sku}%'
+		</if>
+		<if test="param.asin != '' and param.asin != null">
+			and asin like '${param.asin}%'
+		</if>
+	</sql>
+	
+	<sql id="platform_station_where">
+		<foreach collection="platforms" index="index" item="platform" open=" and account in (" separator="," close=")">  
+	        #{platform}  
+	    </foreach> 
+	    <foreach collection="stations" index="index" item="station" open=" and site in (" separator="," close=")">  
+	        #{station}  
+	    </foreach>
+	</sql>
+	
+	<sql id="where_base">
+		<if test="param != null">
+			<where>
+				<include refid="sku_asin_where"/>
+				<include refid="platform_station_where"/>
+				<include refid="common_base"/>
+			</where>
+		</if>
+	</sql>
+	
+	<sql id="footer_where_base">
+		<if test="param != null">
+			<where>
+				<include refid="platform_station_where"/>
+				<include refid="common_base"/>
+			</where>
+		</if>
+	</sql>
+	
+	<sql id="common_base">
+		<if test="param.status != '' and param.status != null">
+			and status = #{param.status}
+		</if>
+		<if test="param.whichTime != '' and param.whichTime != null">
+			<if test="param.whichTime == 'purchaseat'">
+				and date_type = 1
+			</if>
+			<if test="param.whichTime == 'updatedat'">
+				and date_type = 2
+			</if>
+			<if test="param.whichTime == 'lastestshipdate'">
+				and date_type = 3
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="now_time">
+		<if test="param.begintime != null and param.stoptime != null">
+			and order_day between #{param.begintime} and #{param.stoptime}
+		</if>
+	</sql>
+	
+	<sql id="last_year_time">
+		<if test="param.begintime != null and param.stoptime != null">
+			and order_day between add_months(#{param.begintime},-12) and add_months(#{param.stoptime},-12)
+		</if>
+	</sql>
+	
+	<sql id="last_month_time">
+		<if test="param.begintime != null and param.stoptime != null">
+			and order_day between add_months(#{param.begintime},-1) and add_months(#{param.stoptime},-1)
+		</if>
+	</sql>
+	
+	<sql id="last_week_time">
+		<if test="param.begintime != null and param.stoptime != null">
+			and order_day between (#{param.begintime} - 7 ) and (#{param.stoptime} - 7)
+		</if>
+	</sql>
+	
+	<!-- 排序 -->
+	<sql id="order_where">
+		<if test="sort!= null and order!=null">
+			order by s1.${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			order by s1.count desc
+		</if>
+	</sql>
+	
+	<sql id="walmart_sql_where">
+		<where>
+			<foreach collection="platforms" index="index" item="platform" open=" and t.country in (" separator="," close=")">  
+		        #{platform}  
+		    </foreach> 
+		    <if test="param.sku != '' and param.sku != null">
+				and l.sku like '${param.sku}%'
+			</if>
+			<if test="param.status != '' and param.status != null">
+				and l.order_line_status = #{param.status}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="walmart_time_where">
+		<if test="param.whichTime == 'createdat'">
+			t.order_date_utc
+		</if>
+		<if test="param.whichTime == 'lastestshipdate'">
+			l.ship_date_time_utc
+		</if>
+	</sql>
+	
+	<select id="query" resultMap="BaseResultMap">
+		<choose>
+			<when test="param.source == 'amazon'">
+				<include refid="query_amazon_base_all"/>
+			</when>
+			<otherwise>
+				select *
+				  from (SELECT a.country as platform,
+			       			   a.country as station,
+				               a.sku,
+				               a.order_line_status status,
+				               a.count,
+				               a.price,
+				               a.currency as currencyCode,
+				               b.qty,
+				               (a.price * 0.15) as af,
+	        	   			   (a.price * 0.22) as sf,
+	         	               (a.price * 0.15) as co,
+	         	               c.price as lastWeekPrice,
+       						   d.price as lastMonthPrice,
+                               e.price as lastYearPrice,
+				               round(CASE
+				                       WHEN c.price > 0 THEN
+				                        (a.price - c.price) / c.price
+				                       ELSE
+				                        0
+				                     END,
+				                     4) AS weekrate,
+				               round(CASE
+				                       WHEN d.price > 0 THEN
+				                        (a.price - d.price) / d.price
+				                       ELSE
+				                        0
+				                     END,
+				                     4) AS monthrate,
+				               round(CASE
+				                       WHEN e.price > 0 THEN
+				                        (a.price - e.price) / e.price
+				                       ELSE
+				                        0
+				                     END,
+				                     4) AS sametermrate
+				          FROM (SELECT t.country,
+				                       sum(l.order_line_quantity_amount) AS count,
+				                       l.sku,
+				                       sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price,
+				                       min(l.item_price_currency) AS currency,
+				                       l.order_line_status
+				                  FROM walmart_order t
+				                  LEFT JOIN walmart_order_line l
+				                    ON t.id = l.parent_id
+									<include refid="walmart_sql_where"/>
+									and <include refid="walmart_time_where"/> between #{param.begintime} and #{param.stoptime}
+				                 GROUP BY l.sku, l.order_line_status, t.country) a
+				          left join (SELECT r.country,
+				                           count(r.id) AS qty,
+				                           r.sku,
+				                           r.order_line_status
+				                      FROM (SELECT DISTINCT t.country,
+				                                            t.id,
+				                                            l.sku,
+				                                            l.order_line_status
+				                              FROM walmart_order t
+				                              LEFT JOIN walmart_order_line l
+				                                ON t.id = l.parent_id
+				                             <include refid="walmart_sql_where"/>
+											 and <include refid="walmart_time_where"/> between #{param.begintime} and #{param.stoptime}) r
+				                     GROUP BY r.sku, r.order_line_status, r.country) b
+				            ON a.country = b.country
+				           AND a.sku = b.sku
+				           AND a.order_line_status = b.order_line_status
+				          left join (SELECT t.country,
+				                           l.sku,
+				                           sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price,
+				                           l.order_line_status
+				                      FROM walmart_order t
+				                      LEFT JOIN walmart_order_line l
+				                        ON t.id = l.parent_id
+				                     <include refid="walmart_sql_where"/>
+									 and <include refid="walmart_time_where"/> between (#{param.begintime} -7) and (#{param.stoptime} -7)
+				                     GROUP BY l.sku, l.order_line_status, t.country) c
+				            ON a.country = c.country
+				           AND a.sku = c.sku
+				           AND a.order_line_status = c.order_line_status
+				          left join (SELECT t.country,
+				                           l.sku,
+				                           sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price,
+				                           l.order_line_status
+				                      FROM walmart_order t
+				                      LEFT JOIN walmart_order_line l
+				                        ON t.id = l.parent_id
+				                     <include refid="walmart_sql_where"/>
+				                     and <include refid="walmart_time_where"/> between add_months(#{param.begintime},-1) and add_months(#{param.stoptime},-1)
+				                     GROUP BY l.sku, l.order_line_status, t.country) d
+				            ON a.country = d.country
+				           AND a.sku = d.sku
+				           AND a.order_line_status = d.order_line_status
+				          left join (SELECT t.country,
+				                           l.sku,
+				                           sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price,
+				                           l.order_line_status
+				                      FROM walmart_order t
+				                      LEFT JOIN walmart_order_line l
+				                        ON t.id = l.parent_id
+				                     <include refid="walmart_sql_where"/>
+				                     and <include refid="walmart_time_where"/> between add_months(#{param.begintime},-12) and add_months(#{param.stoptime},-12)
+				                     GROUP BY l.sku, l.order_line_status, t.country) e
+				            ON a.country = e.country
+				           AND a.sku = e.sku
+				           AND a.order_line_status = e.order_line_status) s1
+				 <include refid="order_where"/>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<sql id="amazon_rate">
+		select platform, station, shipping_type as type, sum(va) as price
+		  from (select a.platform,
+		               a.station,
+		               b.shipping_type,
+		               (case
+		                 when b.profit_rate_action = 1 then
+		                  a.price / b.final_price
+		                 else
+		                  a.price / F_GET_FINALPRICE(b.COUNTRY_ID,
+		                                             b.FINAL_COST,
+		                                             b.REFERRAL_RATE,
+		                                             b.UNFULLIABLE_RATE,
+		                                             b.REPLACEMENT_RATE,
+		                                             b.PROFIT_RATE,
+		                                             b.VAT,
+		                                             0)
+		               end ) va
+		          from (
+		          	select sku,
+			               account as platform,
+			               site as station,
+			               sum(count) as count,
+			               sum(price) as price
+			          from SALE_ORDER_REPORT
+			          <include refid="where_base"/>
+			  		  <include refid="now_time"/>
+			          <include refid="amazon_group_by"/>
+		                ) a,
+		               cal_price_plan b,
+		               CAL_COUNTRY_INFO c
+		         where a.sku = b.sku
+		           and b.country_id = c.country_id
+		           and a.station = c.site
+		           and b.shipping_type in ('af', 'sf', 'co'))
+		 group by platform, station, shipping_type
+	</sql>
+	
+	<select id="queryRate" resultMap="BaseResultMap">
+		<choose>
+			<when test="param.source == 'amazon'">
+				<include refid="amazon_rate"/>
+			</when>
+			<otherwise>
+				select country as platform, type, sum(price) price
+				  from (select R.COUNTRY,
+				               p.shipping_type as type,
+				               (case
+				                 when p.profit_rate_action = 1 then
+				                  r.price / p.final_price
+				                 else
+				                  r.price / F_GET_FINALPRICE(p.COUNTRY_ID,
+				                                             p.FINAL_COST,
+				                                             p.REFERRAL_RATE,
+				                                             p.UNFULLIABLE_RATE,
+				                                             p.REPLACEMENT_RATE,
+				                                             p.PROFIT_RATE,
+				                                             p.VAT,
+				                                             0)
+				               end) price
+				          from (SELECT t.country,
+				                       sum(l.order_line_quantity_amount) AS count,
+				                       l.sku,
+				                       sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price,
+				                       min(l.item_price_currency) AS currency,
+				                       l.order_line_status
+				                  FROM walmart_order t
+				                  LEFT JOIN walmart_order_line l
+				                    ON t.id = l.parent_id
+				                 <include refid="walmart_sql_where"/>
+								 and <include refid="walmart_time_where"/> between #{param.begintime} and #{param.stoptime}
+				                 GROUP BY l.sku, l.order_line_status, t.country) r,
+				               cal_price_plan p,
+				               CAL_COUNTRY_INFO I
+				         where r.sku = p.sku
+				           and p.shipping_type in ('af', 'sf', 'co')
+				           and r.country = I.COUNTRY_ID
+				           AND P.COUNTRY_ID = I.SITE)
+				 group by country, type
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="queryOrderDetails" resultMap="BaseResultMap">
+		<choose>
+			<when test="param.source == 'amazon'">
+				select SKU,
+					   ASIN,
+					   ACCOUNT as platform,
+					   SITE as station,
+					   CURRENCY_CODE as currencycode,
+					   PRICE as unitprice,
+					   COUNT_PRICE as price,
+					   COUNT,
+					   QTY,
+					   DISCOUNT as deduction,
+					   TAX as taxrate,
+					   S_DATE as fromtime,
+					   E_DATE as totime
+				 from (select * from table(AMAZON_PAGE.AMAZON_GET_ORDER_DETAIL(#{param.sku},#{param.status},#{param.platform},#{param.station},
+				to_char(#{param.begintime},'yyyy-mm-dd'),to_char(#{param.stoptime},'yyyy-mm-dd'))))
+			</when>
+			<otherwise>
+				select SKU,
+					   country as platform,
+					   CURRENCY_CODE as currencycode,
+					   PRICE as unitprice,
+					   COUNT_PRICE as price,
+					   COUNT,
+					   QTY,
+					   S_DATE as fromtime,
+					   E_DATE as totime
+				 from (select * from table(WALMART_PAGE.WALMART_GET_ORDER_DETAIL(#{param.sku},#{param.status},#{param.platform},
+				#{param.begintime},#{param.stoptime})))
+			</otherwise>
+		</choose>
+	</select>
+	
+	<sql id="query_footer_base">
+		select sum(qty) as qty,
+		       sum(count) as count,
+		       sum(price) as price,
+		       account,
+		       site
+		from SALE_ORDER_REPORT_FULL t
+	</sql>
+
+	<sql id="query_footer_base_all">
+		select <include refid="base_cloum"/>
+		       a1.qty,
+		       a1.count,
+		       a1.price,
+		       a1.account as platform,
+		       a1.site as station
+		  from (<include refid="query_footer_base"/>
+		  		<include refid="footer_where_base"/>
+		  		<include refid="now_time"/>
+		  		<include refid="footer_group_by"/>) a1,
+		       (select sum(price) as lastWeekPrice, 
+		       		   account, 
+		       		   site
+		          from SALE_ORDER_REPORT_FULL t
+		         <include refid="footer_where_base"/>
+		  		 <include refid="last_week_time"/>
+		  		 <include refid="footer_group_by"/>) a2,
+		       (select sum(price) as lastMonthPrice, 
+		       		   account, 
+		       		   site
+		          from SALE_ORDER_REPORT_FULL t
+		         <include refid="footer_where_base"/>
+		  		 <include refid="last_month_time"/>
+		  		 <include refid="footer_group_by"/>) a3,
+		       (select sum(price) as lastYearPrice, 
+		       		   account, 
+		       		   site
+		          from SALE_ORDER_REPORT_FULL t
+		         <include refid="footer_where_base"/>
+		  		 <include refid="last_year_time"/>
+		  		 <include refid="footer_group_by"/>) a4
+		 where a1.account = a2.account(+)
+		   and a1.site = a2.site(+)
+		   and a1.account = a3.account(+)
+		   and a1.site = a3.site(+)
+		   and a1.account = a4.account(+)
+		   and a1.site = a4.site(+)
+		
+	</sql>
+	
+	<select id="queryFooter"  resultMap="BaseResultMap">
+		<choose>
+			<when test="param.source == 'amazon'">
+				<include refid="query_footer_base_all"/>
+			</when>
+			<otherwise>
+				SELECT a.country as platform,
+				       a.count,
+				       a.price,
+				       b.qty,
+				       c.price as lastWeekPrice,
+       				   d.price as lastMonthPrice,
+                       e.price as lastYearPrice,
+				       round(CASE
+				               WHEN c.price > 0 THEN
+				                (a.price - c.price) / c.price
+				               ELSE
+				                0
+				             END,
+				             4) AS weekrate,
+				       round(CASE
+				               WHEN d.price > 0 THEN
+				                (a.price - d.price) / d.price
+				               ELSE
+				                0
+				             END,
+				             4) AS monthrate,
+				       round(CASE
+				               WHEN e.price > 0 THEN
+				                (a.price - e.price) / e.price
+				               ELSE
+				                0
+				             END,
+				             4) AS sametermrate
+				  FROM (SELECT t.country,
+				               sum(l.order_line_quantity_amount) AS count,
+				               sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price
+				          FROM walmart_order t
+				          LEFT JOIN walmart_order_line l
+				            ON t.id = l.parent_id
+				         <include refid="walmart_sql_where"/>
+                  		 and <include refid="walmart_time_where"/> between #{param.begintime} and #{param.stoptime}
+				         GROUP BY t.country) a
+				  left join (SELECT r.country, count(r.id) AS qty
+				               FROM (SELECT DISTINCT t.country, t.id
+				                       FROM walmart_order t
+				                       LEFT JOIN walmart_order_line l
+				                         ON t.id = l.parent_id
+				                      <include refid="walmart_sql_where"/>
+                  					  and <include refid="walmart_time_where"/> between #{param.begintime} and #{param.stoptime}) r
+				              GROUP BY r.country) b
+				    ON a.country = b.country
+				  left join (SELECT t.country,
+				                    sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price
+				               FROM walmart_order t
+				               LEFT JOIN walmart_order_line l
+				                 ON t.id = l.parent_id
+				              <include refid="walmart_sql_where"/>
+                   			  and <include refid="walmart_time_where"/> between (#{param.begintime} -7) and (#{param.stoptime} -7)
+				              GROUP BY t.country) c
+				    ON a.country = c.country
+				  left join (SELECT t.country,
+				                    sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price
+				               FROM walmart_order t
+				               LEFT JOIN walmart_order_line l
+				                 ON t.id = l.parent_id
+				              <include refid="walmart_sql_where"/>
+                              and <include refid="walmart_time_where"/> between add_months(#{param.begintime},-1) and add_months(#{param.stoptime},-1)
+				              GROUP BY t.country) d
+				    ON a.country = d.country
+				  left join (SELECT t.country,
+				                    sum(l.item_price * l.order_line_quantity_amount + nvl(l.shipping_price,0)) AS price
+				               FROM walmart_order t
+				               LEFT JOIN walmart_order_line l
+				                 ON t.id = l.parent_id
+				              <include refid="walmart_sql_where"/>
+                              and <include refid="walmart_time_where"/> between add_months(#{param.begintime},-12) and add_months(#{param.stoptime},-12)
+				              GROUP BY t.country) e
+				    ON a.country = e.country
+			</otherwise>
+		</choose>
+	</select>
+	
+	<sql id="details_where">
+		 <if test="param.sku != '' and param.sku != null">
+			and t.sku like '%${param.sku}%'
+		</if>
+		<if test="param.asin != '' and param.asin != null">
+			and t.asin like '%${param.asin}%'
+		</if>
+		<if test="param.begintime != null and param.stoptime != null">
+			<if test="param.whichTime != '' and param.whichTime != null">
+				<if test="param.whichTime == 'purchaseat'">
+					and le.purchase_at
+				</if>
+				<if test="param.whichTime == 'updatedat'">
+					and le.amazon_updated_at
+				</if>
+				<if test="param.whichTime == 'lastestshipdate'">
+					and le.lastest_ship_date
+				</if>
+				between #{param.begintime} and #{param.stoptime}
+			</if>
+		</if>
+	</sql>
+	
+	<select id="getCountBySkuAndCountry" resultType="java.lang.Long">
+		select nvl(sum(t.count),0) from SALE_ORDER_REPORT t
+			where t.sku = #{param.sku} and t.account = #{param.platform} and t.date_type = 1
+				  and t.order_day between #{param.begintime} and #{param.stoptime}
+	</select>
+	
+	<!-- 销售订单 -->
+	<select id="queryDeatals" resultMap="BaseResultMap">
+		<choose>
+			<when test="param.source == 'amazon'">
+				select t.sku,
+				       t.asin,
+				       le.platform,
+				       le.channel as station,
+				       t.price,
+				       le.currency_code as currencycode,
+				       le.status,
+				       t.promotion_discount as deduction,
+				       t.tax as taxrate,
+				       t.qty as count,
+				       (case
+				         when t.qty > 0 then
+				          t.price / t.qty
+				         when t.qty = 0 or t.qty = null then
+				          0
+				       end) as unitprice,
+				       le.purchase_at as purchaseat,
+				       le.lastest_ship_date as lastestshipdate,
+				       le.amazon_updated_at as updatedat
+				  from amazon_order le
+				  left join amazon_order_item t
+				    on t.parent_id = le.id
+				    <where>
+					   <if test="param != null">
+					   		<foreach collection="platforms" index="index" item="platform" open=" and le.platform in (" separator="," close=")">  
+						        #{platform}  
+						    </foreach> 
+						    <foreach collection="stations" index="index" item="station" open=" and le.channel in (" separator="," close=")">  
+						        #{station}  
+						    </foreach>
+						   	<include refid="details_where"/>
+							<if test="param.status != '' and param.status != null">
+								and le.status = #{param.status}
+							</if>
+					   </if>
+				    </where>
+					<if test="param.whichTime != '' and param.whichTime != null">
+						<if test="param.whichTime == 'purchaseat'">
+							order by le.purchase_at desc
+						</if>
+						<if test="param.whichTime == 'updatedat'">
+							order by le.amazon_updated_at desc
+						</if>
+						<if test="param.whichTime == 'lastestshipdate'">
+							order by le.lastest_ship_date desc
+						</if>
+					</if>
+			</when>
+			<otherwise>
+				SELECT t.country as platform,
+				       l.sku,
+				       l.item_price_currency as currencyCode,
+				       l.order_line_quantity_amount * l.item_price + nvl(l.shipping_price,0) as price,
+				       l.order_line_quantity_amount count,
+				       l.item_price as unitprice,
+				       l.order_line_status as status,
+				       t.order_date_utc as createdat
+				  FROM walmart_order t
+				  LEFT JOIN walmart_order_line l
+				    ON t.id = l.parent_id
+				  <include refid="walmart_sql_where"/>
+                  and <include refid="walmart_time_where"/> between #{param.begintime} and #{param.stoptime}
+                  order by t.order_date_utc desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findOrder" resultMap="BaseResultMap">
+		select t.sku,
+               t.asin,
+               le.platform,
+               le.channel           as station,
+               t.price,
+               le.currency_code     as currencycode,
+               le.status,
+               t.qty                as count,
+               le.order_id          as orderId,
+               t.title,
+               le.name,
+               le.state_or_region   as stateOrRegion,
+               le.postal_code       as postalCode,
+               le.phone,
+               le.city,
+               le.street,
+               le.customer_name     as customerName,
+               le.amount,
+               le.amazon_updated_at as updatedat,
+               le.purchase_at as purchaseat
+          from amazon_order le
+          left join amazon_order_item t
+            on t.parent_id = le.id
+            <where>
+            	<if test="param != null">
+            		<if test="param.station == null or param.station == ''">
+            			and le.channel not in ('Non-Amazon') and le.platform not in ('GB', 'FR', 'IT', 'ES') 
+            		</if>
+            		<if test="param.station != null and param.station != ''">
+            			and le.channel = #{param.station}
+            		</if>
+            		<if test="param.orderId != null and param.orderId != ''">
+            			and le.order_id = #{param.orderId}
+            		</if>
+            		<include refid="details_where"/>
+            	</if>
+            </where>
+            order by amazon_updated_at desc
+	</select>
+	
+	<sql id="base_sql">
+		select t.sku,
+			   t.asin,
+			   le.channel as station,
+			   le.amount,
+			   le.order_id as orderId,
+			   t.price,
+			   le.currency_code as currencycode,
+			   le.status,
+			   t.qty as count,
+			   le.order_id as orderId,
+			   le.purchase_at as purchaseat,
+			   le.amazon_updated_at as updatedat
+		from amazon_order le left join amazon_order_item t on t.parent_id=le.id
+	</sql>
+	
+	<!-- 查找产品的图片 -->
+	<select id="findImgAndUrl" resultType="java.util.HashMap">
+		select t.image,t.product_url as url from AMAZON_PRODUCT t where t.asin = #{asin} and t.country = #{platform}
+	</select>
+	
+	<!-- 查mysql的数据库 -->
+	<select id="findByTime" resultMap="BaseResultMap">
+			<include refid="base_sql"/>
+			<![CDATA[
+			 where le.amazon_updated_at >= #{start}
+			   and le.amazon_updated_at <= #{end}
+			   and le.channel = #{station}
+			]]>
+	</select>
+	
+	<!-- 查oracle的 -->
+	<select id="findModelsBySatationAndTime"  resultMap="BaseResultMap">
+		<include refid="base_sql"/>
+		where le.purchase_at between #{start} and #{end}
+		and le.channel = #{station}
+	</select>
+	
+	<!-- 获取最大的更新时间 -->
+	<select id="getMaxUpdateAt" resultType="java.util.Date">
+		select max(le.amazon_updated_at) from amazon_order le
+	</select>
+	
+	<sql id="amazon_sql">
+		select t.sku,
+			   t.asin,
+			   le.platform,
+			   le.channel as station,
+			   t.price,
+			   le.currency_code as currencycode,
+			   le.status,
+			   t.promotion_discount as deduction,
+			   t.tax as taxrate,
+			   t.qty as count,
+			   le.order_id as orderId,
+			   t.title,
+			   le.name,
+			   le.state_or_region as stateOrRegion,
+			   le.postal_code as postalCode,
+			   le.phone,
+			   le.city,
+			   le.street,
+			   le.customer_name as customerName, 
+			   t.id as entityId,
+			   t.amazon_item_id as itemId,
+			   t.updated_at as itemUpdatedat,
+			   le.amount,
+			   le.purchase_at as purchaseat,<!-- 购买时间 -->
+			   le.lastest_ship_date as lastestshipdate,<!-- 发货时间 -->
+			   le.amazon_updated_at as updatedat<!-- 订单更新时间 -->
+		from amazon_order le left join amazon_order_item t on t.parent_id=le.id
+			   where le.channel not in ('Non-Amazon')
+			   and le.platform not in ('GB','FR','IT','ES')
+	</sql>
+	
+	<select id="amazonQuery" resultMap="BaseResultMap">
+		<include refid="amazon_sql"/>	
+		order by le.purchase_at
+
+	</select>
+	
+	<select id="amazonQueryByUpdateAt" resultMap="BaseResultMap">
+		<include refid="amazon_sql"/>
+		and le.amazon_updated_at between #{start} and #{end}
+		order by le.purchase_at
+	</select>
+	
+	<select id="ebayQuery" resultMap="BaseResultMap">
+		select nvl(l.sku, e.item_sku) sku,
+		       t.account as platform,
+		       t.order_status as status,
+		       e.price * to_number(e.quantity_purchased) *
+		       nvl(l.price_coefficient, 1) as amount,
+		       e.price * to_number(e.quantity_purchased) *
+		       nvl(l.price_coefficient, 1) as price,
+		       t.order_id as orderId,
+		       nvl(l.qty, 1) * to_number(e.quantity_purchased) as count,
+		       e.price as unitprice,
+		       e.currencycode as currencycode,
+		       e.transaction_site_id as station,
+		       t.last_fetch_time as lastfetchtime,
+		       t.paid_time as paidtime,
+		       t.shipped_time as lastestshipdate,
+		       e.shipment_tracking_number shipmenttrackingnumber
+		  from ebay_order t
+		  left join ebay_order_item e
+		    on t.order_id = e.order_id
+		  left join sys_sku_link l
+		    on e.item_sku = l.p_sku
+		 where e.item_sku not like '%OS%'
+		
+		<!-- select case
+		         when instr(e.item_sku, '-', 1, 1) = 2 then
+		          substr(e.item_sku, instr(e.item_sku, '-', 1, 1) + 1)
+		         else
+		          e.item_sku
+		       end as sku,
+		       t.account as platform,
+		       t.order_status as status,
+		       e.price * e.quantity_purchased  as amount,
+		       e.price * e.quantity_purchased  as price,
+		       t.order_id as orderId,
+		       e.quantity_purchased as count,
+		       e.price as unitprice,
+		       e.currencycode as currencycode,
+		       e.transaction_site_id as station,
+		       t.last_fetch_time as lastfetchtime,
+		       t.paid_time as paidtime,
+		       t.shipped_time as lastestshipdate,
+		       e.shipment_tracking_number shipmenttrackingnumber
+		  from ebay_order t
+		  left join ebay_order_item e
+		    on t.order_id = e.order_id
+		 where e.item_sku not like '%*%'
+		   and e.item_sku not like '%OS%'
+		union all
+		select substr(e.item_sku, instr(e.item_sku, '*', 1, 1) + 1) as sku,
+		       t.account as platform,
+		       t.order_status as status,
+		       e.price * e.quantity_purchased  as amount,
+		       e.price * e.quantity_purchased  as price,
+		       t.order_id as orderId,
+		       to_char((e.quantity_purchased * ebay_sku_getCount(e.item_sku))) as count,
+		       e.price as unitprice,
+		       e.currencycode as currencycode,
+		       e.transaction_site_id as station,
+		       t.last_fetch_time as lastfetchtime,
+		       t.paid_time as paidtime,
+		       t.shipped_time as lastestshipdate,
+		       e.shipment_tracking_number shipmenttrackingnumber
+		  from ebay_order t
+		  left join ebay_order_item e
+		    on t.order_id = e.order_id
+		 where e.item_sku like '%*%'
+		   and e.item_sku not like '%OS%' -->
+	</select>
+	
+	<sql id="getData_where">
+		<where>
+			<if test="platform != '' and platform != null">
+				and ACCOUNT = #{platform}
+			</if>
+			<if test="station != '' and station != null">
+				and TRANSACTIONSITEID = #{station}
+			</if>
+			<if test="fromDate != '' and toDate != '' and fromDate != null and toDate != null">
+				AND ${whichTime} BETWEEN TO_DATE(#{fromDate},'YYYY-MM-DD') AND TO_DATE(#{toDate},'YYYY-MM-DD')
+			</if>
+			<if test="fromDate != '' and fromDate != null and (toDate == '' or toDate == null)">
+				AND ${whichTime} = TO_DATE(#{fromDate},'YYYY-MM-DD')
+			</if>
+			<if test="(fromDate == '' or fromDate == null) and toDate != '' and toDate != null">
+				AND ${whichTime} = TO_DATE(#{toDate},'YYYY-MM-DD')
+			</if>
+		</where>
+	</sql>
+	<select id="getData2" resultType="com.it.ocs.salesStatistics.model.SalesStatisticsExcelModel">
+		SELECT P.ACCOUNT account,
+		       P.TRANSACTIONSITEID transactionSiteId,
+		       P.SALESRECORDNUMBER salesRecordNumber,
+		       P.BUYERUSERID buyerUserId,
+		       P.ORDERID orderId,
+		       P.ITEMID itemId,
+		       P.TRANSACTIONID transactionId,
+		       P.ITEMTITLE itemTitle,
+		       P.QUANTITYPURCHASED quantityPurchased,
+		       P.SALEPRICE salePrice,
+		       P.TOTAL total,
+		       P.PAYMENTMETHODS paymentMethods,
+		       TO_CHAR(P.CREATEDTIME,'MM/DD/YYYY HH24:mi:ss') createdTime,
+		       TO_CHAR(P.PAIDTIME,'MM/DD/YYYY HH24:mi:ss') paidTime,
+		       TO_CHAR(P.SHIPPEDTIME,'MM/DD/YYYY HH24:mi:ss') shippedTime,
+		       P.SHIPPINGSERVICE shippingService,
+		       P.ITEMSKU itemSku,
+		       P.ORDERSTATUS orderStatus,
+		       L.SHIP_COST shipCost,
+		       l.REFUNDPRICE refundPrice,
+		       p.SHIPPINGADDRESS shippingAddress,
+		       p.PAYPALTRANSACTIONINFO paypalTransactionInfo
+		  FROM (SELECT *
+		          FROM (SELECT R.ID,
+                           R.ACCOUNT,
+		                       M.TRANSACTION_SITE_ID TRANSACTIONSITEID,
+		                       R.SALES_RECORD_NUMBER SALESRECORDNUMBER,
+		                       R.BUYER_USER_ID BUYERUSERID,
+		                       R.ORDER_ID ORDERID,
+		                       M.ITEM_ID ITEMID,
+		                       M.TRANSACTION_ID TRANSACTIONID,
+		                       M.ITEM_TITLE ITEMTITLE,
+		                       M.QUANTITY_PURCHASED QUANTITYPURCHASED,
+		                       M.CURRENCYCODE || ' ' ||
+		                       M.QUANTITY_PURCHASED * M.PRICE SALEPRICE,
+		                       R.TOTAL,
+		                       R.PAYMENT_METHODS PAYMENTMETHODS,
+		                       B.shipping_address SHIPPINGADDRESS,
+		                       B.external_transaction PAYPALTRANSACTIONINFO,
+		                       CASE
+		                         WHEN M.TRANSACTION_SITE_ID = 'eBayMotors' OR
+		                              M.TRANSACTION_SITE_ID = 'US' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'US')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Germany' OR
+		                              M.TRANSACTION_SITE_ID = 'France' OR
+		                              M.TRANSACTION_SITE_ID = 'Italy' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'DE')
+		                         WHEN M.TRANSACTION_SITE_ID = 'UK' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'UK')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Australia' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'AU')
+		                         ELSE
+		                          R.CREATED_TIME
+		                       END CREATEDTIME,
+		                       CASE
+		                         WHEN M.TRANSACTION_SITE_ID = 'eBayMotors' OR
+		                              M.TRANSACTION_SITE_ID = 'US' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'US')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Germany' OR
+		                              M.TRANSACTION_SITE_ID = 'France' OR
+		                              M.TRANSACTION_SITE_ID = 'Italy' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'DE')
+		                         WHEN M.TRANSACTION_SITE_ID = 'UK' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'UK')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Australia' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'AU')
+		                         ELSE
+		                          R.PAID_TIME
+		                       END PAIDTIME,
+		                       CASE
+		                         WHEN M.TRANSACTION_SITE_ID = 'eBayMotors' OR
+		                              M.TRANSACTION_SITE_ID = 'US' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'US')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Germany' OR
+		                              M.TRANSACTION_SITE_ID = 'France' OR
+		                              M.TRANSACTION_SITE_ID = 'Italy' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'DE')
+		                         WHEN M.TRANSACTION_SITE_ID = 'UK' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'UK')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Australia' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'AU')
+		                         ELSE
+		                          R.SHIPPED_TIME
+		                       END SHIPPEDTIME,
+		                       R.SHIPPING_SERVICE SHIPPINGSERVICE,
+		                       M.ITEM_SKU ITEMSKU,
+		                       R.ORDER_STATUS ORDERSTATUS
+		                  FROM ocs_ebay.EBAY_ORDER R, ocs_ebay.EBAY_ORDER_ITEM M,ocs_ebay.EBAY_ORDER_SUB B
+		                 WHERE R.ID = M.PARENT_ID
+		                   AND R.ID = B.PARENT_ID
+		                   AND R.ORDER_STATUS IN ('Completed', 'Active'))
+		                   <include refid="getData_where" />) P,
+		       (SELECT R.ACCOUNT,
+				       M.TRANSACTION_SITE_ID,
+				       R.ORDER_ID,
+				       CASE
+				         WHEN MIN(R.ORDER_STATUS) = 'Completed' THEN
+				          (SUM(SUBSTR(R.AMOUNT_PAID, 5)) +
+				          SUM(ABS(SUBSTR(R.ADJUSTMENT_AMOUNT, 5)))) / COUNT(*) -
+				          SUM(M.QUANTITY_PURCHASED * M.PRICE)
+				         ELSE
+				          SUM(ABS(SUBSTR(R.ADJUSTMENT_AMOUNT, 5))) / COUNT(*) -
+                  		  SUM(M.QUANTITY_PURCHASED * M.PRICE)
+				       END SHIP_COST,
+				       MIN(M.ITEM_ID) ITEM_ID,
+				       MIN(R.ADJUSTMENT_AMOUNT) REFUNDPRICE
+          FROM ocs_ebay.EBAY_ORDER R, ocs_ebay.EBAY_ORDER_ITEM M
+         WHERE R.ID = M.PARENT_ID
+           AND R.ORDER_STATUS IN ('Completed', 'Active')
+         GROUP BY R.ACCOUNT, M.TRANSACTION_SITE_ID, R.ORDER_ID) L
+     WHERE P.ACCOUNT = L.ACCOUNT(+)
+       AND P.TRANSACTIONSITEID = L.TRANSACTION_SITE_ID(+)
+       AND P.ORDERID = L.ORDER_ID(+)
+       AND P.ITEMID = L.ITEM_ID(+)
+     ORDER BY P.ORDERID
+	</select>
+	
+	<select id="getData" resultType="com.it.ocs.salesStatistics.model.SalesStatisticsExcelModel">
+		SELECT P.ACCOUNT,
+		       P.TRANSACTIONSITEID,
+		       P.SALESRECORDNUMBER,
+		       P.BUYERUSERID,
+		       P.ORDERID,
+		       P.ITEMID,
+		       P.TRANSACTIONID,
+		       P.ITEMTITLE,
+		       P.QUANTITYPURCHASED,
+		       P.SALEPRICE,
+		       P.TOTAL,
+		       P.PAYMENTMETHODS,
+		       P.PAYPALTRANSACTIONID,
+		       TO_CHAR(P.CREATEDTIME,'MM/DD/YYYY HH24:mi:ss') CREATEDTIME,
+		       TO_CHAR(P.PAIDTIME,'MM/DD/YYYY HH24:mi:ss') PAIDTIME,
+		       TO_CHAR(P.SHIPPEDTIME,'MM/DD/YYYY HH24:mi:ss') SHIPPEDTIME,
+		       P.SHIPPINGSERVICE,
+		       P.ITEMSKU,
+		       P.ORDERSTATUS,
+		       L.SHIP_COST SHIPCOST,
+		       l.REFUNDPRICE
+		  FROM (SELECT *
+		          FROM (SELECT R.ACCOUNT,
+		                       M.TRANSACTION_SITE_ID TRANSACTIONSITEID,
+		                       R.SALES_RECORD_NUMBER SALESRECORDNUMBER,
+		                       R.BUYER_USER_ID BUYERUSERID,
+		                       R.ORDER_ID ORDERID,
+		                       M.ITEM_ID ITEMID,
+		                       M.TRANSACTION_ID TRANSACTIONID,
+		                       M.ITEM_TITLE ITEMTITLE,
+		                       M.QUANTITY_PURCHASED QUANTITYPURCHASED,
+		                       M.CURRENCYCODE || ' ' ||
+		                       M.QUANTITY_PURCHASED * M.PRICE SALEPRICE,
+		                       R.TOTAL,
+		                       R.PAYMENT_METHODS PAYMENTMETHODS,
+		                       JSON_EXT.GET_STRING(JSON(B.EXTERNAL_TRANSACTION),
+		                                           'ExternalTransactionID') PAYPALTRANSACTIONID,
+		                       CASE
+		                         WHEN M.TRANSACTION_SITE_ID = 'eBayMotors' OR
+		                              M.TRANSACTION_SITE_ID = 'US' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'US')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Germany' OR
+		                              M.TRANSACTION_SITE_ID = 'France' OR
+		                              M.TRANSACTION_SITE_ID = 'Italy' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'DE')
+		                         WHEN M.TRANSACTION_SITE_ID = 'UK' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'UK')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Australia' THEN
+		                          TIME_TO_SELF(R.CREATED_TIME, 'AU')
+		                         ELSE
+		                          R.CREATED_TIME
+		                       END CREATEDTIME,
+		                       CASE
+		                         WHEN M.TRANSACTION_SITE_ID = 'eBayMotors' OR
+		                              M.TRANSACTION_SITE_ID = 'US' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'US')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Germany' OR
+		                              M.TRANSACTION_SITE_ID = 'France' OR
+		                              M.TRANSACTION_SITE_ID = 'Italy' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'DE')
+		                         WHEN M.TRANSACTION_SITE_ID = 'UK' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'UK')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Australia' THEN
+		                          TIME_TO_SELF(R.PAID_TIME, 'AU')
+		                         ELSE
+		                          R.PAID_TIME
+		                       END PAIDTIME,
+		                       CASE
+		                         WHEN M.TRANSACTION_SITE_ID = 'eBayMotors' OR
+		                              M.TRANSACTION_SITE_ID = 'US' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'US')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Germany' OR
+		                              M.TRANSACTION_SITE_ID = 'France' OR
+		                              M.TRANSACTION_SITE_ID = 'Italy' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'DE')
+		                         WHEN M.TRANSACTION_SITE_ID = 'UK' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'UK')
+		                         WHEN M.TRANSACTION_SITE_ID = 'Australia' THEN
+		                          TIME_TO_SELF(R.SHIPPED_TIME, 'AU')
+		                         ELSE
+		                          R.SHIPPED_TIME
+		                       END SHIPPEDTIME,
+		                       R.SHIPPING_SERVICE SHIPPINGSERVICE,
+		                       M.ITEM_SKU ITEMSKU,
+		                       R.ORDER_STATUS ORDERSTATUS
+		                  FROM EBAY_ORDER R, EBAY_ORDER_ITEM M, EBAY_ORDER_SUB B
+		                 WHERE R.ID = M.PARENT_ID
+		                   AND R.ID = B.PARENT_ID
+		                   AND R.ORDER_STATUS IN ('Completed', 'Active'))
+		         		<include refid="getData_where" />) P,
+		       (SELECT R.ACCOUNT,
+				       M.TRANSACTION_SITE_ID,
+				       R.ORDER_ID,
+				       CASE
+				         WHEN MIN(R.ORDER_STATUS) = 'Completed' THEN
+				          (SUM(SUBSTR(R.AMOUNT_PAID, 5)) +
+				          SUM(ABS(SUBSTR(R.ADJUSTMENT_AMOUNT, 5)))) / COUNT(*) -
+				          SUM(M.QUANTITY_PURCHASED * M.PRICE)
+				         ELSE
+				          SUM(ABS(SUBSTR(R.ADJUSTMENT_AMOUNT, 5))) / COUNT(*) -
+                  		  SUM(M.QUANTITY_PURCHASED * M.PRICE)
+				       END SHIP_COST,
+				       MIN(M.ITEM_ID) ITEM_ID,
+				       MIN(R.ADJUSTMENT_AMOUNT) REFUNDPRICE
+				  FROM EBAY_ORDER R, EBAY_ORDER_ITEM M
+				 WHERE R.ID = M.PARENT_ID
+				   AND R.ORDER_STATUS IN ('Completed', 'Active')
+				 GROUP BY R.ACCOUNT, M.TRANSACTION_SITE_ID, R.ORDER_ID) L
+		 WHERE P.ACCOUNT = L.ACCOUNT(+)
+		   AND P.TRANSACTIONSITEID = L.TRANSACTION_SITE_ID(+)
+		   AND P.ORDERID = L.ORDER_ID(+)
+		   AND P.ITEMID = L.ITEM_ID(+)
+		 ORDER BY P.ORDERID
+	</select>
+	
+	<select id="getEbayStation" resultType="java.lang.String">
+		SELECT DISTINCT I.TRANSACTION_SITE_ID FROM EBAY_ORDER_ITEM I
+	</select>
+	
+	<select id="lightQuery" resultMap="BaseResultMap">
+		select nvl(k.sku, l.SKU) sku,
+		       t.platform,
+		       t.platform as STATION,
+		       t.status as status,
+		       l.price as unitprice,
+		       nvl(l.row_total_incl_tax, l.row_total) as amount,
+		       nvl(l.row_total_incl_tax, l.row_total) as price,
+		       t.order_id as orderId,
+		       t.global_currency_code as currencycode,
+		       nvl(k.qty, 1) * to_number(l.qty_ordered) count,
+		       t.discount_amount as deduction,
+		       l.tax_amount as taxrate,
+		       t.light_created_at as createdat,
+		       t.light_updated_at as updatedat,
+		       l.Ship_At as lastestshipdate,
+		       l.PARENT_ID as parentId
+		  from light_ORDER t
+		  left join light_order_item l
+		    on t.entity_id = l.PARENT_ID
+		  left join sys_sku_link k
+		    on l.sku = k.p_sku
+		 where l.sku not like 'B%'
+		   and l.sku not like 'OS%'
+		   and l.sku is not null
+		 order by t.light_created_at
+		<!-- select l.sku,
+		       t.platform,
+		       t.status               as status,
+		       l.price                as unitprice,
+		       l.row_total_incl_tax   as amount,
+		       l.row_total_incl_tax   as price,
+		       t.order_id             as orderId,
+		       t.global_currency_code as currencycode,
+		       l.qty_ordered          as count,
+		       t.discount_amount      as deduction,
+		       l.tax_amount           as taxrate,
+		       t.light_created_at     as createdat,
+		       t.light_updated_at     as updatedat,
+		       l.Ship_At              as lastestshipdate,
+		       l.PARENT_ID            as parentId
+		  from light_ORDER t
+		  left join light_order_item l
+		    on l.PARENT_ID = t.entity_id
+		 where l.sku not like 'B%' and l.sku not like 'OS%'
+		   and l.sku is not null
+		   and t.state in ('complete', 'closed')
+		   and t.status in ('complete', 'closed') 
+		 order by t.light_created_at -->
+	</select>
+</mapper>

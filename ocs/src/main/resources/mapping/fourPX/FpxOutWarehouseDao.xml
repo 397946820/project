@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.fourPX.dao.FpxOutWarehouseDao">
+	<select id="generatePrimaryKey" resultType="java.lang.Long">
+		select fpx_out_seq.nextval from dual
+	</select>
+	
+	<select id="selectUnshippedOrders" parameterType="java.lang.String" resultType="java.util.Map">
+		select wm_concat(keys) keys
+		       , max(platform) platform
+		       , max(account) account
+		       , referenceCode orderid
+		       , referenceCode
+		       , 'NI' insureType
+		       , 'Y' remoteArea
+		       , wm_concat(sku) sku
+		       , wm_concat(quantity) quantity
+		       , max(fullName) fullName
+		       , max(countryCode) countryCode
+		       , max(street)  street
+               , max(addressfieldone) addressfieldone
+               , max(addressfieldtwo) addressfieldtwo
+               , max(addressfieldthree) addressfieldthree
+		       , max(city) city
+		       , max(state) state
+		       , max(postalCode) postalCode
+		       , max(email) email
+		       , max(phone) phone
+		       , '' company
+		       , '' doorplate
+		       , '' cardId
+		       , sum(weight) weight
+		from (select a.*, nvl(b.gross_weight, 0) * a.quantity weight
+		        from (select wm_concat(t.id) keys
+		                       , max(t.platform) platform
+		                       , max(t.account) account
+		                       , t.merchantfulfillmentorderid referenceCode
+		                       , t.merchantsku sku
+		                       , sum(t.quantity) quantity
+		                       , max(t.addressname) fullName
+		                       , max(t.addresscountrycode) countryCode
+		                       , max(t.addressfieldone || ' ' || t.addressfieldtwo || ' ' || t.addressfieldthree)  street
+		                       , max(t.addressfieldone) addressfieldone
+		                       , max(t.addressfieldtwo) addressfieldtwo
+		                       , max(t.addressfieldthree) addressfieldthree
+		                       , max(t.addresscity) city
+		                       , max(t.addressstateorregion) state
+		                       , max(t.addresspostalcode) postalCode
+		                       , max(t.notificationemail) email
+		                       , max(t.addressphonenumber) phone
+		                from sys_uswest_shipping t, fpx_out_warehouse o
+		                where t.status = 0 and t.merchantfulfillmentorderid=o.orderid(+) and o.orderid is null
+						<if test="platform != null and platform != ''">
+							  and t.platform=#{platform}
+						</if>
+		                group by t.merchantfulfillmentorderid, t.merchantsku) a, cal_product_entity b
+		        where a.sku = b.sku(+) and b.is_active=1)
+		group by referenceCode
+	</select>
+	
+	<insert id="insert">
+		insert into fpx_out_warehouse
+		(id,createdat,updatedat,status,keys,platform,orderid,warehouseCode,referenceCode,carrierCode
+		,insureType,insureMoney,sellCode,remoteArea,description,weight,pushedat,feedbackat,documentCode,fpxstatus)
+		values 
+		(#{item.id,jdbcType=NUMERIC},#{item.createdat,jdbcType=TIMESTAMP},#{item.updatedat,jdbcType=TIMESTAMP},#{item.status,jdbcType=VARCHAR}
+		,#{item.keys,jdbcType=VARCHAR},#{item.platform,jdbcType=VARCHAR},#{item.orderid,jdbcType=VARCHAR},#{item.warehouseCode,jdbcType=VARCHAR}
+		,#{item.referenceCode,jdbcType=VARCHAR},#{item.carrierCode,jdbcType=VARCHAR},#{item.insureType,jdbcType=VARCHAR},#{item.insureMoney,jdbcType=DOUBLE}
+		,#{item.sellCode,jdbcType=VARCHAR},#{item.remoteArea,jdbcType=VARCHAR},#{item.description,jdbcType=VARCHAR},#{item.weight,jdbcType=DOUBLE}
+		,#{item.pushedat,jdbcType=TIMESTAMP},#{item.feedbackat,jdbcType=TIMESTAMP},#{item.documentCode,jdbcType=VARCHAR},#{item.fpxstatus,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="update">
+		update fpx_out_warehouse o
+		set o.updatedat=#{item.updatedat,jdbcType=TIMESTAMP}
+			, o.status=#{item.status,jdbcType=VARCHAR}
+			, o.pushedat=#{item.pushedat,jdbcType=TIMESTAMP}
+			, o.feedbackat=#{item.feedbackat,jdbcType=TIMESTAMP}
+			, o.documentCode=#{item.documentCode,jdbcType=VARCHAR}
+			, o.carrierCode=#{item.carrierCode,jdbcType=VARCHAR}
+			, o.warehouseCode=#{item.warehouseCode,jdbcType=VARCHAR}
+			, o.fpxstatus=#{item.fpxstatus,jdbcType=VARCHAR}
+			, o.description=#{item.description,jdbcType=VARCHAR}
+			, o.weight=#{item.weight,jdbcType=DOUBLE}
+		where o.id=#{item.id,jdbcType=NUMERIC} and o.referenceCode=#{item.referenceCode,jdbcType=VARCHAR}
+	</update>
+	
+	<sql id="base_out_sql">
+		select 	o.* 
+		from fpx_out_warehouse o, 
+			 (select oo.id from fpx_out_warehouse oo, fpx_out_warehouse_detail ood  
+			  where oo.id=ood.parentid
+			  <if test="item.platform != null and item.platform != ''">
+			  		and oo.platform=#{item.platform}
+			  </if>
+			  <if test="item.warehouseCode != null and item.warehouseCode != ''">
+			  		and oo.warehouseCode=#{item.warehouseCode}
+			  </if>
+			  <if test="item.status != null and item.status != ''">
+			  		and oo.status=#{item.status}
+			  </if>
+			  <if test="item.referenceCode != null and item.referenceCode != ''">
+			  		and ((oo.referenceCode like '%' || #{item.referenceCode} || '%') or (#{item.referenceCode} like '%' || oo.referenceCode || '%')
+			  			or (oo.orderid like '%' || #{item.referenceCode} || '%') or (#{item.referenceCode} like '%' || oo.orderid || '%'))
+			  </if>
+			  <if test="item.sku != null and item.sku != ''">
+			  		and ((ood.sku like '%' || #{item.sku} || '%') or (#{item.sku} like '%' || ood.sku || '%'))
+			  </if>
+			  <if test="item.beginCreatedat != null and item.beginCreatedat != ''">
+			  <![CDATA[and oo.createdat >= to_date(CONCAT(#{item.beginCreatedat}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="item.endCreatedat != null and item.endCreatedat != ''">
+			  <![CDATA[and oo.createdat <= to_date(CONCAT(#{item.endCreatedat}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="item.beginPushedat != null and item.beginPushedat != ''">
+			  <![CDATA[and oo.pushedat >= to_date(CONCAT(#{item.beginPushedat}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="item.endPushedat != null and item.endPushedat != ''">
+			  <![CDATA[and oo.pushedat <= to_date(CONCAT(#{item.endPushedat}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="item.beginFeedbackat != null and item.beginFeedbackat != ''">
+			  <![CDATA[and oo.feedbackat >= to_date(CONCAT(#{item.beginFeedbackat}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="item.endFeedbackat != null and item.endFeedbackat != ''">
+			  <![CDATA[and oo.feedbackat <= to_date(CONCAT(#{item.endFeedbackat}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="item.fpxstatus != null and item.fpxstatus.length != 0">
+			  	and oo.documentcode is not null and oo.status not in ('feedback') and (oo.fpxstatus is null or oo.fpxstatus in 
+			  	<foreach collection="item.fpxstatus" item="fs" index="index" open="(" close=")" separator=",">
+			  		#{fs}
+			  	</foreach>)
+			  </if>
+			  group by oo.id) g
+		where o.id=g.id
+		<if test="(item.beginAbnormalat != null and item.beginAbnormalat != '') or (item.endAbnormalat != null and item.endAbnormalat != '')">
+			and o.id in (select distinct r.parentid from fpx_abnormal r where r.parenttype='out-warehouse'
+			<if test="item.beginAbnormalat != null and item.beginAbnormalat != ''">
+			<![CDATA[and r.createdat >= to_date(CONCAT(#{item.beginAbnormalat}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="item.endAbnormalat != null and item.endAbnormalat != ''">
+			<![CDATA[and r.createdat <= to_date(CONCAT(#{item.endAbnormalat}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>)
+		</if>
+	</sql>
+	
+	<sql id="base_out_orderby_sql">
+		<include refid="base_out_sql" /> order by o.createdat desc, o.warehouseCode desc, o.referenceCode desc
+	</sql>
+	
+	<select id="count" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_out_orderby_sql" />) t 
+	</select>
+	
+	<select id="selectByPage" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select t3.*, t4.id as detailId, t4.sku, t4.quantity, cc.*
+		from (select * 
+			  from (select t.*, rownum rn from (<include refid="base_out_orderby_sql" />) t 
+			  <![CDATA[ 
+			  where rownum<=#{end}) t2 where t2.rn>=#{start}
+			  ]]>) t3, fpx_out_warehouse_detail t4, 
+			  (select max(c.id) consigneeId, c.parentid, max(c.fullname) fullname, max(c.countrycode) countrycode
+			  		  , max(c.street) street, max(c.city) city, max(c.state) state, max(c.postalcode) postalcode
+			  		  , max(c.email) email, max(c.phone) phone, max(c.company) company, max(c.doorplate) doorplate, max(c.cardid) cardid
+			   from fpx_out_warehouse_consignee c group by c.parentid) cc
+		where t3.id = t4.parentid and t3.id=cc.parentid
+		order by t3.createdat desc, t3.warehouseCode desc, t3.referenceCode desc
+	</select>
+	
+	<select id="select" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		<include refid="base_out_orderby_sql" />
+	</select>
+	
+	<select id="selectPendingIds" resultType="java.lang.Long">
+		select o.id from fpx_out_warehouse o where o.status in ('pending')
+	</select>
+	
+	<select id="selectExportData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select a.*, c.*, d.*, e.abnormal
+		from (<include refid="base_out_orderby_sql" />) a, fpx_out_warehouse_consignee c, fpx_out_warehouse_detail d
+			, (select e2.parentid, wm_concat(e2.reason) abnormal from (select distinct e1.parentid, e1.reason from fpx_abnormal e1) e2 group by e2.parentid) e
+		where a.id=c.parentid and a.id=d.parentid and a.id=e.parentid(+)
+		order by a.createdat desc, a.warehouseCode desc, a.referenceCode desc
+	</select>
+	
+	<select id="selectOfflineExportData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 	tt.merchantfulfillmentorderid, max(tt.displayableorderid) displayableorderid, max(tt.displayableorderdate) displayableorderdate
+		        , tt.merchantsku, sum(tt.quantity) quantity, max(tt.merchantfulfillmentorderitemid) merchantfulfillmentorderitemid, max(tt.giftmessage) giftmessage
+		        , max(tt.displayablecomment) displayablecomment, max(tt.perunitdeclaredvalue) perunitdeclaredvalue, max(tt.displayableordercomment) displayableordercomment
+		        , max(tt.deliverysla) deliverysla, max(tt.addressname) addressname, max(tt.addressfieldone) addressfieldone, max(tt.addressfieldtwo) addressfieldtwo
+		        , max(tt.addressfieldthree) addressfieldthree, max(tt.addresscity) addresscity, max(tt.addresscountrycode) addresscountrycode
+		        , max(tt.addressstateorregion) addressstateorregion, max(tt.addresspostalcode) addresspostalcode, max(tt.addressphonenumber) addressphonenumber
+		        , max(tt.notificationemail) notificationemail, max(tt.abnormal) abnormal 
+		from 	(select t.merchantfulfillmentorderid, t.displayableorderid, t.displayableorderdate, t.merchantsku, t.quantity, t.merchantfulfillmentorderitemid
+		    			, t.giftmessage, t.displayablecomment, t.perunitdeclaredvalue, t.displayableordercomment, t.deliverysla, t.addressname, t.addressfieldone
+		    			, t.addressfieldtwo, t.addressfieldthree, t.addresscity, t.addresscountrycode, t.addressstateorregion, t.addresspostalcode, t.addressphonenumber
+		    			, t.notificationemail, t.abnormal
+	    		from 	(select a.*, s.*, e.*
+	    				from (<include refid="base_out_orderby_sql" />) a, fpx_out_warehouse_consignee c, fpx_out_warehouse_detail d, sys_uswest_shipping s
+							, (select e2.parentid, wm_concat(e2.reason) abnormal from (select distinct e1.parentid, e1.reason from fpx_abnormal e1) e2 group by e2.parentid) e
+						where 	a.id=c.parentid and a.id=d.parentid and a.orderid=s.merchantfulfillmentorderid and d.sku=s.merchantsku and a.id=e.parentid(+)
+						order by s.displayableorderdate desc, s.merchantfulfillmentorderid desc, s.merchantsku desc) t) tt
+		group by tt.merchantfulfillmentorderid, tt.merchantsku
+	</select>
+	
+	<select id="load" resultType="java.util.HashMap" parameterType="java.lang.Long">
+		select o.* from fpx_out_warehouse o where o.id=#{id}
+	</select>
+	
+	<select id="loadDetails" resultType="java.util.HashMap" parameterType="java.lang.Long">
+		select d.* from fpx_out_warehouse_detail d where d.parentid=#{parentId}
+	</select>
+	
+	<select id="loadConsignee" resultType="java.util.HashMap" parameterType="java.lang.Long">
+		select c.* from fpx_out_warehouse_consignee c where c.parentid=#{parentId}
+	</select>
+	
+	<insert id="insertOutDetail">
+		insert into fpx_out_warehouse_detail (id,parentid,sku,quantity,skulabelcode,skuvalue)
+		values 
+		(#{item.id,jdbcType=NUMERIC},#{item.parentId,jdbcType=NUMERIC},#{item.sku,jdbcType=VARCHAR}
+		,#{item.quantity,jdbcType=NUMERIC},#{item.skuLabelCode,jdbcType=VARCHAR},#{item.skuValue,jdbcType=VARCHAR})
+	</insert>
+	
+	<insert id="insertConsignee">
+		insert into fpx_out_warehouse_consignee (id,parentid,fullname,countrycode,street,city,state,postalcode,email,phone,company,doorplate,cardid)
+		values 
+		(#{item.id,jdbcType=NUMERIC},#{item.parentId,jdbcType=NUMERIC},#{item.fullName,jdbcType=VARCHAR},#{item.countryCode,jdbcType=VARCHAR}
+		,#{item.street,jdbcType=VARCHAR},#{item.city,jdbcType=VARCHAR},#{item.state,jdbcType=VARCHAR},#{item.postalCode,jdbcType=VARCHAR}
+		,#{item.email,jdbcType=VARCHAR},#{item.phone,jdbcType=VARCHAR},#{item.company,jdbcType=VARCHAR},#{item.doorplate,jdbcType=VARCHAR},#{item.cardId,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateConsignee">
+		update fpx_out_warehouse_consignee c
+		set	c.fullName=#{item.fullName,jdbcType=VARCHAR}
+	        , c.countryCode=#{item.countryCode,jdbcType=VARCHAR}
+	        , c.street=#{item.street,jdbcType=VARCHAR}
+	        , c.city=#{item.city,jdbcType=VARCHAR}
+	        , c.state=#{item.state,jdbcType=VARCHAR}
+	        , c.postalCode=#{item.postalCode,jdbcType=VARCHAR}
+	        , c.email=#{item.email,jdbcType=VARCHAR}
+	        , c.phone=#{item.phone,jdbcType=VARCHAR}
+	        , c.company=#{item.company,jdbcType=VARCHAR}
+	        , c.doorplate=#{item.doorplate,jdbcType=VARCHAR}
+	        , c.cardId=#{item.cardId,jdbcType=VARCHAR}
+	    where c.id=#{item.id,jdbcType=NUMERIC} and c.parentId=#{item.parentId,jdbcType=NUMERIC}
+	</update>
+	
+	<update id="updateShippingNumber">
+		update sys_uswest_shipping s 
+		set s.carrierservicetypecode=#{item.carrierCode}
+		    , s.tranckingnumber=#{item.shippingNumber}
+		    , s.status=#{item.status}
+		    , s.last_update_date=sysdate
+		where s.merchantfulfillmentorderid=#{item.orderId} and s.status=0
+	</update>
+</mapper>

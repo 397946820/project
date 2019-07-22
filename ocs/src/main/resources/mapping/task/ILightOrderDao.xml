@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.ILightOrderDao">
+	<resultMap type="com.it.ocs.task.model.LightOrderModel" id="lightOrderResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="ORDER_ID" property="order_id"  />
+		<result column="STATE" property="state"  />
+		<result column="STATUS" property="status"  />
+		<result column="DISCOUNT_AMOUNT" property="discount_amount"  />
+		<result column="SUBTOTAL" property="subtotal"  />
+		<result column="GRAND_TOTAL" property="grand_total"  />
+		<result column="SHIPPING_AMOUNT" property="shipping_amount"  />
+		<result column="TAX_AMOUNT" property="tax_amount"  />
+		<result column="TOTAL_CANCELED" property="total_canceled"  />
+		<result column="TOTAL_INVOICED" property="total_invoiced"  />
+		<result column="TOTAL_PAID" property="total_paid"  />
+		<result column="TOTAL_QTY_ORDERED" property="total_qty_ordered"  />
+		<result column="TOTAL_REFUNDED" property="total_refunded"  />
+		<result column="GIFT_MESSAGE" property="gift_message"  />
+		<result column="WEIGHT" property="weight"  />
+		<result column="CUSTOMER_EMAIL" property="customer_email"  />
+		<result column="CUSTOMER_FIRSTNAME" property="customer_firstname"  />
+		<result column="CUSTOMER_LASTNAME" property="customer_lastname"  />
+		<result column="CUSTOMER_MIDDLENAME" property="customer_middlename"  />
+		<result column="GLOBAL_CURRENCY_CODE" property="global_currency_code"  />
+		<result column="ORDER_CURRENCY_CODE" property="order_currency_code"  />
+		<result column="REMOTE_IP" property="remote_ip"  />
+		<result column="SHIPPING_METHOD" property="shipping_method"  />
+		<result column="LIGHT_CREATED_AT" property="light_created_at"  />
+		<result column="LIGHT_UPDATED_AT" property="light_updated_at"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+	</resultMap>
+	<insert id="insertLightOrders" parameterType="java.util.List">
+		INSERT INTO LIGHT_ORDER(
+			ENTITY_ID,
+			PLATFORM,
+			ORDER_ID,
+			STATE,
+			STATUS,
+			DISCOUNT_AMOUNT,
+			SUBTOTAL,
+			GRAND_TOTAL,
+			SHIPPING_AMOUNT,
+			TAX_AMOUNT,
+			TOTAL_CANCELED,
+			TOTAL_INVOICED,
+			TOTAL_PAID,
+			TOTAL_QTY_ORDERED,
+			TOTAL_REFUNDED,
+			GIFT_MESSAGE,
+			WEIGHT,
+			CUSTOMER_EMAIL,
+			CUSTOMER_FIRSTNAME,
+			CUSTOMER_LASTNAME,
+			CUSTOMER_MIDDLENAME,
+			GLOBAL_CURRENCY_CODE,
+			ORDER_CURRENCY_CODE,
+			REMOTE_IP,
+			SHIPPING_METHOD,
+			LIGHT_CREATED_AT,
+			LIGHT_UPDATED_AT,
+			CREATED_AT,
+			UPDATED_AT)  
+		select c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.entity_id,jdbcType=BIGINT},
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.order_id,jdbcType=VARCHAR},
+				#{item.state,jdbcType=VARCHAR},
+				#{item.status,jdbcType=VARCHAR},
+				#{item.discount_amount,jdbcType=BIGINT},
+				#{item.subtotal,jdbcType=BIGINT},
+				#{item.grand_total,jdbcType=BIGINT},
+				#{item.shipping_amount,jdbcType=BIGINT},
+				#{item.tax_amount,jdbcType=BIGINT},
+				#{item.total_canceled,jdbcType=BIGINT},
+				#{item.total_invoiced,jdbcType=BIGINT},
+				#{item.total_paid,jdbcType=BIGINT},
+				#{item.total_qty_ordered,jdbcType=BIGINT},
+				#{item.total_refunded,jdbcType=BIGINT},
+				#{item.gift_message,jdbcType=VARCHAR},
+				#{item.weight,jdbcType=BIGINT},
+				#{item.customer_email,jdbcType=VARCHAR},
+				#{item.customer_firstname,jdbcType=VARCHAR},
+				#{item.customer_lastname,jdbcType=VARCHAR},
+				#{item.customer_middlename,jdbcType=VARCHAR},
+				#{item.global_currency_code,jdbcType=VARCHAR},
+				#{item.order_currency_code,jdbcType=VARCHAR},
+				#{item.remote_ip,jdbcType=VARCHAR},
+				#{item.shipping_method,jdbcType=VARCHAR},
+				#{item.light_created_at,jdbcType=TIMESTAMP},
+				#{item.light_updated_at,jdbcType=TIMESTAMP},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	
+	<select id="selectMaxCreatedAt" resultType="java.lang.String">
+		select to_char(max(light_updated_at) ,'yyyy-mm-dd HH24:mi:ss') from LIGHT_ORDER
+	</select>
+
+	<select id="findLightOrders" resultMap="lightOrderResult" parameterType="java.util.List">
+		 select ORDER_ID,ENTITY_ID from LIGHT_ORDER
+		 where ORDER_ID IN  
+        <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.order_id}  
+        </foreach> 
+	</select>
+	<update id="updateLightOrders" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update LIGHT_ORDER bao 
+	   	set
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			STATE = #{item.state,jdbcType=VARCHAR},
+			STATUS = #{item.status,jdbcType=VARCHAR},
+			DISCOUNT_AMOUNT = #{item.discount_amount,jdbcType=BIGINT},
+			SUBTOTAL = #{item.subtotal,jdbcType=BIGINT},
+			GRAND_TOTAL = #{item.grand_total,jdbcType=BIGINT},
+			SHIPPING_AMOUNT = #{item.shipping_amount,jdbcType=BIGINT},
+			TAX_AMOUNT = #{item.tax_amount,jdbcType=BIGINT},
+			TOTAL_CANCELED = #{item.total_canceled,jdbcType=BIGINT},
+			TOTAL_INVOICED = #{item.total_invoiced,jdbcType=BIGINT},
+			TOTAL_PAID = #{item.total_paid,jdbcType=BIGINT},
+			TOTAL_QTY_ORDERED = #{item.total_qty_ordered,jdbcType=BIGINT},
+			TOTAL_REFUNDED = #{item.total_refunded,jdbcType=BIGINT},
+			GIFT_MESSAGE = #{item.gift_message,jdbcType=VARCHAR},
+			WEIGHT = #{item.weight,jdbcType=BIGINT},
+			CUSTOMER_EMAIL = #{item.customer_email,jdbcType=VARCHAR},
+			CUSTOMER_FIRSTNAME = #{item.customer_firstname,jdbcType=VARCHAR},
+			CUSTOMER_LASTNAME = #{item.customer_lastname,jdbcType=VARCHAR},
+			CUSTOMER_MIDDLENAME = #{item.customer_middlename,jdbcType=VARCHAR},
+			GLOBAL_CURRENCY_CODE = #{item.global_currency_code,jdbcType=VARCHAR},
+			ORDER_CURRENCY_CODE = #{item.order_currency_code,jdbcType=VARCHAR},
+			REMOTE_IP = #{item.remote_ip,jdbcType=VARCHAR},
+			SHIPPING_METHOD = #{item.shipping_method,jdbcType=VARCHAR},
+			LIGHT_CREATED_AT = #{item.light_created_at,jdbcType=TIMESTAMP},
+			LIGHT_UPDATED_AT = #{item.light_updated_at,jdbcType=TIMESTAMP},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP}
+
+	   where bao.ORDER_ID = #{item.order_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

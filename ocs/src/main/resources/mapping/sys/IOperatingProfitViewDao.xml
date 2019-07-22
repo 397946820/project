@@ -1,0 +1,1569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitViewDao">
+	
+	<sql id="newProductRatio_sql_1">
+		<if test="param.year != null and param.year != ''">
+			<foreach collection="param.year" item="item" open="AND YEAR IN (" separator="," close=")">
+            	#{item}
+       		</foreach>
+		</if>
+		<if test="param.month != null and param.month != ''">
+			<foreach collection="param.month" item="item" open="AND MONTH IN (" separator="," close=")">
+            	#{item}
+       		</foreach>
+		</if>
+	</sql>
+	
+	<sql id="newProductRatio_sql_2">
+		<if test="param.year != null and param.year != ''">
+			,YEAR
+		</if>
+		<if test="param.month != null and param.month != ''">
+			,MONTH
+		</if>
+	</sql>
+	
+	<sql id="newProductRatio_sql_3">
+		AND USER_ID = W.USER_ID
+		<if test="param.year != null and param.year != ''">
+			AND YEAR = V.YEAR
+		</if>
+		<if test="param.month != null and param.month != ''">
+			AND MONTH = V.MONTH
+		</if>
+	</sql>
+
+	<sql id="newProductRatio_sql">
+		<choose>
+   			<when test="param.department == 2 and (param.code == 1 or param.code == 6)">
+   				CONCAT(NVL(TO_CHAR(ROUND(SUM(V.NEW_SALES) / (SELECT SALES_AMOUNT
+		           FROM (SELECT USER_ID, SUM(DISTINCT SALES_AMOUNT) SALES_AMOUNT <include refid="newProductRatio_sql_2"/>
+		                   FROM (SELECT V1.SALES_AMOUNT,
+		                                V1.USER_ID,
+		                                SUBSTR(V1.MONTH_OF_YEAR,
+		                                       0,
+		                                       INSTR(V1.MONTH_OF_YEAR, '-', 1, 1) - 1) YEAR,
+		                                SUBSTR(V1.MONTH_OF_YEAR,
+		                                       INSTR(V1.MONTH_OF_YEAR, '-', 1, 1) + 1) MONTH
+		                           FROM SYS_OPERATING_PROFIT_VIEW V1
+		                          WHERE V1.PRICE != 0)
+		                  WHERE 1 = 1
+		                  	<include refid="newProductRatio_sql_1"/>
+		                  	<if test="param.personnel != null and param.personnel != ''">
+			                    <foreach collection="param.personnel" item="item" open="AND USER_ID IN (" separator="," close=")">
+						     		#{item}
+						 	    </foreach>
+						 	</if>
+		                  GROUP BY USER_ID <include refid="newProductRatio_sql_2"/>)
+		          WHERE 1 = 1
+		          	<include refid="newProductRatio_sql_3"/>) * 100,1),'FM999999990.0'),0),'%') NEWPRODUCTRATIO,
+   			</when>
+   			<when test="param.code == 7">
+   				CONCAT(NVL(TO_CHAR(ROUND(SUM(V.NEW_SALES) / (SELECT SALES_AMOUNT
+		           FROM (SELECT USER_ID, SUM(DISTINCT SALES_AMOUNT) SALES_AMOUNT <include refid="newProductRatio_sql_2"/>
+		                   FROM (SELECT V1.SALES_AMOUNT,
+		                                V1.USER_ID,
+		                                SUBSTR(V1.MONTH_OF_YEAR,	
+		                                       0,
+		                                       INSTR(V1.MONTH_OF_YEAR, '-', 1, 1) - 1) YEAR,
+		                                SUBSTR(V1.MONTH_OF_YEAR,
+		                                       INSTR(V1.MONTH_OF_YEAR, '-', 1, 1) + 1) MONTH
+		                           FROM SYS_OPERATING_PROFIT_VIEW V1
+		                          WHERE V1.PRICE != 0)
+		                  WHERE 1 = 1
+		                  	<include refid="newProductRatio_sql_1"/>
+		                    AND USER_ID = #{param.userId}
+		                  GROUP BY USER_ID <include refid="newProductRatio_sql_2"/>)
+		          WHERE 1 = 1
+		          	<include refid="newProductRatio_sql_3"/>) * 100,1),'FM999999990.0'),0),'%') NEWPRODUCTRATIO,
+   			</when>
+   			<otherwise>
+   				decode(SUM(V.PRICE),0,0||'%',CONCAT(NVL(TO_CHAR(ROUND(SUM(V.NEW_SALES) / SUM(V.PRICE) * 100, 1),'FM999999990.0'),0),'%')) NEWPRODUCTRATIO,
+   			</otherwise>
+   		</choose>
+	</sql>
+	
+	<sql id="inventoryTurnover_where_sql_1">
+		<if test="param.flag == 1">
+			<if test="param.platform != null and param.platform != ''">
+				<foreach collection="param.platform" item="item" open="AND T.PLATFORM IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.site != null and param.site != ''">
+				<foreach collection="param.site" item="item" open="AND T.COUNTRY IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.year != null and param.year != ''">
+				<foreach collection="param.year" item="item" open="AND T.YEAR IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.month != null and param.month != ''">
+				<foreach collection="param.month" item="item" open="AND T.MONTH IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.quarter != null and param.quarter != ''">
+				<foreach collection="param.quarter" item="item" open="AND T.QUARTER IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.category != null and param.category != ''">
+				<foreach collection="param.category" item="item" open="AND T.CATEGORY IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.sku != null and param.sku != ''">
+				<foreach collection="param.sku" item="item" open="AND T.SKU IN (" separator="," close=")">
+	            	UPPER(#{item})
+	       		</foreach>
+			</if>
+			<if test="param.code == 1 or param.code == 6 or param.code == 7">
+				<if test="param.platform != null and param.platform != ''">
+					<foreach collection="param.platform" item="item" open="AND T.PLATFORM IN (" separator="," close=")">
+			            	#{item}
+			    	</foreach>
+				</if>
+			</if>
+			<if test="param.department == 2">
+                  <foreach collection="param.personnel" item="item" open="AND T.USER_ID IN (" separator="," close=")">
+	     			#{item}
+	 	       </foreach>
+		 	</if>
+		</if>
+		<if test="param.code == 7">
+			AND T.USER_ID = W.USER_ID			  	
+		</if>
+		<if test="param.code == 2 or param.code == 3 or param.department == 1">
+			AND T.PLATFORM = 'amazon'
+		</if>
+		<if test="param.code == 5">
+			AND T.PLATFORM = 'light'
+		</if>
+		<if test="param.code == 4">
+			AND T.PLATFORM = 'ebay'
+		</if>
+	</sql>
+	
+	<sql id="inventoryTurnover_where_sql">
+		<if test="param.flag == 1">
+			<if test="param.platform != null and param.platform != ''">
+				AND T.PLATFORM = V.PLATFORM
+			</if>
+			<if test="param.site != null and param.site != ''">
+				AND T.COUNTRY = V.SITE
+			</if>
+			<if test="param.year != null and param.year != ''">
+				AND T.YEAR = V.YEAR
+			</if>
+			<if test="param.month != null and param.month != ''">
+				AND T.MONTH = V.MONTH
+			</if>
+			<if test="param.quarter != null and param.quarter != ''">
+				AND T.QUARTER = V.QUARTER
+			</if>
+			<if test="param.category != null and param.category != ''">
+				AND T.CATEGORY = V.CATEGORY
+			</if>
+			<if test="param.sku != null and param.sku != ''">
+				AND T.SKU = UPPER(V.SKU)
+			</if>
+			<if test="param.code == 1 or param.code == 6 or param.code == 7">
+				<if test="param.platform != null and param.platform != ''">
+					<foreach collection="param.platform" item="item" open="AND T.PLATFORM IN (" separator="," close=")">
+			            	#{item}
+			    	</foreach>
+				</if>
+			</if>
+			<if test="param.department == 2">
+				AND T.USER_ID = W.USER_ID
+		 	</if>
+		</if>
+		<if test="param.flag == 2">
+			AND T.PLATFORM = V.PLATFORM
+		</if>
+	</sql>
+	
+	<sql id="inventoryTurnover_group_sql">
+		GROUP BY 
+		<trim prefixOverrides=",">
+			<if test="param.flag == 1">
+				<if test="param.platform != null and param.platform != ''">
+					,T.PLATFORM
+				</if>
+				<if test="param.site != null and param.site != ''">
+					,T.COUNTRY
+				</if>
+				<if test="param.year != null and param.year != ''">
+					,T.YEAR
+				</if>
+				<if test="param.month != null and param.month != ''">
+					,T.MONTH
+				</if>
+				<if test="param.quarter != null and param.quarter != ''">
+					,T.QUARTER
+				</if>
+				<if test="param.category != null and param.category != ''">
+					,T.CATEGORY
+				</if>
+				<if test="param.sku != null and param.sku != ''">
+					,T.SKU
+				</if>
+				<if test="param.department == 2 or param.code == 7">
+					,T.USER_ID
+				</if>
+				<if test="param.department == 1  or param.code == 2 or param.code == 3 or param.code == 5">
+					,PLATFORM
+				</if>
+			</if>
+			<if test="param.flag == 2">
+				,PLATFORM
+			</if>
+		</trim>
+	</sql>
+	
+	<sql id="inventoryTurnover_sql">
+	   (SELECT decode(SUM(T.SALES_COST),0,NULL,ROUND(SUM(T.T_PRICE_+T.L_PRICE_)/2/SUM(T.SALES_COST),1)) 
+		  FROM (SELECT UPPER(S.SKU) SKU,
+		               S.CATEGORY,
+		               S.PLATFORM,
+		               S.COUNTRY,
+		               SUBSTR(S.MONTH_OF_YEAR,
+		                      0,
+		                      INSTR(S.MONTH_OF_YEAR, '-', 1, 1) - 1) YEAR,
+		               SUBSTR(S.MONTH_OF_YEAR, INSTR(S.MONTH_OF_YEAR, '-', 1, 1) + 1) MONTH,
+		               S.T_PRICE_,
+		               S.L_PRICE_,
+		               USER_ID,
+		               S.SALES_COST,
+		               QUARTER
+		          FROM SYS_OPERATING_PROFIT_SKU S
+		          <if test="param.other == 0 or param.count == 1">
+		          	WHERE (S.PLATFORM != 'amazon' OR (S.PLATFORM = 'amazon' AND S.COUNTRY IN ('US','JP','CA','DE')))
+		          </if>
+		          <choose>
+		          	<when test="((param.flag == 1 and param.code == 7) or (param.flag == 1 and (param.code == 1 or param.code == 6)
+		          	and param.department == 2)) and (param.platform == '' or param.platform == null)">
+		          		UNION ALL
+				        SELECT SKU,
+				               CATEGORY,
+				               '' PLATFORM,
+				               '' COUNTRY,
+				               YEAR,
+				               MONTH,
+				               T_PRICE,
+				               L_PRICE,
+				               USER_ID,
+				               0 SALES_COST,
+				               QUARTER
+				          FROM (SELECT UPPER(SKU) SKU,
+				                       CATEGORY,
+				                       SUBSTR(MONTH_OF_YEAR,
+				                              0,
+				                              INSTR(MONTH_OF_YEAR, '-', 1, 1) - 1) YEAR,
+				                       SUBSTR(MONTH_OF_YEAR,
+				                              INSTR(MONTH_OF_YEAR, '-', 1, 1) + 1) MONTH,
+				                       T_PRICE,
+				                       L_PRICE,
+				                       USER_ID,
+				                       QUARTER
+				                  FROM SYS_OPERATING_PROFIT_STOCK)
+		          	</when>
+		          </choose>
+		        ) T WHERE 1 = 1
+		        <include refid="inventoryTurnover_where_sql_1"/>
+		        <if test="param.count == 0">
+		        	<include refid="inventoryTurnover_where_sql"/>
+		        	<include refid="inventoryTurnover_group_sql"/>
+		        </if>
+		          ) inventoryTurnover,
+	</sql>
+
+	<sql id="base_sql_">
+		SELECT <include refid="newProductRatio_sql"/>
+			   TO_CHAR(SUM(V.PRICE),'FM9,999,999,999,999,999,999,999,999') PRICE,
+		       TO_CHAR(SUM(V.SALES_COST * V.COST),'FM9,999,999,999,999,999,999,999,999') SALESCOST,
+		       TO_CHAR(SUM(V.SALE_OF_MAORI),'FM9,999,999,999,999,999,999,999,999') SALEOFMAORI,
+		       decode(SUM(V.PRICE),0,NULL,CONCAT(TO_CHAR(ROUND(SUM(V.PRICE - V.SALES_COST * V.COST) / SUM(V.PRICE) * 100, 1),'FM999999990.0'),'%')) GROSSMARGINSALES,
+		       TO_CHAR(SUM(V.OPERATING_PROFIT),'FM9,999,999,999,999,999,999,999,999') OPERATINGPROFIT,
+		       decode(SUM(V.PRICE),0,NULL,CONCAT(TO_CHAR(ROUND(SUM(V.OPERATING_PROFIT) / SUM(V.PRICE) * 100, 1),'FM999999990.0'),'%')) OPERATINGPROFITMARGIN,
+		       TO_CHAR(SUM(V.NEW_SALES),'FM9,999,999,999,999,999,999,999,999') NEWSALES,
+		       CASE
+		         WHEN SUM(V.QTY) = 0 THEN
+		          0
+		         ELSE
+		          DECODE(SUM(V.PRICE),
+		                 0,
+		                 0,
+		                 ROUND(SUM(V.PRICE) / SUM(V.QTY) * (1 - SUM(V.OPERATING_PROFIT) / SUM(V.PRICE)),
+		                       2))
+		       END BOTTOMPRICE,
+		       <include refid="inventoryTurnover_sql"/>      
+	</sql>
+	
+	<sql id="base_sql_1">
+		SELECT SUM(V.PRICE) PRICE,
+		       SUM(V.SALES_COST * V.COST) SALESCOST,
+		       SUM(V.SALE_OF_MAORI) SALEOFMAORI,
+		       SUM(V.PRICE - V.SALES_COST * V.COST) GROSSMARGINSALES,
+		       SUM(V.OPERATING_PROFIT) OPERATINGPROFIT,
+		       SUM(V.NEW_SALES) NEWSALES,
+		       <include refid="inventoryTurnover_sql"/> 
+	</sql>
+	
+	<sql id="base_sql">
+		  FROM (SELECT V.*,
+				       SUBSTR(V.MONTH_OF_YEAR, 0, INSTR(V.MONTH_OF_YEAR, '-', 1, 1) - 1) YEAR,
+				       SUBSTR(V.MONTH_OF_YEAR, INSTR(V.MONTH_OF_YEAR, '-', 1, 1) + 1) MONTH
+				  FROM SYS_OPERATING_PROFIT_VIEW V) V
+	</sql>
+	
+	<sql id="coloum_sql">
+		<if test="param.flag == 1">
+			<if test="param != null">
+				<if test="param.platform != null and param.platform != ''">
+					,V.PLATFORM
+				</if>
+				<if test="param.site != null and param.site != ''">
+					,V.SITE
+				</if>
+				<if test="param.year != null and param.year != ''">
+					,V.YEAR
+				</if>
+				<if test="param.quarter != null and param.quarter != ''">
+					,V.QUARTER
+				</if>
+				<if test="param.month != null and param.month != ''">
+					,V.MONTH
+				</if>
+				<if test="param.category != null and param.category != ''">
+					,V.CATEGORY
+				</if>
+				<if test="param.sku != null and param.sku != ''">
+					,V.SKU
+				</if>
+			</if>
+		</if>
+		<if test="param.flag == 2">
+			,V.PLATFORM
+		</if>
+	</sql>
+	
+	<sql id="coloum_sql_">
+		<choose>
+			<when test="param.code == 1 or param.code == 2 or param.code == 6">
+				<choose>
+					<when test="param.department != null and param.department != '' and param.personnel != null and param.personnel != ''">
+						,(SELECT R.NICK
+					        FROM SYS_USER R
+					       WHERE R.ENABLED_FLAG = 'Y'
+					         AND R.USER_ID = W.USER_ID) NICK
+					</when>
+				</choose>
+			</when>
+			<when test="param.code == 3 or param.code == 7">
+				,(SELECT R.NICK
+			        FROM SYS_USER R
+			       WHERE R.ENABLED_FLAG = 'Y'
+			         AND R.USER_ID = W.USER_ID) NICK
+			</when>
+		</choose>
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<if test="param.platform != null and param.platform != ''">
+				<foreach collection="param.platform" item="item" open="AND V.PLATFORM IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.site != null and param.site != ''">
+				<foreach collection="param.site" item="item" open="AND V.SITE IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.year != null and param.year != ''">
+				<foreach collection="param.year" item="item" open="AND V.YEAR IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.month != null and param.month != ''">
+				<foreach collection="param.month" item="item" open="AND V.MONTH IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.quarter != null and param.quarter != ''">
+				<foreach collection="param.quarter" item="item" open="AND V.QUARTER IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.category != null and param.category != ''">
+				<foreach collection="param.category" item="item" open="AND V.CATEGORY IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+			<if test="param.sku != null and param.sku != ''">
+				<foreach collection="param.sku" item="item" open="AND V.SKU IN (" separator="," close=")">
+	            	#{item}
+	       		</foreach>
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="user_sql">
+		<choose>
+			<when test="param.code == 2">
+				<choose>
+					<when test="param.personnel == null or param.personnel == ''">
+						WHERE V.PLATFORM = 'amazon'
+					</when>
+					<when test="param.department != null and param.department != '' and param.personnel != null and param.personnel != ''">
+						<include refid="user_sql_"/>
+					</when>
+				</choose>
+			</when>
+			<when test="param.code == 3">
+				<include refid="amazon_sql"/>
+			   	AND W.USER_ID = #{param.userId}
+			</when>
+			<when test="param.code == 4">
+				WHERE V.PLATFORM in ('ebay','walmart')
+			</when>
+			<when test="param.code == 5">
+				WHERE V.PLATFORM = 'light'
+			</when>
+			<when test="param.code == 7">
+				<include refid="cpb_sql"/>
+			    AND W.USER_ID = #{param.userId}
+			</when>
+			<otherwise>
+				<choose>
+					<when test="param.personnel == null or param.personnel == ''">
+						WHERE 1 = 1
+					</when>
+					<when test="param.department != null and param.department != '' and param.personnel != null and param.personnel != ''">
+						<include refid="user_sql_"/>
+					</when>
+				</choose>
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<sql id="user_sql_">
+		<choose>
+			<when test="param.department == 1">
+				<include refid="amazon_sql"/>
+			</when>
+			<when test="param.department == 2">
+				<include refid="cpb_sql"/>
+			</when>
+		</choose>
+	    <foreach collection="param.personnel" item="item" open="AND W.USER_ID IN (" separator="," close=")">
+       		#{item}
+   	    </foreach>
+	</sql>
+	
+	<sql id="amazon_sql">
+		,(SELECT DISTINCT C.COUNTRY, C.USER_ID, L.CATEGORY, L.PLATFORM,L.MONTH_OF_YEAR
+	          FROM SYS_OPERATING_PROFIT_COUNTRY C, SYS_OPERATING_PROFIT_LINK L
+	         WHERE L.ENTITY_ID = C.PARENT_ID
+	           AND L.PLATFORM = 'amazon') W
+	 WHERE V.CATEGORY = W.CATEGORY
+	   AND V.PLATFORM = W.PLATFORM
+	   AND V.SITE = W.COUNTRY
+	   AND V.MONTH_OF_YEAR = W.MONTH_OF_YEAR
+	   AND V.PLATFORM = 'amazon'
+	</sql>
+	
+	<sql id="cpb_sql">
+		,SYS_OPERATING_PROFIT_MAPPING W
+		 WHERE V.CATEGORY = W.CATEGORY
+		   AND V.SKU = W.SKU
+		   AND V.MONTH_OF_YEAR = W.MONTH_OF_YEAR
+	</sql>
+	
+	<sql id="group_sql">
+		GROUP BY
+	</sql>
+	
+	<sql id="group_sql_">
+		<choose>
+			<when test="param.code == 1 or param.code == 2 or param.code == 6">
+				<choose>
+					<when test="param.department != null and param.department != '' and param.personnel != null and param.personnel != ''">
+						,W.USER_ID
+					</when>
+				</choose>
+			</when>
+			<when test="param.code == 3 or param.code == 7">
+				,W.USER_ID
+			</when>
+		</choose>
+	</sql>
+
+	<select id="findAll" resultType="com.it.ocs.sys.model.OperatingProfitViewModel">
+		<include refid="base_sql_"/>  
+		<trim prefixOverrides=",">
+			<include refid="coloum_sql"/> 
+			<include refid="coloum_sql_"/>
+		</trim> 
+		<include refid="base_sql"/>  
+		<include refid="user_sql"/>  
+		<include refid="where_sql"/>  
+		<include refid="group_sql"/>
+		<trim prefixOverrides=",">
+			<include refid="coloum_sql"/>
+			<include refid="group_sql_"/>
+		</trim>
+	</select>
+	
+	<select id="getFooter" resultType="com.it.ocs.sys.vo.OperatingProfitViewVo">
+		SELECT '汇总' PLATFORM, 
+			   MIN(inventoryTurnover) inventoryTurnover,
+			   TO_CHAR(SUM(PRICE),'FM9,999,999,999,999,999,999,999,999') PRICE,
+		       TO_CHAR(SUM(SALESCOST),'FM9,999,999,999,999,999,999,999,999') SALESCOST,
+		       TO_CHAR(SUM(SALEOFMAORI),'FM9,999,999,999,999,999,999,999,999') SALEOFMAORI,
+		       decode(SUM(PRICE),0,NULL,CONCAT(TO_CHAR(ROUND(SUM(GROSSMARGINSALES)/SUM(PRICE)*100,1),'FM999999990.0'),'%')) GROSSMARGINSALES,
+		       TO_CHAR(SUM(OPERATINGPROFIT),'FM9,999,999,999,999,999,999,999,999') OPERATINGPROFIT,
+		       decode(SUM(PRICE),0,NULL,CONCAT(TO_CHAR(ROUND(SUM(OPERATINGPROFIT)/SUM(PRICE)*100,1),'FM999999990.0'),'%')) OPERATINGPROFITMARGIN,
+		       TO_CHAR(SUM(NEWSALES),'FM9,999,999,999,999,999,999,999,999') NEWSALES ,
+		       decode(SUM(PRICE),0,0||'%',CONCAT(TO_CHAR(ROUND(SUM(NEWSALES) / SUM(PRICE) * 100, 1),'FM999999990.0'),'%')) NEWPRODUCTRATIO
+		FROM ( 
+		<include refid="base_sql_1"/>  
+		<trim prefixOverrides=",">
+			<include refid="coloum_sql"/> 
+			<include refid="coloum_sql_"/>
+		</trim> 
+		<include refid="base_sql"/>  
+		<include refid="user_sql"/>  
+		<include refid="where_sql"/>  
+		<include refid="group_sql"/>
+		<trim prefixOverrides=",">
+			<include refid="coloum_sql"/>
+			<include refid="group_sql_"/>
+		</trim>
+		)
+	</select>
+	
+	<select id="refreshBefore" resultType="java.lang.Integer">
+		SELECT DISTINCT IS_SURE FROM SYS_OPERATING_PROFIT_VIEW WHERE 
+		MONTH_OF_YEAR = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'), 'yyyy-mm')
+	</select>
+	
+	<!-- 刷新 -->
+	<insert id="refresh" statementType="CALLABLE">
+	      {call JOB_OPERATING_PROFIT_FULL()}
+	</insert>
+	
+	<!-- 确认 -->
+	<insert id="sure" statementType="CALLABLE">
+	      {call OPERATING_PROFIT_SURE()}
+	</insert>
+	
+	<select id="getCategoryByCode" resultType="java.util.Map">
+		<choose>
+			<when test="code == 3">
+				SELECT DISTINCT K.CATEGORY NAME, K.CATEGORY VALUE
+				  FROM SYS_OPERATING_PROFIT_LINK K, SYS_OPERATING_PROFIT_COUNTRY C
+				 WHERE K.ENTITY_ID = C.PARENT_ID
+				   AND K.PLATFORM = 'amazon'
+				   AND C.USER_ID = #{userId}
+			</when>
+			<when test="code == 7">
+				SELECT DISTINCT M.CATEGORY NAME, M.CATEGORY VALUE
+				  FROM SYS_OPERATING_PROFIT_MAPPING M
+				 WHERE M.USER_ID = #{userId}
+			</when>
+			<when test="code == 1 or code == 2 or code == 4 or code == 5 or code ==6">
+				SELECT DISTINCT M.CATEGORY NAME, M.CATEGORY VALUE
+				  FROM SYS_OPERATING_PROFIT_MAPPING M
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getSiteByCode" resultType="java.util.Map">
+		<choose>
+			<when test="code == 3">
+				SELECT DISTINCT C.COUNTRY NAME, C.COUNTRY VALUE
+				  FROM SYS_OPERATING_PROFIT_LINK K, SYS_OPERATING_PROFIT_COUNTRY C
+				 WHERE K.ENTITY_ID = C.PARENT_ID
+				   AND K.PLATFORM = 'amazon'
+				   AND C.USER_ID = #{userId}
+			</when>
+			<when test="code == 4">
+				SELECT DISTINCT V.SITE NAME, V.SITE VALUE
+				  FROM SYS_OPERATING_PROFIT_VIEW V
+				 WHERE V.PLATFORM = 'ebay'
+			</when>
+			<when test="code == 5">
+				SELECT DISTINCT V.SITE NAME, V.SITE VALUE
+				  FROM SYS_OPERATING_PROFIT_VIEW V
+				 WHERE V.PLATFORM = 'light'
+			</when>
+			<when test="code == 2">
+				SELECT DISTINCT V.SITE NAME, V.SITE VALUE
+				  FROM SYS_OPERATING_PROFIT_VIEW V
+				 WHERE V.PLATFORM = 'amazon'
+			</when>
+			<when test="code == 1 or code == 6 or code == 7">
+				SELECT DISTINCT V.SITE NAME, V.SITE VALUE
+				  FROM SYS_OPERATING_PROFIT_VIEW V
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getSkuByCategory" resultType="java.util.Map">
+		SELECT DISTINCT M.SKU NAME, M.SKU VALUE
+		  FROM SYS_OPERATING_PROFIT_MAPPING M
+		 WHERE M.CATEGORY IN
+	 	<foreach collection="categorys" index="index" item="category" open="(" separator="," close=")">
+           	#{category}
+      	</foreach>
+	</select>
+	
+	<select id="getPersonnelByDepartment" resultType="java.util.Map">
+		<choose>
+			<when test="department == 1">
+				SELECT DISTINCT S.NICK VALUE, S.USER_ID NAME
+				  FROM SYS_USER                     S,
+				       SYS_OPERATING_PROFIT_COUNTRY C,
+				       SYS_OPERATING_PROFIT_LINK    L
+				 WHERE S.USER_ID = C.USER_ID
+				   AND C.PARENT_ID = L.ENTITY_ID
+				   AND S.ENABLED_FLAG = 'Y'
+			</when>
+			<when test="department == 2">
+				SELECT DISTINCT S.NICK VALUE, S.USER_ID NAME
+				  FROM SYS_USER S, SYS_OPERATING_PROFIT_MAPPING M
+				 WHERE S.USER_ID = M.USER_ID
+				 AND S.ENABLED_FLAG = 'Y'
+			</when>
+		</choose>
+	</select>
+	
+	<sql id="backups_where">
+		<if test="fromDate != '' and toDate != '' and fromDate != null and toDate != null">
+			AND TO_DATE(V.MONTH_OF_YEAR,'YYYY-MM') BETWEEN TO_DATE(#{fromDate},'YYYY-MM') AND TO_DATE(#{toDate},'YYYY-MM')
+		</if>
+		<if test="fromDate != '' and fromDate != null and (toDate == '' or toDate == null)">
+			AND TO_DATE(V.MONTH_OF_YEAR,'YYYY-MM') = TO_DATE(#{fromDate},'YYYY-MM')
+		</if>
+		<if test="(fromDate == '' or fromDate == null) and toDate != '' and toDate != null">
+			AND TO_DATE(V.MONTH_OF_YEAR,'YYYY-MM') = TO_DATE(#{toDate},'YYYY-MM')
+		</if>
+	</sql>
+	
+	<select id="exportBackups" resultType="com.it.ocs.common.CamelKeyMap">
+		<choose>
+			<when test="type == 0">
+				SELECT * FROM CAL_PRICE_PLAN_BACKUPS V WHERE 1 = 1
+				<include refid="backups_where"/>
+			</when>
+			<when test="type == 1">
+				SELECT * FROM CAL_PRODUCT_BACKUPS V WHERE 1 = 1
+				<include refid="backups_where"/>
+			</when>
+			<when test="type == 2">
+				SELECT * FROM CAL_FBA_RULE_BACKUPS V WHERE 1 = 1
+				<include refid="backups_where"/>
+			</when>
+			<when test="type == 3">
+				SELECT * FROM CAL_BASICS_BACKUPS V WHERE 1 = 1
+				<include refid="backups_where"/>
+			</when>
+		</choose>
+	</select>
+	
+	<select id="exportAmazonData" resultType="hashMap">
+		<choose>
+			<when test="type == 1">
+				SELECT V.PLATFORM,
+				       V.SITE,
+				       V.TYPE,
+				       V.SKU,
+				       V.QTY,
+				       V.PRICE,
+				       V.PRICE_,
+				       V.FEE,
+				       V.FEE_,
+				       V.MONTH_OF_YEAR MONTHOFYEAR
+				  FROM (SELECT T.*,
+				               ROUND(T.PRICE * NVL(Y.CURRENCY_RATE, 1), 4) PRICE_,
+				               ROUND(T.FEE * NVL(Y.CURRENCY_RATE, 1), 4) FEE_
+				          FROM (SELECT PLATFORM,
+				                       SITE,
+				                       TYPE,
+				                       SKU,
+				                       SUM(QTY) QTY,
+				                       TO_CHAR(SELF_DATE, 'YYYY-MM') MONTH_OF_YEAR,
+				                       SUM(TO_NUMBER(NVL(PRODUCT_SALES, 0)) +
+				                           TO_NUMBER(NVL(SHIPPING_CREDITS, 0)) +
+				                           TO_NUMBER(NVL(GIFT_WRAP_CREDITS, 0))) PRICE,
+				                       ABS(SUM(TO_NUMBER(NVL(PROMOTIONAL_REBATES, 0)) +
+				                           TO_NUMBER(NVL(SALES_TAX_COLLECTED, 0)) +
+				                           TO_NUMBER(NVL(SELLING_FEES, 0)) +
+				                           TO_NUMBER(NVL(FBA_FEES, 0)) +
+				                           TO_NUMBER(NVL(OTHER_TRANSACTION_FEES, 0)) +
+				                           TO_NUMBER(NVL(OTHER, 0)))) FEE
+				                  FROM (SELECT A.SELF_DATE,
+				                               A.TYPE,
+				                               A.PLATFORM,
+				                               CASE
+				                                 WHEN A.SITE = 'amazon.de' THEN
+				                                  'DE'
+				                                 WHEN A.SITE = 'amazon.co.uk' THEN
+				                                  'GB'
+				                                 WHEN A.SITE = 'amazon.com' THEN
+				                                  'US'
+				                                 WHEN A.SITE = 'amazon.fr' THEN
+				                                  'FR'
+				                                 WHEN A.SITE = 'amazon.ca' THEN
+				                                  'CA'
+				                                 WHEN A.SITE = 'amazon.es' THEN
+				                                  'ES'
+				                                 WHEN A.SITE = 'amazon.it' THEN
+				                                  'IT'
+				                                 WHEN A.SITE = 'amazon.jp' THEN
+				                                  'JP'
+				                               END SITE,
+				                               NVL(K.SKU, A.SKU) SKU,
+				                               A.QUANTITY * NVL(K.QTY, 1) QTY,
+				                               A.PRODUCT_SALES,
+				                               A.SHIPPING_CREDITS,
+				                               A.GIFT_WRAP_CREDITS,
+				                               A.PROMOTIONAL_REBATES,
+				                               A.SALES_TAX_COLLECTED,
+				                               A.SELLING_FEES,
+				                               A.FBA_FEES,
+				                               A.OTHER_TRANSACTION_FEES,
+				                               A.OTHER
+				                          FROM AMAZON_REPORT_ORDER_DATA A, SYS_SKU_LINK K
+				                         WHERE A.SKU = K.P_SKU(+))
+				                 GROUP BY PLATFORM,
+				                          SITE,
+				                          TYPE,
+				                          SKU,
+				                          TO_CHAR(SELF_DATE, 'YYYY-MM')) T,
+				               CAL_CURRENCY_RATE_SYS Y
+				         WHERE T.MONTH_OF_YEAR = Y.MONTH_OF_YEAR(+)
+				           AND T.SITE = Y.COUNTRY_ID(+)) V
+						WHERE 1 = 1 
+			</when>
+			<otherwise>
+				SELECT V.FREIGHT,
+				       A4.FREIGHT FREIGHT_,
+				       (A4.FREIGHT - V.FREIGHT) DIFFERENCE1,
+				       V.ADVERTISING_FEE_GOOGLE ADVERTISINGFEEGOOGLE,
+				       A2.ADVERTISING_FEE_GOOGLE ADVERTISINGFEEGOOGLE_,
+				       (A2.ADVERTISING_FEE_GOOGLE - V.ADVERTISING_FEE_GOOGLE) DIFFERENCE2,
+				       V.ADVERTISING_FEE_BING ADVERTISINGFEEBING,
+				       A2.ADVERTISING_FEE_BING ADVERTISINGFEEBING_,
+				       (A2.ADVERTISING_FEE_BING - V.ADVERTISING_FEE_BING) DIFFERENCE3,
+				       V.CUSTOMER_FEE1 CUSTOMERFEE1,
+				       A4.CUSTOMER_FEE1 CUSTOMERFEE1_,
+				       (A4.CUSTOMER_FEE1 - V.CUSTOMER_FEE1) DIFFERENCE4,
+				       V.CUSTOMER_FEE2 CUSTOMERFEE2,
+				       A4.CUSTOMER_FEE2 CUSTOMERFEE2_,
+				       (A4.CUSTOMER_FEE2 - V.CUSTOMER_FEE2) DIFFERENCE5,
+				       V.CUSTOMER_FEE3 CUSTOMERFEE3,
+				       A4.CUSTOMER_FEE3 CUSTOMERFEE3_,
+				       (A4.CUSTOMER_FEE3 - V.CUSTOMER_FEE3) DIFFERENCE6,
+				       V.CUSTOMER_FEE4 CUSTOMERFEE4,
+				       A4.CUSTOMER_FEE4 CUSTOMERFEE4_,
+				       (A4.CUSTOMER_FEE4 - V.CUSTOMER_FEE4) DIFFERENCE7,
+				       V.CUSTOMER_FEE5 CUSTOMERFEE5,
+				       A4.CUSTOMER_FEE5 CUSTOMERFEE5_,
+				       (A4.CUSTOMER_FEE5 - V.CUSTOMER_FEE5) DIFFERENCE8,
+				       V.FEE_EBAY FEEEBAY,
+				       A4.FEE_EBAY FEEEBAY_,
+				       (A4.FEE_EBAY - V.FEE_EBAY) DIFFERENCE9,
+				       V.CLEAR_FEE CLEARFEE,
+				       A4.CLEAR_FEE CLEARFEE_,
+				       (A4.CLEAR_FEE - V.CLEAR_FEE) DIFFERENCE10,
+				       V.PACKING_CHARGE PACKINGCHARGE,
+				       A4.PACKING_CHARGE PACKINGCHARGE_,
+				       (A4.PACKING_CHARGE - V.PACKING_CHARGE) DIFFERENCE11,
+				       V.PROMOTION_FEE PROMOTIONFEE,
+				       A3.PROMOTION_FEE PROMOTIONFEE_,
+				       (A3.PROMOTION_FEE - V.PROMOTION_FEE) DIFFERENCE12,
+				       V.FEE_AMAZON FEEAMAZON,
+				       A1.FEE_AMAZON FEEAMAZON_,
+				       (A1.FEE_AMAZON - V.FEE_AMAZON) DIFFERENCE13,
+				       V.SALARY,
+				       A5.SALARY SALARY_,
+				       (A5.SALARY - V.SALARY) DIFFERENCE14,
+				       V.MONTH_OF_YEAR MONTHOFYEAR
+				  FROM (SELECT SUM(V.FREIGHT) FREIGHT,
+				               SUM(V.ADVERTISING_FEE_GOOGLE) ADVERTISING_FEE_GOOGLE,
+				               SUM(V.ADVERTISING_FEE_BING) ADVERTISING_FEE_BING,
+				               SUM(V.CUSTOMER_FEE1) CUSTOMER_FEE1,
+				               SUM(V.CUSTOMER_FEE2) CUSTOMER_FEE2,
+				               SUM(V.CUSTOMER_FEE3) CUSTOMER_FEE3,
+				               SUM(V.CUSTOMER_FEE4) CUSTOMER_FEE4,
+				               SUM(V.CUSTOMER_FEE5) CUSTOMER_FEE5,
+				               SUM(V.FEE_EBAY) FEE_EBAY,
+				               SUM(V.CLEAR_FEE) CLEAR_FEE,
+				               SUM(V.PACKING_CHARGE) PACKING_CHARGE,
+				               SUM(V.PROMOTION_FEE) PROMOTION_FEE,
+				               SUM(V.FEE_AMAZON) FEE_AMAZON,
+				               SUM(V.SALARY) SALARY,
+				               MONTH_OF_YEAR
+				          FROM SYS_OPERATING_PROFIT_VIEW V
+				         GROUP BY V.MONTH_OF_YEAR) V,
+				       (SELECT SUM(ROUND(E.FEE * S.CURRENCY_RATE, 4)) FEE_AMAZON,
+				               E.MONTH_OF_YEAR
+				          FROM SYS_OPERATING_PROFIT_SKU_FEE E, CAL_CURRENCY_RATE_SYS S
+				         WHERE E.MONTH_OF_YEAR = S.MONTH_OF_YEAR(+)
+				           AND E.COUNTRY = S.COUNTRY_ID
+				         GROUP BY E.MONTH_OF_YEAR) A1,
+				       (SELECT SUM(E.ADVERTISING_FEE_GOOGLE) ADVERTISING_FEE_GOOGLE,
+				               SUM(E.ADVERTISING_FEE_BING) ADVERTISING_FEE_BING,
+				               MONTH_OF_YEAR
+				          FROM SYS_OPERATING_PROFIT_CATE_FEE E
+				         GROUP BY E.MONTH_OF_YEAR) A2,
+				       (SELECT SUM(E.PROMOTION_FEE) PROMOTION_FEE, MONTH_OF_YEAR
+				          FROM SYS_OPERATING_PROFIT_FEE_CATE E
+				         GROUP BY E.MONTH_OF_YEAR) A3,
+				       (SELECT SUM(E.FREIGHT_US + E.FREIGHT_UK + E.FREIGHT_DE) FREIGHT,
+				               SUM(E.CUSTOMER_FEE1) CUSTOMER_FEE1,
+				               SUM(E.CUSTOMER_FEE2) CUSTOMER_FEE2,
+				               SUM(E.CUSTOMER_FEE3) CUSTOMER_FEE3,
+				               SUM(E.CUSTOMER_FEE4) CUSTOMER_FEE4,
+				               SUM(E.CUSTOMER_FEE5) CUSTOMER_FEE5,
+				               SUM(E.FEE_EBAY) FEE_EBAY,
+				               SUM(E.PACKING_CHARGE) PACKING_CHARGE,
+				               SUM(E.CLEAR_FEE) CLEAR_FEE,
+				               MONTH_OF_YEAR
+				          FROM SYS_OPERATING_PROFIT_FEE E
+				         GROUP BY E.MONTH_OF_YEAR) A4,
+				       (SELECT ROUND(SUM((E.WAGE_BONUSES + E.SOCIAL_SECURITY +
+				                         E.ACCUMULATION_FUND + E.INDIVIDUAL_INCOME_TAX +
+				                         E.OTHER_FEE) / Y.CURRENCY_RATE),
+				                     4) SALARY,
+				               E.MONTH_OF_YEAR
+				          FROM SYS_OPERATING_PROFIT_SALARY E, CAL_CURRENCY_RATE_SYS Y
+				         WHERE E.MONTH_OF_YEAR = Y.MONTH_OF_YEAR(+)
+				           AND Y.COUNTRY_ID = 'CN'
+				         GROUP BY E.MONTH_OF_YEAR) A5
+				 WHERE V.MONTH_OF_YEAR = A1.MONTH_OF_YEAR(+)
+				   AND V.MONTH_OF_YEAR = A2.MONTH_OF_YEAR(+)
+				   AND V.MONTH_OF_YEAR = A3.MONTH_OF_YEAR(+)
+				   AND V.MONTH_OF_YEAR = A4.MONTH_OF_YEAR(+)
+				   AND V.MONTH_OF_YEAR = A5.MONTH_OF_YEAR(+)
+			</otherwise>
+		</choose>
+		<include refid="backups_where"/>
+	</select>
+	
+	<select id="exportBefore" resultType="java.lang.String">
+		SELECT wm_concat(DISTINCT V.MONTH_OF_YEAR) FROM SYS_OPERATING_PROFIT_VIEW V
+		WHERE V.IS_SURE = 0
+		<include refid="backups_where"/>
+	</select>
+	
+	<sql id="export_base_sql">
+		SELECT V.PLATFORM,
+			   V.SITE,
+			   V.SKU,
+			   V.QTY,
+			   V.PRICE,
+			   V.CATEGORY,
+			   ROUND(V.SALES_COST * COST,4) SALESCOST,
+			   V.FEE_AMAZON+V.AMAZON_FEE FEEAMAZON,
+			   V.FREIGHT,
+			   V.CUSTOMER_FEE1 CUSTOMERFEE1,
+		       V.CUSTOMER_FEE2 CUSTOMERFEE2,
+		       V.CUSTOMER_FEE3 CUSTOMERFEE3,
+		       V.CUSTOMER_FEE4 CUSTOMERFEE4,
+		       V.CUSTOMER_FEE5 CUSTOMERFEE5,
+			   V.FEE_EBAY FEEEBAY,
+			   V.PACKING_CHARGE PACKINGCHARGE,
+			   V.CLEAR_FEE CLEARFEE,
+			   0 OTHERFEE,
+			   V.ADVERTISING_FEE_GOOGLE ADVERTISINGFEEGOOGLE,
+			   V.ADVERTISING_FEE_BING ADVERTISINGFEEBING,
+			   V.PROMOTION_FEE PROMOTIONFEE,
+			   V.SALARY,
+			   V.OPERATING_PROFIT OPERATINGPROFIT,
+			   V.QUARTER,
+			   V.MONTH_OF_YEAR MONTHOFYEAR,
+			   CASE
+		         WHEN V.QTY = 0 THEN
+		          0
+		         ELSE
+		          DECODE(V.PRICE,
+		                 0,
+		                 0,
+		                 ROUND(V.PRICE / V.QTY * (1 - V.OPERATING_PROFIT / V.PRICE),
+		                       2))
+		       END BOTTOMPRICE,
+			   DECODE(V.PRICE,
+		              0,
+		              NULL,
+		              CONCAT(TO_CHAR(ROUND(V.OPERATING_PROFIT / V.PRICE * 100, 1),
+		                             'FM999999990.0'),
+		                     '%')) OPERATINGPROFITMARGIN,
+		       CASE
+		         WHEN V.STATUS IS NULL THEN
+		          '否'
+		         ELSE
+		          '是'
+		       END ISNEWPRODUCT,
+		       (SELECT DECODE(SUM(K.SALES_COST),
+		                      0,
+		                      NULL,
+		                      TO_CHAR(ROUND(SUM(K.T_PRICE_ + K.L_PRICE_) / 2 /
+		                                    SUM(K.SALES_COST),
+		                                    1),
+		                              'FM999999990.0'))
+		          FROM SYS_OPERATING_PROFIT_SKU K
+		         WHERE K.PLATFORM = V.PLATFORM
+		           AND K.COUNTRY = V.SITE
+		           AND K.SKU = V.SKU
+		           AND K.CATEGORY = V.CATEGORY
+		           AND K.MONTH_OF_YEAR = V.MONTH_OF_YEAR) INVENTORYTURNOVER
+	</sql>
+	<sql id="export_sql">
+		FROM (SELECT V.PLATFORM,
+               V.SITE,
+               V.SKU,
+               V.CATEGORY,
+               V.MONTH_OF_YEAR,
+               SUM(V.QTY) QTY,
+               SUM(V.PRICE) PRICE,
+               SUM(V.AMAZON_FEE) AMAZON_FEE,
+               SUM(V.FREIGHT) FREIGHT,
+               SUM(V.ADVERTISING_FEE_GOOGLE) ADVERTISING_FEE_GOOGLE,
+               SUM(V.ADVERTISING_FEE_BING) ADVERTISING_FEE_BING,
+               SUM(V.CUSTOMER_FEE1) CUSTOMER_FEE1,
+               SUM(V.CUSTOMER_FEE2) CUSTOMER_FEE2,
+               SUM(V.CUSTOMER_FEE3) CUSTOMER_FEE3,
+               SUM(V.CUSTOMER_FEE4) CUSTOMER_FEE4,
+               SUM(V.CUSTOMER_FEE5) CUSTOMER_FEE5,
+               SUM(V.FEE_EBAY) FEE_EBAY,
+               SUM(V.PACKING_CHARGE) PACKING_CHARGE,
+               SUM(V.PROMOTION_FEE) PROMOTION_FEE,
+               SUM(V.FEE_AMAZON) FEE_AMAZON,
+               SUM(V.CLEAR_FEE) CLEAR_FEE,
+               SUM(V.SALARY) SALARY,
+               SUM(V.OPERATING_PROFIT) OPERATING_PROFIT,
+               MIN(V.QUARTER) QUARTER,
+               MIN(V.STATUS) STATUS,
+               MIN(V.COST) COST,
+               MIN(V.USER_ID) USER_ID,
+               SUM(V.SALES_COST) SALES_COST
+          FROM SYS_OPERATING_PROFIT_VIEW V
+         GROUP BY V.PLATFORM, V.SITE, V.SKU, V.CATEGORY, V.MONTH_OF_YEAR) V
+	</sql>
+	
+	<select id="exportData" resultType="java.util.HashMap">
+		<choose>
+			<when test="code == 1">
+				<include refid="export_base_sql"/>,(SELECT NICK
+		          FROM SYS_USER S
+		         WHERE S.USER_ID = V.USER_ID
+		           AND S.ENABLED_FLAG = 'Y') PRODUCTMANAGER, T.NICK NAME
+				<include refid="export_sql"/>,
+			       (SELECT C.COUNTRY, L.CATEGORY, L.MONTH_OF_YEAR, S.NICK
+			          FROM SYS_OPERATING_PROFIT_COUNTRY C,
+			               SYS_OPERATING_PROFIT_LINK    L,
+			               SYS_USER                     S
+			         WHERE C.PARENT_ID = L.ENTITY_ID
+			           AND L.PLATFORM = 'amazon'
+			           AND C.USER_ID = S.USER_ID
+			           AND S.ENABLED_FLAG = 'Y') T
+			 WHERE V.PLATFORM = 'amazon'
+			   AND V.SITE = T.COUNTRY(+)
+			   AND V.CATEGORY = T.CATEGORY(+)
+			   AND V.MONTH_OF_YEAR = T.MONTH_OF_YEAR(+)
+				<include refid="backups_where"/> 
+				UNION ALL
+				<include refid="export_base_sql"/>,
+				(SELECT NICK
+		          FROM SYS_USER S
+		         WHERE S.USER_ID = V.USER_ID
+		           AND S.ENABLED_FLAG = 'Y') PRODUCTMANAGER , '' NAME
+				<include refid="export_sql"/>
+				WHERE 1 = 1 AND V.PLATFORM != 'amazon'
+				<include refid="backups_where"/> 
+			</when>
+			
+			<when test="code == 2">
+				<include refid="export_base_sql"/>, T.NICK NAME
+				<include refid="export_sql"/>,
+			       (SELECT C.COUNTRY, L.CATEGORY, L.MONTH_OF_YEAR, S.NICK
+			          FROM SYS_OPERATING_PROFIT_COUNTRY C,
+			               SYS_OPERATING_PROFIT_LINK    L,
+			               SYS_USER                     S
+			         WHERE C.PARENT_ID = L.ENTITY_ID
+			           AND L.PLATFORM = 'amazon'
+			           AND C.USER_ID = S.USER_ID
+			           AND S.ENABLED_FLAG = 'Y') T
+			 WHERE V.PLATFORM = 'amazon'
+			   AND V.SITE = T.COUNTRY(+)
+			   AND V.CATEGORY = T.CATEGORY(+)
+			   AND V.MONTH_OF_YEAR = T.MONTH_OF_YEAR(+)
+				<include refid="backups_where"/> 
+			</when>
+			<when test="code == 3">
+				<include refid="export_base_sql"/>
+				<include refid="export_sql"/>,
+			       (SELECT C.COUNTRY, L.CATEGORY, L.MONTH_OF_YEAR, S.NICK
+			          FROM SYS_OPERATING_PROFIT_COUNTRY C,
+			               SYS_OPERATING_PROFIT_LINK    L,
+			               SYS_USER                     S
+			         WHERE C.PARENT_ID = L.ENTITY_ID
+			           AND L.PLATFORM = 'amazon'
+			           AND C.USER_ID = S.USER_ID
+			           AND C.USER_ID = #{userId}
+			           AND S.ENABLED_FLAG = 'Y') T
+			 WHERE V.PLATFORM = 'amazon'
+			   AND V.SITE = T.COUNTRY
+			   AND V.CATEGORY = T.CATEGORY
+			   AND V.MONTH_OF_YEAR = T.MONTH_OF_YEAR
+				<include refid="backups_where"/> 
+			</when>
+			<when test="code == 4">
+				<include refid="export_base_sql"/>
+				<include refid="export_sql"/>
+				WHERE 1 = 1 AND PLATFORM IN ('ebay','walmart')
+				<include refid="backups_where"/>
+			</when>
+			<when test="code == 5">
+				<include refid="export_base_sql"/>
+				<include refid="export_sql"/>
+				WHERE 1 = 1 AND PLATFORM = 'light'
+				<include refid="backups_where"/>
+			</when>
+			<when test="code == 6">
+				<include refid="export_base_sql"/>,
+				(SELECT NICK
+		          FROM SYS_USER S
+		         WHERE S.USER_ID = V.USER_ID
+		           AND S.ENABLED_FLAG = 'Y') NAME
+				<include refid="export_sql"/>
+				WHERE 1 = 1
+				<include refid="backups_where"/> 
+			</when>
+			<when test="code == 7">
+				<include refid="export_base_sql"/>
+				<include refid="export_sql"/>
+				WHERE 1 = 1 AND USER_ID = #{userId}
+				<include refid="backups_where"/> 
+			</when>
+		</choose>
+	</select>
+	
+	<select id="generateDataBefore" resultType="int">
+		SELECT COUNT(*) FROM SYS_OPERATING_PROFIT_VIEW WHERE MONTH_OF_YEAR = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'), 'yyyy-mm')
+	</select>
+	
+	<select id="mappingSku" resultType="int">
+		SELECT COUNT(*) FROM (<include refid="mappingSku_sql"/>) WHERE SKU_ IS NULL
+	</select>
+	
+	<select id="categorySku" resultType="int">
+		SELECT COUNT(*) FROM (<include refid="categorySku_sql"/>) WHERE CATEGORY IS NULL
+	</select>
+	
+	<insert id="generateData" statementType="CALLABLE">
+		{call JOB_OPERATING_PROFIT()}
+	</insert>
+	
+	<select id="exportSku" resultType="hashMap">
+		<choose>
+			<when test="type == 0">
+				SELECT SKU FROM (<include refid="mappingSku_sql"/>) WHERE SKU_ IS NULL
+			</when>
+			<when test="type == 1">
+				SELECT SKU FROM (<include refid="categorySku_sql"/>) WHERE CATEGORY IS NULL
+			</when>
+		</choose>
+	</select>
+	
+	<insert id="syncCategory" statementType="CALLABLE">
+		{call JOB_SYS_PROFIT_MAPPING_SYNC()}
+	</insert>
+	
+	<sql id="queryAmazonFee_sql">
+		SELECT V.SITE,
+			   SUM(V.AMAZON_FEE) AMAZONFEE,
+			   SUM(V.FEE_AMAZON) FEEAMAZON,
+			   SUM(V.AMAZON_FEE + V.FEE_AMAZON) TOTAL,
+		       V.MONTH_OF_YEAR
+		  FROM SYS_OPERATING_PROFIT_VIEW V
+		 WHERE V.PLATFORM = 'amazon'
+		 GROUP BY V.SITE, V.MONTH_OF_YEAR
+	</sql>
+	
+	<sql id="queryAmazonFee_sql_where">
+		<where>
+			<if test="param!=null">
+				<if test="param.site != null and param.site != ''">
+				<foreach collection="param.site" item="item" open="AND SITE IN (" separator="," close=")">
+		            	#{item}
+		       		</foreach>
+				</if>
+				<if test="param.monthOfYear!=null and param.monthOfYear!=''">
+					AND MONTH_OF_YEAR=#{param.monthOfYear}
+				</if>
+			</if>
+		</where>
+	</sql>
+	
+	<select id="queryAmazonFee" resultType="hashMap">
+		SELECT * FROM
+		  ( 
+			SELECT S.*,ROWNUM RN FROM (
+				SELECT SITE,
+					   TO_CHAR(AMAZONFEE,'FM9,999,999,999,999,999,999,999,999') AMAZONFEE,
+					   TO_CHAR(FEEAMAZON,'FM9,999,999,999,999,999,999,999,999') FEEAMAZON,
+					   TO_CHAR(TOTAL,'FM9,999,999,999,999,999,999,999,999') TOTAL,
+					   MONTH_OF_YEAR MONTHOFYEAR FROM (
+				<include refid="queryAmazonFee_sql"/>)
+				<include refid="queryAmazonFee_sql_where"/>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]>
+	</select>
+	
+	<select id="getCount" resultType="int">
+		SELECT COUNT(*) FROM (
+		<include refid="queryAmazonFee_sql"/>)
+		<include refid="queryAmazonFee_sql_where"/>
+	</select>
+	
+	<select id="getAmazonFeeFooter" resultType="hashMap">
+		SELECT '汇总' SITE,
+			   TO_CHAR(SUM(AMAZONFEE),'FM9,999,999,999,999,999,999,999,999') AMAZONFEE,
+			   TO_CHAR(SUM(FEEAMAZON),'FM9,999,999,999,999,999,999,999,999') FEEAMAZON,
+			   TO_CHAR(SUM(TOTAL),'FM9,999,999,999,999,999,999,999,999') TOTAL
+	    FROM (
+		<include refid="queryAmazonFee_sql"/>)
+		<include refid="queryAmazonFee_sql_where"/>
+	</select>
+	
+	<sql id="mappingSku_sql">
+		SELECT K.SKU,Y.SKU SKU_ FROM (
+		SELECT SKU
+		  FROM (SELECT T.SKU, Y.SKU SKU_
+		          FROM (SELECT T.SKU
+		                  FROM (SELECT S.SKU, K.SKU P_SKU
+		                          FROM (SELECT DISTINCT SKU
+		                                  FROM (SELECT DISTINCT D.SKU SKU
+		                                          FROM (SELECT A.SELF_DATE,
+		                                                       A.SKU,
+		                                                       CASE
+		                                                         WHEN A.SITE = 'amazon.de' THEN
+		                                                          CASE
+		                                                            WHEN A.TYPE =
+		                                                                 'Erstattung' THEN
+		                                                             'Refund'
+		                                                            WHEN A.TYPE =
+		                                                                 'Bestellung' THEN
+		                                                             'Order'
+		                                                            ELSE
+		                                                             A.TYPE
+		                                                          END
+		                                                         WHEN A.SITE = 'amazon.es' THEN
+		                                                          CASE
+		                                                            WHEN A.TYPE = 'Reembolso' THEN
+		                                                             'Refund'
+		                                                            WHEN A.TYPE = 'Pedido' THEN
+		                                                             'Order'
+		                                                            ELSE
+		                                                             A.TYPE
+		                                                          END
+		                                                         WHEN A.SITE = 'amazon.fr' THEN
+		                                                          CASE
+		                                                            WHEN A.TYPE =
+		                                                                 'Remboursement' THEN
+		                                                             'Refund'
+		                                                            WHEN A.TYPE = 'Commande' THEN
+		                                                             'Order'
+		                                                            ELSE
+		                                                             A.TYPE
+		                                                          END
+		                                                         WHEN A.SITE = 'amazon.it' THEN
+		                                                          CASE
+		                                                            WHEN A.TYPE = 'Rimborso' THEN
+		                                                             'Refund'
+		                                                            WHEN A.TYPE = 'Ordine' THEN
+		                                                             'Order'
+		                                                            ELSE
+		                                                             A.TYPE
+		                                                          END
+		                                                         WHEN A.SITE = 'amazon.jp' THEN
+		                                                          CASE
+		                                                            WHEN A.TYPE = '返金' THEN
+		                                                             'Refund'
+		                                                            WHEN A.TYPE = '注文' THEN
+		                                                             'Order'
+		                                                            ELSE
+		                                                             A.TYPE
+		                                                          END
+		                                                         ELSE
+		                                                          A.TYPE
+		                                                       END TYPE
+		                                                  FROM AMAZON_REPORT_ORDER_DATA A) D
+		                                         WHERE D.TYPE IN ('Order', 'Refund')
+		                                           AND D.SELF_DATE BETWEEN
+		                                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                               TRUNC(SYSDATE, 'MM')
+		                                           AND D.SKU IS NOT NULL
+		                                        UNION ALL
+		                                        SELECT DISTINCT SKU SKU
+		                                          FROM (SELECT I.ITEM_SKU SKU,
+		                                                       CASE
+		                                                         WHEN I.TRANSACTION_SITE_ID =
+		                                                              'eBayMotors' OR
+		                                                              I.TRANSACTION_SITE_ID = 'US' THEN
+		                                                          TIME_TO_SELF(R.SHIPPED_TIME,
+		                                                                       'US')
+		                                                         WHEN I.TRANSACTION_SITE_ID =
+		                                                              'Germany' OR
+		                                                              I.TRANSACTION_SITE_ID =
+		                                                              'France' OR I.TRANSACTION_SITE_ID =
+		                                                              'Italy' THEN
+		                                                          TIME_TO_SELF(R.SHIPPED_TIME,
+		                                                                       'DE')
+		                                                         WHEN I.TRANSACTION_SITE_ID = 'UK' THEN
+		                                                          TIME_TO_SELF(R.SHIPPED_TIME,
+		                                                                       'UK')
+		                                                         ELSE
+		                                                          R.SHIPPED_TIME
+		                                                       END SHIPPED_TIME
+		                                                  FROM EBAY_ORDER      R,
+		                                                       EBAY_ORDER_ITEM I
+		                                                 WHERE R.ID = I.PARENT_ID
+		                                                   AND R.SHIPPED_TIME IS NOT NULL
+		                                                   AND I.SHIPMENT_TRACKING_NUMBER IS NOT NULL)
+		                                         WHERE SHIPPED_TIME BETWEEN
+		                                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                               TRUNC(SYSDATE, 'MM')
+		                                        UNION ALL
+		                                        SELECT DISTINCT SKU SKU
+		                                          FROM (SELECT I.SKU,
+		                                                       TIME_TO_SELF(I.SHIP_AT,
+		                                                                    O.PLATFORM) SHIP_AT
+		                                                  FROM LIGHT_ORDER      O,
+		                                                       LIGHT_ORDER_ITEM I
+		                                                 WHERE O.ENTITY_ID = I.PARENT_ID
+		                                                   AND I.SKU NOT LIKE 'B%'
+		                                                   AND I.SHIP_AT IS NOT NULL) T
+		                                         WHERE SHIP_AT BETWEEN
+		                                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                               TRUNC(SYSDATE, 'MM')
+		                                        UNION ALL
+		                                        SELECT DISTINCT SKU SKU
+		                                          FROM (SELECT O.SKU,
+		                                                       TIME_TO_SELF(O.SHIP_DATE_TIME_UTC,
+		                                                                    'US') SHIP_AT
+		                                                  FROM WALMART_ORDER      W,
+		                                                       WALMART_ORDER_LINE O
+		                                                 WHERE W.ID = O.PARENT_ID
+		                                                   AND O.SHIP_DATE_TIME_UTC IS NOT NULL
+		                                                   AND O.SHIP_TRACKING_NUMBER IS NOT NULL) T
+		                                         WHERE SHIP_AT BETWEEN
+		                                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                               TRUNC(SYSDATE, 'MM')
+		                                        UNION ALL
+		                                        SELECT DISTINCT SKU SKU
+		                                          FROM (SELECT D.SKU
+		                                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                                 WHERE D.SELF_DATE BETWEEN
+		                                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                                       TRUNC(SYSDATE, 'MM')
+		                                                   AND D.SITE = 'amazon.de'
+		                                                   AND ((D.TYPE NOT LIKE
+		                                                       '%bertrag' AND
+		                                                       D.TYPE NOT LIKE
+		                                                       'Servicege%') OR
+		                                                       (D.TYPE LIKE 'Servicege%' AND
+		                                                       D.DESCRIPTION !=
+		                                                       'Werbekosten'))
+		                                                UNION ALL
+		                                                SELECT D.SKU
+		                                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                                 WHERE D.SELF_DATE BETWEEN
+		                                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                                       TRUNC(SYSDATE, 'MM')
+		                                                   AND D.SITE IN
+		                                                       ('amazon.com',
+		                                                        'amazon.co.uk',
+		                                                        'amazon.ca')
+		                                                   AND ((D.TYPE NOT IN
+		                                                       ('Transfer',
+		                                                          'Service Fee')) OR
+		                                                       (D.TYPE = 'Service Fee' AND
+		                                                       D.DESCRIPTION !=
+		                                                       'Cost of Advertising'))
+		                                                UNION ALL
+		                                                SELECT D.SKU
+		                                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                                 WHERE D.SELF_DATE BETWEEN
+		                                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                                       TRUNC(SYSDATE, 'MM')
+		                                                   AND D.SITE = 'amazon.fr'
+		                                                   AND ((D.TYPE NOT IN
+		                                                       ('Transfert',
+		                                                          'Frais de service')) OR
+		                                                       (D.TYPE =
+		                                                       'Frais de service' AND
+		                                                       D.DESCRIPTION NOT LIKE
+		                                                       'Prix de la publicit%'))
+		                                                UNION ALL
+		                                                SELECT D.SKU
+		                                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                                 WHERE D.SELF_DATE BETWEEN
+		                                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                                       TRUNC(SYSDATE, 'MM')
+		                                                   AND D.SITE = 'amazon.es'
+		                                                   AND ((D.TYPE != 'Transferir' AND
+		                                                       D.TYPE NOT LIKE
+		                                                       'Tarifa de prestac%') OR
+		                                                       (D.TYPE LIKE
+		                                                       'Tarifa de prestac%' AND
+		                                                       D.DESCRIPTION !=
+		                                                       'Gastos de publicidad'))
+		                                                UNION ALL
+		                                                SELECT D.SKU
+		                                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                                 WHERE D.SELF_DATE BETWEEN
+		                                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                                       TRUNC(SYSDATE, 'MM')
+		                                                   AND D.SITE = 'amazon.jp'
+		                                                   AND ((D.TYPE NOT IN
+		                                                       ('振込み', '注文外料金')) OR
+		                                                       (D.TYPE = '注文外料金' AND
+		                                                       D.DESCRIPTION != '広告費用'))
+		                                                UNION ALL
+		                                                SELECT D.SKU
+		                                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                                 WHERE D.SELF_DATE BETWEEN
+		                                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                                       TRUNC(SYSDATE, 'MM')
+		                                                   AND D.SITE = 'amazon.it'
+		                                                   AND (D.TYPE NOT IN
+		                                                       ('Trasferimento',
+		                                                         'Commissione di servizio') OR
+		                                                       (D.TYPE =
+		                                                       'Commissione di servizio' AND
+		                                                       D.DESCRIPTION NOT LIKE
+		                                                       'Costo della pubblicit%')))
+		                                         WHERE SKU IS NOT NULL)) S,
+		                               SYS_SKU_LINK K
+		                         WHERE S.SKU = K.P_SKU(+)) T
+		                 WHERE T.P_SKU IS NULL
+		                    OR T.P_SKU NOT IN (SELECT SKU
+		                                         FROM CAL_PRODUCT_ENTITY C
+		                                        WHERE C.IS_ACTIVE = 1
+		                                          AND C.STATUS = '1')) T,
+		               (SELECT SKU
+		                  FROM CAL_PRODUCT_ENTITY C
+		                 WHERE C.IS_ACTIVE = 1
+		                   AND C.STATUS = '1') Y
+		         WHERE T.SKU = Y.SKU(+))
+		 WHERE SKU_ IS NULL) K ,(SELECT UPPER(SKU) SKU
+		                  FROM CAL_PRODUCT_ENTITY C
+		                 WHERE C.IS_ACTIVE = 1
+		                   AND C.STATUS = '1') Y
+		                   WHERE UPPER(K.SKU) = Y.SKU(+)
+	</sql>
+	
+	<sql id="categorySku_sql">
+		SELECT T.SKU, M.CATEGORY
+		  FROM (SELECT NVL(K.SKU, S.SKU) SKU
+		          FROM (SELECT DISTINCT SKU
+		                  FROM (SELECT DISTINCT D.SKU SKU
+		                          FROM (SELECT A.SELF_DATE,
+		                                       A.SKU,
+		                                       CASE
+		                                         WHEN A.SITE = 'amazon.de' THEN
+		                                          CASE
+		                                            WHEN A.TYPE = 'Erstattung' THEN
+		                                             'Refund'
+		                                            WHEN A.TYPE = 'Bestellung' THEN
+		                                             'Order'
+		                                            ELSE
+		                                             A.TYPE
+		                                          END
+		                                         WHEN A.SITE = 'amazon.es' THEN
+		                                          CASE
+		                                            WHEN A.TYPE = 'Reembolso' THEN
+		                                             'Refund'
+		                                            WHEN A.TYPE = 'Pedido' THEN
+		                                             'Order'
+		                                            ELSE
+		                                             A.TYPE
+		                                          END
+		                                         WHEN A.SITE = 'amazon.fr' THEN
+		                                          CASE
+		                                            WHEN A.TYPE = 'Remboursement' THEN
+		                                             'Refund'
+		                                            WHEN A.TYPE = 'Commande' THEN
+		                                             'Order'
+		                                            ELSE
+		                                             A.TYPE
+		                                          END
+		                                         WHEN A.SITE = 'amazon.it' THEN
+		                                          CASE
+		                                            WHEN A.TYPE = 'Rimborso' THEN
+		                                             'Refund'
+		                                            WHEN A.TYPE = 'Ordine' THEN
+		                                             'Order'
+		                                            ELSE
+		                                             A.TYPE
+		                                          END
+		                                         WHEN A.SITE = 'amazon.jp' THEN
+		                                          CASE
+		                                            WHEN A.TYPE = '返金' THEN
+		                                             'Refund'
+		                                            WHEN A.TYPE = '注文' THEN
+		                                             'Order'
+		                                            ELSE
+		                                             A.TYPE
+		                                          END
+		                                         ELSE
+		                                          A.TYPE
+		                                       END TYPE
+		                                  FROM AMAZON_REPORT_ORDER_DATA A) D
+		                         WHERE D.TYPE IN ('Order', 'Refund')
+		                           AND D.SELF_DATE BETWEEN
+		                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                               TRUNC(SYSDATE, 'MM')
+		                           AND D.SKU IS NOT NULL
+		                        UNION ALL
+		                        SELECT DISTINCT SKU SKU
+		                          FROM (SELECT I.ITEM_SKU SKU,
+		                                       CASE
+		                                         WHEN I.TRANSACTION_SITE_ID =
+		                                              'eBayMotors' OR
+		                                              I.TRANSACTION_SITE_ID = 'US' THEN
+		                                          TIME_TO_SELF(R.SHIPPED_TIME, 'US')
+		                                         WHEN I.TRANSACTION_SITE_ID = 'Germany' OR
+		                                              I.TRANSACTION_SITE_ID = 'France' OR
+		                                              I.TRANSACTION_SITE_ID = 'Italy' THEN
+		                                          TIME_TO_SELF(R.SHIPPED_TIME, 'DE')
+		                                         WHEN I.TRANSACTION_SITE_ID = 'UK' THEN
+		                                          TIME_TO_SELF(R.SHIPPED_TIME, 'UK')
+		                                         ELSE
+		                                          R.SHIPPED_TIME
+		                                       END SHIPPED_TIME
+		                                  FROM EBAY_ORDER R, EBAY_ORDER_ITEM I
+		                                 WHERE R.ID = I.PARENT_ID
+		                                   AND R.SHIPPED_TIME IS NOT NULL
+		                                   AND I.SHIPMENT_TRACKING_NUMBER IS NOT NULL)
+		                         WHERE SHIPPED_TIME BETWEEN
+		                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                               TRUNC(SYSDATE, 'MM')
+		                        UNION ALL
+		                        SELECT DISTINCT SKU SKU
+		                          FROM (SELECT I.SKU,
+		                                       TIME_TO_SELF(I.SHIP_AT, O.PLATFORM) SHIP_AT
+		                                  FROM LIGHT_ORDER O, LIGHT_ORDER_ITEM I
+		                                 WHERE O.ENTITY_ID = I.PARENT_ID
+		                                   AND I.SKU NOT LIKE 'B%'
+		                                   AND I.SHIP_AT IS NOT NULL) T
+		                         WHERE SHIP_AT BETWEEN
+		                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                               TRUNC(SYSDATE, 'MM')
+		                        UNION ALL
+		                        SELECT DISTINCT SKU SKU
+		                          FROM (SELECT O.SKU,
+		                                       TIME_TO_SELF(O.SHIP_DATE_TIME_UTC, 'US') SHIP_AT
+		                                  FROM WALMART_ORDER W, WALMART_ORDER_LINE O
+		                                 WHERE W.ID = O.PARENT_ID
+		                                   AND O.SHIP_DATE_TIME_UTC IS NOT NULL
+		                                   AND O.SHIP_TRACKING_NUMBER IS NOT NULL) T
+		                         WHERE SHIP_AT BETWEEN
+		                               TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                               TRUNC(SYSDATE, 'MM')
+		                        UNION ALL
+		                        SELECT DISTINCT SKU SKU
+		                          FROM (SELECT D.SKU
+		                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                 WHERE D.SELF_DATE BETWEEN
+		                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                       TRUNC(SYSDATE, 'MM')
+		                                   AND D.SITE = 'amazon.de'
+		                                   AND ((D.TYPE NOT LIKE '%bertrag' AND
+		                                       D.TYPE NOT LIKE 'Servicege%') OR
+		                                       (D.TYPE LIKE 'Servicege%' AND
+		                                       D.DESCRIPTION != 'Werbekosten'))
+		                                UNION ALL
+		                                SELECT D.SKU
+		                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                 WHERE D.SELF_DATE BETWEEN
+		                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                       TRUNC(SYSDATE, 'MM')
+		                                   AND D.SITE IN ('amazon.com',
+		                                                  'amazon.co.uk',
+		                                                  'amazon.ca')
+		                                   AND ((D.TYPE NOT IN
+		                                       ('Transfer', 'Service Fee')) OR
+		                                       (D.TYPE = 'Service Fee' AND
+		                                       D.DESCRIPTION != 'Cost of Advertising'))
+		                                UNION ALL
+		                                SELECT D.SKU
+		                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                 WHERE D.SELF_DATE BETWEEN
+		                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                       TRUNC(SYSDATE, 'MM')
+		                                   AND D.SITE = 'amazon.fr'
+		                                   AND ((D.TYPE NOT IN
+		                                       ('Transfert', 'Frais de service')) OR
+		                                       (D.TYPE = 'Frais de service' AND
+		                                       D.DESCRIPTION NOT LIKE
+		                                       'Prix de la publicit%'))
+		                                UNION ALL
+		                                SELECT D.SKU
+		                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                 WHERE D.SELF_DATE BETWEEN
+		                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                       TRUNC(SYSDATE, 'MM')
+		                                   AND D.SITE = 'amazon.es'
+		                                   AND ((D.TYPE != 'Transferir' AND
+		                                       D.TYPE NOT LIKE 'Tarifa de prestac%') OR
+		                                       (D.TYPE LIKE 'Tarifa de prestac%' AND
+		                                       D.DESCRIPTION !=
+		                                       'Gastos de publicidad'))
+		                                UNION ALL
+		                                SELECT D.SKU
+		                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                 WHERE D.SELF_DATE BETWEEN
+		                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                       TRUNC(SYSDATE, 'MM')
+		                                   AND D.SITE = 'amazon.jp'
+		                                   AND ((D.TYPE NOT IN ('振込み', '注文外料金')) OR
+		                                       (D.TYPE = '注文外料金' AND
+		                                       D.DESCRIPTION != '広告費用'))
+		                                UNION ALL
+		                                SELECT D.SKU
+		                                  FROM AMAZON_REPORT_ORDER_DATA D
+		                                 WHERE D.SELF_DATE BETWEEN
+		                                       TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') AND
+		                                       TRUNC(SYSDATE, 'MM')
+		                                   AND D.SITE = 'amazon.it'
+		                                   AND (D.TYPE NOT IN
+		                                       ('Trasferimento',
+		                                         'Commissione di servizio') OR
+		                                       (D.TYPE = 'Commissione di servizio' AND
+		                                       D.DESCRIPTION NOT LIKE
+		                                       'Costo della pubblicit%')))
+		                         WHERE SKU IS NOT NULL)) S,
+		               SYS_SKU_LINK K
+		         WHERE S.SKU = K.P_SKU(+)) T,
+		       (SELECT DISTINCT UPPER(SKU) SKU, CATEGORY
+		          FROM SYS_OPERATING_PROFIT_MAPPING
+		         WHERE MONTH_OF_YEAR = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'),'yyyy-mm')) M
+		 WHERE UPPER(T.SKU) = M.SKU(+)
+	</sql>
+</mapper>

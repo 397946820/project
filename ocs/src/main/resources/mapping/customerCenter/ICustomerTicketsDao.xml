@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.customerCenter.dao.ICustomerTicketsDao">
+	
+	<resultMap type="com.it.ocs.customerCenter.model.CustomerTicketsModel" id="customerTicketsResult">
+	    <id column="TICKETS_ID" property="tickets_id"  />
+		<result column="COUNTRY" property="country"  />
+		<result column="ORDER_NUMBER" property="order_number"  />
+		<result column="SKU" property="sku"  />
+		<result column="SKU_GRADE" property="sku_grade"  />
+		<result column="ORDER_DATE" property="order_date"  />
+		<result column="DEFECTIVE_QUANTITY" property="defective_quantity"  />
+		<result column="CATAGORIES" property="catagories"  />
+		<result column="PROBLEM_TYPE_LVL2" property="problem_type_lvl2"  />
+		<result column="TOTAL_DAYS" property="total_days"  />
+		<result column="PROBLEM_DATE" property="problem_date"  />
+		<result column="SOLUTION" property="solution"  />
+		<result column="REPLACEMENT_TIMES" property="replacement_times"  />
+		<result column="OPERATORS" property="operators"  />
+		<result column="REMARK" property="remark"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="PARENT_CATEGORY" property="parent_category" />
+		<result column="AMOUNT" property="amount"  />
+		<result column="CURRENCY" property="currency"  />
+		<result column="PAY_METHOD" property="payMethod"  />
+	</resultMap>
+ <select id="selectTicketByOrderID" resultMap="customerTicketsResult">
+  	select PLATFORM,COUNTRY,to_char(ORDER_DATE,'yyyy-mm-dd') ORDER_DATE from CUSTOMER_TICKETS where ORDER_NUMBER=#{orderID,jdbcType=VARCHAR}
+  </select>
+	<sql id="base_map_conditions">
+		<if test="tickets.sku !=null and tickets.sku !=''"> 
+			and ct.SKU like '%'||#{tickets.sku}||'%'
+		</if>
+		<if test="tickets.country !=null and tickets.country !=''"> 
+			and ct.COUNTRY=#{tickets.country}
+		</if>
+		<if test="tickets.order_number !=null and tickets.order_number !=''"> 
+			and ct.ORDER_NUMBER like '%'||#{tickets.order_number}||'%'
+		</if>
+		<if test="tickets.startDate !=null and tickets.startDate !=''"> 
+			and ct.PROBLEM_DATE >= to_date('${tickets.startDate}','YYYY-MM-DD')
+		</if>
+		<if test="tickets.endDate !=null and tickets.endDate !=''"> 
+			and ct.PROBLEM_DATE <![CDATA[<=]]> to_date('${tickets.endDate}','YYYY-MM-DD')
+		</if>
+	</sql>
+	<sql id="base_conditions">
+		<choose>
+			<when test="order!=null and order!=''">
+			order by 'ct.'||${sort} ${order}
+			</when>
+			<otherwise>
+				order by ct.create_date desc
+			</otherwise>
+		</choose>
+	</sql>	
+	<sql id="select_base">
+		
+		ct.TICKETS_ID,
+		ct.COUNTRY,
+		ct.ORDER_NUMBER,
+		ct.SKU,
+		ct.SKU_GRADE,
+		to_char(ct.ORDER_DATE,'yyyy-mm-dd') order_date,
+		ct.DEFECTIVE_QUANTITY,
+		ct.CATAGORIES,
+		ct.PROBLEM_TYPE_LVL2,
+		ct.TOTAL_DAYS,
+		to_char(ct.PROBLEM_DATE,'yyyy-mm-dd') problem_date,
+		ct.SOLUTION,
+		ct.REPLACEMENT_TIMES,
+		ct.OPERATORS,
+		ct.PARENT_CATEGORY,
+		ct.REMARK,
+		ct.PLATFORM,
+		ct.AMOUNT,
+		ct.CURRENCY,
+		ct.PAY_METHOD
+	</sql>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from CUSTOMER_TICKETS ct where ENABLED_FLAG='Y' <include refid="base_map_conditions" />
+	</select>
+	<insert id="insertCustomer">
+		INSERT INTO CUSTOMER_TICKETS(
+		    TICKETS_ID,
+			COUNTRY,
+			ORDER_NUMBER,
+			SKU,
+			ORDER_DATE,
+			DEFECTIVE_QUANTITY,
+			CATAGORIES,
+			PROBLEM_TYPE_LVL2,
+			TOTAL_DAYS,
+			PROBLEM_DATE,
+			SOLUTION,
+			REPLACEMENT_TIMES,
+			OPERATORS,
+			REMARK,
+			PARENT_CATEGORY,
+			PLATFORM,
+			AMOUNT,
+			CURRENCY,
+			CREATE_DATE,
+			UPDATE_DATE,
+			PAY_METHOD) values
+		(CUSTOMER_TICKETS_SEQ.NEXTVAL,
+		#{country,jdbcType=VARCHAR},
+		#{orderNumber,jdbcType=VARCHAR},
+		#{sku,jdbcType=VARCHAR},
+		#{orderDate,jdbcType=DATE},
+		#{defectiveQuantity,jdbcType=BIGINT},
+		#{CATAGORIES,jdbcType=VARCHAR},
+		#{problemTypeLvl2,jdbcType=VARCHAR},
+		trunc(#{problemDate}) - trunc(#{orderDate}),
+		#{problemDate,jdbcType=DATE},
+		#{solution,jdbcType=VARCHAR},
+		#{replacementTimes,jdbcType=BIGINT},
+		#{operators,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR},
+		#{PARENTCATEGORY,jdbcType=VARCHAR},
+		#{platform,jdbcType=VARCHAR},
+		#{amount,jdbcType=BIGINT},
+		#{currency,jdbcType=VARCHAR},
+		sysdate,sysdate,
+		#{payMethod,jdbcType=VARCHAR})
+	</insert>
+	
+	<insert id="insertTickets" parameterType="java.util.List">
+		INSERT INTO CUSTOMER_TICKETS(
+		    TICKETS_ID,
+			COUNTRY,
+			ORDER_NUMBER,
+			SKU,
+			SKU_GRADE,
+			ORDER_DATE,
+			DEFECTIVE_QUANTITY,
+			CATAGORIES,
+			PROBLEM_TYPE_LVL2,
+			TOTAL_DAYS,
+			PROBLEM_DATE,
+			SOLUTION,
+			REPLACEMENT_TIMES,
+			OPERATORS,
+			REMARK,
+			PARENT_CATEGORY,
+			PLATFORM,
+			AMOUNT,
+			CURRENCY,
+			CREATE_DATE,
+			UPDATE_DATE)  
+		select CUSTOMER_TICKETS_SEQ.NEXTVAL,c.*,sysdate,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.country,jdbcType=VARCHAR},
+				#{item.order_number,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.sku_grade,jdbcType=VARCHAR},
+				to_date(#{item.order_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.defective_quantity,jdbcType=BIGINT},
+				#{item.catagories,jdbcType=VARCHAR},
+				#{item.problem_type_lvl2,jdbcType=VARCHAR},
+				#{item.total_days,jdbcType=BIGINT},
+				to_date(#{item.problem_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.solution,jdbcType=VARCHAR},
+				#{item.replacement_times,jdbcType=BIGINT},
+				#{item.operators,jdbcType=VARCHAR},
+				#{item.remark,jdbcType=VARCHAR},
+				#{item.parent_category,jdbcType=VARCHAR},
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.amount,jdbcType=BIGINT},
+				#{item.currency,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateTickets" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			update CUSTOMER_TICKETS baoi
+			set 
+			COUNTRY = #{item.country,jdbcType=VARCHAR},
+			ORDER_NUMBER = #{item.order_number,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			SKU_GRADE = #{item.sku_grade,jdbcType=VARCHAR},
+			ORDER_DATE =to_date(#{item.order_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			DEFECTIVE_QUANTITY = #{item.defective_quantity,jdbcType=BIGINT},
+			CATAGORIES = #{item.catagories,jdbcType=VARCHAR},
+			PROBLEM_TYPE_LVL2 = #{item.problem_type_lvl2,jdbcType=VARCHAR},
+			TOTAL_DAYS = #{item.total_days,jdbcType=BIGINT},
+			PROBLEM_DATE =to_date(#{item.problem_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			SOLUTION = #{item.solution,jdbcType=VARCHAR},
+			REPLACEMENT_TIMES = #{item.replacement_times,jdbcType=BIGINT},
+			OPERATORS = #{item.operators,jdbcType=VARCHAR},
+			REMARK = #{item.remark,jdbcType=VARCHAR},
+			PARENT_CATEGORY = #{item.parent_category,jdbcType=VARCHAR},
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			UPDATE_DATE = #{item.lastUpdationDate,jdbcType=TIMESTAMP},
+			AMOUNT = #{item.amount,jdbcType=BIGINT},
+			CURRENCY = #{item.currency,jdbcType=VARCHAR}
+			where baoi.TICKETS_ID = #{item.tickets_id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+	<select id="selectCustomerTickets" resultMap="customerTicketsResult">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  <include refid="select_base"/>  from CUSTOMER_TICKETS ct where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+					  <include refid="base_conditions"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	<update id="remove">
+		update CUSTOMER_TICKETS set ENABLED_FLAG='N' where TICKETS_ID=#{tickets_id,jdbcType=BIGINT}
+	</update>
+	<select id="selectCustomerT" resultType="java.util.HashMap">
+		select <include refid="select_base"/> from CUSTOMER_TICKETS ct where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+	</select>
+
+</mapper>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ILightEbaySundryDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.LightEbaySundryModel">
+		<id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="COUNTRY" property="country" jdbcType="VARCHAR" />
+		<result column="OVER_WEIGHT" property="overWeight" jdbcType="DECIMAL" />
+		<result column="OVER_LENGTH" property="overLength" jdbcType="DECIMAL" />
+		<result column="OVER_WIDTH" property="overWidth" jdbcType="DECIMAL" />
+		<result column="OVERWEIGHT_FEE" property="overweightFee"
+			jdbcType="DECIMAL" />
+		<result column="PACKING_CHARGE" property="packingCharge"
+			jdbcType="DECIMAL" />
+		<result column="HANDLING_FEE" property="handlingFee" jdbcType="DECIMAL" />
+		<result column="EXTRA_FEE" property="extraFee" jdbcType="DECIMAL" />
+		<result column="TPS_DELIVERY_FEE" property="tpsDeliveryFee"
+			jdbcType="DECIMAL" />
+		<result column="TPS_PROPORTION" property="tpsProportion"
+			jdbcType="DECIMAL" />
+		<result column="TPN_DELIVERY_FEE" property="tpnDeliveryFee"
+			jdbcType="DECIMAL" />
+		<result column="TPN_PROPORTION" property="tpnProportion"
+			jdbcType="DECIMAL" />
+		<result column="PF_PRICE" property="pfPrice" jdbcType="DECIMAL" />
+		<result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="sql_base">
+		SELECT ENTITY_ID as entityId, 
+			   COUNTRY, 
+			   OVER_WEIGHT as overWeight, 
+			   OVER_LENGTH as overLength, 
+			   OVER_WIDTH as overWidth, 
+			   OVERWEIGHT_FEE as overweightFee,
+			   PACKING_CHARGE as packingCharge,
+			   HANDLING_FEE as handlingFee, 
+			   EXTRA_FEE as extraFee, 
+			   TPS_DELIVERY_FEE as tpsDeliveryFee, 
+			   TPS_PROPORTION as tpsProportion, 
+			   TPN_DELIVERY_FEE as tpnDeliveryFee,
+			   TPN_PROPORTION as tpnProportion,
+			   PF_PRICE as pfPrice, 
+			   CREATED_AT as createdAt, 
+			   UPDATED_AT as updatedAt
+		FROM LIGHT_EBAY_SUNDRY
+	</sql>
+	
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.country != null and param.country != ''">
+					AND COUNTRY = #{param.country}
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<select id="query" resultMap="BaseResultMap">
+		<include refid="sql_base"/>
+		<include refid="sql_where"/>
+	</select>
+	
+	<select id="queryByCountry" resultType="com.it.ocs.cal.model.LightEbaySundryModel">
+		<include refid="sql_base"/>
+		where country = #{country}
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.LightEbaySundryModel">
+		insert into LIGHT_EBAY_SUNDRY
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			
+				ENTITY_ID,
+			
+			<if test="country != null">
+				COUNTRY,
+			</if>
+			<if test="overWeight != null">
+				OVER_WEIGHT,
+			</if>
+			<if test="overLength != null">
+				OVER_LENGTH,
+			</if>
+			<if test="overWidth != null">
+				OVER_WIDTH,
+			</if>
+			<if test="overweightFee != null">
+				OVERWEIGHT_FEE,
+			</if>
+			<if test="packingCharge != null">
+				PACKING_CHARGE,
+			</if>
+			<if test="handlingFee != null">
+				HANDLING_FEE,
+			</if>
+			<if test="extraFee != null">
+				EXTRA_FEE,
+			</if>
+			<if test="tpsDeliveryFee != null">
+				TPS_DELIVERY_FEE,
+			</if>
+			<if test="tpsProportion != null">
+				TPS_PROPORTION,
+			</if>
+			<if test="tpnDeliveryFee != null">
+				TPN_DELIVERY_FEE,
+			</if>
+			<if test="tpnProportion != null">
+				TPN_PROPORTION,
+			</if>
+			<if test="pfPrice != null">
+				PF_PRICE,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			
+				LIGHT_EBAY_SUNDRY_SEQ.NEXTVAL,
+			
+			<if test="country != null">
+				#{country,jdbcType=VARCHAR},
+			</if>
+			<if test="overWeight != null">
+				#{overWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="overLength != null">
+				#{overLength,jdbcType=DECIMAL},
+			</if>
+			<if test="overWidth != null">
+				#{overWidth,jdbcType=DECIMAL},
+			</if>
+			<if test="overweightFee != null">
+				#{overweightFee,jdbcType=DECIMAL},
+			</if>
+			<if test="packingCharge != null">
+				#{packingCharge,jdbcType=DECIMAL},
+			</if>
+			<if test="handlingFee != null">
+				#{handlingFee,jdbcType=DECIMAL},
+			</if>
+			<if test="extraFee != null">
+				#{extraFee,jdbcType=DECIMAL},
+			</if>
+			<if test="tpsDeliveryFee != null">
+				#{tpsDeliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test="tpsProportion != null">
+				#{tpsProportion,jdbcType=DECIMAL},
+			</if>
+			<if test="tpnDeliveryFee != null">
+				#{tpnDeliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test="tpnProportion != null">
+				#{tpnProportion,jdbcType=DECIMAL},
+			</if>
+			<if test="pfPrice != null">
+				#{pfPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="com.it.ocs.cal.model.LightEbaySundryModel">
+		update LIGHT_EBAY_SUNDRY
+		<set>
+			<if test="country != null">
+				COUNTRY = #{country,jdbcType=VARCHAR},
+			</if>
+			<if test="overWeight != null">
+				OVER_WEIGHT = #{overWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="overLength != null">
+				OVER_LENGTH = #{overLength,jdbcType=DECIMAL},
+			</if>
+			<if test="overWidth != null">
+				OVER_WIDTH = #{overWidth,jdbcType=DECIMAL},
+			</if>
+			<if test="overweightFee != null">
+				OVERWEIGHT_FEE = #{overweightFee,jdbcType=DECIMAL},
+			</if>
+			<if test="packingCharge != null">
+				PACKING_CHARGE = #{packingCharge,jdbcType=DECIMAL},
+			</if>
+			<if test="handlingFee != null">
+				HANDLING_FEE = #{handlingFee,jdbcType=DECIMAL},
+			</if>
+			<if test="extraFee != null">
+				EXTRA_FEE = #{extraFee,jdbcType=DECIMAL},
+			</if>
+			<if test="tpsDeliveryFee != null">
+				TPS_DELIVERY_FEE = #{tpsDeliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test="tpsProportion != null">
+				TPS_PROPORTION = #{tpsProportion,jdbcType=DECIMAL},
+			</if>
+			<if test="tpnDeliveryFee != null">
+				TPN_DELIVERY_FEE = #{tpnDeliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test="tpnProportion != null">
+				TPN_PROPORTION = #{tpnProportion,jdbcType=DECIMAL},
+			</if>
+			<if test="pfPrice != null">
+				PF_PRICE = #{pfPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

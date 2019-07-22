@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.seller.dao.IEBayBuyerRequiredDao">
+	<resultMap type="com.it.ocs.seller.model.EBayBuyerRequiredModel" id="buyerRequiredResult">
+		<id property="id" column="BUYER_REQUIRE_ID" />
+		<result property="name" column="NAME" />
+		<result property="site" column="SITE_ID" />
+		<result property="allowAllBuyer" column="ALLOW_ALL_BUBER" />
+		<result property="buyerRule" column="BUYER_RULE" />
+		<result property="enabledFlag" column="ENABLED_FLAG" />
+	</resultMap>
+	<sql id="select_base">
+			SITE_ID ,
+			BUYER_REQUIRE_ID,
+			NAME,
+			BUYER_RULE,
+			ALLOW_ALL_BUBER
+	</sql>
+	<select id="queryRequires" resultMap="buyerRequiredResult">
+		select * from EBAY_BUYER_REQUIRE
+	</select>
+	
+	<select id="queryByPage" resultMap="buyerRequiredResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from EBAY_BUYER_REQUIRE  
+				where ENABLED_FLAG='Y' order by CREATION_DATE desc 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="getById" resultMap="buyerRequiredResult" parameterType="java.lang.Long">
+		select <include refid="select_base" /> from EBAY_BUYER_REQUIRE where BUYER_REQUIRE_ID=#{id}
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_BUYER_REQUIRE where ENABLED_FLAG='Y'
+	</select>
+	<insert id="add" parameterType="com.it.ocs.seller.model.EBayBuyerRequiredModel">
+		insert into EBAY_BUYER_REQUIRE(BUYER_REQUIRE_ID,ALLOW_ALL_BUBER,NAME,SITE_ID,BUYER_RULE,CREATION_DATE,ENABLED_FLAG) 
+		values(ebay_buyer_require_SEQ.Nextval,#{allowAllBuyer,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{site,jdbcType=DOUBLE},#{buyerRule,jdbcType=VARCHAR},sysdate,'Y')
+	</insert>
+	
+	<update id="update"  parameterType="com.it.ocs.seller.model.EBayBuyerRequiredModel">
+		update EBAY_BUYER_REQUIRE set BUYER_RULE=#{buyerRule,jdbcType=VARCHAR},NAME=#{name,jdbcType=VARCHAR},SITE_ID=#{site,jdbcType=DOUBLE},LAST_UPDATE_DATE=sysdate,ALLOW_ALL_BUBER=#{allowAllBuyer,jdbcType=VARCHAR} where BUYER_REQUIRE_ID=#{id,jdbcType=DOUBLE}
+	</update>
+	<update id="deleteBuyerRequireById"  parameterType="java.util.List">
+	
+		update EBAY_BUYER_REQUIRE set ENABLED_FLAG='N',LAST_UPDATE_DATE=sysdate where BUYER_REQUIRE_ID in
+		
+		<foreach collection="list" item="ids" index="index" open="(" separator="," close=")">#{ids}</foreach>
+	</update>
+</mapper>

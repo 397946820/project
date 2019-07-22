@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IMEbayOrderDao">
+	<resultMap type="com.it.ocs.task.model.EbayOrderModel" id="ebayOrderResult">
+		<id column="id" property="id"  />
+		<result column="account" property="account"  />
+		<result column="order_id" property="order_id"  />
+		<result column="record_number" property="record_number"  />
+		<result column="order_status" property="order_status"  />
+		<result column="adjustment_amount" property="adjustment_amount"  />
+		<result column="amount_paid" property="amount_paid"  />
+		<result column="amount_saved" property="amount_saved"  />
+		<result column="created_time" property="created_time"  />
+		<result column="payment_methods" property="payment_methods"  />
+		<result column="seller_email" property="seller_email"  />
+		<result column="sub_total" property="sub_total"  />
+		<result column="total" property="total"  />
+		<result column="buyer_user_id" property="buyer_user_id"  />
+		<result column="paid_time" property="paid_time"  />
+		<result column="shipped_time" property="shipped_time"  />
+		<result column="integrated_merchant_credit_card_enabled" property="integrated_merchant_credit_card_enabled"  />
+		<result column="eias_token" property="eias_token"  />
+		<result column="payment_hold_status" property="payment_hold_status"  />
+		<result column="is_multi_leg_shipping" property="is_multi_leg_shipping"  />
+		<result column="seller_user_id" property="seller_user_id"  />
+		<result column="seller_eias_token" property="seller_eias_token"  />
+		<result column="cancel_status" property="cancel_status"  />
+		<result column="extended_order_id" property="extended_order_id"  />
+		<result column="contains_ebay_plus_transaction" property="contains_ebay_plus_transaction"  />
+		<result column="checkout_status" property="checkout_status"  />
+		<result column="shipping_details" property="shipping_details"  />
+		<result column="shipping_address" property="shipping_address"  />
+		<result column="shipping_service_selected" property="shipping_service_selected"  />
+		<result column="external_transaction" property="external_transaction"  />
+		<result column="transaction_array" property="transaction_array"  />
+		<result column="monetary_details" property="monetary_details"  />
+		<result column="last_modified_time" property="last_modified_time"  />
+		<result column="last_fetch_time" property="last_fetch_time"  />
+		<result column="has_pushed" property="has_pushed"  />
+	</resultMap>
+	<select id="selectMaxLastFetchTime" resultType="java.lang.String">
+		select date_format(max(LAST_MODIFIED_TIME), '%Y-%c-%e %T') as last_fetch_time from ebay_order_full
+	</select>
+	<select id="selectEbayOrderByStartTAndEndT" resultMap="ebayOrderResult">
+		select * from ebay_order_full where  LAST_MODIFIED_TIME>'${startT}' and LAST_MODIFIED_TIME<![CDATA[<=]]>'${endT}'
+	</select>
+</mapper>

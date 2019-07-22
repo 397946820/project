@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.ISyncAmazonOrderDao">
+	
+	<select id="getOrderPrice" resultType="java.lang.String">
+		select to_char(amount) amount from amazon_order where id=#{id}
+	</select>
+	<select id="isExist" resultType="int">
+		select ao.id from amazon_order ao where ao.order_id = #{orderId}
+	</select>
+	<select id="getId" resultType="int">
+		select total_order_seq.nextval from dual
+	</select>
+	<select id="orderItemIsExistByPid" resultType="int">
+		select count(1) from amazon_order_item oi where oi.parent_id = #{id}
+	</select>
+	<select id="getStartTime" resultType="java.lang.String">
+		 select to_char(max(ao.last_opt_time),'yyyy-MM-dd HH24:MI:ss.ff')startTime from  amazon_order ao  where ao.platform = #{platform}
+	</select>
+	<select id="getAmazonAccounts" resultType="com.it.ocs.synchronou.model.AmazonAccountModel">
+		select am.id         id,
+		       am.platform   platform,
+		       am.seller_id  sellerId,
+		       am.secret_key secretKey,
+		       am.access_key accessKey,
+		       am.token      token,
+		       am.url        url,
+		       am.site_id    siteId
+		  from amazon_account_manager am
+		  where am.status = 1
+	</select>
+	
+	<insert id="insertData">
+		insert into amazon_order
+		  (id,
+		   platform,
+		   channel,
+		   order_id,
+		   status,
+		   payment_method,
+		   purchase_at,
+		   created_at,
+		   updated_at,
+		   amazon_updated_at,
+		   lastest_ship_date,
+		   lastest_delivery_date,
+		   customer_name,
+		   email,
+		   amount,
+		   currency_code,
+		   country_code,
+		   name,
+		   state_or_region,
+		   postal_code,
+		   phone,
+		   city,
+		   street,
+		   LAST_OPT_TIME)
+		values
+		  (#{id},
+		   #{platform,jdbcType=VARCHAR},
+		  #{SalesChannel,jdbcType=VARCHAR},
+		  #{AmazonOrderId,jdbcType=VARCHAR},
+		  #{OrderStatus,jdbcType=VARCHAR},
+		  #{PaymentMethod,jdbcType=VARCHAR},
+		  to_timestamp(#{PurchaseDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  to_timestamp(#{createDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  to_timestamp(#{createDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  to_timestamp(#{LastUpdateDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  to_timestamp(#{LatestShipDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  to_timestamp(#{LatestDeliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  #{BuyerName,jdbcType=VARCHAR},
+		  #{BuyerEmail,jdbcType=VARCHAR},
+		  #{Amount,jdbcType=DOUBLE},
+		  #{CurrencyCode,jdbcType=VARCHAR},
+		  #{CountryCode,jdbcType=VARCHAR},
+		  #{Name,jdbcType=VARCHAR},
+		  #{StateOrRegion,jdbcType=VARCHAR},
+		  #{PostalCode,jdbcType=VARCHAR},
+		  #{Phone,jdbcType=VARCHAR},
+		  #{City,jdbcType=VARCHAR},
+		  #{street,jdbcType=VARCHAR},
+		  to_timestamp(#{LastUpdateDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')
+		  )
+	</insert>
+	<update id="updateData">
+		update amazon_order set
+		  platform = #{platform,jdbcType=VARCHAR},
+		  channel = #{SalesChannel,jdbcType=VARCHAR},
+		  status = #{OrderStatus,jdbcType=VARCHAR},
+		  payment_method = #{PaymentMethod,jdbcType=VARCHAR},
+		  purchase_at = to_timestamp(#{PurchaseDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  updated_at = to_timestamp(#{createDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  amazon_updated_at = to_timestamp(#{LastUpdateDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  lastest_ship_date = to_timestamp(#{LatestShipDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  lastest_delivery_date = to_timestamp(#{LatestDeliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  customer_name = #{BuyerName,jdbcType=VARCHAR},
+		  email = #{BuyerEmail,jdbcType=VARCHAR},
+		  amount = #{Amount,jdbcType=DOUBLE},
+		  currency_code = #{CurrencyCode,jdbcType=VARCHAR},
+		  country_code =#{CountryCode,jdbcType=VARCHAR},
+		  name = #{Name,jdbcType=VARCHAR},
+		  state_or_region =#{StateOrRegion,jdbcType=VARCHAR},
+		  postal_code =#{PostalCode,jdbcType=VARCHAR},
+		  phone =#{Phone,jdbcType=VARCHAR},
+		  city =#{City,jdbcType=VARCHAR},
+		  street=#{street,jdbcType=VARCHAR}
+		  where order_id = #{AmazonOrderId,jdbcType=VARCHAR}
+	</update>
+	<select id="itemIsExist" resultType="int">
+		select count(1) from amazon_order_item oi where oi.amazon_item_id = #{itemId}
+	</select>
+	<insert id="insertItemData">
+		INSERT INTO amazon_order_item (
+			ID,
+			PARENT_ID,
+			AMAZON_ITEM_ID,
+			TITLE,
+			ASIN,
+			SKU,
+			PRICE,
+			QTY,
+			SHIPPING_AMOUNT,
+			SHIPPING_DISCOUNT,
+			TAX,
+			GIFT_PRICE,
+			PROMOTION_ID,
+			PROMOTION_DISCOUNT,
+			SHIPPING_TAX,
+			CONDITION_ID,
+			CREATED_AT,
+			UPDATED_AT,
+			PUSH_STATUS)   
+      values(
+        TOTAL_ORDER_ITEM_SEQ.Nextval,
+        #{parentId,jdbcType=BIGINT},
+		#{OrderItemId,jdbcType=VARCHAR},
+		#{Title,jdbcType=VARCHAR},
+		#{ASIN,jdbcType=VARCHAR},
+		#{SellerSKU,jdbcType=VARCHAR},
+		#{ItemPrice_Amount,jdbcType=DOUBLE},
+		#{QuantityOrdered,jdbcType=BIGINT},
+		#{ShippingPrice_Amount,jdbcType=DOUBLE},
+		#{ShippingDiscount_Amount,jdbcType=DOUBLE},
+		#{ItemTax_Amount,jdbcType=DOUBLE},
+		#{GiftWrapPrice_Amount,jdbcType=DOUBLE},
+		#{PromotionIds_PromotionId,jdbcType=VARCHAR},
+		#{PromotionDiscount_Amount,jdbcType=DOUBLE},
+		#{ShippingTax_Amount,jdbcType=DOUBLE},
+		#{ConditionId,jdbcType=VARCHAR},
+		to_timestamp(#{createDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		to_timestamp(#{createDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		0
+      )
+	</insert>
+	<update id="updateItemData">
+		update amazon_order_item set
+	      		TITLE = #{Title,jdbcType=VARCHAR},
+				ASIN = #{ASIN,jdbcType=VARCHAR},
+				SKU = #{SellerSKU,jdbcType=VARCHAR},
+				PRICE = #{ItemPrice_Amount,jdbcType=DOUBLE},
+				QTY =#{QuantityOrdered,jdbcType=BIGINT},
+				SHIPPING_AMOUNT = #{ShippingPrice_Amount,jdbcType=DOUBLE},
+				SHIPPING_DISCOUNT = #{ShippingDiscount_Amount,jdbcType=DOUBLE},
+				TAX = #{ItemTax_Amount,jdbcType=DOUBLE},
+				GIFT_PRICE = #{GiftWrapPrice_Amount,jdbcType=DOUBLE},
+				PROMOTION_ID = #{PromotionIds_PromotionId,jdbcType=VARCHAR},
+				PROMOTION_DISCOUNT = #{PromotionDiscount_Amount,jdbcType=DOUBLE},
+				SHIPPING_TAX = #{ShippingTax_Amount,jdbcType=DOUBLE},
+				CONDITION_ID = #{ConditionId,jdbcType=VARCHAR},
+				UPDATED_AT = to_timestamp(#{createDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')
+        where AMAZON_ITEM_ID = #{OrderItemId,jdbcType=VARCHAR}
+	</update>
+	<select id="getNoItemOrder" resultType="com.it.ocs.task.model.AmazonOrderModel">
+		select *
+		  from (select ao.id parentId, ao.order_id
+		          from amazon_order ao, amazon_order_item aoi
+		         where ao.id = aoi.parent_id(+)
+		           and aoi.id is null
+		           and ao.platform = #{platform}
+		         order by ao.purchase_at desc)
+		  <![CDATA[ where rownum < 101]]>
+	</select>
+	
+	<select id="getTimeForm" resultType="java.lang.String">
+		select to_char(max(eo.to_time),'yyyy-mm-dd hh24:mi:ss.ff') from SYS_ORDER_SYNCTIME eo where eo.platform = 'amazon' and eo.type = 1 and account = #{account}
+	</select>
+	<select id="getTimeSetId" resultType="int">
+		select SYS_ORDER_SYNCTIME_SEQ.Nextval from dual
+	</select>
+	<insert id="insertTimeSet">
+		insert into SYS_ORDER_SYNCTIME(id,from_time,platform,type,account)values(#{id},to_timestamp(#{timeFrom},'yyyy-MM-dd HH24:MI:ss.ff'),'amazon',1,#{account})
+	</insert>
+	<update id="udpateTimeSet">
+		update SYS_ORDER_SYNCTIME set to_time = to_timestamp(#{timeTo},'yyyy-MM-dd HH24:MI:ss.ff') where id = #{id}
+	</update>
+</mapper> 

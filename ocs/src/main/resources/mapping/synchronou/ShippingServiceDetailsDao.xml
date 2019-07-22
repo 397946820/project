@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayShippingServiceDetailsDao">
+
+	<sql id="select_base">
+		select a.id,
+		a.site_id siteId,
+		a.shipping_service shippingService,
+		a.description,
+		a.dimensions_required dimensionsRequired,
+		a.is_use isUse,
+		a.service_type serviceType,
+		a.shipping_category shippingCategory,
+		a.shipping_package shippingPackage,
+		a.shipping_service_id shippingServiceId,
+		a.shipping_time_max shippingTimeMax,
+		a.shipping_time_min shippingTimeMin,
+		a.weight_required weightRequired,
+		to_char(a.update_time,'yyyy-MM-dd hh24:mi:ss') updateTime,
+		a.international_service internationalService
+		from ebay_base_shipservice a
+		where 1 = 1
+			
+	</sql>
+	<sql id="select_condition">
+		<if test="param.siteId !=null and param.siteId != ''">
+			and a.site_id = #{param.siteId}
+		</if>
+		<if test="param.description !=null and param.description != ''">
+			and a.description like '%'||#{param.description}||'%'
+		</if>
+		<if test="param.internationalService !=null and param.internationalService != ''">
+			and a.international_service = #{param.internationalService}
+		</if>
+	</sql>
+
+
+	<update id="updateShippingServiceDetails" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update SHIPPING_SERVICE_DETAILS bao 
+	   	set
+			DESCRIPTION = #{item.description,jdbcType=VARCHAR},
+			INTERNATIONAL_SERVICE = #{item.international_service,jdbcType=VARCHAR},
+			SHIPPING_SERVICE = #{item.shipping_service,jdbcType=VARCHAR},
+			SHIPPING_TIME_MAX = #{item.shipping_time_max,jdbcType=VARCHAR},
+			SHIPPING_TIME_MIN = #{item.shipping_time_min,jdbcType=VARCHAR},
+			SERVICE_TYPE = #{item.service_type,jdbcType=VARCHAR},
+			SHIPPING_PACKAGE = #{item.shipping_package,jdbcType=VARCHAR},
+			VALID_FOR_SELLING_FLOW = #{item.valid_for_selling_flow,jdbcType=VARCHAR},
+			SHIPPING_CARRIER = #{item.shipping_carrier,jdbcType=VARCHAR},
+			SHIPPING_PACKAGE_DETAILS = #{item.shipping_package_details,jdbcType=VARCHAR},
+			WEIGHT_REQUIRED = #{item.weight_required,jdbcType=VARCHAR},
+			DETAIL_VERSION = #{item.detail_version,jdbcType=VARCHAR},
+			UPDATE_TIME = #{item.update_time,jdbcType=VARCHAR},
+			SHIPPING_CATEGORY = #{item.shipping_category,jdbcType=VARCHAR},
+			UPDATED_AT = #{item.lastUpdationDate}
+	   where SHIPPING_SERVICE_ID = #{item.shipping_service_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+	<select id="selectShippingServiceDetails" resultType="com.it.ocs.synchronou.model.EBayShippingServiceDetailsModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+			 <include refid="select_base" />   
+			 <include refid="select_condition" /> 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="getTotal" resultType="int">
+		select count(ID) from (
+		 	<include refid="select_base" />   
+			 <include refid="select_condition" /> 
+		)
+	</select>
+	<insert id="insertShippingServiceDetails" parameterType="java.util.List">
+		INSERT INTO SHIPPING_SERVICE_DETAILS(
+			ID,
+			DESCRIPTION,
+			INTERNATIONAL_SERVICE,
+			SHIPPING_SERVICE,
+			SHIPPING_SERVICE_ID,
+			SHIPPING_TIME_MAX,
+			SHIPPING_TIME_MIN,
+			SERVICE_TYPE,
+			SHIPPING_PACKAGE,
+			VALID_FOR_SELLING_FLOW,
+			SHIPPING_CARRIER,
+			SHIPPING_PACKAGE_DETAILS,
+			WEIGHT_REQUIRED,
+			DETAIL_VERSION,
+			UPDATE_TIME,
+			SHIPPING_CATEGORY,
+			CREATED_AT)  
+		select SHIPPING_SERVICE_DETAILS_SEQ.Nextval,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.description,jdbcType=VARCHAR},
+				#{item.international_service,jdbcType=VARCHAR},
+				#{item.shipping_service,jdbcType=VARCHAR},
+				#{item.shipping_service_id,jdbcType=VARCHAR},
+				#{item.shipping_time_max,jdbcType=VARCHAR},
+				#{item.shipping_time_min,jdbcType=VARCHAR},
+				#{item.service_type,jdbcType=VARCHAR},
+				#{item.shipping_package,jdbcType=VARCHAR},
+				#{item.valid_for_selling_flow,jdbcType=VARCHAR},
+				#{item.shipping_carrier,jdbcType=VARCHAR},
+				#{item.shipping_package_details,jdbcType=VARCHAR},
+				#{item.weight_required,jdbcType=VARCHAR},
+				#{item.detail_version,jdbcType=VARCHAR},
+				#{item.update_time,jdbcType=VARCHAR},
+				#{item.shipping_category,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="isExist" resultType="int">
+		select count(*) from ebay_base_shipservice s where s.shipping_service_id = #{shippingId}
+	</select>
+	<insert id="addShipService">
+		insert into ebay_base_shipservice
+		  (id,
+		   site_id,
+		   shipping_service_id,
+		   shipping_service,
+		   description,
+		   shipping_time_max,
+		   shipping_time_min,
+		   service_type,
+		   valid_for_selling_flow,
+		   weight_required,
+		   dimensions_required,
+		   shipping_package,
+		   shipping_category,
+		   update_time,
+		   International_Service
+		   )
+		values
+		  (ebay_base_shipservice_SEQ.Nextval,
+		  #{siteId},
+		  #{ShippingServiceID},
+		  #{ShippingService},
+		  #{Description,jdbcType=VARCHAR},
+		  #{ShippingTimeMax},
+		  #{ShippingTimeMin},
+		  #{ServiceType,jdbcType=VARCHAR},
+		  #{ValidForSellingFlow,jdbcType=VARCHAR},
+		  #{WeightRequired,jdbcType=VARCHAR},
+		  #{DimensionsRequired,jdbcType=VARCHAR},
+		  #{ShippingPackage,jdbcType=VARCHAR},
+		  #{ShippingCategory,jdbcType=VARCHAR},
+		  to_timestamp(#{UpdateTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+0,
+		  #{InternationalService,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="updateShipService">
+		update ebay_base_shipservice set 
+		  shipping_service = #{param.ShippingService},
+		  description = #{param.Description,jdbcType=VARCHAR},
+		  shipping_time_max = #{param.ShippingTimeMax},
+		  shipping_time_min = #{param.ShippingTimeMin},
+		  service_type = #{param.ServiceType,jdbcType=VARCHAR},
+		  valid_for_selling_flow = #{param.ValidForSellingFlow,jdbcType=VARCHAR},
+		  weight_required = #{param.WeightRequired,jdbcType=VARCHAR},
+		  dimensions_required = #{param.DimensionsRequired,jdbcType=VARCHAR},
+		  shipping_package = #{param.ShippingPackage,jdbcType=VARCHAR},
+		  shipping_category = #{param.ShippingCategory,jdbcType=VARCHAR},
+		  <if test="param.InternationalService != null and param.InternationalService != ''">
+		  International_Service = #{param.InternationalService,jdbcType=VARCHAR},
+		  </if>
+		  update_time = to_timestamp(#{param.UpdateTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+0
+		where site_id = #{param.siteId}
+		and shipping_service_id = #{param.ShippingServiceID}
+	</update>
+	<select id="getShippingServiceById" resultType="com.it.ocs.synchronou.model.EBayShippingServiceDetailsModel">
+		 <include refid="select_base" />   
+		 and a.id = #{id}
+	</select>
+	<delete id="deleteShippingService">
+	begin
+		delete ebay_base_data e where e.site_id = #{siteId} and e.value = #{shippingService} and e.data_type = #{internationalService};
+		 update ebay_base_shipservice set is_use = 0 where id = #{id};
+	end;
+	</delete>
+	<insert id="addOrUpdateShippingService">
+	begin
+		insert into ebay_base_data
+	       (site_id, value, display_name, data_type)
+	     values
+	       (#{siteId},#{shippingService},#{description},#{internationalService});
+	    update ebay_base_shipservice set is_use = 1 where id = #{id};
+	end;
+	
+	</insert>
+	<select id="shippingLocationIsExist" resultType="int">
+		select count(*) from ebay_base_shiplocation s where s.Shipping_Location = #{ShippingLocation,jdbcType=VARCHAR} and s.site_id = #{siteId}
+	</select>
+	<insert id="addShipLocation">
+		insert into ebay_base_shiplocation
+		  (id, description, detailversion, shipping_location, site_id, update_time)
+		values
+		  (ebay_base_shiplocation_SEQ.Nextval,
+		  #{Description,jdbcType=VARCHAR},
+		  #{DetailVersion},
+		  #{ShippingLocation,jdbcType=VARCHAR},
+		  #{siteId},
+		  to_timestamp(#{UpdateTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+0)
+	</insert>
+	<update id="updateShipLocation">
+		update ebay_base_shiplocation set
+		  description = #{Description,jdbcType=VARCHAR},
+		  DetailVersion = #{DetailVersion},
+		  update_time = to_timestamp(#{UpdateTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+0
+	    where shipping_location = #{ShippingLocation,jdbcType=VARCHAR}
+		  and site_id = #{siteId}
+		  
+	</update>
+</mapper> 

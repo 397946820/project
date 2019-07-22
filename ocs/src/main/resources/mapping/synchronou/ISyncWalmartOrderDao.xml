@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.ISyncWalmartOrderDao">
+	<select id="getAccounts" resultType="com.it.ocs.synchronou.model.WalmartAccountModel">
+		select account,url,nexturl nextUrl,token from walmart_account_manager where status = 1
+	</select>
+	<select id="getWalamrtId" resultType="int">
+		select id from walmart_order t where t.purchase_order_id = #{purchaseOrderId,jdbcType=VARCHAR}
+	</select>
+	<select id="getId" resultType="int">
+		select total_order_seq.nextval from dual
+	</select>
+	<insert id="addOrder">
+		insert into walmart_order(
+		  id,
+		  purchase_order_id,
+		  customer_order_id,
+		  customer_email_id,
+		  order_date_utc,
+		  phone,
+		  estimated_delivery_date_utc,
+		  estimated_ship_date_utc,
+		  method_code,
+		  name,
+		  address1,
+		  address2 ,
+		  city,
+		  state ,
+		  postal_code ,
+		  country ,
+		  address_type,
+		  order_line_total,
+		  created_at,
+		  updated_at
+		  )values(
+		  #{id,jdbcType=BIGINT},
+		  #{purchaseOrderId,jdbcType=VARCHAR},
+		  #{customerOrderId,jdbcType=VARCHAR},
+		  #{customerEmailId,jdbcType=VARCHAR},
+		  to_timestamp(#{orderDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  #{shippingInfo_phone,jdbcType=VARCHAR},
+		  to_timestamp(#{shippingInfo_estimatedDeliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  to_timestamp(#{shippingInfo_estimatedShipDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  #{shippingInfo_methodCode,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_name,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_address1,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_address2,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_city,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_state,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_postalCode,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_country,jdbcType=VARCHAR},
+		  #{shippingInfo_postalAddress_addressType,jdbcType=VARCHAR},
+		  #{line_total,jdbcType=VARCHAR},
+		  sysdate - 8/24,
+		  sysdate- 8/24
+		  )
+	</insert>
+	<update id="updateOrder">
+		 update walmart_order set
+		  customer_email_id=#{customerEmailId,jdbcType=VARCHAR},
+		  order_date_utc=to_timestamp(#{orderDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  phone=#{shippingInfo_phone,jdbcType=VARCHAR},
+		  estimated_delivery_date_utc=to_timestamp(#{shippingInfo_estimatedDeliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  estimated_ship_date_utc=to_timestamp(#{shippingInfo_estimatedShipDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  method_code=#{shippingInfo_methodCode,jdbcType=VARCHAR},
+		  name=#{shippingInfo_postalAddress_name,jdbcType=VARCHAR},
+		  address1=#{shippingInfo_postalAddress_address1,jdbcType=VARCHAR},
+		  address2 =#{shippingInfo_postalAddress_address2,jdbcType=VARCHAR},
+		  city=#{shippingInfo_postalAddress_city,jdbcType=VARCHAR},
+		  state = #{shippingInfo_postalAddress_state,jdbcType=VARCHAR},
+		  postal_code =#{shippingInfo_postalAddress_postalCode,jdbcType=VARCHAR},
+		  country = #{shippingInfo_postalAddress_country,jdbcType=VARCHAR},
+		  address_type=#{shippingInfo_postalAddress_addressType,jdbcType=VARCHAR},
+		  order_line_total=#{line_total,jdbcType=VARCHAR},
+		  updated_at = sysdate-8/24
+		  where id = #{id}
+	</update>
+	<insert id="addOrderLine">
+		insert into walmart_order_line(
+		  id,
+		  parent_id ,
+		  purchase_order_id,
+		  customer_order_id,
+		  line_number,
+		  product_name,
+		  sku,
+		  item_price,
+		  item_price_currency,
+		  shipping_price,
+		  shipping_price_currency ,
+		  order_line_quantity_meas,
+		  order_line_quantity_amount,
+			status_date_utc,
+			order_line_status ,
+			status_quantity_meas ,
+			status_quantity_amount,
+			ship_date_time_utc,
+			ship_carrier,
+			ship_method_code ,
+			ship_tracking_number,
+			ship_tracking_url ,
+			created_at ,
+			updated_at
+		  )values(
+		  TOTAL_ORDER_ITEM_SEQ.Nextval,
+		  #{parentId,jdbcType=BIGINT},
+		  #{purchaseOrderId,jdbcType=VARCHAR},
+		  #{customerOrderId,jdbcType=VARCHAR},
+		  #{lineNumber,jdbcType=BIGINT},
+		  #{item_productName,jdbcType=VARCHAR},
+		  #{item_sku,jdbcType=VARCHAR},
+		  #{itemPrice,jdbcType=BIGINT},
+		  #{itemPrice_currency,jdbcType=VARCHAR},
+		  #{shippingPrice,jdbcType=BIGINT},
+		  #{shipping_currency,jdbcType=VARCHAR},
+		  #{orderLineQuantity_unitOfMeasurement,jdbcType=VARCHAR},
+		  #{orderLineQuantity_amount,jdbcType=BIGINT},
+			to_timestamp(#{statusDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			#{orderLineStatuses_orderLineStatus_status,jdbcType=VARCHAR},
+			#{orderLineStatuses_orderLineStatus_statusQuantity_unitOfMeasurement,jdbcType=VARCHAR},
+			#{orderLineStatuses_orderLineStatus_statusQuantity_amount,jdbcType=BIGINT},
+			to_timestamp(#{orderLineStatuses_orderLineStatus_trackingInfo_shipDateTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			#{orderLineStatuses_orderLineStatus_trackingInfo_carrierName_carrier,jdbcType=VARCHAR},
+			#{orderLineStatuses_orderLineStatus_trackingInfo_methodCode,jdbcType=VARCHAR},
+			#{orderLineStatuses_orderLineStatus_trackingInfo_trackingNumber,jdbcType=VARCHAR},
+			#{orderLineStatuses_orderLineStatus_trackingInfo_trackingURL,jdbcType=VARCHAR},
+			sysdate-8/24 ,
+			sysdate-8/24
+		  )
+	</insert>
+	<update id="updateOrderLine">
+		 update walmart_order_line set
+		  product_name=#{item_productName,jdbcType=VARCHAR},
+		  sku=#{item_sku,jdbcType=VARCHAR},
+		  item_price=#{itemPrice,jdbcType=BIGINT},
+		  item_price_currency=#{itemPrice_currency,jdbcType=VARCHAR},
+		  shipping_price=#{shippingPrice,jdbcType=BIGINT},
+		  shipping_price_currency =#{shipping_currency,jdbcType=VARCHAR},
+		  order_line_quantity_meas=#{orderLineQuantity_unitOfMeasurement,jdbcType=VARCHAR},
+		  order_line_quantity_amount=#{orderLineQuantity_amount,jdbcType=BIGINT},
+			status_date_utc=to_timestamp(#{statusDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			order_line_status =#{orderLineStatuses_orderLineStatus_status,jdbcType=VARCHAR},
+			status_quantity_meas =#{orderLineStatuses_orderLineStatus_statusQuantity_unitOfMeasurement,jdbcType=VARCHAR},
+			status_quantity_amount=#{orderLineStatuses_orderLineStatus_statusQuantity_amount,jdbcType=BIGINT},
+			ship_date_time_utc=to_timestamp(#{orderLineStatuses_orderLineStatus_trackingInfo_shipDateTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			ship_carrier=#{orderLineStatuses_orderLineStatus_trackingInfo_carrierName_carrier,jdbcType=VARCHAR},
+			ship_method_code =#{orderLineStatuses_orderLineStatus_trackingInfo_methodCode,jdbcType=VARCHAR},
+			ship_tracking_number=#{orderLineStatuses_orderLineStatus_trackingInfo_trackingNumber,jdbcType=VARCHAR},
+			ship_tracking_url =#{orderLineStatuses_orderLineStatus_trackingInfo_trackingURL,jdbcType=VARCHAR},
+			updated_at=sysdate-8/24
+		  where parent_id = #{parentId}
+		  and line_number = #{lineNumber,jdbcType=BIGINT}
+	</update>
+	<select id="lineIsExist" resultType="int">
+		select count(*) from walmart_order_line where parent_id = #{parentId} and line_number = #{lineNumber,jdbcType=BIGINT}
+	</select>
+</mapper> 

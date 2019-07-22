@@ -1,0 +1,6408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GetItemResponse xmlns="urn:ebay:apis:eBLBaseComponents">
+	<Timestamp>2018-02-26T05:44:47.016Z</Timestamp>
+	<Ack>Success</Ack>
+	<Version>1047</Version>
+	<Build>E1047_CORE_API_18630299_R1</Build>
+	<Item>
+		<ApplicationData>ic6d9i8408076244713160112345</ApplicationData>
+		<AutoPay>true</AutoPay>
+		<BuyerProtection>ItemIneligible</BuyerProtection>
+		<BuyItNowPrice currencyID="USD">0.0</BuyItNowPrice>
+		<Country>US</Country>
+		<Currency>USD</Currency>
+		<Description><!--[Datacaciques code start,cross,md5___9376___,don&apos;t 
+				modify it] --><!-- dc-cs-style,md5:80d32ed5e5e09e8f29283922cdf0ad15 -->
+			<style>.dc-dock{position:absolute;width:35px;height:20px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHUAAAAoCAYAAADAFLWVAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAAWdEVYdENyZWF0aW9uIFRpbWUAMjAxMy42LjPM/S8QAAAMaklEQVR4nO2bb0wbZ57HvzPj8X88NtgYDNgEklCbhLJH7IRtIAlBTY+rc9e60i6l2ipoVyhZVafcnWJ3dWhPinaPvNncixPZ7krtRquI7QvSW5X2FNQSkmwrQpqGZompSZqAGwIGx2ODZ4wZbN+Lxjm6axsnMal0588rmN/zfH+P5zfPH8ZfiEQigTxPDkEQWbd1Op2bAfwtgO0ACgFIcjkWUS7F8mTG6XSSAH4M4EUA2T8Fj0i+qE+XHwOwpwqEw2H5/Pz8JoZhqHg8TkYiEV6v19+RSCTCoybJF/Up4XQ6tyNNQQGAJMkEQRDUwYMHSYIgEIlE5OfPnzdzHDddWFgYepRc5BOPNk+2HEp10efzacfHx2sXFhZqiouLycHBQczMzEAmk6GtrY00mUyb7t69a4zH41nXisgflHJDpoOS0+ncAuBXqWI8z0sjkUiN3W4nSJJELBaDx+PB3NwcjEYjqqurEQgEMDQ0tKJSqe4oFIrIemPJz9Snw750AYlEIvj9fn5gYAAejwccx8FisaClpQVyuRyffvopZmdncfDgQbFMJtvq8/l06yXL76lPB2uqiz6fT8txXOmOHTuoLVu2IBwOw+v1gud50DQNsViMmpoaSCQSBAIBlJaWEoIglE1PT8tMJpM3XbJ8UTcYp9NZAaAkVUwqlUZZlo0JgkARBIGioiIUFxc/jCcSCdy/fx8+nw9TU1PYvn07WlpaMDw8XLi8vOyTSqXRVLr5om48u9MFGIZZKigo+PLatWvPCIIgpigKJEmCpmlIJBKIxWLI5XLcvHkTe/bsQSgUwvj4OMLhMABI8kX97mjKFPT7/Rqr1Squr69/eI1lWXAcB7VajWvXrsFms2FychJFRUVQqVSIRCKgaTpt7fJF3UCcTmcNgIp08Xg8TiwtLanGx8djMzMzlEwmg0qlQnl5OfR6PTiOg0QiAc/zoCgKFRUVWFxcRFNTEy5cuFAAIJBKN1/UjeXvMwVJkkxUV1ff8Xg8W+rr6xVlZWWIxWKYmprC6uoqVlZW4PV6cePGDTgcDgCASqWCTCYDwzAaANMpdXP/OfIAgNPpLAfw/fXaRSIRyerqqoJlWYyMjOC9996DyWSC3+9HKBTCwsICdDodVCrVwz5DQ0Pgef5uOs38TN0Ajh07RgD4KQBqvbbRaFSiUqnmPR6PIAiCiOd5/ZkzZxI8zxMHDhxALBaD1WrF/Pw8BEFASUkJQqGQYDAY/Ok080XdAAiCcADYlk1btVq9qFarFwEgGo2KAdwXi8XCwsJC4eDgoAEAFQwG8cknn4CiqKBIJBJJJJKM74LzRc0xTqezFsBrj9NXIpGsJH8uLi6+LxaLV6ampqr9fj9IkgxVV1dPZaOTL2oOcTqdRQCcyGLZzYaCggKOIIjErVu3EjKZbN13vknyRc0RTqdTBMAFQJMrTYqi4iUlJTPxeJyUy+X5on4HHAbwTK5F9Xp92gNROh7JUrHR3po8T4wAYC6roj4tb02e3JDt8pvWWzMllDKj5D5bdYlCtJqgqHnfPPscPvq8kFrMeg/Ik1vWLep63hoRYgmCoqn/PlpFiUgCC0vlmp/8Trdn+qvzX3xPOjmb09HmyYp1j967d+92ASj6y+t/4p81/THcvINXP7v5eyYF+cexJRQpKdQapPjhTg3J0kbDu26pzEjd9YuIeN4z8xTJWNQH3ppXU3Yk4nHNpr+p/pOriviBlcHf1RXg4iSH3mEWUSGB17+vRnNdOXNqvLSM4ufvMxSX8ru/PLknY1F37979CoCaVDGaiMU/ulesvXAnIUskgEIFhZZnlDj4bAHuh2M4NcyCiybwi1fK6cuLlcbLUyurJnoumC5Xd3d3S1tbW21ra+vW1tbWrQ0NDXqGYXDz5s117ZE2m037xhtvtExOTt4NhULr+mRtNpv2tddea7Db7XWtra1bGxsby3U6HTkxMcGu1zcdRqNR/uabbx5YXFwMzMzM8I+rkwvW21NTemsu8fWVs9LtNT97pYRutzH4OiBg8AaH2VAQSgkJlYxCu42BRkFhYjaK57YoCG6lqfa/rmpU/6AY+iJdsitXrkz09/d/BQCHDx9uaG5uruN5XhgeHs7Z3rx3797SF154oWF6enr2xIkTlwCgo6PDbLVazVKpVHzmzJmJx9H1er28y+UayNU4n4S0Rc3krdGJ2LCHWxbC0ThNEsC2Mil2VMoexlfjCYzPRHHlTgQD15dwZF8hfvsjFY5QqJj/4trNYhG77pN86tSpq0ePHt21c+fOzcPDw7NqtZo+dOhQg16v1wIAy7IhpVIpHxsbu2W1Ws0AcOTIkZbe3t6hbdu2aRsbG800TdMA4PP5/Hq9XutyuQaamprMk5OT3rfffvt6MteDQk7YbDYtALS1tRnT9TcajXKHw1G3dhx9fX1Xk/nPnj07Mjo66l+rIQiCEAgEQkqlUn78+PGhnp6eF9c+wJ2dnXUMw8hPnjw5YrPZtPv27TNrNBoG+N8HXa1W011dXbs0Gg3DcRzf399/1e12p1zFMs3UtN6aZ8TT/ir63oVfffDSHi4al0tpEiISUEpJqGUUCqQkShkR3v0shP9sL8VXCyv49QUWX7MCyJhGmU1RAcDj8dxrbm6uSxZULBbTvb29Q16vlz969Oiu5E0/e/bsyMsvv7yrt7d3qKSkRN7c3FyXvBk2m01rt9sbAMBisTAKhUJ++/bthVT5RkdH/TabTZuuPwA4HI46sVhM9/T0nAOArq6uXa+//vqu06dPjyTb7N27tzSVxsrKSsatwWg0yu12e0MgEAi5XK4Bi8XCtLe37wKASCQiaDQapqen59z+/fuNlZWVTLqiZvqSPKO35vPlmrJ/fckk//eX9fi5XYc323Q4UKtERSGNHZUy/GF0ET+369A3GgK3EkeVToyFpRi4uOyR30IZDAa5Xq/XXr58+ZbX6+UB4OTJkyOCIPzVTWpoaDCxLBtKzoLR0VH/2NjYrWxzZepvsVgYvV6vff/9968Hg0EhGAwKJ06cuHT69OkRpVJJJzXMZrPhccZgtVpLaZqm33nnnasA4Ha7Q2NjY7fq6+s3j4+P+wVBELq6unZJpVLxhx9++GgW0fW8NUJCRN4WDMW/Oe8TLk5ytK5AhMoiGvvNSlgrZZgNrUKjIDEXWoVYROB5ixJ3/Cv4jx+U4KenynTAja/X+4AAUFJSouY4LmeHDrfbHeI4jjebzYZc7tNer5c3Go3ybNv/5WeSSCT02t9dLteBVDm6u7vPdXR0mKuqqko7OzvptVvIWtLN1IzeGppYjb+qGvwsEGDD/7i/CL/9kQH//LwWM0EBo3ciGJ9ZxqCbw6HfzaBtuxIAsEkrxvYyKaqqtxgyaSfp7Oys27p1q9Htdk+73e4Qy7KhnTt3bk7evLXL71omJibuaTQaxuFwVAPfnHTr6+s3J+Pnzp27bjKZSg8fPvxwSe3o6DD39PS82NnZWZepv9vtDvl8Pr/dbq9Tq9W0Wq2mnU5nU3d3d8vamXr16tXptRoWi4VZO4ZwOMxbLBaTWq2mLRYLYzAYtADw8ccfewVBEK5cuTLhcrkGent7hziO4ycnJ70dHR3m7u7ulg8++OCW3+8PMQyT9iH6q5marbfGt1qoiIgKNR5fFB9/yWHoSw4f/ZMJv77AIp5I4PPpCJ6vVWKTVgwAiCeArt/fw4Ln0p+3ylJrWq1Wc/LQw7Js6OLFi9eTy8xbb701cujQoYYjR460JOOplt/h4eFZuVx+vbGx8aFW8qADfLMUhsPhS3a7va6np+dF4JuZs/bgkql/f3//dYfDUZecTSzLhtbup8kcWq32oYYgCEI4HObFYjGd1Ghvb29YqwEAwWBQ6OvrG3kwNjMAJA91RqNRXl5ernW5XAcEQRD6+vq+lXMt33o5f+zYMYIgiF8iCyvGjWhV8R2hVKsiOT6SkEpmxeYtUlEi7luKk30/qcBLvV6M/KwKBICIEIdtkwzNv5xY3h/5/Ufraf9fxOFwVFssFtPx48eHNjrXt2bqo3hraiW352slt+cBwB9jZAQmvGpiafkyXVvx6m9WLQAlmpyLwtnvA83PzMlkMrFG8M4h650nz+PycKY+8Nb8AjmwYtyIVukGws/t/JcDWvxhyD3XoTr32ZNq5skeEZB7b81m8dcBEon4u5fvx3UUu5gLzTzZQz3w1vwbMvwJ86iIiHgiAWJFEfMHDbQ/qKOC3+m70P9viLBB3prd8i9S/ktAng1lGcD8/wCcx1YlT44gTAAAAABJRU5ErkJggg==)
+				no-repeat top
+				right}.cs-head{overflow:hidden;position:relative}.cs-head
+				.title{margin:0;font-weight:400;font-size:14px;padding:5px
+				10px}.dc-cs:hover
+				.dc-dock,.dc-dock:hover{width:117px;background-position:bottom
+				right}.dc-cs{clear:both;max-width:100vw}.dock-rb{right:0;bottom:0}
+				.cs-top .cs-head .title {font-weight: 700;font-size: 22px;}.cs-top
+				.cs-head .title:after {content: &apos;Hot Sale&apos;;color:
+				#FFFFFF;}.cs-top .cs-list .title{color:#333;}.cs-top .cs-list
+				.expand{display: inline;}@media (max-width:480px) {.cs-top
+				.cs-list>li:nth-child(n+5) {display: none;}.cs-top{display:
+				block;}}.cs-top .cs-head {background-color: #FF751A;}.cs-bottom
+				.cs-head .title,.cs-append .cs-head .title {margin: 0;font-weight:
+				700;font-size: 22px;}.cs-bottom .cs-head .title:after,.cs-append
+				.cs-head .title:after {content: &apos;You may like&apos;;color:
+				#FFFFFF;}.cs-bottom .cs-list .title,.cs-append .cs-list
+				.title{color:#333;}.cs-bottom .cs-list .expand,.cs-append .cs-list
+				.expand{display: inline;}@media (max-width:480px) {.cs-bottom
+				.cs-list>li:nth-child(n+7),.cs-append .cs-list>li:nth-child(n+7)
+				{display: none;}.cs-bottom{display: block;}}.cs-bottom
+				.cs-head,.cs-append .cs-head {background-color: #FF751A;}@media
+				(min-width: 640px) {.cs-list-col7 .coupon, .cs-list-col8 .coupon,
+				.cs-list-col9 .coupon, .cs-list-col10 .coupon {display: none
+				!important;}} .cs-list{margin:0 0 0
+				-20px;padding:0;background:#FFF}.cs-list:after,.cs-list:before{display:table;line-height:0;content:&quot;&quot;}.cs-list:after{clear:both}.cs-list>li{float:left;width:16.66%;list-style:none;box-sizing:border-box;padding:10px
+				0 10px
+				20px;position:relative;margin:0}.cs-append,.cs-bottom{margin-top:10px}.cs-list-col6>li{width:16.66%}.cs-list-col7{margin-left:-18px}.cs-list-col7>li{width:14.28%;padding-left:18px}.cs-list-col8{margin-left:-16px}.cs-list-col8>li{width:12.5%;padding-left:16px}.cs-list-col9{margin-left:-15px}.cs-list-col9>li{width:11.11%;padding-left:15px}.cs-list-col10{margin-left:-14px}.cs-list-col10>li{width:10%;padding-left:14px}.cs-list-col11{margin-left:-12px}.cs-list-col11>li{width:9.09%;padding-left:12px}.cs-list-col12{margin-left:-10px}.cs-list-col12>li{width:8.33%;padding-left:10px}.cs-list-collapse
+				.expand{display:none}.cs-list-collapse>li{padding:0}@media
+				(max-width:800px){img{max-width:100%}.cs-list{margin-left:-20px}.cs-list>li{width:20%!important;padding-left:20px}}@media
+				(max-width:640px){img{max-width:100%}.cs-list{margin-left:-18px}.cs-list>li{width:33.33%!important;padding-left:18px}}@media
+				(max-width:480px){img{max-width:100%}.cs-list{margin-left:-15px}.cs-list>li{width:50%!important;padding-left:15px}}.cs-list
+				.cover:after{display:block;content:&apos;&apos;;padding-top:100%;background-repeat:no-repeat;background-size:cover;background-position:center}.cs-list
+				a{text-decoration:none}.cs-list a:hover
+				.title{text-decoration:underline}.cs-list
+				.title{color:#333;margin:5px 0}.cs-list
+				.title:after{display:block;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:14px;line-height:1.4em;height:2.8em;overflow:hidden;white-space:normal;word-break:break-word;-webkit-hyphens:auto;-ms-hyphens:auto;hyphens:auto}.cs-list
+				.plus{height:20px;overflow:hidden}.cs-list
+				.price{color:#E50010}.cs-list
+				.price:after{content:&apos;&apos;;font-size:14px}.cs-list
+				.origin{margin-left:3px;font-size:12px;color:#AAA}.cs-list
+				.origin:after{display:none;content:&apos;&apos;;text-decoration:line-through}.cs-list
+				.coupon{display:none;width:60px;height:60px;border-radius:50%;background:rgba(224,13,12,.8);color:#FFF;position:absolute;top:10px;right:10px;text-align:center;padding-top:12px;box-sizing:border-box}.cs-list
+				.coupon:before{content:&apos;&apos;;font-size:20px}.cs-list
+				.coupon:after{content:&apos;Off&apos;;font-size:12px;position:absolute;bottom:8px;right:12px}.dc-cs
+				*{text-align:left}.cs-top .cs-head{min-height:24px}.cs-append
+				.cs-head .title,.cs-bottom .cs-head .title,.cs-top .cs-head
+				.title{min-height:12px}p:empty+hr{display:none}hr+span.ebay{display:none}.dc_tracker_img{display:none}#ds_div>.dc_tracker_img:last-of-type{display:block}
+				[data-lid=&quot;322992861394&quot;]
+				.cover:after{background-image:url(https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/UX0AAOSwSypY9GD0/$_1.JPG?set_id=880000500F)}[data-lid=&quot;322992861394&quot;]
+				.title:after{content:&apos;LE 30-Inch Ceiling Fan with Six
+				White/Whitewash Blades and Single Light Kit
+				&apos;}[data-lid=&quot;322992861394&quot;]
+				.price:after{content:&apos;$87.48&apos;}
+				[data-lid=&quot;322992861394&quot;]
+				.cover:after{background-image:url(https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/UX0AAOSwSypY9GD0/$_1.JPG?set_id=880000500F)}[data-lid=&quot;322992861394&quot;]
+				.title:after{content:&apos;LE 30-Inch Ceiling Fan with Six
+				White/Whitewash Blades and Single Light Kit
+				&apos;}[data-lid=&quot;322992861394&quot;]
+				.price:after{content:&apos;$87.48&apos;}    </style><!--[Datacaciques code 
+				end] --><!--[Datacaciques code 
+				start,cross,md5___259___,don&apos;t modify it] --><!-- dc-cs-link,md5:fa5d2f39b2488ea18884e9ca80f73768 -->
+			<link
+				rel=&quot;stylesheet
+				prefetch &
+				quot ;
+				href=&quot;https://crosell.datacaciques.com/cmaster/getstyle?s=H4sIAAAAAAAAA3XJsRGAMAwDwIVSRFJs7HXCkQkoNTwT8O3TqmipimHErMLkyhCBFZnjtchuVkK9vB9fx2jfZ%2Bzf%2BgDyFoEKVgAAAA%3D%3D&quot;><!--[Datacaciques code end] --><!--[Datacaciques code start,cross,md5___617___,don&apos;t modify 
+					it] --><!-- dc-cs-top,md5:c31cf38c7f5f2c64b56f82f3390da43c -->
+				<div
+					class=&quot;dc-cs
+					cs-top &
+					quot ;>
+					<div class=&quot;cs-head&quot;>
+						<h3 class=&quot;title&quot;></h3>
+						<strong
+							class=&quot;dc-dock
+							dock-rb &
+							quot ;
+							title=&quot;DataCaciques -
+							We
+							promote
+							your
+							sales &
+							quot ;></strong>
+					</div>
+					<ul
+						class=&quot;cs-list
+						cs-list-col6 &
+						quot ;>
+						<li data-lid=&quot;322992861394&quot;>
+							<a
+								href=&quot;https://www.ebay.com/itm/LE-30-Inch-Ceiling-Fan-Six-White-Whitewash-Blades-and-Single-Light-Kit-/322992861394&quot;target=&quot;_blank&quot;>
+								<div class=&quot;cover&quot;></div>
+								<div class=&quot;expand&quot;>
+									<p class=&quot;title&quot;></p>
+									<div class=&quot;plus&quot;>
+										<span class=&quot;price&quot;></span>
+										<span class=&quot;origin&quot;></span>
+										<span class=&quot;coupon&quot;></span>
+									</div>
+								</div>
+							</a>
+						</li>
+					</ul>
+				</div><!--[Datacaciques code end] -->
+				<link
+					href=&quot;https://s.pushauction.com/tl/76a6d92d31e5443a8041764706bfed68/180111024508.css&quot;
+					rel=&quot;stylesheet&quot; />
+				<link
+					href=&quot;https://s.pushauction.com/pm/42c9e47595f347a2ad8e8755a7b2fe48/08a47492e18e4c1ab394211cced3392c/180111024508.css&quot;
+					rel=&quot;stylesheet&quot; />
+				<meta
+					name=&quot;viewport&quot;
+					content=&quot;target-densitydpi=device-dpi,
+					width=device-width,
+					initial-scale=1.0,
+					minimum-scale=1.0,
+					maximum-scale=1.0,
+					user-scalable=yes&quot;>
+					<div id=&quot;pa_t_cp&quot;></div>
+					<div
+						id=&quot;patemplate&quot;
+						class=&quot;pc_template&quot;>
+						<div
+							class=&quot;pastore_top_background
+							patemplate_box_content &
+							quot ;>
+							<div
+								class=&quot;patemplate_bgin
+								pastore_bottom_background &
+								quot ;>
+								<div class=&quot;patemplate_center&quot;>
+									<div class=&quot;patemplate_header&quot;>
+										<div id=&quot;header&quot;>
+											<div
+												class=&quot;patemplate_headertop
+												pastore_header_background &
+												quot ;>
+												<div
+													class=&quot;patemplate_header_logo&quot;
+													id=&quot;patemplate_header_logo&quot;>
+												</div>
+												<div
+													class=&quot;patemplate_head_right&quot;
+													id=&quot;patemplate_header_right&quot;></div>
+											</div>
+											<div
+												class=&quot;patemplate_header_nav&quot;
+												id=&quot;patemplate_header_nav&quot;>
+												<ul
+													class=&quot;megamenu
+													lev1 &
+													quot ;>
+													<li>
+														<a
+															target=&quot;_blank&quot;
+															href=&quot;https://stores.ebay.com/neonmartlighting/Payment.html&quot;>Payment</a>
+													</li>
+													<li>
+														<a
+															target=&quot;_blank&quot;
+															href=&quot;https://stores.ebay.com/neonmartlighting/Shipment.html&quot;>Shipment</a>
+													</li>
+													<li>
+														<a
+															target=&quot;_blank&quot;
+															href=&quot;https://stores.ebay.com/neonmartlighting/Return.html&quot;>Return</a>
+													</li>
+													<li>
+														<a
+															target=&quot;_blank&quot;
+															href=&quot;https://stores.ebay.com/neonmartlighting/Feedback.html&quot;>Feedback</a>
+													</li>
+													<li>
+														<a
+															target=&quot;_blank&quot;
+															href=&quot;https://stores.ebay.com/neonmartlighting/FAQ.html&quot;>FAQ</a>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+									<div class=&quot;patemplate_content&quot;>
+										<div class=&quot;patemplate_contentin&quot;>
+											<div class=&quot;patemplate_content_left&quot;>
+												<div
+													class=&quot;patemplatebox&quot;
+													id=&quot;patemplate_store_category&quot;>
+													<div class=&quot;patemplatebox_h&quot;>
+														<h2 class=&quot;patemplatebox_title&quot;>Store category</h2>
+														<span></span>
+													</div>
+													<div class=&quot;patemplatebox_body&quot;>
+														<div class=&quot;patemplatebox_bodynone&quot;>
+															<div
+																class=&quot;patemplate_category&quot;
+																id=&quot;patemplate_template_category&quot;>
+																<ul>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Other/_i.html?_fsub=1&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Other</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED Bulbs/_i.html?_fsub=9535528010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Bulbs</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED
+																			Flood
+																			Light /
+																			_i.html ?
+																			_fsub=9535532010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Flood Light</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED Strips/_i.html?_fsub=9535530010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Strips</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Commercial Lighting/_i.html?_fsub=9535529010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Commercial Lighting</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Ceiling Lights/_i.html?_fsub=9535531010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Ceiling Lights</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Outdoor
+																			Lighting /
+																			_i.html ?
+																			_fsub=22011044010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Outdoor Lighting</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Lamps/_i.html?_fsub=9535533010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Lamps</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Flashlights/_i.html?_fsub=22011045010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Flashlights</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Parts &
+																			amp ;
+																			Accessories /
+																			_i.html ?
+																			_fsub=22011200010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Parts &amp; Accessories</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Accessories/_i.html?_fsub=9535537010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Accessories</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED Torches/_i.html?_fsub=9535535010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Torches</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/May
+																			Discounts /
+																			_i.html ?
+																			_fsub=19498818010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>May Discounts</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/0.99-9.99
+																			Zone /
+																			_i.html ?
+																			_fsub=19701228010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>0.99-9.99 Zone</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/10.99-40.99
+																			Zone /
+																			_i.html ?
+																			_fsub=19701229010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>10.99-40.99 Zone</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/49.99-99.99
+																			Zone /
+																			_i.html ?
+																			_fsub=19701230010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>49.99-99.99 Zone</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Big
+																			Discounts--up
+																			to 4
+																			off /
+																			_i.html ?
+																			_fsub=19701231010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Big Discounts--up to 40% off</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Sales-UP
+																			to 4
+																			off /
+																			_i.html ?
+																			_fsub=20041316010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Sales-UP to 40% off</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Timed
+																			Buying
+																			Spree /
+																			_i.html ?
+																			_fsub=20041338010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Timed Buying Spree</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Niedrigster
+																			Preis /
+																			_i.html ?
+																			_fsub=20669091010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Niedrigster Preis</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED
+																			Outdoor
+																			Lights /
+																			_i.html ?
+																			_fsub=20791120010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Outdoor Lights</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Wedding
+																			Lighting &
+																			amp ;
+																			Decor /
+																			_i.html ?
+																			_fsub=20791121010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Wedding Lighting &amp; Decor</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED
+																			Camping
+																			Lights /
+																			_i.html ?
+																			_fsub=20791122010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Camping Lights</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Weekly
+																			Deals-UP
+																			to 4
+																			OFF /
+																			_i.html ?
+																			_fsub=20791123010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Weekly Deals-UP to 40% OFF</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Back
+																			to
+																			School
+																			Sale /
+																			_i.html ?
+																			_fsub=22166937010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Back to School Sale</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Camping
+																			Lighting /
+																			Floodlights /
+																			_i.html ?
+																			_fsub=22167311010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Camping Lighting / Floodlights</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/LED
+																			Tagfahrlicht /
+																			_i.html ?
+																			_fsub=22205863010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>LED Tagfahrlicht</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Black
+																			Friday -
+																			UP
+																			TO 1
+																			OFF /
+																			_i.html ?
+																			_fsub=22948295010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Black Friday - UP TO 10% OFF</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Black
+																			Friday -
+																			UP
+																			TO 5
+																			OFF /
+																			_i.html ?
+																			_fsub=22949085010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Black Friday - UP TO 5% OFF</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Promotion/_i.html?_fsub=22994677010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Promotion</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Merry
+																			Christmas-
+																			UP
+																			to 5
+																			OFF /
+																			_i.html ?
+																			_fsub=23042705010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Merry Christmas- UP to 5% OFF</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a
+																			target=&quot;_blank&quot;
+																			href=&quot;https://stores.ebay.com/neonmartlighting/Merry
+																			Christmas-
+																			UP
+																			to 1
+																			OFF /
+																			_i.html ?
+																			_fsub=23119734010&amp;_sid=0&amp;_trksid=p4634.c0.m322&quot;>
+																			<i></i>
+																			<span>Merry Christmas- UP to 10% OFF</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class=&quot;storenewsletter&quot;>
+													<p class=&quot;storenewsletter_txt&quot;></p>
+													<a
+														target=&quot;_blank&quot;
+														href=&quot;https://my.ebay.com/ws/eBayISAPI.dll?AcceptSavedSeller&amp;amp;linkname=includenewsletter&amp;amp;sellerid=lightingever01&quot;
+														class=&quot;savesellery_button&quot;
+														title=&quot;Sign
+														Up &
+														quot ;>Sign Up Now !</a>
+												</div>
+												<div
+													class=&quot;patemplatebox&quot;
+													id=&quot;patemplate_userlinks&quot;>
+													<div class=&quot;patemplatebox_h&quot;>
+														<h2 class=&quot;patemplatebox_title&quot;></h2>
+														<span></span>
+													</div>
+													<div class=&quot;patemplatebox_body&quot;>
+														<div class=&quot;patemplatebox_bodyin&quot;>
+															<div id=&quot;patemplate_links&quot;>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div
+													class=&quot;patemplatebox&quot;
+													id=&quot;patemplate_left_cp&quot;>
+													<div class=&quot;patemplatebox_h&quot;>
+														<h2 class=&quot;patemplatebox_title&quot;>You may also like</h2>
+														<span></span>
+													</div>
+													<div class=&quot;patemplatebox_body&quot;>
+														<div class=&quot;patemplatebox_bodyin&quot;>
+															<div id=&quot;pa_l_cp&quot;>
+																<div class=&apos;cp_h&apos;>
+																	<span></span>
+																</div>
+																<ul class=&apos;pacp&apos;>
+																	<li id=&quot;l181837179381&quot;>
+																		<a
+																			href=&quot;https://www.ebay.com/itm/181837179381&quot;
+																			target=&quot;_blank&quot;>
+																			<p1>
+																				<img src=&apos;https://s.pushauction.com/b.png&apos; />
+																			</p1>
+																			<p2></p2>
+																			<p3>
+																				<p31></p31>
+																				<p32></p32>
+																			</p3>
+																			<p4></p4>
+																			<p5></p5>
+																			<p6>
+																				<span></span>
+																				<l></l>
+																				<r></r>
+																			</p6>
+																		</a>
+																	</li>
+																	<li id=&quot;l181830493605&quot;>
+																		<a
+																			href=&quot;https://www.ebay.com/itm/181830493605&quot;
+																			target=&quot;_blank&quot;>
+																			<p1>
+																				<img src=&apos;https://s.pushauction.com/b.png&apos; />
+																			</p1>
+																			<p2></p2>
+																			<p3>
+																				<p31></p31>
+																				<p32></p32>
+																			</p3>
+																			<p4></p4>
+																			<p5></p5>
+																			<p6>
+																				<span></span>
+																				<l></l>
+																				<r></r>
+																			</p6>
+																		</a>
+																	</li>
+																	<li id=&quot;l181992544013&quot;>
+																		<a
+																			href=&quot;https://www.ebay.com/itm/181992544013&quot;
+																			target=&quot;_blank&quot;>
+																			<p1>
+																				<img src=&apos;https://s.pushauction.com/b.png&apos; />
+																			</p1>
+																			<p2></p2>
+																			<p3>
+																				<p31></p31>
+																				<p32></p32>
+																			</p3>
+																			<p4></p4>
+																			<p5></p5>
+																			<p6>
+																				<span></span>
+																				<l></l>
+																				<r></r>
+																			</p6>
+																		</a>
+																	</li>
+																	<li id=&quot;l181843026000&quot;>
+																		<a
+																			href=&quot;https://www.ebay.com/itm/181843026000&quot;
+																			target=&quot;_blank&quot;>
+																			<p1>
+																				<img src=&apos;https://s.pushauction.com/b.png&apos; />
+																			</p1>
+																			<p2></p2>
+																			<p3>
+																				<p31></p31>
+																				<p32></p32>
+																			</p3>
+																			<p4></p4>
+																			<p5></p5>
+																			<p6>
+																				<span></span>
+																				<l></l>
+																				<r></r>
+																			</p6>
+																		</a>
+																	</li>
+																	<li id=&quot;l181834940222&quot;>
+																		<a
+																			href=&quot;https://www.ebay.com/itm/181834940222&quot;
+																			target=&quot;_blank&quot;>
+																			<p1>
+																				<img src=&apos;https://s.pushauction.com/b.png&apos; />
+																			</p1>
+																			<p2></p2>
+																			<p3>
+																				<p31></p31>
+																				<p32></p32>
+																			</p3>
+																			<p4></p4>
+																			<p5></p5>
+																			<p6>
+																				<span></span>
+																				<l></l>
+																				<r></r>
+																			</p6>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class=&quot;patemplate_content_right&quot;>
+												<div
+													class=&quot;patemplatebox&quot;
+													id=&quot;patemplate_picture&quot;>
+													<div class=&quot;patemplate_picbody&quot;>
+														<div class=&quot;patemplate_picbodyin&quot;>
+															<div class=&quot;patemplate_title&quot;> LE 52 In. Ceiling Fan with 5 Wooden
+																Blades and Light Kit Reversible Classic                                        </div>
+															<div
+																class=&quot;papicturelayout
+																layout1 &
+																quot ;>
+																<input
+																	type=&quot;radio&quot;
+																	name=&quot;slide_switch&quot;
+																	id=&quot;preview_id1&quot;
+																	checked>
+																	<input
+																		type=&quot;radio&quot;
+																		name=&quot;slide_switch&quot;
+																		id=&quot;preview_id2&quot;>
+																		<input
+																			type=&quot;radio&quot;
+																			name=&quot;slide_switch&quot;
+																			id=&quot;preview_id3&quot;>
+																			<input
+																				type=&quot;radio&quot;
+																				name=&quot;slide_switch&quot;
+																				id=&quot;preview_id4&quot;>
+																				<input
+																					type=&quot;radio&quot;
+																					name=&quot;slide_switch&quot;
+																					id=&quot;preview_id5&quot;>
+																					<input
+																						type=&quot;radio&quot;
+																						name=&quot;slide_switch&quot;
+																						id=&quot;preview_id6&quot;>
+																						<input
+																							type=&quot;radio&quot;
+																							name=&quot;slide_switch&quot;
+																							id=&quot;preview_id7&quot;>
+																							<div class=&quot;picturesmall&quot;>
+																								<label
+																									id=&quot;small_label1&quot;
+																									for=&quot;preview_id1&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/R1IAAOSwA29Y5bJ2/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																								<label
+																									id=&quot;small_label2&quot;
+																									for=&quot;preview_id2&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7NkAAOSwTM5Y5bJy/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																								<label
+																									id=&quot;small_label3&quot;
+																									for=&quot;preview_id3&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/wJAAAOSww3tY5bJ0/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																								<label
+																									id=&quot;small_label4&quot;
+																									for=&quot;preview_id4&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/0UcAAOSwB-1Y5bJ4/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																								<label
+																									id=&quot;small_label5&quot;
+																									for=&quot;preview_id5&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/xy0AAOSwhQhY5bJ6/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																								<label
+																									id=&quot;small_label6&quot;
+																									for=&quot;preview_id6&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7dkAAOSwc-tY5bLw/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																								<label
+																									id=&quot;small_label7&quot;
+																									for=&quot;preview_id7&quot;>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7j8AAOSwc-tY5bLz/$_12.JPG?set_id=880000500F&quot; />
+																								</label>
+																							</div>
+																							<div class=&quot;big_preview_img&quot;>
+																								<div>
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/R1IAAOSwA29Y5bJ2/$_12.JPG?set_id=880000500F&quot; />
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7NkAAOSwTM5Y5bJy/$_12.JPG?set_id=880000500F&quot; />
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/wJAAAOSww3tY5bJ0/$_12.JPG?set_id=880000500F&quot; />
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/0UcAAOSwB-1Y5bJ4/$_12.JPG?set_id=880000500F&quot; />
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/xy0AAOSwhQhY5bJ6/$_12.JPG?set_id=880000500F&quot; />
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7dkAAOSwc-tY5bLw/$_12.JPG?set_id=880000500F&quot; />
+																									<img
+																										src=&quot;https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7j8AAOSwc-tY5bLz/$_12.JPG?set_id=880000500F&quot; />
+																								</div>
+																							</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div
+													class=&quot;patemplatebox&quot;
+													id=&quot;patemplate_description&quot;>
+													<div class=&quot;patemplatebox_h1&quot;>
+														<h2 class=&quot;patemplatebox_title&quot;>Product Description</h2>
+														<span></span>
+													</div>
+													<div class=&quot;patemplatebox_body&quot;>
+														<div class=&quot;patemplatebox_bodyin&quot;>
+															<div>                                            <!--PA4_Description_Begin -->
+																<p
+																	class=&quot;sign-box&quot;
+																	style=&quot;font-family:
+																	Arial ;
+																	font-size: 1
+																	pt ;
+																	quot ;>
+																	<strong>
+																		<span
+																			class=&quot;title&quot;
+																			style=&quot;color: #
+																			ff6600 ;
+																			quot ;>Product Description</span>
+																	</strong>
+																</p>
+																<div
+																	class=&quot;std&quot;
+																	style=&quot;font-family:
+																	Arial ;
+																	font-size: 1
+																	pt ;
+																	quot ;>
+																	<p>
+																		<strong>Excellent balance &amp;amp; noiseless</strong>
+																		<br />
+																		By adopting qualified fan motor and hanging system,
+																		this ceiling fan balanced nicely with almost zero
+																		wobble.
+																		<br />It&apos;s
+																		so quiet that you don&apos;t even know it&apos;s
+																		running, which keeps you and your family comfortable
+																		all the time without annoying tics or hums.
+																		<br />
+																		<br />
+																	</p>
+																	<p>
+																		<strong>Optimum height</strong>
+																		<br />
+																		They do not hang down far from the ceiling, so the fan
+																		does not reduce headroom much at all, and despite of
+																		being close to the ceiling, it does a nice job of
+																		moving air.
+																		<br />
+																		<br />
+																	</p>
+																	<p>
+																		<strong>Versatile</strong>
+																		<br />
+																		This delicate ceiling fan perfectly fits your upstairs
+																		loft bedroom, family room, nursery, dining room,
+																		kitchen, or a covered patio, and many more places.
+																		<br />
+																		<br />
+																	</p>
+																	<p>
+																		<strong>Reversible fan for summer and winter use
+																		</strong>
+																		<br />
+																		It has a toggle switch for direction reverse on the
+																		fan motor, you can switch the fan rotation for summer
+																		and winter.
+																		<br />
+																		<br />
+																	</p>
+																	<p>
+																		<strong>Two control models</strong>
+																		<br />
+																		This fabulous ceiling fan has a pull chain to access
+																		high, medium and slow speed, and the last pull turns
+																		it off.
+																		<br />
+																		You can turn it on/off via the switch (not included)
+																		on wall as well. You can pull another chain on the fan
+																		to turn on/off the lights.
+																		<br />
+																		<br />
+																	</p>
+																	<p>
+																		<strong>Light Fixture provided</strong>
+																		<br />
+																		It comes with a lamp shape with two E12 base screws.
+																		For normal lighting needs, you can add two 60W
+																		incandescent bulbs which was recommended.
+																		<br />
+																		You can also try an LED bulb which is much more energy
+																		efficient and brings you bright light as well.
+																		<br />
+																		<br />
+																	</p>
+																	<p>
+																		<strong>Ready to use</strong>
+																		<br />
+																		With all the accessories provided, all you have to do
+																		is to have an electrician to install the ceiling
+																		<br />
+																		fan (unless you are a handyman type yourself), then
+																		you can fully enjoy the comfort it brings.
+																	</p>
+																	<div>
+																		<p class=&quot;sign-box&quot;>
+																			<span class=&quot;title&quot;>Applications</span>
+																		</p>
+																		<div class=&quot;std&quot;>
+																			<div
+																				class=&quot;application
+																				clearfix &
+																				quot ;>
+																				<p>Ideal for shopping malls, office building,
+																					hotels, exhibition halls, hospitals, home, etc,
+																					especiallly for decorative lighting.</p>
+																			</div>
+																		</div>
+																	</div>
+																	<p>
+																		<span
+																			style=&quot;
+																			color: #
+																			ff6600 ;
+																			quot ;>
+																			<strong>Package Includes:</strong>
+																		</span>
+																		<br />
+																		1x 30-inch Ceiling Fan
+																		<br />
+																		2x E12 Base Screw
+																	</p>
+																</div><!--PA4_Description_End -->
+															</div>
+															<div>
+															</div>
+															<div>
+															</div>
+															<div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div
+													class=&quot;patemplatebox
+													sellerdetail
+													tabs &
+													quot ;
+													id=&quot;terms&quot;>
+													<input
+														class=&quot;&quot;
+														id=&quot;tab1&quot;
+														type=&quot;radio&quot;
+														name=&quot;tabs&quot;
+														checked>
+														<label
+															class=&quot;headlabel1&quot;
+															for=&quot;tab1&quot;>Payment</label>
+														<input
+															id=&quot;tab2&quot;
+															type=&quot;radio&quot;
+															name=&quot;tabs&quot;>
+															<label
+																class=&quot;headlabel2&quot;
+																for=&quot;tab2&quot;>Shipment</label>
+															<input
+																id=&quot;tab3&quot;
+																type=&quot;radio&quot;
+																name=&quot;tabs&quot;>
+																<label
+																	class=&quot;headlabel3&quot;
+																	for=&quot;tab3&quot;>Return</label>
+																<input
+																	id=&quot;tab4&quot;
+																	type=&quot;radio&quot;
+																	name=&quot;tabs&quot;>
+																	<label
+																		class=&quot;headlabel4&quot;
+																		for=&quot;tab4&quot;>Feedback</label>
+																	<input
+																		id=&quot;tab5&quot;
+																		type=&quot;radio&quot;
+																		name=&quot;tabs&quot;>
+																		<label
+																			class=&quot;headlabel5&quot;
+																			for=&quot;tab5&quot;>FAQ</label>
+																		<div
+																			id=&quot;patemplate_termscontent_1&quot;
+																			class=&quot;template_terms_content&quot;>
+																			<div class=&quot;template_terms_contentin_t&quot;>
+																				<label for=&quot;tab1&quot;>
+																					<span>Payment</span>
+																					<i></i>
+																				</label>
+																			</div>
+																			<div class=&quot;template_terms_contentin&quot;>
+																				<div>
+																					<span
+																						style=&quot;color: #
+																						font-family:
+																						Arial ;
+																						font-size: 1
+																						px ;
+																						quot ;>We&amp;nbsp;only&amp;nbsp;accept&amp;nbsp;prepaid&amp;nbsp;payment&amp;nbsp;via&amp;nbsp;Paypal.
+																					</span>
+																				</div>
+																				<div>
+																					<img
+																						src=&quot;https://image.pushauction.com/0/0/42c9e475-95f3-47a2-ad8e-8755a7b2fe48/4cbbb4e5-a8de-4d1d-84f0-a0a728061234.png&quot;
+																						alt=&quot;&quot;
+																						width=&quot;280&quot;
+																						height=&quot;56&quot; />
+																				</div>
+																			</div>
+																		</div>
+																		<div
+																			id=&quot;patemplate_termscontent_2&quot;
+																			class=&quot;template_terms_content&quot;>
+																			<div class=&quot;template_terms_contentin_t&quot;>
+																				<label for=&quot;tab2&quot;>
+																					<span>Shipment</span>
+																					<i></i>
+																				</label>
+																			</div>
+																			<div class=&quot;template_terms_contentin&quot;>
+																				<p
+																					style=&quot; 0
+																					pt ;
+																					pt ;
+																					initial
+																					initial ;
+																					quot ;>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>1.</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>Items&amp;nbsp;will&amp;nbsp;be&amp;nbsp;dispatched
+																					</span>
+																					<span
+																						style=&quot;font-weight:
+																						bold ;
+																						font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>&amp;nbsp;within&amp;nbsp;one&amp;nbsp;working&amp;nbsp;day&amp;nbsp;
+																					</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>after&amp;nbsp;cleared&amp;nbsp;payment.(Sat.&amp;nbsp;&amp;amp;&amp;nbsp;Sun.&amp;nbsp;excluded.)
+																					</span>
+																				</p>
+																				<div
+																					style=&quot;font-family:
+																					Simsun ;
+																					font-size:
+																					medium ;
+																					quot ;>&amp;nbsp;</div>
+																				<p
+																					style=&quot;font-family:
+																					Simsun ;
+																					font-size:
+																					medium ;
+																					margin-bottom: 0
+																					pt ;
+																					margin-top: 0
+																					pt ;
+																					line-height: 1
+																					pt ;
+																					quot ;>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>2.&amp;nbsp;</span>
+																					<span
+																						style=&quot;font-weight:
+																						bold ;
+																						font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>Delivery&amp;nbsp;time
+																						<br />
+																					</span>
+																				</p>
+																				<div
+																					style=&quot;font-family:
+																					Simsun ;
+																					font-size:
+																					medium ;
+																					quot ;>&amp;nbsp;</div>
+																				<div
+																					style=&quot;font-family:
+																					Simsun ;
+																					font-size:
+																					medium ;
+																					quot ;>
+																					<table
+																						style=&quot;border: 1
+																						px
+																						dotted #
+																						f7c75 ;
+																						border-collapse:
+																						collapse ;
+																						quot ;>
+																						<tbody>
+																							<tr>
+																								<td
+																									width=&quot;91&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-weight:
+																											bold ;
+																											font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>Price</span>
+																									</p>
+																								</td>
+																								<td
+																									width=&quot;156&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-weight:
+																											bold ;
+																											font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>To</span>
+																									</p>
+																								</td>
+																								<td
+																									width=&quot;144&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-weight:
+																											bold ;
+																											font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>Services</span>
+																									</p>
+																								</td>
+																								<td
+																									width=&quot;176&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-weight:
+																											bold ;
+																											font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>Delivery Time</span>
+																									</p>
+																								</td>
+																							</tr>
+																							<tr>
+																								<td
+																									width=&quot;91&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>Free</span>
+																									</p>
+																								</td>
+																								<td
+																									width=&quot;156&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>United States</span>
+																									</p>
+																								</td>
+																								<td
+																									width=&quot;144&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>USPS First Class Package</span>
+																									</p>
+																								</td>
+																								<td
+																									width=&quot;176&quot;
+																									valign=&quot;top&quot;
+																									style=&quot;border: 1
+																									px
+																									dotted #
+																									f7c75 ;
+																									quot ;>
+																									<p>
+																										<span
+																											style=&quot;font-size: 1
+																											pt ;
+																											font-family:
+																											Arial ;
+																											quot ;>2-6 &amp;nbsp;working day</span>
+																									</p>
+																								</td>
+																							</tr>
+																						</tbody>
+																					</table>
+																					&amp;nbsp;
+																				</div>
+																			</div>
+																		</div>
+																		<div
+																			id=&quot;patemplate_termscontent_3&quot;
+																			class=&quot;template_terms_content&quot;>
+																			<div class=&quot;template_terms_contentin_t&quot;>
+																				<label for=&quot;tab3&quot;>
+																					<span>Return</span>
+																					<i></i>
+																				</label>
+																			</div>
+																			<div class=&quot;template_terms_contentin&quot;>
+																				<p
+																					style=&quot; 0
+																					pt ;
+																					pt ;
+																					pt ;
+																					quot ;>
+																					<span
+																						style=&quot;font-weight:
+																						bold ;
+																						font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;>30 Days Money Back Guarantee</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;>.</span>
+																				</p>
+																				<p
+																					style=&quot; 0
+																					pt ;
+																					pt ;
+																					pt ;
+																					quot ;>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>1. If you no longer want your purchase and it
+																						remains unopened and unused, you can arrange to
+																						return it to us within 30 days of receipt for a
+																						refund. Please be aware that we will not refund
+																						your postage costs, as there is no error on our
+																						part.</span>
+																				</p>
+																				<div>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>2. If the item(s) are returned in its
+																						original condition and the packaging is in as good
+																						as new condition, we offer a full refund of the
+																						item(s). </span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;>Refund will be made upon receipt of the
+																						returned item.</span>
+																					<span
+																						style=&quot;color: #
+																						font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;>
+																						<br />
+																					</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>If</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						quot ;>you </span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;>received an incorrect item or damaged product
+																						during shipment, we will offer full-refund or
+																						resend</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;>a new one to</span>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						initial ;
+																						quot ;> you. Please kindly tell us at once in this
+																						situation. </span>
+																				</div>
+																				<p
+																					style=&quot; 0
+																					pt ;
+																					pt ;
+																					text-align:
+																					justify ;
+																					pt ;
+																					quot ;>
+																					<span
+																						style=&quot;font-size: 1
+																						pt ;
+																						font-family:
+																						Arial ;
+																						background-image:
+																						initial ;
+																						background-attachment:
+																						initial ;
+																						background-size:
+																						initial ;
+																						background-origin:
+																						initial ;
+																						background-clip:
+																						initial ;
+																						quot ;>3. Please inform us to get RMA (Return
+																						Merchandise Authorization) document before sending
+																						parcel back.</span>
+																				</p>
+																			</div>
+																		</div>
+																		<div
+																			id=&quot;patemplate_termscontent_4&quot;
+																			class=&quot;template_terms_content&quot;>
+																			<div class=&quot;template_terms_contentin_t&quot;>
+																				<label for=&quot;tab4&quot;>
+																					<span>Feedback</span>
+																					<i></i>
+																				</label>
+																			</div>
+																			<div class=&quot;template_terms_contentin&quot;>
+																				<div id=&quot;pastingspan1&quot;>
+																					<span
+																						style=&quot;font-family:
+																						Arial ;
+																						font-size: 1
+																						pt ;
+																						quot ;>1. If you are dissatisfied for any reason,
+																						please donot be quick to leave negative/neutral
+																						feedback. We work hard to make sure EVERY CUSTOMER
+																						100% SATISFIED and resolve any problem for you and
+																						always leave positive feedback to all our
+																						customers.</span>
+																				</div>
+																				<div
+																					style=&quot;font-family:
+																					Arial ;
+																					font-size: 1
+																					pt ;
+																					quot ;>&amp;nbsp;</div>
+																				<div id=&quot;pastingspan1&quot;>
+																					<span
+																						style=&quot;font-family:
+																						Arial ;
+																						font-size: 1
+																						pt ;
+																						quot ;>2. If you are satisfied with the product you
+																						received,please leave us positive feedback and 5
+																						scores DSR.</span>
+																				</div>
+																			</div>
+																		</div>
+																		<div
+																			id=&quot;patemplate_termscontent_5&quot;
+																			class=&quot;template_terms_content&quot;>
+																			<div class=&quot;template_terms_contentin_t&quot;>
+																				<label for=&quot;tab5&quot;>
+																					<span>FAQ</span>
+																					<i></i>
+																				</label>
+																			</div>
+																			<div class=&quot;template_terms_contentin&quot;>
+																				<strong
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;>Q:</strong>
+																				<span
+																					style=&quot;color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;> How do I pay for my purchase?</span>
+																				<br
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ; />
+																				<strong
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;>A:</strong>
+																				<span
+																					style=&quot;color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;>&amp;nbsp;We only accepts PayPal.</span>
+																				<br
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ; />
+																				<br
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ; />
+																				<strong
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;>Q:</strong>
+																				<span
+																					style=&quot;color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;> When will the item be shipped out?</span>
+																				<br
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ; />
+																				<strong
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;>A:</strong>
+																				<span
+																					style=&quot;color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ;> This item will be shipped with 1 business day
+																					once payment completed.</span>
+																				<br
+																					style=&quot;margin: 0
+																					px ;
+																					color: #
+																					font-family:
+																					Arial ;
+																					font-size: 1
+																					px ;
+																					background-color: #
+																					ffffff ;
+																					quot ; />
+																			</div>
+																		</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div id=&quot;patemplate_footer&quot;>
+										<div
+											class=&quot;pastore_footer
+											pastore_footer_background &
+											quot ;>
+											<div class=&quot;pastore_inside&quot;>
+												<div class=&quot;inside_left&quot;>
+													<div id=&quot;menu&quot;>
+														<ul></ul>
+													</div>
+													<div id=&quot;copyright&quot;></div>
+												</div>
+												<div class=&quot;inside_right&quot;>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id=&quot;pa_b_cp&quot;>
+						<div class=&apos;cp_h&apos;>
+							<span></span>
+						</div>
+						<ul class=&apos;pacp&apos;>
+							<li id=&quot;b322992845605&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992845605&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992834966&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992834966&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992832555&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992832555&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992830429&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992830429&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992828944&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992828944&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992814628&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992814628&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992813947&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992813947&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992796368&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992796368&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322992786864&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322992786864&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322991082502&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322991082502&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322991081273&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322991081273&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322991078487&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322991078487&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322990885551&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322990885551&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322990879377&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322990879377&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322990826640&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322990826640&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322990823082&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322990823082&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322990598298&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322990598298&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988890033&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988890033&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988862158&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988862158&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988773029&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988773029&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988683373&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988683373&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988663878&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988663878&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988660309&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988660309&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988645900&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988645900&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988626149&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988626149&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988620950&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988620950&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322988396876&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322988396876&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986403474&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986403474&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986388855&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986388855&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986365367&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986365367&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986330041&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986330041&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986253785&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986253785&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986232236&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986232236&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322986220901&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322986220901&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979819639&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979819639&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979774333&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979774333&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979755013&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979755013&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979557890&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979557890&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979548700&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979548700&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979546311&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979546311&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979543536&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979543536&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979526464&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979526464&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322979514269&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322979514269&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322977696369&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322977696369&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322977673410&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322977673410&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322977619167&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322977619167&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322977597399&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322977597399&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322975772431&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322975772431&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322975647637&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322975647637&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322959713527&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322959713527&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322957850825&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322957850825&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322957809906&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322957809906&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322952031198&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322952031198&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322952006389&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322952006389&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322952001389&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322952001389&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322951843535&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322951843535&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322951835282&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322951835282&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322950057781&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322950057781&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322950048436&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322950048436&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322950038058&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322950038058&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322950025081&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322950025081&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322949982553&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322949982553&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322949962487&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322949962487&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322949949574&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322949949574&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322949947469&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322949947469&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322949945423&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322949945423&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322949904259&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322949904259&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322948266734&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322948266734&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322948238654&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322948238654&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322948221873&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322948221873&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946555883&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946555883&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946526134&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946526134&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946498108&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946498108&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946497584&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946497584&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946456909&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946456909&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946443187&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946443187&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322946438393&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322946438393&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322944940853&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322944940853&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322944860090&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322944860090&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322940260645&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322940260645&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322940241550&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322940241550&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938884092&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938884092&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938867098&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938867098&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938760611&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938760611&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938727739&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938727739&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938726104&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938726104&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938716929&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938716929&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938708300&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938708300&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938705168&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938705168&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938701496&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938701496&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322938696797&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322938696797&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937255607&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937255607&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937161415&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937161415&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937146147&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937146147&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937143327&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937143327&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937139188&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937139188&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937134476&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937134476&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322937107603&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322937107603&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322935538723&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322935538723&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322935415630&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322935415630&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322935355708&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322935355708&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322935339798&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322935339798&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322933940329&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322933940329&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322933931657&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322933931657&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322933845969&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322933845969&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322933829242&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322933829242&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322933805440&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322933805440&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322933791720&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322933791720&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322928847020&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322928847020&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322928838196&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322928838196&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322928792974&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322928792974&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322928787733&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322928787733&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322928761343&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322928761343&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322927002483&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322927002483&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322926984833&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322926984833&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322926969327&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322926969327&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322924940617&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322924940617&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322924927962&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322924927962&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322924909852&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322924909852&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322924901990&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322924901990&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322922961304&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322922961304&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322922857915&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322922857915&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322922830048&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322922830048&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322922827957&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322922827957&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322922800548&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322922800548&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322920868023&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322920868023&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322920847455&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322920847455&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914990576&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914990576&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914951274&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914951274&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914936810&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914936810&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914908203&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914908203&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914891387&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914891387&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914871348&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914871348&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322914844856&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322914844856&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322912401151&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322912401151&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322912372620&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322912372620&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322912189750&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322912189750&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322910527623&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322910527623&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322910498580&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322910498580&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322908503817&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322908503817&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322908280908&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322908280908&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322908235765&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322908235765&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322906680806&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322906680806&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322906612097&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322906612097&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322906546635&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322906546635&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322906512474&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322906512474&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322906491233&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322906491233&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902819228&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902819228&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902811128&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902811128&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902794397&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902794397&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902790174&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902790174&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902784111&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902784111&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902777035&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902777035&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902771190&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902771190&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902749925&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902749925&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322902742781&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322902742781&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900939461&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900939461&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900922096&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900922096&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900849854&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900849854&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900836903&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900836903&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900815103&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900815103&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900779127&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900779127&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900777425&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900777425&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900759594&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900759594&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322900660298&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322900660298&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322899030667&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322899030667&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322899009832&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322899009832&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322898768649&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322898768649&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322897017835&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322897017835&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322896935164&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322896935164&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322895045759&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322895045759&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322895038145&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322895038145&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322895022262&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322895022262&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322895017432&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322895017432&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322895011095&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322895011095&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322895003207&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322895003207&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322894997670&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322894997670&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322894978286&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322894978286&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322894968589&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322894968589&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322894788949&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322894788949&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888177857&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888177857&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888168481&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888168481&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888167730&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888167730&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888163597&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888163597&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888144030&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888144030&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888128483&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888128483&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322888115729&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322888115729&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322887934241&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322887934241&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322887923494&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322887923494&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322886327179&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322886327179&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322886242233&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322886242233&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322886017647&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322886017647&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322886016249&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322886016249&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322885811823&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322885811823&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322884108023&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322884108023&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322884083641&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322884083641&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322884057193&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322884057193&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322881546105&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322881546105&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322879516140&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322879516140&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+							<li id=&quot;b322879505824&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/322879505824&quot;
+									target=&quot;_blank&quot;>
+									<p1>
+										<img src=&apos;https://s.pushauction.com/b.png&apos; />
+									</p1>
+									<p2></p2>
+									<p3>
+										<p31></p31>
+										<p32></p32>
+									</p3>
+									<p4></p4>
+									<p5></p5>
+									<p6>
+										<span></span>
+										<l></l>
+										<r></r>
+									</p6>
+								</a>
+							</li>
+						</ul>
+					</div><!--PA4_HTMLBottom_Begin -->
+					<div
+						id=&apos;pushauctioncounterdiv&apos;
+						style=&apos;width:100%;text-align:center;padding-top:20px;font-family:Times
+						New
+						Roman &
+						apos ;>
+						<img
+							id=&apos;pushauctioncounter&apos;
+							src=&apos;https://counter.pushauction.com/42c9e475-95f3-47a2-ad8e-8755a7b2fe48/08a47492-e18e-4c1a-b394-211cced3392c.jpg&apos; />
+					</div>
+					<div
+						id=&apos;pushauctionlogosigndiv&apos;
+						style=&apos;text-align:center;width:100%;padding-top:20px&apos;>
+						<img
+							src=&apos;https://image.pushauction.com/poweredbypushauction.png&apos;
+							alt=&apos;PushAuction&apos;
+							border=&apos;0&apos;
+							title=&apos;Engineered
+							for
+							professional
+							sellers &
+							apos ; />
+					</div><!--PA4_HTMLBottom_End --><!--[Datacaciques code start,cross,md5___623___,don&apos;t modify 
+						it] --><!-- dc-cs-bottom,md5:dec93ee17d733f4e2c16215b494e48be -->
+					<div
+						class=&quot;dc-cs
+						cs-bottom &
+						quot ;>
+						<div class=&quot;cs-head&quot;>
+							<h3 class=&quot;title&quot;></h3>
+							<strong
+								class=&quot;dc-dock
+								dock-rb &
+								quot ;
+								title=&quot;DataCaciques -
+								We
+								promote
+								your
+								sales &
+								quot ;></strong>
+						</div>
+						<ul
+							class=&quot;cs-list
+							cs-list-col6 &
+							quot ;>
+							<li data-lid=&quot;322992861394&quot;>
+								<a
+									href=&quot;https://www.ebay.com/itm/LE-30-Inch-Ceiling-Fan-Six-White-Whitewash-Blades-and-Single-Light-Kit-/322992861394&quot;target=&quot;_blank&quot;>
+									<div class=&quot;cover&quot;></div>
+									<div class=&quot;expand&quot;>
+										<p class=&quot;title&quot;></p>
+										<div class=&quot;plus&quot;>
+											<span class=&quot;price&quot;></span>
+											<span class=&quot;origin&quot;></span>
+											<span class=&quot;coupon&quot;></span>
+										</div>
+									</div>
+								</a>
+							</li>
+						</ul>
+					</div><!--[Datacaciques code end] --><!--[Datacaciques code start,code,don&apos;t modify it] -->
+					<style type=&quot;text/css&quot;>.dc_tracker_img{display:none;}.dc_tracker_img:last-of-type{display:block;}p:empty+hr{display:none;}hr+span.ebay{display:none;}
+					</style>
+					<div
+						class=&quot;dc_tracker_img&quot;
+						style=&quot;text-align:center;margin-top:25px&quot;>
+						<img
+							src=&quot;https://gate.datacaciques.com/track/img?_lid=322992846621&quot;
+							data=&quot;__dc_tracker&quot;
+							alt=&quot;DataCaciques&quot;>
+					</div><!--[Datacaciques code end] -->
+		</Description>
+		<GiftIcon>0</GiftIcon>
+		<HitCounter>NoHitCounter</HitCounter>
+		<ItemID>322992846621</ItemID>
+		<ListingDetails>
+			<Adult>false</Adult>
+			<BindingAuction>false</BindingAuction>
+			<CheckoutEnabled>false</CheckoutEnabled>
+			<ConvertedBuyItNowPrice currencyID="USD">0.0
+			</ConvertedBuyItNowPrice>
+			<ConvertedStartPrice currencyID="USD">115.98
+			</ConvertedStartPrice>
+			<ConvertedReservePrice currencyID="USD">0.0
+			</ConvertedReservePrice>
+			<HasReservePrice>false</HasReservePrice>
+			<StartTime>2018-01-11T02:45:10.000Z</StartTime>
+			<EndTime>2018-03-12T02:45:10.000Z</EndTime>
+			<ViewItemURL>http://www.ebay.com/itm/52-Inch-Indoor-Ceiling-Fan-Light-5-Wooden-Brown-Blades-Reversible-Classic-Light-/322992846621
+			</ViewItemURL>
+			<HasUnansweredQuestions>false</HasUnansweredQuestions>
+			<HasPublicMessages>false</HasPublicMessages>
+			<ViewItemURLForNaturalSearch>http://www.ebay.com/itm/52-Inch-Indoor-Ceiling-Fan-Light-5-Wooden-Brown-Blades-Reversible-Classic-Light-/322992846621
+			</ViewItemURLForNaturalSearch>
+		</ListingDetails>
+		<ListingDesigner>
+			<LayoutID>10000</LayoutID>
+			<ThemeID>10</ThemeID>
+		</ListingDesigner>
+		<ListingDuration>GTC</ListingDuration>
+		<ListingType>FixedPriceItem</ListingType>
+		<Location>Ontario, California</Location>
+		<PaymentMethods>PayPal</PaymentMethods>
+		<PayPalEmailAddress>payment@lightingever.com</PayPalEmailAddress>
+		<PrimaryCategory>
+			<CategoryID>176937</CategoryID>
+			<CategoryName>Home &amp; Garden:Lamps, Lighting &amp; Ceiling
+				Fans:Ceiling Fans</CategoryName>
+		</PrimaryCategory>
+		<PrivateListing>false</PrivateListing>
+		<ProductListingDetails>
+			<UPC>732173434596</UPC>
+			<BrandMPN>
+				<Brand>Lighting EVER</Brand>
+				<MPN>L-7400001-US</MPN>
+			</BrandMPN>
+			<IncludeeBayProductDetails>true</IncludeeBayProductDetails>
+		</ProductListingDetails>
+		<Quantity>11</Quantity>
+		<ReservePrice currencyID="USD">0.0</ReservePrice>
+		<ReviseStatus>
+			<ItemRevised>true</ItemRevised>
+		</ReviseStatus>
+		<Seller>
+			<AboutMePage>false</AboutMePage>
+			<Email>zhongliuqing@ledbrighter.com</Email>
+			<FeedbackScore>876</FeedbackScore>
+			<PositiveFeedbackPercent>99.5</PositiveFeedbackPercent>
+			<FeedbackPrivate>false</FeedbackPrivate>
+			<FeedbackRatingStar>Purple</FeedbackRatingStar>
+			<IDVerified>false</IDVerified>
+			<eBayGoodStanding>true</eBayGoodStanding>
+			<NewUser>false</NewUser>
+			<RegistrationDate>2017-06-14T03:26:08.000Z</RegistrationDate>
+			<Site>HongKong</Site>
+			<Status>Confirmed</Status>
+			<UserID>lightingever01</UserID>
+			<UserIDChanged>false</UserIDChanged>
+			<UserIDLastChanged>2017-06-14T03:22:07.000Z</UserIDLastChanged>
+			<VATStatus>NoVATTax</VATStatus>
+			<SellerInfo>
+				<AllowPaymentEdit>false</AllowPaymentEdit>
+				<CheckoutEnabled>false</CheckoutEnabled>
+				<CIPBankAccountStored>false</CIPBankAccountStored>
+				<GoodStanding>true</GoodStanding>
+				<LiveAuctionAuthorized>false</LiveAuctionAuthorized>
+				<MerchandizingPref>OptIn</MerchandizingPref>
+				<QualifiesForB2BVAT>false</QualifiesForB2BVAT>
+				<StoreOwner>true</StoreOwner>
+				<StoreURL>http://stores.ebay.com.hk/lightingever01</StoreURL>
+				<SafePaymentExempt>false</SafePaymentExempt>
+			</SellerInfo>
+			<MotorsDealer>false</MotorsDealer>
+		</Seller>
+		<SellingStatus>
+			<BidCount>0</BidCount>
+			<BidIncrement currencyID="USD">0.0</BidIncrement>
+			<ConvertedCurrentPrice currencyID="USD">115.98
+			</ConvertedCurrentPrice>
+			<CurrentPrice currencyID="USD">115.98</CurrentPrice>
+			<HighBidder>
+				<AboutMePage>false</AboutMePage>
+				<EIASToken>nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AAl4GhCZiHoQSdj6x9nY+seQ==
+				</EIASToken>
+				<Email>Invalid Request</Email>
+				<FeedbackScore>5</FeedbackScore>
+				<PositiveFeedbackPercent>100.0</PositiveFeedbackPercent>
+				<FeedbackPrivate>false</FeedbackPrivate>
+				<FeedbackRatingStar>None</FeedbackRatingStar>
+				<IDVerified>false</IDVerified>
+				<eBayGoodStanding>true</eBayGoodStanding>
+				<NewUser>false</NewUser>
+				<RegistrationDate>2016-04-02T23:16:07.000Z</RegistrationDate>
+				<Site>US</Site>
+				<Status>Confirmed</Status>
+				<UserID>deals7*</UserID>
+				<UserIDChanged>false</UserIDChanged>
+				<UserIDLastChanged>2017-09-05T00:43:24.000Z</UserIDLastChanged>
+				<VATStatus>NoVATTax</VATStatus>
+				<BuyerInfo>
+					<ShippingAddress>
+						<Country>US</Country>
+						<PostalCode>21804</PostalCode>
+					</ShippingAddress>
+				</BuyerInfo>
+				<UserAnonymized>false</UserAnonymized>
+			</HighBidder>
+			<LeadCount>0</LeadCount>
+			<MinimumToBid currencyID="USD">115.98</MinimumToBid>
+			<QuantitySold>1</QuantitySold>
+			<ReserveMet>true</ReserveMet>
+			<SecondChanceEligible>false</SecondChanceEligible>
+			<ListingStatus>Active</ListingStatus>
+			<PromotionalSaleDetails>
+				<OriginalPrice currencyID="USD">144.98</OriginalPrice>
+				<StartTime>2018-02-23T10:17:27.000Z</StartTime>
+				<EndTime>2018-03-29T08:00:00.000Z</EndTime>
+			</PromotionalSaleDetails>
+			<QuantitySoldByPickupInStore>0</QuantitySoldByPickupInStore>
+		</SellingStatus>
+		<ShippingDetails>
+			<ApplyShippingDiscount>false</ApplyShippingDiscount>
+			<CalculatedShippingRate>
+				<WeightMajor
+					measurementSystem="English"
+					unit="lbs">0</WeightMajor>
+				<WeightMinor
+					measurementSystem="English"
+					unit="oz">0</WeightMinor>
+			</CalculatedShippingRate>
+			<SalesTax>
+				<SalesTaxPercent>0.0</SalesTaxPercent>
+				<ShippingIncludedInTax>false</ShippingIncludedInTax>
+			</SalesTax>
+			<ShippingServiceOptions>
+				<ShippingService>USPSFirstClass</ShippingService>
+				<ShippingServiceCost currencyID="USD">0.0
+				</ShippingServiceCost>
+				<ShippingServiceAdditionalCost
+					currencyID="USD">0.0</ShippingServiceAdditionalCost>
+				<ShippingServicePriority>1</ShippingServicePriority>
+				<ExpeditedService>false</ExpeditedService>
+				<ShippingTimeMin>2</ShippingTimeMin>
+				<ShippingTimeMax>3</ShippingTimeMax>
+				<FreeShipping>true</FreeShipping>
+			</ShippingServiceOptions>
+			<ShippingType>Flat</ShippingType>
+			<ThirdPartyCheckout>false</ThirdPartyCheckout>
+			<TaxTable>
+				<TaxJurisdiction>
+					<JurisdictionID>NV</JurisdictionID>
+					<SalesTaxPercent>8.25</SalesTaxPercent>
+					<ShippingIncludedInTax>true</ShippingIncludedInTax>
+				</TaxJurisdiction>
+			</TaxTable>
+			<ShippingDiscountProfileID>0</ShippingDiscountProfileID>
+			<InternationalShippingDiscountProfileID>0
+			</InternationalShippingDiscountProfileID>
+			<ExcludeShipToLocation>Alaska/Hawaii</ExcludeShipToLocation>
+			<ExcludeShipToLocation>APO/FPO</ExcludeShipToLocation>
+			<ExcludeShipToLocation>US Protectorates</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Africa</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Asia</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Central America and Caribbean
+			</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Europe</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Middle East</ExcludeShipToLocation>
+			<ExcludeShipToLocation>North America</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Oceania</ExcludeShipToLocation>
+			<ExcludeShipToLocation>Southeast Asia</ExcludeShipToLocation>
+			<ExcludeShipToLocation>South America</ExcludeShipToLocation>
+			<ExcludeShipToLocation>PO Box</ExcludeShipToLocation>
+			<SellerExcludeShipToLocationsPreference>false
+			</SellerExcludeShipToLocationsPreference>
+		</ShippingDetails>
+		<ShipToLocations>US</ShipToLocations>
+		<Site>US</Site>
+		<StartPrice currencyID="USD">115.98</StartPrice>
+		<Storefront>
+			<StoreCategoryID>24066047014</StoreCategoryID>
+			<StoreCategory2ID>0</StoreCategory2ID>
+			<StoreURL>http://stores.ebay.com.hk/lightingever01</StoreURL>
+		</Storefront>
+		<TimeLeft>P13DT21H24S</TimeLeft>
+		<Title>52 Inch Indoor Ceiling Fan Light, 5 Wooden Brown Blades
+			Reversible Classic Light</Title>
+		<UUID>08A47492E18E4C1AB394211CCED3392C</UUID>
+		<HitCount>40</HitCount>
+		<BestOfferDetails>
+			<BestOfferCount>0</BestOfferCount>
+			<BestOfferEnabled>true</BestOfferEnabled>
+			<NewBestOffer>false</NewBestOffer>
+		</BestOfferDetails>
+		<LocationDefaulted>true</LocationDefaulted>
+		<GetItFast>false</GetItFast>
+		<BuyerResponsibleForShipping>false</BuyerResponsibleForShipping>
+		<SKU>L-7400001-US</SKU>
+		<PostalCode>91761</PostalCode>
+		<PictureDetails>
+			<GalleryType>Gallery</GalleryType>
+			<GalleryURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7dkAAOSwc-tY5bLw/$_12.JPG?set_id=880000500F
+			</GalleryURL>
+			<PhotoDisplay>PicturePack</PhotoDisplay>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7dkAAOSwc-tY5bLw/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/R1IAAOSwA29Y5bJ2/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7NkAAOSwTM5Y5bJy/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/wJAAAOSww3tY5bJ0/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/0UcAAOSwB-1Y5bJ4/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/xy0AAOSwhQhY5bJ6/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureURL>https://i.ebayimg.com/00/s/MTAwMFgxMDAw/z/7j8AAOSwc-tY5bLz/$_12.JPG?set_id=880000500F
+			</PictureURL>
+			<PictureSource>EPS</PictureSource>
+		</PictureDetails>
+		<DispatchTimeMax>1</DispatchTimeMax>
+		<ProxyItem>false</ProxyItem>
+		<ItemSpecifics>
+			<NameValueList>
+				<Name>Brand</Name>
+				<Value>Lighting EVER</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Room</Name>
+				<Value>Living Room</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>MPN</Name>
+				<Value>L-7400001-US</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Fan Width</Name>
+				<Value>52&quot;</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Material</Name>
+				<Value>Metal &amp; Wood</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Style</Name>
+				<Value>Contemporary</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Features</Name>
+				<Value>With Light</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Lamp current (mA)</Name>
+				<Value>1500mA</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Wattage(W)</Name>
+				<Value>60</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Input Voltage (v)</Name>
+				<Value>120 AC</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Frequency (hz)</Name>
+				<Value>60</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Power Factor</Name>
+				<Value>>0.99</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Diameter (in)</Name>
+				<Value>52</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Height (in)</Name>
+				<Value>18.07</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Net Weight (lb)</Name>
+				<Value>15.18</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Waterproof</Name>
+				<Value>No</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Certification</Name>
+				<Value>UL Listed</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Warranty</Name>
+				<Value>1 Year</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Finish</Name>
+				<Value>Wooden</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Power Source</Name>
+				<Value>Corded-Electric</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Type of Bulb</Name>
+				<Value>incandescent</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Special Features</Name>
+				<Value>Variable Speed, Reversible Airflow</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+			<NameValueList>
+				<Name>Color</Name>
+				<Value>Brushed Nickel</Value>
+				<Source>ItemSpecific</Source>
+			</NameValueList>
+		</ItemSpecifics>
+		<BuyerGuaranteePrice currencyID="USD">20000.0
+		</BuyerGuaranteePrice>
+		<BuyerRequirementDetails>
+			<ShipToRegistrationCountry>true</ShipToRegistrationCountry>
+			<LinkedPayPalAccount>true</LinkedPayPalAccount>
+		</BuyerRequirementDetails>
+		<IntangibleItem>false</IntangibleItem>
+		<ReturnPolicy>
+			<RefundOption>MoneyBack</RefundOption>
+			<Refund>Money Back</Refund>
+			<ReturnsWithinOption>Days_30</ReturnsWithinOption>
+			<ReturnsWithin>30 Days</ReturnsWithin>
+			<ReturnsAcceptedOption>ReturnsAccepted</ReturnsAcceptedOption>
+			<ReturnsAccepted>Returns Accepted</ReturnsAccepted>
+			<ShippingCostPaidByOption>Buyer</ShippingCostPaidByOption>
+			<ShippingCostPaidBy>Buyer</ShippingCostPaidBy>
+			<RestockingFeeValue>No</RestockingFeeValue>
+			<RestockingFeeValueOption>NoRestockingFee</RestockingFeeValueOption>
+		</ReturnPolicy>
+		<ConditionID>1000</ConditionID>
+		<ConditionDisplayName>New</ConditionDisplayName>
+		<PostCheckoutExperienceEnabled>false</PostCheckoutExperienceEnabled>
+		<SellerProfiles>
+			<SellerShippingProfile>
+				<ShippingProfileID>115148846015</ShippingProfileID>
+				<ShippingProfileName>Flat:USPS First Cla(Free),1 business day
+				</ShippingProfileName>
+			</SellerShippingProfile>
+			<SellerReturnProfile>
+				<ReturnProfileID>116278828015</ReturnProfileID>
+				<ReturnProfileName>Returns Accepted,Buyer,30 Days,Money Back#1
+				</ReturnProfileName>
+			</SellerReturnProfile>
+			<SellerPaymentProfile>
+				<PaymentProfileID>116278829015</PaymentProfileID>
+				<PaymentProfileName>PayPal:Immediate pay#1</PaymentProfileName>
+			</SellerPaymentProfile>
+		</SellerProfiles>
+		<ShippingPackageDetails>
+			<ShippingIrregular>false</ShippingIrregular>
+			<ShippingPackage>None</ShippingPackage>
+			<WeightMajor
+				measurementSystem="English"
+				unit="lbs">0</WeightMajor>
+			<WeightMinor
+				measurementSystem="English"
+				unit="oz">0</WeightMinor>
+		</ShippingPackageDetails>
+		<HideFromSearch>false</HideFromSearch>
+		<OutOfStockControl>true</OutOfStockControl>
+		<eBayPlus>false</eBayPlus>
+		<eBayPlusEligible>false</eBayPlusEligible>
+		<IsSecureDescription>true</IsSecureDescription>
+	</Item>
+</GetItemResponse>

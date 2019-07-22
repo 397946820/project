@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IRolePermissionDAO">
+	<resultMap type="com.it.ocs.sys.model.RolePermissionModel" id="rolePermissionResult">
+		<id property="id" column="ROLE_PERMISSION_ID" jdbcType="DECIMAL" />
+		<result property="roleId" column="ROLE_ID" jdbcType="DECIMAL" />
+		<result property="permissionId" column="PERMISSION_ID" jdbcType="DECIMAL" />
+	</resultMap>
+	<select id="findByRoleIds" resultMap="rolePermissionResult">
+		select 
+			ROLE_PERMISSION_ID id,
+			ROLE_ID  roleId,
+			PERMISSION_ID permissionId
+			from SYS_ROLE_PERMISSION where ROLE_ID in 
+		<foreach collection="roleIds" item="roleId" index="index" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</select>
+	<select id="findByRoleId" resultMap="rolePermissionResult">
+		select 
+			ROLE_PERMISSION_ID id,
+			ROLE_ID  roleId,
+			PERMISSION_ID permissionId
+			from SYS_ROLE_PERMISSION where ROLE_ID=#{roleId}
+	</select>
+
+	<delete id="removeByRoleId">
+		delete from SYS_ROLE_PERMISSION where ROLE_ID=#{roleId}
+	</delete>
+	<insert id="batchAdd" parameterType="com.it.ocs.sys.model.RolePermissionModel">
+		insert into SYS_ROLE_PERMISSION
+		(
+			ROLE_ID,
+			PERMISSION_ID
+		) values 
+		<foreach collection="list" item="item" index="index" separator=","> 
+	      (#{item.roleId}, #{item.permissionId})
+	    </foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.IProductEntityDao">
+	
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.ProductEntityModel" >
+	    <id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+	    <result column="SKU" property="sku" jdbcType="VARCHAR" />
+	    <result column="USERNAME" property="username" jdbcType="VARCHAR" />
+	    <result column="CURRENCY" property="currency" jdbcType="VARCHAR" />
+	    <result column="PRICE" property="price" jdbcType="DECIMAL" />
+	    <result column="LENGTH" property="length" jdbcType="DECIMAL" />
+	    <result column="WIDTH" property="width" jdbcType="DECIMAL" />
+	    <result column="HEIGHT" property="height" jdbcType="DECIMAL" />
+	    <result column="NET_WEIGHT" property="netWeight" jdbcType="DECIMAL" />
+	    <result column="GROSS_WEIGHT" property="grossWeight" jdbcType="DECIMAL" />
+	    <result column="PACKING_QTY" property="packingQty" jdbcType="DECIMAL" />
+	    <result column="OUTER_VOLUME" property="outerVolume" jdbcType="DECIMAL" />
+	    <result column="OUTER_WEIGHT" property="outerWeight" jdbcType="DECIMAL" />
+	    <result column="IS_MULTI_ONE" property="isMultiOne" jdbcType="DECIMAL" />
+	    <result column="IS_PEU" property="isPeu" jdbcType="DECIMAL" />
+	    <result column="STATUS" property="status" jdbcType="DECIMAL" />
+	    <result column="USER_ID" property="userId" jdbcType="DECIMAL" />
+	    <result column="V_SKU" property="vSku" jdbcType="VARCHAR" />
+	    <result column="TAX_REBATE_RATE" property="taxRebateRate" jdbcType="DECIMAL" />
+		<result column="INTEREST_RATE" property="interestRate" jdbcType="DECIMAL" />
+	    <result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+	    <result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+   </resultMap>
+   
+   <sql id="baseSql">
+   		select t.ENTITY_ID as entityId,
+   			   t.SKU as sku,
+   			   u.USERNAME as username,
+   			   t.LENGTH as length,
+   			   t.WIDTH as width,
+   			   t.HEIGHT as height,
+   			   t.NET_WEIGHT as netWeight,
+   			   t.GROSS_WEIGHT as grossWeight,
+   			   c.CURRENCY as currency,
+   			   c.PRICE as price,
+   			   t.PACKING_QTY as packingQty,
+   			   t.OUTER_VOLUME as outerVolume,
+   			   t.OUTER_WEIGHT as outerWeight,
+   			   t.IS_MULTI_ONE as isMultiOne,
+   			   t.IS_PEU as isPeu,
+   			   t.STATUS as status,
+   			   t.USER_ID as userId,
+   			   t.v_sku as v_sku,
+   			   c.TAX_REBATE_RATE as taxRebateRate,
+   			   c.INTEREST_RATE as interestRate,
+   			   t.CREATED_AT as createdAt,
+   			   t.UPDATED_AT as updatedAt
+   		FROM CAL_PRODUCT_ENTITY t,SYS_USER u ,CAL_PRODUCT_ENTITY_COST c
+   		where c.PARENT_ID = t.entity_id and u.user_id(+) = t.user_id and t.is_active = 1 AND T.STATUS != '0'
+   </sql>
+   
+   <sql id="sql_where">
+		<if test="param != null">
+			<if test="param.userId != '' and param.userId != null">
+				and t.USER_ID = #{param.userId}
+			</if>
+			<if test="param.sku != '' and param.sku != null">
+				and UPPER(t.SKU) like '%' || UPPER(#{param.sku}) || '%'
+			</if>
+			<if test="param.username != '' and param.username != null">
+				and u.USERNAME like '%${param.username}%'
+			</if>
+			<if test="param.length != '' and param.length != null or param.length == 0">
+				and t.LENGTH = #{param.length}
+			</if>
+			<if test="param.width != '' and param.width != null or param.width == 0">
+				and t.WIDTH = #{param.width}
+			</if>
+			<if test="param.height != '' and param.height != null or param.height == 0">
+				and t.HEIGHT = #{param.height}
+			</if>
+			<if test="param.netWeight != '' and param.netWeight != null or param.netWeight == 0">
+				and t.NET_WEIGHT = #{param.netWeight}
+			</if>
+			<if test="param.grossWeight != '' and param.grossWeight != null or param.grossWeight == 0">
+				and t.GROSS_WEIGHT = #{param.grossWeight}
+			</if>
+			<if test="param.price != '' and param.price != null or param.price == 0">
+				and c.PRICE = #{param.price}
+			</if>
+			<if test="param.packingQty != '' and param.packingQty != null or param.packingQty == 0">
+				and t.PACKING_QTY = #{param.packingQty}
+			</if>
+			<if test="param.outerVolume != '' and param.outerVolume != null or param.outerVolume == 0">
+				and t.OUTER_VOLUME = #{param.outerVolume}
+			</if>
+			<if test="param.outerWeight != '' and param.outerWeight != null or param.outerWeight == 0">
+				and t.OUTER_WEIGHT = #{param.outerWeight}
+			</if>
+			<if test="param.isMultiOne != '' and param.isMultiOne != null">
+				and t.IS_MULTI_ONE = #{param.isMultiOne}
+			</if>
+			<if test="param.isPeu != '' and param.isPeu != null">
+				and t.IS_PEU = #{param.isPeu}
+			</if>
+			<if test="param.status != '' and param.status != null">
+				and t.STATUS = #{param.status}
+			</if>
+			<if test="param.taxRebateRate != '' and param.taxRebateRate != null or param.taxRebateRate == 0">
+				and c.TAX_REBATE_RATE = #{param.taxRebateRate}
+			</if>
+			<if test="param.interestRate != '' and param.interestRate != null or param.interestRate == 0">
+				and c.INTEREST_RATE = #{param.interestRate}
+			</if>
+			<include refid="com.it.ocs.cal.dao.IProductOtherDao.sql_time"/>
+		</if>
+	</sql>
+   
+   <!-- 排序 -->
+	<sql id="order_sql">
+		<if test="sort!= null and order!=null">
+			<if test="sort != 'currency' and sort != 'username' and sort != 'price' and sort != 'tax_rebate_rate' and sort != 'interest_rate'">
+				order by t.${sort} ${order}
+			</if>
+			<if test="sort == 'currency'">
+				order by c.${sort} ${order}
+			</if>
+			<if test="sort == 'price'">
+				order by c.${sort} ${order}
+			</if>
+			<if test="sort == 'tax_rebate_rate'">
+				order by c.${sort} ${order}
+			</if>
+			<if test="sort == 'interest_rate'">
+				order by c.${sort} ${order}
+			</if>
+			<if test="sort == 'username'">
+				order by u.${sort} ${order}
+			</if>
+		</if>
+		<if test="sort == null and order == null">
+			order by t.entity_id desc
+		</if>
+	</sql>
+	
+	<sql id="base_sql_where">
+		AND T.IS_ACTIVE = 1
+	    AND T.STATUS != '0'
+	    AND T.LENGTH > 0
+	    AND T.WIDTH > 0
+	    AND T.HEIGHT > 0
+	    AND T.PACKING_QTY > 0
+	</sql>
+	
+	<select id="queryEntityBySku" parameterType="java.lang.String" resultType="com.it.ocs.cal.model.ProductEntityModel">
+		<include refid="baseSql" /> 
+		<include refid="base_sql_where"/>
+		and t.sku = #{sku} and rownum = 1 order by t.UPDATED_AT desc
+	</select>
+	
+	<select id="getById" parameterType="java.lang.Long" resultType="com.it.ocs.cal.model.ProductEntityModel">
+		<include refid="baseSql" /> and t.entity_id = #{id}
+	</select>
+	
+	<!-- 根据sku查找id -->
+	<select id="findEntityIdBySku" parameterType="java.lang.String" resultType="java.lang.Long" >
+   		select ENTITY_ID from CAL_PRODUCT_ENTITY t where t.sku = #{sku} <include refid="base_sql_where"/>
+    </select>
+    
+    <select id="findUserIdBySku" resultType="java.lang.Long">
+    	select user_id from CAL_PRODUCT_ENTITY t where t.sku = #{sku} <include refid="base_sql_where"/>
+    </select>
+    
+    <!-- 查找所有的sku -->
+    <select id="findAllSku" resultType="java.lang.String">
+    	select sku from CAL_PRODUCT_ENTITY t
+    	<where>
+    		<include refid="base_sql_where"/>
+    	</where>
+    </select>
+	
+	<select id="findAllActivated" resultMap="BaseResultMap">
+   		select e.* from cal_product_entity e where e.is_active=1
+   	</select>
+	
+	<!-- 查找所有 -->
+	<select id="findAllByUserId"  resultMap="BaseResultMap">
+		SELECT  distinct T.SKU,T.USER_ID USERID
+	    FROM CAL_PRODUCT_ENTITY T
+	    <where>
+			<if test="userId != -1">
+				and t.user_id = #{userId}
+			</if>
+		    <include refid="base_sql_where"/>
+	    </where>
+	</select>
+	
+	<!-- 查找所有 -->
+	<select id="findAllByUserAndStatus"  resultMap="BaseResultMap">
+		<include refid="baseSql" />
+	    AND T.IS_ACTIVE = 1
+	    AND T.STATUS = #{status}
+	    AND T.LENGTH > 0
+	    AND T.WIDTH > 0
+	    AND T.HEIGHT > 0
+	    AND T.PACKING_QTY > 0
+		<if test="userId != -1">
+			and t.user_id = #{userId}
+		</if>
+		    
+	</select>
+	
+	<!-- 查找所有 -->
+	<select id="findAllByUser"  resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<if test="userId != -1">
+			and t.user_id = #{userId}
+		</if>
+		<include refid="base_sql_where"/>
+	</select>
+   
+    <!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+	
+		<include refid="baseSql" />
+		<include refid="sql_where" />
+		<include refid="order_sql"/>
+		
+	</select>
+	
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) FROM CAL_PRODUCT_ENTITY t,SYS_USER u ,CAL_PRODUCT_ENTITY_COST c
+   		where c.PARENT_ID = t.entity_id and u.user_id = t.user_id and is_active = 1
+		<include refid="sql_where" />
+	</select>
+	
+	<update id="update" parameterType="com.it.ocs.cal.model.ProductEntityModel">
+	 	update CAL_PRODUCT_ENTITY
+	    <set >
+	      <if test="sku != null" >
+	        SKU = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="length != null" >
+	        LENGTH = #{length,jdbcType=DECIMAL},
+	      </if>
+	      <if test="width != null" >
+	        WIDTH = #{width,jdbcType=DECIMAL},
+	      </if>
+	      <if test="height != null" >
+	        HEIGHT = #{height,jdbcType=DECIMAL},
+	      </if>
+	      <if test="netWeight != null" >
+	        NET_WEIGHT = #{netWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="grossWeight != null" >
+	        GROSS_WEIGHT = #{grossWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="packingQty != null" >
+	        PACKING_QTY = #{packingQty,jdbcType=DECIMAL},
+	      </if>
+	      <if test="outerVolume != null" >
+	        OUTER_VOLUME = #{outerVolume,jdbcType=DECIMAL},
+	      </if>
+	      <if test="outerWeight != null" >
+	        OUTER_WEIGHT = #{outerWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isMultiOne != null" >
+	        IS_MULTI_ONE = #{isMultiOne,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isPeu != null" >
+	        IS_PEU = #{isPeu,jdbcType=DECIMAL},
+	      </if>
+	      <if test="status != null" >
+	        STATUS = #{status,jdbcType=DECIMAL},
+	      </if>
+	      <if test="userId != null" >
+	        USER_ID = #{userId,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt},
+	      </if>
+	    </set>
+	    where entity_id = #{entityId}
+	 </update>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.ProductEntityModel">
+	 	insert into CAL_PRODUCT_ENTITY
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	     
+	      <if test="sku != null" >
+	        SKU,
+	      </if>
+	      <if test="length != null" >
+	        LENGTH,
+	      </if>
+	      <if test="width != null" >
+	        WIDTH,
+	      </if>
+	      <if test="height != null" >
+	        HEIGHT,
+	      </if>
+	      <if test="netWeight != null" >
+	        NET_WEIGHT,
+	      </if>
+	      <if test="grossWeight != null" >
+	        GROSS_WEIGHT,
+	      </if>
+	      <if test="packingQty != null" >
+	        PACKING_QTY,
+	      </if>
+	      <if test="outerVolume != null" >
+	        OUTER_VOLUME,
+	      </if>
+	      <if test="outerWeight != null" >
+	        OUTER_WEIGHT,
+	      </if>
+	      <if test="isMultiOne != null" >
+	        IS_MULTI_ONE,
+	      </if>
+	      <if test="isPeu != null" >
+	        IS_PEU,
+	      </if>
+	      <if test="status != null" >
+	        STATUS,
+	      </if>
+	      <if test="userId != null" >
+	        USER_ID,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	      CAL_PRODUCT_ENTITY_SEQ.NEXTVAL,
+	      
+	      <if test="sku != null" >
+	        #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="length != null" >
+	        #{length,jdbcType=DECIMAL},
+	      </if>
+	      <if test="width != null" >
+	        #{width,jdbcType=DECIMAL},
+	      </if>
+	      <if test="height != null" >
+	        #{height,jdbcType=DECIMAL},
+	      </if>
+	      <if test="netWeight != null" >
+	        #{netWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="grossWeight != null" >
+	        #{grossWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="packingQty != null" >
+	        #{packingQty,jdbcType=DECIMAL},
+	      </if>
+	      <if test="outerVolume != null" >
+	        #{outerVolume,jdbcType=DECIMAL},
+	      </if>
+	      <if test="outerWeight != null" >
+	        #{outerWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isMultiOne != null" >
+	        #{isMultiOne,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isPeu != null" >
+	        #{isPeu,jdbcType=DECIMAL},
+	      </if>
+	      <if test="status != null" >
+	        #{status,jdbcType=DECIMAL},
+	      </if>
+	      <if test="userId != null" >
+	        #{userId,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt}
+	      </if>
+	    </trim>
+	 </insert>
+	 
+	 <select id="getSkuDisInfoBySKUAndPlatform" resultType="com.it.ocs.cal.model.SKUDiscontinueModel">
+	 	
+	 	select t.sku,t.platform,t.country_id countryId,t.is_dis isDis
+		from CAL_PRODUCT_DIS t
+		where t.sku =  #{sku}
+		and t.platform = #{platform}
+	 </select>
+	 <select id="skuDisInfoIsExist" resultType="int">
+	 	select count(*)
+	 	from CAL_PRODUCT_DIS t
+	 	where t.sku =  #{sku}
+		and t.platform = #{platform}
+		and t.country_id = #{countryId}
+	 </select>
+	 <insert id="addSkuDisInfo">
+	 	insert into CAL_PRODUCT_DIS
+		  (ID, SKU, PLATFORM, COUNTRY_ID, IS_DIS, UPDATE_BY, UPDATE_DATE)
+		values
+		  (CAL_PRODUCT_DIS_SEQ.NEXTVAL,#{sku},#{platform},#{countryId},#{isDis},#{userId},sysdate)
+	 </insert>
+	 <update id="updateSkuDisInfo">
+	 	update CAL_PRODUCT_DIS t set
+	 	t.IS_DIS = #{isDis},
+	 	t.UPDATE_BY = #{userId},
+	 	t.UPDATE_DATE =sysdate
+	 	where t.sku =  #{sku}
+		and t.platform = #{platform}
+		and t.country_id = #{countryId}
+	 </update>
+	 <select id="getSKUInfoBySKU" resultType="com.it.ocs.cal.model.SKUModel">
+	 	select p.length,p.width,p.height,p.gross_weight gw
+		from cal_product_entity p
+		where p.sku = #{skuName}
+		and p.is_active = 1
+	 </select>
+	 <select id="getFBA" resultType="java.lang.String">
+	 	 select SKU_STATIC_PRICE.AMAZON_SKU_FBA_PRICE(#{countryId},#{fLength},#{fWidth},#{fHeight},#{weight},1,'',0) from dual
+	 </select>
+	 <select id="getFBAForAU" resultType="java.lang.String">
+	 	select SKU_STATIC_PRICE.AMAZON_SKU_AU_FBA_PRICE(#{fLength},#{fWidth},#{fHeight},#{weight}) from dual
+	 </select>
+	 <select id="skuExist" resultType="int">
+	 	select count(*)
+		from cal_product_entity p
+		where p.sku = #{sku}
+		and p.is_active = 1
+	 </select>
+</mapper>

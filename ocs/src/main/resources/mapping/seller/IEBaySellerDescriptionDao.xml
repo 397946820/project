@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.seller.dao.IEBaySellerDescriptionDao">
+	<resultMap type="com.it.ocs.seller.model.EBaySellerDescriptionModel" id="sellerDescriptionResult">
+		<id column="ID" property="id"  />
+		<result column="NAME" property="name"  />
+		<result column="SITE_ID" property="siteId"  />
+		<result column="DESCRIPTION1" property="description1"  />
+		<result column="DESCRIPTION2" property="description2"  />
+		<result column="DESCRIPTION3" property="description3"  />
+		<result column="DESCRIPTION4" property="description4"  />
+		<result column="DESCRIPTION5" property="description5"  />
+		<result column="CARRY_COUNT" property="carry_count"  />
+		<result column="SAMPLE_COUNT" property="sample_count"  />
+	</resultMap>
+	
+	<sql id="select_base">
+			ID,
+			NAME,
+			SITE_ID,
+			DESCRIPTION1,
+			DESCRIPTION2,
+			DESCRIPTION3,
+			DESCRIPTION4,
+			DESCRIPTION5,
+			CARRY_COUNT,
+			SAMPLE_COUNT
+	</sql>
+	<select id="queryByPage" resultMap="sellerDescriptionResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from EBAY_SELLER_DESCRIPTION 
+				where ENABLED_FLAG='Y' order by CREATION_DATE desc 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_SELLER_DESCRIPTION where ENABLED_FLAG='Y'
+	</select>
+	<select id="getById"  resultType="com.it.ocs.seller.model.EBaySellerDescriptionModel">
+		select ID id,
+			NAME name,
+			SITE_ID siteId,
+			DESCRIPTION1 description1,
+			DESCRIPTION2 description2,
+			DESCRIPTION3 description3,
+			DESCRIPTION4 description4,
+			DESCRIPTION5 description5
+		from EBAY_SELLER_DESCRIPTION
+		where ID = #{id,jdbcType=BIGINT}
+	</select>
+	
+	<insert id="add" >
+		insert into EBAY_SELLER_DESCRIPTION(ID,NAME,DESCRIPTION,CREATION_DATE,ENABLED_FLAG,CARRY_COUNT,SAMPLE_COUNT) 
+		values(ebay_seller_description_seq.Nextval,#{name,jdbcType=VARCHAR},#{description,jdbcType=VARCHAR},sysdate,'Y',#{carry_count,jdbcType=VARCHAR},#{sample_count,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="update"  parameterType="com.it.ocs.seller.model.EBaySellerDescriptionModel">
+		update EBAY_SELLER_DESCRIPTION set NAME=#{name,jdbcType=VARCHAR},DESCRIPTION=#{description,jdbcType=VARCHAR}
+		,LAST_UPDATE_DATE=sysdate where ID=#{id,jdbcType=DOUBLE}
+	</update>
+	
+	<update id="deleteSellerDescriptionByIds"  parameterType="java.util.List">
+	
+		update EBAY_SELLER_DESCRIPTION set ENABLED_FLAG='N',LAST_UPDATE_DATE=sysdate where ID in
+		
+		<foreach collection="list" item="ids" index="index" open="(" separator="," close=")">#{ids}</foreach>
+	</update>
+	<insert id="addSellerDescription">
+		insert into ebay_seller_description
+		  (id,
+		   name,
+		   site_id,
+		   description1,
+		   description2,
+		   description3,
+		   description4,
+		   description5,
+		   create_by,
+		   creation_date,
+		   last_update_by,
+		   last_update_date)
+		values
+		  (ebay_seller_description_seq.nextval,
+		  #{name,jdbcType=VARCHAR},
+		  #{siteId,jdbcType=BIGINT},
+		  #{description1,jdbcType=VARCHAR},
+		  #{description2,jdbcType=VARCHAR},
+		  #{description3,jdbcType=VARCHAR},
+		  #{description4,jdbcType=VARCHAR},
+		  #{description5,jdbcType=VARCHAR},
+		  #{createBy},
+			sysdate,
+		  #{createBy},
+			sysdate
+		  )
+	</insert>
+	<update id="updateSellerDescription">
+		update ebay_seller_description set 
+		  name = #{name,jdbcType=VARCHAR},
+		  site_id = #{siteId,jdbcType=BIGINT},
+		  description1 = #{description1,jdbcType=VARCHAR},
+		  description2 = #{description2,jdbcType=VARCHAR},
+		  description3 = #{description3,jdbcType=VARCHAR},
+		  description4 = #{description4,jdbcType=VARCHAR},
+		  description5 = #{description5,jdbcType=VARCHAR},
+			last_update_by = #{lastUpdateBy},
+			last_update_date = sysdate
+		  where id = #{id}
+	</update>
+</mapper>

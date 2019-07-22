@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IRoleDAO">
+	<resultMap type="com.it.ocs.sys.model.RoleModel" id="roleResult">
+		<id property="id" column="ROLE_ID" jdbcType="DECIMAL" />
+		<result property="departmentId" column="DEPARTMENT_ID" jdbcType="DECIMAL" />
+		<result property="name" column="NAME" jdbcType="VARCHAR" />
+		<result property="code" column="CODE" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="where">
+		where ENABLED_FLAG='Y'
+		<if test="param != null">
+			<if test="param.departmentId != null">
+				and DEPARTMENT_ID=#{param.departmentId}
+			</if>
+			<if test="param.name != null">
+				and NAME=#{param.name,jdbcType=VARCHAR}
+			</if>
+			<if test="param.code">
+				and CODE=#{param.code,jdbcType=VARCHAR}
+			</if>
+		</if>
+	</sql>
+	<select id="queryByUserId" resultMap="roleResult">
+		<include refid="select_base" />
+		 where ROLE_ID in (select ROLE_ID from SYS_ROLE_USER where USER_ID=#{userId}) and ENABLED_FLAG='Y'
+	</select>
+	<select id="getByParam" resultMap="roleResult">
+		<include refid="select_base" />
+		<include refid="where" />
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from SYS_ROLE where ENABLED_FLAG='Y'
+	</select>
+	<select id="getById" resultMap="roleResult">
+		<include refid="select_base" /> where ROLE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="roleResult">
+		<include refid="select_base" />
+		<include refid="where" /> limit #{starRow},#{endRow}
+	</select>
+	<select id="queryByIds" resultMap="roleResult">
+		<include refid="select_base" />
+		<if test="ids!=null">
+			where ROLE_ID in 
+			<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+			</foreach>
+		</if>
+	</select>
+	<sql id="select_base">
+		select 
+			ROLE_ID id,
+			DEPARTMENT_ID  departmentId,
+			NAME name,
+			CODE code,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from SYS_ROLE
+	</sql>
+	<select id="query" resultMap="roleResult" parameterType="com.it.ocs.sys.model.RoleModel">
+		 <include refid="select_base" />
+		 <include refid="where" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.sys.model.RoleModel">
+		insert into SYS_ROLE
+		(
+			DEPARTMENT_ID,
+			NAME,
+			CODE,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{departmentId},
+			#{name},
+			#{code},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.sys.model.RoleModel">
+		update SYS_ROLE set 
+			DEPARTMENT_ID=#{departmentId},
+			NAME=#{name},
+			CODE=#{code},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where ROLE_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update SYS_ROLE set ENABLED_FLAG='N' where ROLE_ID=#{id}
+	</update>
+</mapper>

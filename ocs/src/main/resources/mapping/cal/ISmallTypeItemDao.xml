@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ISmallTypeItemDao">
+	
+	<sql id="base_sql">
+		SELECT M.ENTITY_ID ENTITYID,
+			   M.PARENT_ID PARENTID,
+			   T.TYPE_NAME TYPENAME,
+			   M.SHIPPING_TYPE SHIPPINGTYPE,
+			   M.MIN_WEIGHT MINWEIGHT,
+			   M.FROM_WEIGHT FROMWEIGHT,
+			   M.TO_WEIGHT TOWEIGHT,
+			   M.OPERATING_EXPENSES OPERATINGEXPENSES,
+			   M.KILOGRAM_WEIGHT KILOGRAMWEIGHT,
+			   M.CREATED_AT CREATEDAT,
+			   M.UPDATED_AT UPDATEDAT
+	    FROM CAL_SMALL_TYPE_ITEM M , CAL_SMALL_TYPE T
+	      WHERE M.PARENT_ID = T.ENTITY_ID
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<if test="param.typeName != '' and param.typeName != null">
+				AND T.TYPE_NAME = #{param.typeName}
+			</if>
+			<if test="param.shippingType != '' and param.shippingType != null">
+				AND M.SHIPPING_TYPE = #{param.shippingType}
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="order_sql">
+		<if test="sort!= null and order!=null">
+			ORDER BY M.${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			ORDER BY M.UPDATED_AT desc
+		</if>
+	</sql>
+	
+	<select id="query" resultType="com.it.ocs.cal.model.SmallTypeItemModel">
+		<include refid="base_sql" />
+		<include refid="where_sql"/>
+		<include refid="order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.cal.model.SmallTypeItemModel">
+		<include refid="base_sql" />
+		<include refid="where_sql"/>
+	</select>
+	
+	<select id="getTypeName" resultType="hashMap">
+		SELECT TYPE_NAME NAME,TYPE_NAME VALUE FROM CAL_SMALL_TYPE
+	</select>
+	
+	<select id="getShippingTypeByTypeName" resultType="hashMap">
+		SELECT DISTINCT M.SHIPPING_TYPE NAME,M.SHIPPING_TYPE VALUE
+	    FROM CAL_SMALL_TYPE_ITEM M , CAL_SMALL_TYPE T
+	      WHERE M.PARENT_ID = T.ENTITY_ID AND T.TYPE_NAME = #{typeName}
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.SmallTypeItemModel" >
+	    insert into CAL_SMALL_TYPE_ITEM
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="parentId != null" >
+	        PARENT_ID,
+	      </if>
+	      <if test="shippingType != null" >
+	        SHIPPING_TYPE,
+	      </if>
+	      <if test="minWeight != null" >
+	        MIN_WEIGHT,
+	      </if>
+	      <if test="fromWeight != null" >
+	        FROM_WEIGHT,
+	      </if>
+	      <if test="toWeight != null" >
+	        TO_WEIGHT,
+	      </if>
+	      <if test="operatingExpenses != null" >
+	        OPERATING_EXPENSES,
+	      </if>
+	      <if test="kilogramWeight != null" >
+	        KILOGRAM_WEIGHT,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        CAL_SMALL_TYPE_ITEM_SEQ.NEXTVAL,
+	      
+	      <if test="parentId != null" >
+	        #{parentId,jdbcType=DECIMAL},
+	      </if>
+	      <if test="shippingType != null" >
+	        #{shippingType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="minWeight != null" >
+	        #{minWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="fromWeight != null" >
+	        #{fromWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="toWeight != null" >
+	        #{toWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="operatingExpenses != null" >
+	        #{operatingExpenses,jdbcType=DECIMAL},
+	      </if>
+	      <if test="kilogramWeight != null" >
+	        #{kilogramWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>
+	  
+    <update id="update" parameterType="com.it.ocs.cal.model.SmallTypeItemModel" >
+    	update CAL_SMALL_TYPE_ITEM
+	    <set >
+	      <if test="parentId != null" >
+	        PARENT_ID = #{parentId,jdbcType=DECIMAL},
+	      </if>
+	      <if test="shippingType != null" >
+	        SHIPPING_TYPE = #{shippingType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="minWeight != null" >
+	        MIN_WEIGHT = #{minWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="fromWeight != null" >
+	        FROM_WEIGHT = #{fromWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="toWeight != null" >
+	        TO_WEIGHT = #{toWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="operatingExpenses != null" >
+	        OPERATING_EXPENSES = #{operatingExpenses,jdbcType=DECIMAL},
+	      </if>
+	      <if test="kilogramWeight != null" >
+	        KILOGRAM_WEIGHT = #{kilogramWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+    </update>
+</mapper>

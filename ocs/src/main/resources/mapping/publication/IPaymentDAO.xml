@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IPaymentDAO">
+	<resultMap type="com.it.ocs.publication.model.PaymentModel" id="payResult">
+		<id property="id" column="PAYID" jdbcType="DECIMAL" />
+		<result property="payAreaName" column="PAY_NAME" jdbcType="VARCHAR" />
+		<result property="siteNumber" column="SITE_ID" jdbcType="DECIMAL" />
+		<result property="paypaiAccount" column="PAY_ACCOUNT" jdbcType="VARCHAR" />
+		<result property="supportPaypaiInfo" column="SUPPORT_PAYMENT" jdbcType="DECIMAL" />
+		<result property="description" column="DESCRIPTION" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_PAYMENT where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select ebay_payment_seq.nextval from dual
+	</select>
+	<select id="getById" resultMap="payResult">
+		<include refid="select_base" /> where PAYID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="payResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+				where ENABLED_FLAG='Y'
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			PAYID id,
+			PAY_NAME payAreaName,
+			site_id siteNumber,
+			PAY_ACCOUNT  paypaiAccount,
+			SUPPORT_PAYMENT supportPaypaiInfo,
+			DESCRIPTION description,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_PAYMENT
+	</sql>
+	<select id="query" resultMap="payResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.PaymentModel">
+		insert into EBAY_PAYMENT
+		(
+			PAYID,
+			PAY_ACCOUNT,
+			site_id,
+			PAY_NAME,
+			SUPPORT_PAYMENT,
+			DESCRIPTION,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{paypaiAccount},
+			#{siteNumber},
+			#{payAreaName,jdbcType=VARCHAR},
+			#{supportPaypaiInfo},
+			#{description},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.PaymentModel">
+		update EBAY_PAYMENT set 
+			PAY_ACCOUNT=#{paypaiAccount},
+			SUPPORT_PAYMENT=#{supportPaypaiInfo},
+			DESCRIPTION=#{description},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where PAYID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_PAYMENT set ENABLED_FLAG='N' where PAYID=#{id}
+	</update>
+	<select id="payNameIsExist" resultType="int">
+		select count(*) from EBAY_PAYMENT where upper(pay_name) = upper(#{payName,jdbcType=VARCHAR})
+	</select>
+</mapper>

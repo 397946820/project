@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.portal.dao.IPortalDAO">
+	<select id="queryByPage" resultType="java.lang.Double">
+		select sum(b.price)
+		totalprice
+		from ocs_ebay.SALE_ORDER_REPORT b
+		where b.terrace = 'amazon'
+		and b.date_type = '3'
+		and b.order_day between to_date('2018-09-01', 'yyyy-MM-dd') and
+		to_date('2018-10-01', 'yyyy-MM-dd')
+	</select>
+</mapper>

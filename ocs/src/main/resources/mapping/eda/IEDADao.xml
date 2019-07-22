@@ -1,0 +1,1733 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.eda.dao.IEDADao">
+	<insert id="addOrderToEDA" statementType="CALLABLE">
+		 <![CDATA[  
+        {CALL eda_util.eda_order_create}  
+    	]]>  
+		
+	</insert>
+	<insert id="addEdaOrders">
+		   insert into EDA_ORDER
+	        (ID,
+	         PLATFORM,
+	         ORDER_OCS_ID,
+	         ORDER_ID,
+	         EDA_ACCOUNT,
+	         SHIPPING_METHOD,
+	         SHIPPING_ADDRESS,
+	         ITEMS,
+	         CREATE_DATE)
+	         values(
+	          EDA_ORDER_SEQ.NEXTVAL,
+	          #{platform,jdbcType=VARCHAR},
+	          #{orderOCSId,jdbcType=VARCHAR},
+	          #{orderId,jdbcType=VARCHAR},
+	          #{edaAccount,jdbcType=VARCHAR},
+	          #{shippingMethod,jdbcType=VARCHAR},
+	          #{shippingAddress,jdbcType=VARCHAR},
+	          #{items,jdbcType=VARCHAR},
+	          sysdate
+	         )
+	</insert>
+	<select id="getCreateEDAOrder" resultType="java.util.HashMap">
+		select t.id,
+			   t.PLATFORM,
+			   t.EDA_ACCOUNT edaAccount,
+		       t.order_ocs_id poNumber,
+		       t.shipping_method shippingMethod,
+		       t.shipping_address shippingAddress,
+		       t.items items
+		  from EDA_ORDER t
+		  where t.is_create = 0
+		  AND T.ITEMS IS NOT NULL
+	</select>
+	<select id="getEDAAccount" resultType="java.util.HashMap">
+		select a.account,a.pass_word passWord,b.url
+		  from SYS_TRANSPORT_ACCOUNT a, sys_request_template b
+		 where a.tran_platform = b.type
+		   and a.tran_platform = 'eda'
+		   and b.name = #{methodName}
+		   and a.account = #{edaAccount}
+	</select>
+	<update id="updateEDAOrder">
+		 update EDA_ORDER set eda_order_id = #{edaOrderId,jdbcType=VARCHAR},is_create = 1,create_json=#{createJson,jdbcType=VARCHAR} where id = #{ID}
+	</update>
+	<select id="getEDAOrder" resultType="java.util.HashMap">
+		select e.id, e.eda_order_id edaId, e.eda_account edaAccount,e.is_upload isUpload,e.platform ,e.order_ocs_id ocsId,e.items
+		  from EDA_ORDER e
+		 where e.is_create = 1
+		 and e.IS_GET_INFO = 0
+	</select>
+	<select id="isExist" resultType="int">
+		SELECT COUNT(*) FROM EDA_ORDER_INFO WHERE PARENT_ID = #{parentId}
+	</select>
+	<insert id="addEDAOrderInfo" >
+		insert into EDA_ORDER_INFO(
+		    ID,
+		    parent_id,
+		    businessNum,
+		    omniOrderId,
+		    channelOrderId,
+		    type,
+		    orderDate,
+		    shippedDate,
+		    fulfilment,
+		    orderStatus,
+		    buyerName,
+		    shippingService,
+		    shippingCost,
+		    note,
+		    itemDetails,
+		    shippingAddress,
+		    shipmentInfos,
+		    CREATE_DATE,
+		    UPDATE_DATE 
+		    )values(
+		    EDA_ORDER_INFO_SEQ.NEXTVAL,
+		    #{parentId,jdbcType=BIGINT},
+		    #{businessNum,jdbcType=VARCHAR},
+		    #{omniOrderId,jdbcType=VARCHAR},
+		    #{channelOrderId,jdbcType=VARCHAR},
+		    #{type,jdbcType=VARCHAR},
+		    #{orderDate,jdbcType=BIGINT},
+		    #{shippedDate,jdbcType=BIGINT},
+		    #{fulfilment,jdbcType=VARCHAR},
+		    #{orderStatus,jdbcType=VARCHAR},
+		    #{buyerName,jdbcType=VARCHAR},
+		    #{shippingService,jdbcType=VARCHAR},
+		    #{shippingCost,jdbcType=VARCHAR},
+		    #{note,jdbcType=VARCHAR},
+		    #{itemDetails,jdbcType=VARCHAR},
+		    #{shippingAddress,jdbcType=VARCHAR},
+		    #{shipmentInfos,jdbcType=VARCHAR},
+		    sysdate,
+		    sysdate 
+		    )
+	</insert>
+	<update id="updateEDAOrderInfo">
+			update EDA_ORDER_INFO set
+		    type=#{type,jdbcType=VARCHAR},
+		    orderDate=#{orderDate,jdbcType=BIGINT},
+		    shippedDate=#{shippedDate,jdbcType=BIGINT},
+		    fulfilment=#{fulfilment,jdbcType=VARCHAR},
+		    orderStatus=#{orderStatus,jdbcType=VARCHAR},
+		    buyerName=#{buyerName,jdbcType=VARCHAR},
+		    shippingService=#{shippingService,jdbcType=VARCHAR},
+		    shippingCost=#{shippingCost,jdbcType=VARCHAR},
+		    note=#{note,jdbcType=VARCHAR},
+		    itemDetails=#{itemDetails,jdbcType=VARCHAR},
+		    shippingAddress=#{shippingAddress,jdbcType=VARCHAR},
+		    shipmentInfos=#{shipmentInfos,jdbcType=VARCHAR},
+		    UPDATE_DATE = sysdate
+		    where parent_id = #{parentId,jdbcType=BIGINT}
+	</update>
+	<update id="updateEDAOrderInfoGetStatus">
+		update EDA_ORDER set IS_GET_INFO = 1 where id = #{id}
+	</update>
+	<sql id="query_base">
+		SELECT A.ID id,
+	          A.PLATFORM platform,
+	          A.ORDER_ID orderId,
+	          B.BUSINESSNUM edaOrderId,
+	          A.EDA_ORDER_ID edaPlatformOrderId,
+	          A.EDA_ACCOUNT edaAccount,
+	          nvl(B.ITEMDETAILS,A.ITEMS) skuInfo,
+	          B.SHIPMENTINFOS shipInfo,
+	          B.SHIPPEDDATE shipDate,
+	          nvl(B.BUYERNAME,json_ext.get_string(json(A.Shipping_Address),'name')) buyerName,
+	          B.ORDERSTATUS shipStatus,
+	          B.ORDERDATE edaCreateDate,
+	          A.is_create isCreate,
+	          NVL(B.SHIPPINGADDRESS,A.SHIPPING_ADDRESS) shippingAddress
+	     FROM EDA_ORDER A, EDA_ORDER_INFO B
+	    WHERE A.ID = B.PARENT_ID(+)
+	</sql>
+	<sql id="query_condition">
+		<if test="param.edaPlatformOrderId !=null and param.edaPlatformOrderId !=''">
+			 AND A.EDA_ORDER_ID LIKE #{param.edaPlatformOrderId}||'%'
+		</if>
+		<if test="param.orderId != null and param.orderId != ''">
+			AND A.ORDER_ID = #{param.orderId}
+		</if>
+		<if test="param.timeStart != null and param.timeStart != ''">
+			<![CDATA[AND b.ORDERDATE > #{param.timeStart}]]>
+		</if>
+		<if test="param.timeEnd != null and param.timeEnd != ''">
+			<![CDATA[AND b.ORDERDATE < #{param.timeEnd}]]>
+		</if>
+	</sql>
+	<select id="queryEDAOrderByPage" resultType="com.it.ocs.eda.vo.EDAOrderVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="query_base"></include>
+				<include refid="query_condition"></include>
+				ORDER BY A.CREATE_DATE DESC
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countEDAOrder" resultType="int">
+		select count(*) from (
+			<include refid="query_base"></include>
+			<include refid="query_condition"></include>
+		)
+	</select>
+	<select id="getOrderShippingEastByCondition" resultType="com.it.ocs.eda.vo.EDAOrderVO">
+		select * from (
+				<include refid="query_base"></include>
+				<include refid="query_condition"></include>
+				ORDER BY A.CREATE_DATE DESC
+			) S 
+	</select>
+	<select id="getEDAOrderByEDAId" resultType="java.util.HashMap">
+		select e.id, e.eda_order_id edaId, e.eda_account edaAccount
+		  from EDA_ORDER e
+		 where e.eda_order_id = #{edaId}
+	</select>
+	<select id="getEDAOrderById" resultType="java.util.HashMap">
+		select a.id,
+			   a.order_ocs_id ocsId,
+           	   a.platform,
+		       a.eda_order_id edaId,
+		       a.eda_account  edaAccount,
+		       b.businessnum  businessNum
+		  from eda_order a, eda_order_info b
+		 where a.id = b.parent_id
+		   and a.id = #{id}
+	</select>
+	<update id="updateEDAOrderNoCreate">
+		update eda_order set is_create = 2 where id = #{id}
+	</update>
+	<select id="getAllAccount" resultType="java.util.HashMap">
+		select a.account,a.pass_word passWord,b.url
+		  from SYS_TRANSPORT_ACCOUNT a, sys_request_template b
+		 where a.tran_platform = b.type
+		   and a.tran_platform = 'eda'
+       and b.name = #{method}
+	</select>
+	<select id="skuStockIsExist" resultType="int">
+		select count(*) from EDA_SKU_STOCK_INFO ss where ss.sku = #{sku} and ss.warehouse_id = #{warehouseId}
+	</select>
+	<insert id="addSkuStockInfoHis">
+		insert into EDA_SKU_STOCK_INFO_HIS
+	     (ID,
+	      SKU,
+	      WAREHOUSE_ID,
+	      WAREHOUSE_NAME,
+	      QTY,
+	      TOTAL_INVENTORY,
+	      FOR_OUTBOUND_INVENTORY)
+	   values
+	     (EDA_SKU_STOCK_INFO_SEQ.NEXTVAL,
+	     #{sku,jdbcType=VARCHAR},
+	     #{warehouseId,jdbcType=VARCHAR},
+	     #{warehouseName,jdbcType=VARCHAR},
+	     nvl(#{qty,jdbcType=BIGINT},0),
+	     nvl(#{totalInventory,jdbcType=BIGINT},0),
+	     nvl(#{forOutboundInventory,jdbcType=BIGINT},0)
+	     )
+	</insert>
+	<insert id="addSkuStockInfo">
+		insert into EDA_SKU_STOCK_INFO
+	     (ID,
+	      SKU,
+	      WAREHOUSE_ID,
+	      WAREHOUSE_NAME,
+	      QTY,
+	      TOTAL_INVENTORY,
+	      FOR_OUTBOUND_INVENTORY)
+	   values
+	     (EDA_SKU_STOCK_INFO_SEQ.NEXTVAL,
+	     #{sku,jdbcType=VARCHAR},
+	     #{warehouseId,jdbcType=VARCHAR},
+	     #{warehouseName,jdbcType=VARCHAR},
+	     nvl(#{qty,jdbcType=BIGINT},0),
+	     nvl(#{totalInventory,jdbcType=BIGINT},0),
+	     nvl(#{forOutboundInventory,jdbcType=BIGINT},0)
+	     )
+	</insert>
+	<update id="updateSkuStockInfo">
+		update EDA_SKU_STOCK_INFO set 
+	     WAREHOUSE_NAME =#{warehouseName,jdbcType=VARCHAR},
+	     QTY = nvl(#{qty,jdbcType=BIGINT},0),
+	     TOTAL_INVENTORY = nvl(#{totalInventory,jdbcType=BIGINT},0),
+	     FOR_OUTBOUND_INVENTORY = nvl(#{forOutboundInventory,jdbcType=BIGINT},0)
+	     where  SKU = #{sku,jdbcType=VARCHAR}
+	     and WAREHOUSE_ID = #{warehouseId,jdbcType=VARCHAR}
+	</update>
+	
+	<sql id="stock_query_base">
+		     SELECT T.ID id,
+		            T.SKU sku,
+		            T.WAREHOUSE_ID warehouseId,
+		            T.WAREHOUSE_NAME warehouseName,
+		            T.QTY qty,
+		            T.TOTAL_INVENTORY totalInventory,
+		            T.FOR_OUTBOUND_INVENTORY forOutboundInventory,
+		            TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') createDate,
+		            TO_CHAR(T.UPDATE_DATE,'yyyy-MM-dd hh24:mi:ss') updateDate
+		       FROM EDA_SKU_STOCK_INFO T
+		       where T.WAREHOUSE_ID in (2,7)
+	</sql>
+	<sql id="stock_condition">
+		<if test="param.sku !=null and param.sku !=''">
+			 and T.SKU = #{param.sku}
+		</if>
+		<if test="param.warehouseName != null and param.warehouseName != ''">
+			AND T.WAREHOUSE_NAME LIKE '%' || #{param.warehouseName} || '%'
+		</if>
+	</sql>
+	<select id="queryEDAStockInfoByPage" resultType="com.it.ocs.eda.vo.EDAStockVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="stock_query_base"></include>
+				<include refid="stock_condition"></include>
+				ORDER BY T.CREATE_DATE DESC
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countEDAStockInfo" resultType="int">
+		select count(*) from (
+			<include refid="stock_query_base"></include>
+			<include refid="stock_condition"></include>
+		)
+	</select>
+	<sql id="stockHis_query_base">
+		     SELECT T.ID id,
+		            T.SKU sku,
+		            T.WAREHOUSE_ID warehouseId,
+		            T.WAREHOUSE_NAME warehouseName,
+		            T.QTY qty,
+		            T.TOTAL_INVENTORY totalInventory,
+		            T.FOR_OUTBOUND_INVENTORY forOutboundInventory,
+		            TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') createDate,
+		            TO_CHAR(T.UPDATE_DATE,'yyyy-MM-dd hh24:mi:ss') updateDate
+		       FROM EDA_SKU_STOCK_INFO_HIS T
+		       where T.WAREHOUSE_ID in (2,7)
+	</sql>
+	<sql id="stockHis_condition">
+		<if test="param.sku !=null and param.sku !=''">
+			 and T.SKU = #{param.sku}
+		</if>
+		<if test="param.warehouseName != null and param.warehouseName != ''">
+			AND T.WAREHOUSE_NAME LIKE '%' || #{param.warehouseName} || '%'
+		</if>
+		<if test="param.dayTime !=null and param.dayTime !=''">
+			 and  TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd') = #{param.dayTime}
+		</if>
+	</sql>
+	<select id="queryEDAStockInfoHisByPage" resultType="com.it.ocs.eda.vo.EDAStockVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="stockHis_query_base"></include>
+				<include refid="stockHis_condition"></include>
+				ORDER BY T.CREATE_DATE DESC
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countEDAStockInfoHis" resultType="int">
+		select count(*) from (
+			<include refid="stockHis_query_base"></include>
+			<include refid="stockHis_condition"></include>
+		)
+	</select>
+	
+	<sql id="sku_query_base">
+		select distinct t.sku
+		  from cal_product_entity t
+		 where t.is_active = 1
+	</sql>
+	<sql id="sku_condition">
+		<if test="param.sku !=null and param.sku !=''">
+			 and t.sku like '%'||#{param.sku}||'%'
+		</if>
+	</sql>
+	<select id="productListByPage" resultType="com.it.ocs.eda.vo.SKULinkVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="sku_query_base"></include>
+				<include refid="sku_condition"></include>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="productListCount" resultType="int">
+	select count(*) from (
+			<include refid="sku_query_base"></include>
+			<include refid="sku_condition"></include>
+		)
+	</select>
+	<update id="updatePSkuLinkInfo">
+		declare
+		 N_EXIST NUMBER;
+		begin
+		  SELECT COUNT(*) INTO N_EXIST FROM SYS_SKU_LINK T WHERE T.P_SKU = #{pSku} AND T.SKU = #{sku};
+		  IF N_EXIST = 0 THEN 
+		    INSERT INTO SYS_SKU_LINK
+		      (ID, P_SKU, SKU, QTY, CREATE_BY, UPDATE_BY)
+		    VALUES
+		      (SYS_SKU_LINK_SEQ.NEXTVAL,
+		       #{pSku,jdbcType=VARCHAR},
+		       #{sku,jdbcType=VARCHAR},
+		       #{qty,jdbcType=BIGINT},
+		       #{userId},
+		       #{userId});
+		  ELSE
+		    UPDATE SYS_SKU_LINK SET 
+		    QTY =  #{qty,jdbcType=BIGINT},
+		    UPDATE_BY = #{userId},
+		    UPDATE_DATE = SYSDATE
+		    WHERE P_SKU =#{pSku,jdbcType=VARCHAR}
+		     AND SKU=#{sku,jdbcType=VARCHAR};
+		  END IF;
+		end;
+	</update>
+	<delete id="deletePSkuLinkInfo">
+		delete SYS_SKU_LINK T WHERE T.P_SKU = #{pSku} AND T.SKU = #{sku}
+	</delete>
+	
+	<sql id="sku_link_query_base">
+		select max(s.id) id,
+		       s.p_sku pSku,
+		       to_char(min(s.create_date),'yyyy-MM-dd hh24:mi:ss')createDate,
+		       to_char(max(s.update_date),'yyyy-MM-dd hh24:mi:ss')updateDate,
+		       wm_concat(sku) sku,
+		       wm_concat(qty) qty
+		  from SYS_SKU_LINK s
+		  where 1 = 1
+	</sql>
+	<sql id="sku_link_condition">
+		<if test="param.sku !=null and param.sku !=''">
+			and s.p_sku in (select p_sku from SYS_SKU_LINK where sku like '%'||#{param.sku}||'%' )
+		</if>
+		<if test="param.pSku !=null and param.pSku !=''">
+			and s.p_sku like '%'||#{param.pSku}||'%'
+		</if>
+	</sql>
+	<select id="skuLinkListByPage" resultType="com.it.ocs.eda.vo.SKULinkVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+		  		select *
+		  		from (
+				<include refid="sku_link_query_base"></include>
+				<include refid="sku_link_condition"></include>
+				 group by s.p_sku
+				 )
+				 order by createDate desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="skuLinkListCount" resultType="int">
+		select count(*) from (
+			<include refid="sku_link_query_base"></include>
+			<include refid="sku_link_condition"></include>
+			 group by s.p_sku
+		)
+	</select>
+	<select id="getSkusByPSku" resultType="com.it.ocs.eda.vo.SKULinkVO">
+		select t.sku,t.qty from SYS_SKU_LINK t where t.p_sku = #{psku}
+	</select>
+	<select id="getPSkuLinkDatas" resultType="java.util.HashMap">
+		<include refid="sku_link_query_base"></include>
+		group by s.p_sku
+	</select>
+	<select id="getEDAOrderPlatform" resultType="com.it.ocs.eda.model.EDAOrderModel">
+	   select distinct platform from eda_order
+	</select>
+	<select id="getEDAOrderByPlatform" resultType="com.it.ocs.eda.model.EDAOrderModel">
+	   select eo.platform platform,
+              eo.order_ocs_id orderOcsId,
+              eo.items,
+              eoi.shipmentinfos shipmentinfos
+       from eda_order eo,eda_order_info eoi
+       where eo.id=eoi.parent_id 
+       and  eo.is_upload = 0 
+       and eo.is_get_info = 1
+       AND ITEMS IS NOT NULL
+       and eoi.shipmentinfos is not null
+       and eo.platform=#{platform,jdbcType=VARCHAR}
+	</select>
+	<select id="getEbayOrder" resultType="com.it.ocs.eda.model.EBayOrderShippingModel">
+		  select o.id ocsOrderId,i.id,o.account,o.order_id orderId,i.transaction_id transactionId,i.item_id itemId,i.item_sku sku
+		  from ebay_order o,ebay_order_item i,ebay_publication_line l
+		  where o.id = i.parent_id
+      	  and i.item_id = l.item_id
+		  and o.id = #{id}
+		  and i.item_sku not like '%OS%'
+          and l.region != 'CN'
+	</select>
+	<select id="countPSku" resultType="int">
+		select count(*) from sys_sku_link l where upper(l.p_sku) = upper(#{pSku,jdbcType=VARCHAR})
+	</select>
+	<select id="skuIsExist" resultType="int">
+		select count(*)
+		from cal_product_entity t
+		where t.is_active = 1
+		and t.sku = #{sku0,jdbcType=VARCHAR}
+	</select>
+	<update id="updateEbayOrderShipInfo">
+		begin
+			update ebay_order_item eoi set eoi.ship_time = to_timestamp(#{shipTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+	                               eoi.shipping_carrier_used = #{carrier,jdbcType=VARCHAR},
+	                               eoi.shipment_tracking_number = #{trackingNumber,jdbcType=VARCHAR},
+	                               eoi.shipping_carrier_used2 = #{carrier1,jdbcType=VARCHAR},
+	                               eoi.shipment_tracking_number2 = #{trackingNumber1,jdbcType=VARCHAR},
+	                               eoi.shipping_carrier_used3 = #{carrier2,jdbcType=VARCHAR},
+	                               eoi.shipment_tracking_number3 = #{trackingNumber2,jdbcType=VARCHAR}
+			where eoi.id = #{id};
+		end;
+	</update>
+	<select id="getEBayUSShipOrders" resultType="com.it.ocs.eda.model.ShipOrderInfo">
+		select 'ebay' platform,
+	           e.account account,
+	           e.id orderOCSId,
+	           e.orderId,
+	           e.SHIPPING_SERVICE shippingMethod,
+	           e.createTime,
+	           json_ext.get_string(json(es.shipping_address), 'Street1') addressLine1,
+	           json_ext.get_string(json(es.shipping_address), 'Street2') addressLine2,
+	           json_ext.get_string(json(es.shipping_address), 'CityName') city,
+	           json_ext.get_string(json(es.shipping_address), 'Country') country,
+	           json_ext.get_string(json(es.shipping_address), 'Name') name,
+	           case
+	             when json_ext.get_string(json(es.shipping_address), 'Phone') =
+	                  'Invalid Request' then
+	              null
+	             else
+	              json_ext.get_string(json(es.shipping_address), 'Phone')
+	           end phone,
+	           json_ext.get_string(json(es.shipping_address), 'PostalCode') postalCode,
+	           json_ext.get_string(json(es.shipping_address), 'StateOrProvince') provState,
+	           e.orderItemOCSId,
+	           e.item_id itemId,
+	           nvl(s.sku,e.sku) warehouseSku,
+	           nvl(s.qty,1)*e.qty quantity,
+	           e.price unitPrice,
+	           e.productId,
+	           e.description
+	      from (SELECT EO.ID id,
+	                   eo.account,
+	                   EO.ORDER_ID orderId,
+	                   to_char(eo.created_time,'yyyy-MM-dd hh24:mi:ss') createTime,
+	                   eo.shipping_service,
+	                   ei.id orderItemOCSId,
+	                   ei.item_id item_id,
+	                   EI.ITEM_SKU sku,
+	                   EI.QUANTITY_PURCHASED qty,
+	                   ei.price  price,
+	                   ei.item_id productId,
+	                   '' description
+	              FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+	             WHERE EO.ID = EI.PARENT_ID
+	               AND EO.PAID_TIME IS NOT NULL
+	               AND EO.SHIPPED_TIME IS NULL
+	               and eo.tag = 0
+	               and eo.order_status = 'Completed'
+	               and ei.item_sku not like '%OS%'
+	               and eo.sales_record_number is not null
+	               AND EO.PAY_STATUS = 'Complete'
+	               and ei.ship_time is null
+	              <![CDATA[ and eo.created_time >
+	                   to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')) e,]]>
+	           EBAY_ORDER_SUB ES,ebay_publication_line l,sys_sku_link s
+	     where  e.ID = ES.PARENT_ID
+	       and e.productId = l.item_id
+	       and e.sku = s.p_sku(+)
+	       AND to_char(ES.SHIPPING_ADDRESS) like '%"US"%'
+	       and l.region != 'CN'
+	</select>
+	<select id="getWalmartShipOrders"  resultType="com.it.ocs.eda.model.ShipOrderInfo">
+		      SELECT 'walmart' platform,
+		             e.country account,
+		             e.id orderOCSId,
+		             e.orderId,
+                 e.createTime,
+		             e.SHIPPING_SERVICE shippingMethod,
+		             e.addressLine1,
+		             e.addressLine2,
+		             e.city,
+		             e.country,
+		             e.name,
+		             e.phone,
+		             e.postalCode,
+		             e.provState,
+		             e.orderItemOCSId,
+		             e.sku itemId,
+		             nvl(s.sku,e.sku) warehouseSku,
+		             nvl(s.qty,1)*e.qty quantity,
+		             e.price unitPrice,
+		             '' productId,
+		             '' description
+		        FROM (SELECT max(wo.customer_order_id) orderId,
+		                     WO.ID,
+                         to_char(max(wo.order_date_utc),'yyyy-MM-dd hh24:mi:ss') createTime,
+		                     MAX(WO.customer_order_id) ORDER_ID,
+		                     MAX(WO.ADDRESS1) addressLine1,
+		                     MAX(WO.ADDRESS2) addressLine2,
+		                     MAX(WO.CITY) city,
+		                     MAX(WO.NAME) name,
+		                     MAX(WO.STATE) provState,
+		                     MAX(WO.POSTAL_CODE) postalCode,
+		                     MAX(WO.COUNTRY) country,
+		                     MAX(WO.PHONE) phone,
+		                     MAX(WL.ID) orderItemOCSId,
+		                     MAX(WO.METHOD_CODE) SHIPPING_SERVICE,
+		                     WL.SKU,
+		                     sum(WL.ORDER_LINE_QUANTITY_AMOUNT) QTY,
+		                     MAX(WL.ITEM_PRICE) PRICE
+		                FROM WALMART_ORDER WO, WALMART_ORDER_LINE WL
+		               WHERE WO.ID = WL.PARENT_ID
+		                 AND WO.COUNTRY = 'USA'
+		                 AND WL.ORDER_LINE_STATUS IN ('Created', 'Acknowledged')
+		                 AND WL.SHIP_TRACKING_NUMBER IS NULL
+		                <![CDATA[ and wo.order_date_utc >  to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')]]>
+		               GROUP BY WO.ID, WL.SKU) e,sys_sku_link s
+		       WHERE e.sku = s.p_sku(+)
+	</select>
+	
+	<select id="getLightShipOrders" resultType="com.it.ocs.eda.model.ShipOrderInfo">
+		
+			SELECT 'light' platform,
+		       T.country account,
+           	   T.createTime,
+		       T.orderOCSId,
+		       T.orderId,
+		       '' shippingMethod,
+		       T.addressLine1,
+		       '' addressLine2,
+		       T.city,
+		       T.country,
+		       T.name,
+		       T.phone,
+		       T.postalCode,
+		       T.provState,
+		       T.orderItemOCSId,
+		       T.sku warehouseSku,
+		       T.sku itemId,
+		       T.qty quantity,
+		       T.price unitPrice,
+		       '' productId,
+		       T.description
+      FROM (SELECT LO.ENTITY_ID orderOCSId,
+                   LO.ORDER_ID orderId,
+                   to_char(li.light_created_at,'yyyy-MM-dd hh24:mi:ss') createTime,
+                   nvl(LI.COUNTRY_ID,LO.PLATFORM) COUNTRY,
+                   li.entity_id orderItemOCSId,
+                   LI.SHIPPING_FIRSTNAME || ' ' || LI.SHIPPING_MIDDLENAME || ' ' ||
+                   LI.SHIPPING_LASTNAME NAME,
+                   LI.POSTCODE postalCode,
+                   LI.REGION provState,
+                   LI.CITY,
+                   LI.STREET addressLine1,
+                   LI.TELEPHONE PHONE,
+                   li.sku,
+                   (LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+                   LI.QTY_SHIPPED) qty,
+                   li.price price,
+                   '' description
+              FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+             WHERE LO.ENTITY_ID = LI.PARENT_ID
+               AND LO.PLATFORM = 'US'
+               and li.COUNTRY_ID = 'US'
+               AND LO.STATUS = 'processing'
+               AND LO.AVS = 1
+               AND LI.SKU NOT LIKE 'B%'
+               AND LI.SKU IS NOT NULL
+             <![CDATA[  AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+                   LI.QTY_SHIPPED > 0
+               AND LO.LIGHT_CREATED_AT > TO_DATE('2018-01-26', 'YYYY-MM-DD')]]>
+               AND STREET IS NOT NULL
+               AND (LI.SKU NOT LIKE 'OS%' OR
+                   (LI.SKU LIKE 'OS%' AND
+                   LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+                   
+              union all
+              
+              SELECT LO.ENTITY_ID orderOCSId,
+                   LO.ORDER_ID orderId,
+                   to_char(li.light_created_at,'yyyy-MM-dd hh24:mi:ss') createTime,
+                   nvl(LI.COUNTRY_ID,LO.PLATFORM) COUNTRY,
+                   li.entity_id orderItemOCSId,
+                   LI.SHIPPING_FIRSTNAME || ' ' || LI.SHIPPING_MIDDLENAME || ' ' ||
+                   LI.SHIPPING_LASTNAME NAME,
+                   LI.POSTCODE postalCode,
+                   LI.REGION provState,
+                   LI.CITY,
+                   LI.STREET addressLine1,
+                   LI.TELEPHONE PHONE,
+                   li.sku,
+                   (LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+                   LI.QTY_SHIPPED) qty,
+                   li.price price,
+                   '' description
+              FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM_B LI
+             WHERE LO.ENTITY_ID = LI.PARENT_ID
+               AND LO.PLATFORM = 'US'
+               and li.COUNTRY_ID = 'US'
+               AND LO.STATUS = 'processing'
+               AND LO.AVS = 1
+               AND LI.SKU NOT LIKE 'B%'
+               AND LI.SKU IS NOT NULL
+             <![CDATA[  AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+                   LI.QTY_SHIPPED > 0
+               AND LO.LIGHT_CREATED_AT > TO_DATE('2018-01-26', 'YYYY-MM-DD')]]>
+               AND STREET IS NOT NULL
+               AND (LI.SKU NOT LIKE 'OS%' OR
+                   (LI.SKU LIKE 'OS%' AND
+                   LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+                   ) T
+		<![CDATA[ where T.qty > 0 ]]>
+	</select>
+	<select id="getOCSShipOrders" resultType="com.it.ocs.eda.model.ShipOrderInfo">
+		 SELECT a.platform,
+                 a.account account,
+                 to_char(a.create_date, 'yyyy-MM-dd hh24:mi:ss') createTime,
+                 'OCS' || a.id orderOCSId,
+                 a.order_id orderId,
+                 '' shippingMethod,
+                 json_ext.get_string(json(a.delivery_address),
+                                     'addressLine1') addressLine1,
+                 json_ext.get_string(json(a.delivery_address),
+                                     'addressLine2') addressLine2,
+                 json_ext.get_string(json(a.delivery_address), 'city') city,
+                 json_ext.get_string(json(a.delivery_address), 'country') country,
+                 json_ext.get_string(json(a.delivery_address), 'name') name,
+                 json_ext.get_string(json(a.delivery_address), 'phone') phone,
+                 json_ext.get_string(json(a.delivery_address), 'postalCode') postalCode,
+                 json_ext.get_string(json(a.delivery_address), 'provState') provState,
+                 'OCSI' || c.id orderItemOCSId,
+                 b.sku warehouseSku,
+                 b.sku itemId,
+                 b.qty quantity,
+                 '' unitPrice,
+                 '' productId,
+                 '' description
+            from sys_return_order       a,
+                 sys_return_order_final b,
+                 sys_return_order_item  c
+           where a.id = b.parent_id
+             and a.id = c.parent_id
+             and b.sku = c.sku
+             and b.order_type = 2
+             and a.site in ('US', 'USA', 'Amazon.com')
+             and b.tarcking_num is null
+		
+	</select>
+	
+	<select id="getWShipOrders" resultType="com.it.ocs.eda.model.ShipOrderInfo">
+		select f.platform,
+		       a.account account,
+		       'W_' || a.id || '_' || f.times orderOCSId,
+		       'W_' || a.order_id || '_' || f.times orderId,
+		       a.SHIPPING_SERVICE shippingMethod,
+		       to_char(a.created_time, 'yyyy-MM-dd hh24:mi:ss') createTime,
+		       json_ext.get_string(json(c.shipping_address), 'Street1') addressLine1,
+		       json_ext.get_string(json(c.shipping_address), 'Street2') addressLine2,
+		       json_ext.get_string(json(c.shipping_address), 'CityName') city,
+		       json_ext.get_string(json(c.shipping_address), 'Country') country,
+		       json_ext.get_string(json(c.shipping_address), 'Name') name,
+		       case
+		         when json_ext.get_string(json(c.shipping_address), 'Phone') =
+		              'Invalid Request' then
+		          ''
+		         else
+		          json_ext.get_string(json(c.shipping_address), 'Phone')
+		       end phone,
+		       json_ext.get_string(json(c.shipping_address), 'PostalCode') postalCode,
+		       json_ext.get_string(json(c.shipping_address), 'StateOrProvince') provState,
+		       'W_' || b.id || '_' || f.times orderItemOCSId,
+		       b.item_id itemId,
+		       nvl(d.sku, f.sku) warehouseSku,
+		       nvl(d.qty, 1) * f.qty quantity,
+		       b.price unitPrice,
+		       b.item_id productId,
+		       '' description,
+		       g.delivery_address newAddress
+		  from ebay_order             a,
+		       ebay_order_item        b,
+		       sys_return_order_final f,
+		       ebay_order_sub         c,
+		       sys_sku_link           d,
+		       ebay_publication_line  e,
+		       sys_return_order       g
+		 where a.id = b.parent_id
+		   and a.order_id = f.order_id
+		   and b.item_sku = f.m_sku
+		   and a.id = c.parent_id
+		   and b.item_id = e.item_id(+)
+		   and g.id = f.parent_id
+		   and f.sku = d.p_sku(+)
+		   and f.platform = 'ebay'
+		   and f.tarcking_num is  null
+		   and (e.region != 'CN' or e.region is null)
+		   and to_char(c.SHIPPING_ADDRESS) like '%"US"%'
+		   and f.order_type = 1
+		
+		union all
+		
+		select f.platform,
+		       a.platform account,
+		       
+		       'W_' || a.entity_id || '_' || f.times orderOCSId,
+		       'W_' || a.order_id || '_' || f.times orderId,
+		       '' shippingMethod,
+		       to_char(b.light_created_at, 'yyyy-MM-dd hh24:mi:ss') createTime,
+		       b.STREET addressLine1,
+		       '' addressLine2,
+		       b.city,
+		       nvl(b.COUNTRY_ID, a.PLATFORM) country,
+		       b.SHIPPING_FIRSTNAME || ' ' || b.SHIPPING_MIDDLENAME || ' ' ||
+		       b.SHIPPING_LASTNAME name,
+		       b.TELEPHONE phone,
+		       b.POSTCODE postalCode,
+		       b.REGION provState,
+		       'W_' || b.entity_id || '_' || f.times orderItemOCSId,
+		       f.sku warehouseSku,
+		       f.sku itemId,
+		       f.qty quantity,
+		       b.price unitPrice,
+		       '' productId,
+		       '' description,
+		       g.delivery_address newAddress
+		  from light_order            a,
+		       light_order_item       b,
+		       sys_return_order_final f,
+		       sys_return_order       g
+		 where a.entity_id = b.parent_id
+		   and a.order_id = f.order_id
+		   and b.sku = f.m_sku
+		   and g.id = f.parent_id
+		   and b.country_id = 'US'
+		   and f.platform = 'light'
+		   and f.order_type = 1
+		   and f.tarcking_num is null
+		
+		union all
+		
+		SELECT f.platform,
+		       e.country account,
+		       'W_' || e.id || '_' || f.times orderOCSId,
+		       'W_' || e.orderId || '_' || f.times orderId,
+		       e.SHIPPING_SERVICE shippingMethod,
+		       e.createTime createTime,
+		       e.addressLine1,
+		       e.addressLine2,
+		       e.city,
+		       case
+		         when e.country = 'USA' then
+		          'US'
+		         else
+		          e.country
+		       end country,
+		       e.name,
+		       e.phone,
+		       e.postalCode,
+		       e.provState,
+		       'W_' || e.orderItemOCSId || '_' || f.times orderItemOCSId,
+		       e.sku itemId,
+		       nvl(s.sku, f.sku) warehouseSku,
+		       nvl(s.qty, 1) * f.qty quantity,
+		       e.price unitPrice,
+		       '' productId,
+		       '' description,
+		       g.delivery_address newAddress
+		  FROM (SELECT max(wo.customer_order_id) orderId,
+		               WO.ID,
+		               to_char(max(wo.order_date_utc), 'yyyy-MM-dd hh24:mi:ss') createTime,
+		               MAX(WO.Purchase_Order_Id) pORDER_ID,
+		               MAX(WO.Customer_Order_Id) ORDER_ID,
+		               MAX(WO.ADDRESS1) addressLine1,
+		               MAX(WO.ADDRESS2) addressLine2,
+		               MAX(WO.CITY) city,
+		               MAX(WO.NAME) name,
+		               MAX(WO.STATE) provState,
+		               MAX(WO.POSTAL_CODE) postalCode,
+		               MAX(WO.COUNTRY) country,
+		               MAX(WO.PHONE) phone,
+		               MAX(WL.ID) orderItemOCSId,
+		               MAX(WO.METHOD_CODE) SHIPPING_SERVICE,
+		               WL.SKU,
+		               sum(WL.ORDER_LINE_QUANTITY_AMOUNT) QTY,
+		               MAX(WL.ITEM_PRICE) PRICE
+		          FROM WALMART_ORDER WO, WALMART_ORDER_LINE WL
+		         WHERE WO.ID = WL.PARENT_ID
+		           AND WO.COUNTRY = 'USA'
+		         GROUP BY WO.ID, WL.SKU) e,
+		       sys_sku_link s,
+		       sys_return_order_final f,
+		       sys_return_order g
+		 WHERE e.SKU = f.m_sku
+		   and f.sku = s.p_sku(+)
+		   and e.porder_id = f.order_id
+		   and g.id = f.parent_id
+		   and f.platform = 'walmart'
+		   and f.order_type = 1
+		   and f.tarcking_num is null
+		union all
+		select f.platform,
+		       a.channel account,
+		       'W_' || a.id || '_' || f.times orderOCSId,
+		       'W_' || a.order_id || '_' || f.times orderId,
+		       '' shippingMethod,
+		       to_char(a.purchase_at, 'yyyy-MM-dd hh24:mi:ss') createTime,
+		       a.street addressLine1,
+		       '' addressLine2,
+		       a.city,
+		       a.country_code country,
+		       a.name,
+		       a.phone,
+		       a.postal_code postalCode,
+		       a.state_or_region provState,
+		       'W_' || b.id || '_' || f.times orderItemOCSId,
+		       b.sku itemId,
+		       nvl(s.sku, f.sku) warehouseSku,
+		       nvl(s.qty, 1) * f.qty quantity,
+		       b.price / b.qty unitPrice,
+		       '' productId,
+		       '' description,
+		       g.delivery_address newAddress
+		  from amazon_order           a,
+		       amazon_order_item      b,
+		       sys_return_order_final f,
+		       sys_sku_link           s,
+		       sys_return_order       g
+		 where a.id = b.parent_id
+		   and a.order_id = f.order_id
+		   and a.channel = f.site
+		   and b.sku = f.m_sku
+		   and g.id = f.parent_id
+		   and f.sku = s.p_sku(+)
+		   and f.platform = 'amazon'
+		   and f.tarcking_num is null
+		   and f.order_type = 1
+		   and a.country_code = 'US'
+	</select>
+	
+	<select id="getSKUInfo" resultType="java.lang.Double">
+		select TRUNC(p.gross_weight + (p.outer_weight / p.packing_qty),4) weight
+		from cal_product_entity p
+		where p.sku = #{sku}
+		and p.is_active = 1
+	</select>
+	<select id="isExistInWest" resultType="int">
+		select count(*) from SYS_USWEST_SHIPPING s where s.orderid = #{param.ORDERID,jdbcType=VARCHAR} 
+		<if test="param.ISMPS != null and param.ISMPS != ''">
+			and s.isMPS = #{param.ISMPS} 
+		</if>
+		and s.IS_HAND = 0
+		and s.MerchantSKU = #{param.MERCHANTSKU,jdbcType=VARCHAR}
+	</select>
+	<select id="isCreateInWest" resultType="int">
+		select count(*) from SYS_USWEST_SHIPPING s where s.merchantfulfillmentorderid = #{orderId,jdbcType=VARCHAR}
+		and s.status in (0,1,2,3,4)
+	</select>
+	<select id="isCreateInEast" resultType="int">
+		select count(*) from eda_order r where r.order_id = #{MERCHANTFULFILLMENTORDERID,jdbcType=VARCHAR}
+	</select>
+	<insert id="addWest">
+		insert into SYS_USWEST_SHIPPING(
+			id,
+			platform,
+			account,
+			orderId,
+			MerchantFulfillmentOrderID,
+			isMPS,
+			DisplayableOrderID,
+			DisplayableOrderDate,
+			MerchantSKU,
+			Quantity,
+			MerchantFulfillmentOrderItemID,
+			GiftMessage,
+			DisplayableComment,
+			PerUnitDeclaredValue,
+			DisplayableOrderComment,
+			DeliverySLA,
+			AddressName,
+			AddressFieldOne,
+			AddressFieldTwo,
+			AddressFieldThree,
+			AddressCity,
+			AddressCountryCode,
+			AddressStateOrRegion,
+			AddressPostalCode,
+			AddressPhoneNumber,
+			NotificationEmail,
+			CarrierServiceTypeCode,
+			PackageLength,
+			PackageWidth,
+			PackageHeight,
+			PackageWeight,
+			tranckingNumber,
+			is_hand
+			)
+			values(
+			SYS_USWEST_SHIPPING_SEQ.NEXTVAL,
+			#{PLATFORM,jdbcType=VARCHAR},
+			#{ACCOUNT,jdbcType=VARCHAR},
+			#{ORDERID,jdbcType=VARCHAR},
+			#{MERCHANTFULFILLMENTORDERID,jdbcType=VARCHAR},
+			#{ISMPS,jdbcType=VARCHAR},
+			#{DISPLAYABLEORDERID,jdbcType=VARCHAR},
+			to_date(#{DISPLAYABLEORDERDATE,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+			#{MERCHANTSKU,jdbcType=VARCHAR},
+			#{QUANTITY,jdbcType=VARCHAR},
+			#{MERCHANTFULFILLMENTORDERITEMID,jdbcType=VARCHAR},
+			#{GIFTMESSAGE,jdbcType=VARCHAR},
+			#{DISPLAYABLECOMMENT,jdbcType=VARCHAR},
+			#{PERUNITDECLAREDVALUE,jdbcType=VARCHAR},
+			#{DISPLAYABLEORDERCOMMENT,jdbcType=VARCHAR},
+			#{DELIVERYSLA,jdbcType=VARCHAR},
+			#{ADDRESSNAME,jdbcType=VARCHAR},
+			#{ADDRESSFIELDONE,jdbcType=VARCHAR},
+			#{ADDRESSFIELDTWO,jdbcType=VARCHAR},
+			#{ADDRESSFIELDTHREE,jdbcType=VARCHAR},
+			#{ADDRESSCITY,jdbcType=VARCHAR},
+			#{ADDRESSCOUNTRYCODE,jdbcType=VARCHAR},
+			#{ADDRESSSTATEORREGION,jdbcType=VARCHAR},
+			#{ADDRESSPOSTALCODE,jdbcType=VARCHAR},
+			#{ADDRESSPHONENUMBER,jdbcType=VARCHAR},
+			#{NOTIFICATIONEMAIL,jdbcType=VARCHAR},
+			#{CARRIERSERVICETYPECODE,jdbcType=VARCHAR},
+			#{PACKAGELENGTH,jdbcType=VARCHAR},
+			#{PACKAGEWIDTH,jdbcType=VARCHAR},
+			#{PACKAGEHEIGHT,jdbcType=VARCHAR},
+			#{PACKAGEWEIGHT,jdbcType=VARCHAR},
+			#{TRANCKINGNUMBER,jdbcType=VARCHAR},
+			#{isHand}
+			)
+	</insert>
+	
+	<sql id="query_West_Shipping">
+		select * from SYS_USWEST_SHIPPING
+		where 1 = 1
+		<if test="param.orderId != null and param.orderId != ''">
+			AND MerchantFulfillmentOrderID = #{param.orderId}
+		</if>
+		<if test="param.platform != null and param.platform != ''">
+			AND platform = #{param.platform}
+		</if>
+		<if test="param.account != null and param.account != ''">
+			AND account = #{param.account}
+		</if>
+		<if test="param.status != null and param.status != ''">
+			AND status = #{param.status}
+		</if>
+		<if test="param.MerchantSKU != null and param.MerchantSKU != ''">
+			AND MerchantSKU = #{param.MerchantSKU}
+		</if>
+		<if test="param.CarrierServiceTypeCode != null and param.CarrierServiceTypeCode != ''">
+			AND CarrierServiceTypeCode = #{param.CarrierServiceTypeCode}
+		</if>
+		<if test="param.timeStart != null and param.timeStart != ''">
+			<![CDATA[AND DisplayableOrderDate > to_date(#{param.timeStart},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.timeEnd != null and param.timeEnd != ''">
+			<![CDATA[AND DisplayableOrderDate < to_date(#{param.timeEnd},'yyyy-MM-dd hh24:mi:ss')+1]]>
+		</if>
+		<if test="param.optTtimeStart != null and param.optTtimeStart != ''">
+			<![CDATA[AND LAST_UPDATE_DATE > to_date(#{param.optTtimeStart},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.optTimeEnd != null and param.optTimeEnd != ''">
+			<![CDATA[AND LAST_UPDATE_DATE < to_date(#{param.optTimeEnd},'yyyy-MM-dd hh24:mi:ss')+1]]>
+		</if>
+	</sql>
+	<select id="westOrderList" resultType="com.it.ocs.eda.model.WestShippingModel">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+		  		<include refid="query_West_Shipping"></include>
+				 order by DisplayableOrderDate desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countWestOrderList" resultType="int">
+		select count(*) from (
+		<include refid="query_West_Shipping"></include>
+		)
+	</select>
+	<select id="getWestShipByShipOrderId" resultType="com.it.ocs.eda.model.WestShippingModel">
+		  select s.*,(select e.parent_id
+			             from ebay_order_item e
+			            where #{id} like 'W\_' || e.id || '\_%' escape '\'
+			           union all
+			           select l.parent_id
+			             from light_order_item l
+			            where #{id} like 'W\_' || l.entity_id || '\_%' escape '\'
+			           union all
+			           select w.parent_id
+			             from walmart_order_line w
+			            where #{id} like 'W\_' || w.id || '\_%' escape '\'
+			           union all
+			           select a.parent_id
+			             from amazon_order_item a
+			            where #{id} like 'W\_' || a.id || '\_%' escape '\')orderOcsId
+			    from SYS_USWEST_SHIPPING s
+			   where s.MerchantFulfillmentOrderID in
+			         (select t.MerchantFulfillmentOrderID
+			            from SYS_USWEST_SHIPPING t
+			           where t.orderid = #{id})
+	</select>
+	<select id="exportDataByParam" resultType="java.util.HashMap">
+		<include refid="query_West_Shipping"></include>
+		order by DisplayableOrderDate desc
+	</select>
+	<select id="exportChooseData" resultType="java.util.HashMap">
+		select * from SYS_USWEST_SHIPPING where id in
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+	<update id="cancelWestOrderById">
+		update SYS_USWEST_SHIPPING set status = 4 ,LAST_UPDATE_BY = #{userId},LAST_UPDATE_DATE = sysdate where id = #{id}
+	</update>
+	<update id="updateTranckingNumber">
+		update SYS_USWEST_SHIPPING set  status = 1,
+										TRANCKINGNUMBER = #{tranckingNumber},
+										CARRIERSERVICETYPECODE = #{CarrierServiceTypeCode},
+										LAST_UPDATE_BY = #{userId},
+										LAST_UPDATE_DATE = sysdate
+		where ORDERID = #{orderId,jdbcType=VARCHAR} 
+		and status = 0
+		and ISMPS is null
+		and MERCHANTSKU = #{MerchantSKU,jdbcType=VARCHAR}
+	</update>
+	<update id="updateTranckingNumberMPS">
+		update SYS_USWEST_SHIPPING set  status = 1,
+										TRANCKINGNUMBER = #{tranckingNumber},
+										CARRIERSERVICETYPECODE = #{CarrierServiceTypeCode},
+										LAST_UPDATE_BY = #{userId},
+										LAST_UPDATE_DATE = sysdate
+		where ORDERID = #{orderId,jdbcType=VARCHAR} 
+		and status = 0
+		and ISMPS = #{isMPS,jdbcType=VARCHAR}
+		and MERCHANTSKU = #{MerchantSKU,jdbcType=VARCHAR}
+	</update>
+	<select id="getEDAEastOrderById" resultType="com.it.ocs.eda.model.ShipOrderInfo">
+		select *
+		from (
+			select 'ebay' platform,
+			             e.account account,
+			             e.id orderOCSId,
+			             e.orderId,
+			             e.SHIPPING_SERVICE shippingMethod,
+			             e.createTime,
+			             json_ext.get_string(json(es.shipping_address), 'Street1') addressLine1,
+			             json_ext.get_string(json(es.shipping_address), 'Street2') addressLine2,
+			             json_ext.get_string(json(es.shipping_address), 'CityName') city,
+			             json_ext.get_string(json(es.shipping_address), 'Country') country,
+			             json_ext.get_string(json(es.shipping_address), 'Name') name,
+			             case
+			               when json_ext.get_string(json(es.shipping_address), 'Phone') =
+			                    'Invalid Request' then
+			                null
+			               else
+			                json_ext.get_string(json(es.shipping_address), 'Phone')
+			             end phone,
+			             json_ext.get_string(json(es.shipping_address), 'PostalCode') postalCode,
+			             json_ext.get_string(json(es.shipping_address), 'StateOrProvince') provState,
+			             e.orderItemOCSId,
+			             e.item_id itemId,
+			             nvl(s.sku,e.sku) warehouseSku,
+			             nvl(s.qty,1)*e.qty quantity,
+			             e.price unitPrice,
+			             e.productId,
+			             e.description
+			        from (SELECT EO.ID id,
+			                     eo.account,
+			                     EO.ORDER_ID orderId,
+			                     to_char(eo.created_time,'yyyy-MM-dd hh24:mi:ss') createTime,
+			                     eo.shipping_service,
+			                     ei.id orderItemOCSId,
+			                     ei.item_id item_id,
+			                     EI.ITEM_SKU sku,
+			                     EI.QUANTITY_PURCHASED qty,
+			                     ei.price / EI.QUANTITY_PURCHASED price,
+			                     ei.item_id productId,
+			                     '#' || ei.sales_record_number description
+			                FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+			               WHERE EO.ID = EI.PARENT_ID
+			                 AND EO.PAID_TIME IS NOT NULL
+			                 AND EO.SHIPPED_TIME IS NULL
+			                 and eo.order_status = 'Completed'
+			                 and ei.item_sku not like '%OS%'
+			                 and eo.sales_record_number is not null
+			                 AND EO.PAY_STATUS = 'Complete'
+			                 and ei.ship_time is null
+			             <![CDATA[   and eo.created_time >
+			                     to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')) e,]]>
+			             EBAY_ORDER_SUB ES,sys_sku_link s
+			       where  e.ID = ES.PARENT_ID
+			         and e.sku = s.p_sku(+)
+			     union all
+			      SELECT 'walmart' platform,
+					             e.country account,
+					             e.id orderOCSId,
+					             e.orderId,
+			                 
+					             e.SHIPPING_SERVICE shippingMethod,
+			                 e.createTime,
+					             e.addressLine1,
+					             e.addressLine2,
+					             e.city,
+					             e.country,
+					             e.name,
+					             e.phone,
+					             e.postalCode,
+					             e.provState,
+					             e.orderItemOCSId,
+					             e.sku itemId,
+					             nvl(s.sku,e.sku) warehouseSku,
+					             nvl(s.qty,1)*e.qty quantity,
+					             e.price unitPrice,
+					             '' productId,
+					             e.description
+					        FROM (SELECT max(wo.customer_order_id) orderId,
+					                     WO.ID,
+			                         to_char(max(wo.order_date_utc),'yyyy-MM-dd hh24:mi:ss') createTime,
+					                     MAX(WO.PURCHASE_ORDER_ID) ORDER_ID,
+					                     MAX(WO.ADDRESS1) addressLine1,
+					                     MAX(WO.ADDRESS2) addressLine2,
+					                     MAX(WO.CITY) city,
+					                     MAX(WO.NAME) name,
+					                     MAX(WO.STATE) provState,
+					                     MAX(WO.POSTAL_CODE) postalCode,
+					                     MAX(WO.COUNTRY) country,
+					                     MAX(WO.PHONE) phone,
+					                     MAX(WL.ID) orderItemOCSId,
+					                     MAX(WL.ship_method_code) SHIPPING_SERVICE,
+					                     WL.SKU,
+					                     sum(WL.ORDER_LINE_QUANTITY_AMOUNT) QTY,
+					                     MAX(WL.ITEM_PRICE) PRICE,
+					                     max(wl.product_name) description
+					                FROM WALMART_ORDER WO, WALMART_ORDER_LINE WL
+					               WHERE WO.ID = WL.PARENT_ID
+					                 AND WO.COUNTRY = 'USA'
+					                 AND WL.ORDER_LINE_STATUS IN ('Created', 'Acknowledged')
+					                 AND WL.SHIP_TRACKING_NUMBER IS NULL
+					            <![CDATA[   and wo.order_date_utc >  to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')]]>
+					               GROUP BY WO.ID, WL.SKU) e,sys_sku_link s
+					       WHERE e.sku = s.p_sku(+)
+			           union all
+			           SELECT 'light' platform,
+			                   T.PLATFORM account,
+			                   T.orderOCSId,
+			                   T.orderId,
+			                   '' shippingMethod,
+			                   T.createTime,
+			                   T.addressLine1,
+			                   '' addressLine2,
+			                   T.city,
+			                   T.country,
+			                   T.name,
+			                   T.phone,
+			                   T.postalCode,
+			                   T.provState,
+			                   T.orderItemOCSId,
+			                   T.sku warehouseSku,
+			                   T.sku itemId,
+			                   T.qty quantity,
+			                   T.price unitPrice,
+			                   '' productId,
+			                   T.description
+			              FROM (SELECT LO.ENTITY_ID orderOCSId,
+			                           LO.ORDER_ID orderId,
+			                           to_char(li.light_created_at,'yyyy-MM-dd hh24:mi:ss') createTime,
+			                           LO.PLATFORM ,
+			                           nvl(LI.country_id,LO.PLATFORM) COUNTRY,
+			                           li.entity_id orderItemOCSId,
+			                           LI.SHIPPING_FIRSTNAME || ' ' || LI.SHIPPING_MIDDLENAME || ' ' ||
+			                           LI.SHIPPING_LASTNAME NAME,
+			                           LI.POSTCODE postalCode,
+			                           LI.REGION provState,
+			                           LI.CITY,
+			                           LI.STREET addressLine1,
+			                           LI.TELEPHONE PHONE,
+			                           li.sku,
+			                           (LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+			                           LI.QTY_SHIPPED) qty,
+			                           li.price price,
+			                           li.name description
+			                      FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+			                     WHERE LO.ENTITY_ID = LI.PARENT_ID
+			                       AND LO.PLATFORM = 'US'
+			                       AND LO.STATUS = 'processing'
+			                       AND LO.AVS = 1
+			                       AND LI.SKU NOT LIKE 'B%'
+			                       AND LI.SKU IS NOT NULL
+			                      <![CDATA[ AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+			                           LI.QTY_SHIPPED > 0
+			                       AND LO.LIGHT_CREATED_AT > TO_DATE('2018-01-26', 'YYYY-MM-DD') ]]>
+			                       AND STREET IS NOT NULL
+			                       AND (LI.SKU NOT LIKE 'OS%' OR
+			                           (LI.SKU LIKE 'OS%' AND
+			                           LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))) T
+			)g
+		where g.orderOCSId = (
+			(select i.parent_id
+          from light_order_item i
+         where i.entity_id = #{id}
+        union
+        select i.parent_id
+          from ebay_order_item i
+         where i.id = #{id}
+        union
+        select i.parent_id from walmart_order_line i where i.id = #{id})
+		)
+	</select>
+	<update id="updateWestToEast">
+		update SYS_USWEST_SHIPPING set status = 5,LAST_UPDATE_DATE = sysdate
+		where status = 0
+		and MERCHANTFULFILLMENTORDERID =
+		(
+		select a.order_id
+		  from ebay_order a, ebay_order_item b
+		 where a.id = b.parent_id
+		   and b.id = #{id}
+		union all
+		select a.order_id
+		  from light_order a, light_order_item b
+		 where a.ENTITY_ID = b.parent_id
+		   and b.ENTITY_ID = #{id}
+		union all
+		select a.customer_order_id order_id
+		  from walmart_order a, walmart_order_line b
+		 where a.id = b.parent_id
+		   and b.id = #{id}
+		)
+	</update>
+	<update id="updateWestWOrderToEast">
+		update SYS_USWEST_SHIPPING set status = 5,LAST_UPDATE_DATE = sysdate
+		where status = 0
+		and MERCHANTFULFILLMENTORDERID = #{orderId}
+	</update>
+	<select id="getWalmartOrderInfoByShip" resultType="java.util.HashMap">
+		select w.purchase_order_id order_Id,l.line_number line_Number from walmart_order w,walmart_order_line l where w.id = l.parent_id and w.id = #{OCSID}
+	</select>
+	<select id="getWalmartOrderItemInfoByShip" resultType="java.util.HashMap">
+		select w.purchase_order_id order_Id, l.line_number line_Number
+       from walmart_order w, walmart_order_line l
+      where w.id = l.parent_id
+      and w.customer_order_id = #{ORDERID}
+      and l.sku like '%'||#{SKU}||'%'
+	</select>
+	<select id="getLightOrderForShip" resultType="java.lang.String">
+		select distinct m.order_id from light_order m,light_order_item n where m.entity_id = n.parent_id and m.entity_id = #{OCSID}
+	</select>
+	<update id="updateUploadStatus">
+		 update EDA_ORDER e set e.is_upload = 1 where e.id = #{ID} 
+	</update>
+	<update id="updateUploadStatusFail">
+		update EDA_ORDER e set e.is_upload = 2 where e.id = #{ID} 
+	</update>
+	<select id="getImportShips" resultType="java.util.HashMap">
+		select * 
+		from(
+			select t.id,
+			       t.platform,
+			       t.orderid                OCSItemId,
+			       t.MERCHANTFULFILLMENTORDERID orderId,
+			       t.carrierservicetypecode carrier,
+			       t.tranckingnumber        trancknumber,
+			       t.Merchantsku sku
+			  from SYS_USWEST_SHIPPING t
+			  where t.status = 1
+			  and t.tranckingnumber is not null
+		)
+		 <![CDATA[where rownum < 301]]>
+	</select>
+	<select id="shippingNumberHasUpload" resultType="int">
+		select count(*) from SYS_USWEST_SHIPPING t 
+		where t.status = 2 
+		and t.tranckingnumber = #{TRANCKNUMBER} 
+		and t.MERCHANTFULFILLMENTORDERID = #{ORDERID}
+	</select>
+	<select id="getEbayOrderItemById" resultType="com.it.ocs.eda.model.EBayOrderShippingModel">
+		select o.id ocsOrderId,i.id,o.account,o.order_id orderId,i.transaction_id transactionId,i.item_id itemId,i.item_sku sku
+		  from ebay_order o,ebay_order_item i
+		  where o.id = i.parent_id
+		  and i.id = #{OCSITEMID}
+	</select>
+	<select id="getEbayOrderItemByParentId" parameterType="java.lang.Long" resultType="com.it.ocs.eda.model.EBayOrderShippingModel">
+		select o.id ocsOrderId,i.id,o.account,o.order_id orderId,i.transaction_id transactionId,i.item_id itemId,i.item_sku sku
+		from ocs_ebay.ebay_order o, ocs_ebay.ebay_order_item i
+		where o.id = i.parent_id and i.parent_id = #{parentId}
+	</select>
+	<update id="updateWestShipStatus">
+		update SYS_USWEST_SHIPPING set status = #{status} where id = #{ID}
+	</update>
+	<select id="noUploadOrder" resultType="java.util.HashMap">
+		select a.id,
+	           a.platform,
+	           a.ORDER_OCS_ID ocsId,
+	           a.order_id orderId,
+	           a.eda_order_id edaId,
+	           a.eda_account  edaAccount,
+	           a.is_upload    isUpload,
+	           a.platform,
+	           a.order_ocs_id ocsId,
+	           a.items,
+	           b.shipmentinfos shipInfos
+	      from eda_order a, eda_order_info b
+	     where a.id = b.parent_id
+	       and a.is_upload = 0
+	       and b.shipmentinfos is not null
+	</select>
+	<select id="edaOrderIsExist" resultType="int">
+		select count(*) from eda_order r where r.order_ocs_id = #{ocsId} and r.eda_account = #{edaAccount}
+	</select>
+	<select id="getIQty" resultType="java.lang.Integer">
+		select sum(m.qty) from  EDA_SKU_STOCK_INFO m where m.sku = #{warehouseSku} and m.warehouse_id in(2,7)
+	</select>
+	<update id="addressUpdate">
+		update sys_uswest_shipping s set 
+			s.addressname = #{AddressName,jdbcType=VARCHAR},
+			s.addressfieldone = #{AddressFieldOne,jdbcType=VARCHAR},
+			s.addressfieldtwo = #{AddressFieldTwo,jdbcType=VARCHAR},
+			s.addressfieldthree = #{AddressFieldThree,jdbcType=VARCHAR},
+			s.addresscity = #{AddressCity,jdbcType=VARCHAR},
+			s.addresscountrycode = #{AddressCountryCode,jdbcType=VARCHAR},
+			s.addressstateorregion = #{AddressStateOrRegion,jdbcType=VARCHAR},
+			s.addresspostalcode = #{AddressPostalCode,jdbcType=VARCHAR},
+			s.addressphonenumber = #{AddressPhoneNumber,jdbcType=VARCHAR}
+			where s.merchantfulfillmentorderid = #{orderId}
+			and s.account = #{account}
+			and s.status = 0
+	</update>
+	<update id="edaAddressUpdate">
+		update eda_order a set a.shipping_address = #{shipAddress} where a.id = #{id}
+	</update>
+	<select id="getLightOrderItemIdBySku" resultType="java.lang.String">
+		 select b.light_item_id
+	     from light_order a, light_order_item b
+	    where a.entity_id = b.parent_id
+	      and a.order_id = #{orderId}
+	      and b.sku = #{sku}
+	</select>
+	<select id="getOrder" resultType="java.util.HashMap">
+		select 'ebay' platform,
+			   a.account account,
+			   to_char(a.created_time,'yyyy-MM-dd hh24:mi:ss') createTime,
+			   a.id ocsId,
+	           b.id ocsItemId,
+	           a.order_id orderId,
+	           nvl(l.sku, b.item_sku) sku,
+	           b.quantity_purchased * nvl(l.qty, 1) qty,
+	           json_ext.get_string(json(c.shipping_address), 'Street1') addressLine1,
+	           json_ext.get_string(json(c.shipping_address), 'Street2') addressLine2,
+	           json_ext.get_string(json(c.shipping_address), 'CityName') city,
+	           json_ext.get_string(json(c.shipping_address), 'Country') country,
+	           json_ext.get_string(json(c.shipping_address), 'Name') name,
+	           case
+	             when json_ext.get_string(json(c.shipping_address), 'Phone') =
+	                  'Invalid Request' then
+	              ''
+	             else
+	              json_ext.get_string(json(c.shipping_address), 'Phone')
+	           end phone,
+	           json_ext.get_string(json(c.shipping_address), 'PostalCode') postalCode,
+	           json_ext.get_string(json(c.shipping_address), 'StateOrProvince') provState
+	      from ebay_order a, ebay_order_item b, ebay_order_sub c, sys_sku_link l
+	     where a.id = b.parent_id
+	       and a.id = c.parent_id
+	       and b.item_sku = l.p_sku(+)
+	       and a.order_id = #{orderId}
+	    union all
+	    select 'light' platform,
+	    	   a.PLATFORM account,
+	    	   to_char(a.light_created_at,'yyyy-MM-dd hh24:mi:ss') createTime,
+	    	   a.entity_id ocsId,
+	           b.entity_id ocsItemId,
+	           a.order_id orderId,
+	           b.sku sku,
+	          (b.QTY_ORDERED - b.QTY_CANCELED - b.QTY_REFUNDED - b.QTY_SHIPPED)  qty,
+	           b.STREET addressLine1,
+	           '' addressLine2,
+	           b.CITY city,
+	           nvl(b.country_id,a.PLATFORM) country,
+	           b.SHIPPING_FIRSTNAME || ' ' || b.SHIPPING_MIDDLENAME || ' ' ||
+	           b.SHIPPING_LASTNAME name,
+	           b.TELEPHONE phone,
+	           b.POSTCODE postalCode,
+	           b.REGION provState
+	    from light_order a,light_order_item b
+	    where a.entity_id = b.parent_id
+	    and a.order_id = #{orderId}
+	    union all
+	    select 'walmart' platform,
+	    	   m.country account,
+	    	   m.createTime,
+	    	   m.ocsId,
+	           m.ocsItemId,
+	           m.orderId,
+	           nvl(l.sku,m.sku) sku,
+	           m.qty * nvl(l.qty,1) qty,
+	           m.addressLine1,
+	           m.addressLine2,
+	           m.city,
+	           m.country,
+	           m.name,
+	           m.phone,
+	           m.postalCode,
+	           m.provState
+	    from (
+	    select a.id ocsId,
+	    	   to_char(max(a.order_date_utc),'yyyy-MM-dd hh24:mi:ss') createTime,
+	           max(b.id) ocsItemId,
+	           b.customer_order_id orderId,
+	           b.sku sku,
+	           sum(b.order_line_quantity_amount) qty,
+	           MAX(a.ADDRESS1) addressLine1,
+	           MAX(a.ADDRESS2) addressLine2,
+	           MAX(a.CITY) city,
+	           MAX(a.NAME) name,
+	           MAX(a.STATE) provState,
+	           MAX(a.POSTAL_CODE) postalCode,
+	           MAX(a.COUNTRY) country,
+	           MAX(a.PHONE) phone
+	    from walmart_order a,walmart_order_line b
+	    where a.id = b.parent_id
+	    and b.customer_order_id = #{orderId}
+	    group by a.id,b.customer_order_id,b.sku
+	    ) m,sys_sku_link l
+	    where m.sku = l.p_sku(+)
+	</select>
+	<select id="getOrderItemInfoInEast" resultType="java.util.HashMap">
+		select a.is_create,a.is_upload,a.shipping_address from eda_order a where a.order_ocs_id = #{OCSID,jdbcType=VARCHAR} and a.items like '%"'||#{SKU}||'"%'
+	</select>
+	<select id="getOrderItemInfoInWest" resultType="java.util.HashMap">
+		select m.status,
+		       m.addresscity city,
+		       m.addresscountrycode country,
+		       m.addressfieldone addressLine1,
+		       nvl(m.addressfieldtwo,'') ||' '||nvl(m.addressfieldthree,'') addressLine2,
+		       m.addressname name,
+		       nvl(m.addressphonenumber,'') phone,
+		       m.addresspostalcode postalCode,
+		       m.addressstateorregion provState
+		  from sys_uswest_shipping m
+		 where m.merchantsku = #{SKU}
+		   and m.orderid = #{OCSITEMID}
+	</select>
+	<select id="hasWest" resultType="int">
+		select count(*)
+		  from sys_uswest_shipping m
+	      where m.merchantfulfillmentorderid = #{orderId}
+	      and m.status in (1,2,3)
+	</select>
+	<select id="hasHand" resultType="int">
+		select count(*)
+		  from sys_uswest_shipping m
+	      where m.merchantfulfillmentorderid = #{orderId}
+	      and m.status in (0,1,2,3)
+	      and m.is_hand = 1
+	</select>
+	<update id="updateSysWestOrder">
+		update sys_uswest_shipping m set m.status = 6 where m.status = 0 and m.is_hand = 0 and m.MERCHANTFULFILLMENTORDERID = #{orderId}
+	</update>
+	<select id="shipIsExist" resultType="int">
+		select count(*)
+		  from sys_uswest_shipping m
+	      where m.ORDERID = #{orderId,jdbcType=VARCHAR} 
+	      and m.status = 0
+	      and MERCHANTSKU = #{MerchantSKU,jdbcType=VARCHAR}
+	</select>
+	<select id="getEDAOrderShipInfoByParentId" resultType="java.lang.String">
+		select f.shipmentinfos from eda_order_info f where f.parent_id = #{id}
+	</select>
+	<update id="updateEDAOrderIsUpload">
+		update eda_order a set a.is_upload = 0 where a.id = #{id}
+	</update>
+	<insert id="addEDAOrder">
+		insert into EDA_ORDER
+	        (ID,
+	         PLATFORM,
+	         ORDER_OCS_ID,
+	         ORDER_ID,
+	         EDA_ACCOUNT,
+	         SHIPPING_METHOD,
+	         SHIPPING_ADDRESS,
+	         ITEMS,
+	         CREATE_DATE)
+	         values(
+	          EDA_ORDER_SEQ.NEXTVAL,
+	          #{platform,jdbcType=VARCHAR},
+	          #{orderOcsId,jdbcType=VARCHAR},
+	          #{orderId,jdbcType=VARCHAR},
+	          #{edaAccount,jdbcType=VARCHAR},
+	          #{shippingMethod,jdbcType=VARCHAR},
+	          #{shippingAddress,jdbcType=VARCHAR},
+	          #{items,jdbcType=VARCHAR},
+	          sysdate
+	         )
+	</insert>
+	<update id="updateWOrderTranckNumber">
+		  update sys_return_order_final f
+		     set f.tarcking_service = #{CARRIER}, f.tarcking_num = #{TRANCKNUMBER}
+		   where f.order_id = #{wOrderId}
+		     and f.times = #{times}
+		     and f.sku = #{SKU}
+	</update>
+	<select id="getOrderByWOrder" resultType="java.util.HashMap">
+		 select a.account, b.item_id itemId, a.buyer_user_id buyerId,b.transaction_site_id siteId
+		    from ebay_order a, ebay_order_item b, sys_return_order_final f
+		   where a.id = b.parent_id
+		     and a.order_id = f.order_id
+		     and b.item_sku = f.m_sku
+		     and f.sku = #{SKU}
+		      and f.times = #{times}
+		     and f.order_id = #{wOrderId}
+		     and f.platform = 'ebay'
+	</select>
+	<update id="updateEbayOrderRemark">
+		update ebay_order o set o.remark = o.remark ||' '||to_char(sysdate,'yyyy-MM-dd')||'已补发('||#{CARRIER,jdbcType=VARCHAR}||' '||#{TRANCKNUMBER,jdbcType=VARCHAR}||').' 
+		where o.account =#{account} and o.order_id = #{wOrderId}
+	</update>
+	<select id="inventoryHistoryExist" resultType="int">
+		select count(*) from eda_inventory_history y where y.bill_num = #{billNum} and y.sku = #{sku}
+	</select>
+	<select id="inventoryHistoryExist2" resultType="int">
+		select count(*) from eda_inventory_history y where y.change_date = to_date(#{changeDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss') and y.sku = #{sku}
+	</select>
+	<insert id="insertInventoryHistory">
+		insert into eda_inventory_history
+		  (id,
+		   bill_num,
+		   change_date,
+		   product_name,
+		   qty,
+		   record_type,
+		   sku,
+		   warehouse_id)
+		values
+		  (eda_inventory_history_SEQ.Nextval,
+		   #{billNum,jdbcType=VARCHAR},
+		   to_date(#{changeDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		   #{productName,jdbcType=VARCHAR},
+		   #{qty,jdbcType=BIGINT},
+		   #{recordType,jdbcType=VARCHAR},
+		   #{sku,jdbcType=VARCHAR},
+		   #{warehouseId,jdbcType=BIGINT}
+		   )
+	</insert>
+	
+	<sql id="inventory_query_base">
+		select a.id,
+		       a.record_type recordType,
+		       a.sku,
+		       a.product_name productName,
+		       a.bill_num billNum,
+		       a.qty,
+		       to_char(a.change_date,'yyyy-MM-dd hh24:mi:ss') changeDate,
+		       a.warehouse_id warehouseId,
+		       to_char( a.sync_date,'yyyy-MM-dd hh24:mi:ss') syncDate
+		  from eda_inventory_history a
+		  where 1 = 1
+	</sql>
+	
+	<sql id="inventory_query_condition">
+		<if test="param.sku != null and param.sku != '' ">
+			and a.sku = #{param.sku}
+		</if>
+		<if test="param.timeStart != null and param.timeStart != '' ">
+			<![CDATA[and a.change_date > to_date(#{param.timeStart},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.timeEnd != null and param.timeEnd != '' ">
+			<![CDATA[and a.change_date < to_date(#{param.timeEnd},'yyyy-MM-dd hh24:mi:ss')+1]]>
+		</if>
+		
+		<if test="param.billNum != null and param.billNum != '' ">
+			and a.bill_num = #{param.billNum}
+		</if>
+		<if test="param.recordType != null and param.recordType != '' ">
+			and a.record_type = #{param.recordType}
+		</if>
+		<if test="param.warehouseId != null and param.warehouseId != '' ">
+			and a.warehouse_id = #{param.warehouseId}
+		</if>
+	</sql>
+	<select id="queryInventoryHistoryByPage" resultType="com.it.ocs.eda.model.InventoryHistoryModel">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="inventory_query_base"></include>
+				<include refid="inventory_query_condition"></include>
+				ORDER BY A.change_date DESC
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countInventoryHistory" resultType="int">
+		select count(*) from (
+			<include refid="inventory_query_base"></include>
+			<include refid="inventory_query_condition"></include>
+		)
+	</select>
+	<select id="getTotalByRecordType" resultType="java.util.HashMap">
+		select 
+		        nvl(a.record_type,'库存盘点') recordType,
+		       a.warehouse_id warehouseId,
+		       sum(a.qty) qty
+		  from eda_inventory_history a
+		  where 1 = 1
+		<include refid="inventory_query_condition"></include>
+		group by a.warehouse_id,a.record_type
+	</select>
+	<select id="exportInventoryHistoryDataByParam" resultType="java.util.HashMap">
+		 select* from (
+				<include refid="inventory_query_base"></include>
+				<include refid="inventory_query_condition"></include>
+				ORDER BY A.change_date DESC
+			) S 
+	</select>
+	<select id="getRecordType" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		  select record_type value, record_type displayName
+		  from (
+		  select distinct a.record_type
+		    from eda_inventory_history a
+		   where a.record_type is not null
+		   )
+	</select>
+	<select id="getEDAOrderInfoByORAId" resultType="java.util.HashMap">
+		 select a.order_id orderId,to_char(a.create_date,'yyyy-MM-dd hh24:mi:ss') edaOrderCreateDate
+		   from eda_order a,eda_order_info b
+		   where a.id = b.parent_id
+		   and b.omniorderid = #{billNum}
+	</select>
+	<select id="getEdaInfoForToEastOrder" resultType="java.lang.String">
+		select e.eda_order_id from eda_order e where e.order_id = #{orderId} and e.eda_account in ('API_LE_West','API_LE_Transport')
+	</select>
+	<select id="getCOrderId" resultType="java.lang.String">
+		select r.purchase_order_id from walmart_order r where r.customer_order_id = #{orderId}
+	</select>
+</mapper>

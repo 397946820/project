@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IEBayTimingPlanDAO">
+	<resultMap type="com.it.ocs.publication.model.EBayTimingPlanModel" id="timingPlanResult">
+		<result column="ID" property="id"  />
+		<result column="TEMPLATE_ID" property="template_id"  />
+		<result column="TEMPLATE_NAME" property="template_name"  />
+		<result column="SITE_ID" property="site_id"  />
+		<result column="FIRST_DATE" property="first_date"  />
+		<result column="FIRST_SITE_DATE" property="first_site_date"  />
+		<result column="CREATE_BY" property="create_by"  />
+		<result column="CREATE_DATE" property="create_date"  />
+		<result column="UPDATE_BY" property="update_by"  />
+		<result column="UPDATE_DATE" property="update_date"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="IS_SUCCESS" property="is_success"  />
+		<result column="REAL_PUBLICATION_DATE" property="real_publication_date"  />
+		<result column="REAL_END_DATE" property="real_end_date"  />
+		<result column="PUBLICATION_INFO" property="publication_info"  />
+		<result property="sku" column="SKU" jdbcType="VARCHAR" />
+		<result property="productTitle" column="PRODUCT_TITLE" jdbcType="VARCHAR" />
+		<result property="publicationType" column="PUBLICATION_TYPE" jdbcType="VARCHAR" />
+		<result property="ebayAccount" column="EBAY_ACCOUNT" jdbcType="VARCHAR" />
+		<result property="ebayImages" column="EBAY_IMAGES" jdbcType="VARCHAR" />
+		<result column="ERROR_INFO" property="error_info"  />
+		<result column="NEW_TEMPLATE_ID" property="new_template_id"  />
+	</resultMap>
+	<select id="selectTimingPlanByFD" resultMap="timingPlanResult">
+		select ID,TEMPLATE_ID,NEW_TEMPLATE_ID from  EBAY_TIMING_PLAN_INFO where ENABLED_FLAG='Y' and FIRST_DATE=#{first_date,jdbcType=TIMESTAMP}
+	</select>
+	
+	
+	<sql id="update_is_not_null">
+		<trim suffix=" " suffixOverrides="," >
+			<if test="publication_info!=null">
+			   PUBLICATION_INFO = #{publication_info,jdbcType=BIGINT},
+			</if>
+			<if test="is_success!=null">
+			   IS_SUCCESS = #{is_success,jdbcType=BIGINT},
+			</if>
+			<if test="real_publication_date!=null">
+			   REAL_PUBLICATION_DATE = #{real_publication_date,jdbcType=TIMESTAMP},
+			</if>
+			<if test="real_end_date!=null">
+			   REAL_END_DATE = #{real_end_date,jdbcType=TIMESTAMP},
+			</if>
+			<if test="error_info!=null">
+			   ERROR_INFO = #{error_info,jdbcType=VARCHAR},
+			</if>
+			<if test="new_template_id!=null">
+				NEW_TEMPLATE_ID=#{new_template_id,jdbcType=BIGINT}
+			</if>
+
+        </trim>
+	</sql>
+	<sql id="select_base">
+		etpi.FIRST_DATE,
+		etpi.FIRST_SITE_DATE,
+		etpi.ID,
+		etpi.SITE_ID,
+		etpi.TEMPLATE_NAME,
+		etpi.CREATE_DATE,
+		epi.SKU,
+		epi.PRODUCT_TITLE,
+		epi.PUBLICATION_TYPE,
+		epi.EBAY_ACCOUNT,
+		epi.EBAY_IMAGES,
+		epi.TEMPLATE_ID
+	</sql>
+	<sql id="select_line_base">
+		etpi.FIRST_DATE,
+		etpi.FIRST_SITE_DATE,
+		etpi.ID,
+		etpi.SITE_ID,
+		etpi.TEMPLATE_NAME,
+		etpi.CREATE_DATE,
+	    etpi.PUBLICATION_INFO,
+	    etpi.NEW_TEMPLATE_ID new_template_id,
+	    epi.SKU ,
+	    epi.item_id itemId,
+	    epi.ebay_product_url ebayProductURL,
+		epi.PRODUCT_TITLE,
+		epi.PUBLICATION_TYPE,
+		epi.EBAY_ACCOUNT,
+		epi.EBAY_IMAGES,
+		etpi.IS_SUCCESS
+	</sql>
+	<update id="updateTimingPlan">
+		update EBAY_TIMING_PLAN_INFO 
+		set 
+		<include refid="update_is_not_null"/>
+		where ID = #{id,jdbcType=BIGINT}
+		
+	</update>
+	<sql id="select_base_condition">
+	 and IS_SUCCESS=2
+	  <choose>
+		  <when test="planModel.paramName=='first_date'">
+		        <if test="planModel.startDate !=null and planModel.startDate !=''"> 
+					and etpi0.first_date >= to_date('${planModel.startDate}','yyyy-mm-dd hh24:mi:ss')
+				</if>
+				<if test="planModel.endDate !=null and planModel.endDate !=''"> 
+					and etpi0.first_date <![CDATA[<=]]> to_date('${planModel.endDate}','yyyy-mm-dd hh24:mi:ss')
+				</if>
+				
+		  </when>
+		  <when test="planModel.paramName=='first_site_date'">
+		 	<if test="planModel.startDate !=null and planModel.startDate !=''"> 
+			and etpi0.first_site_date >= to_date('${planModel.startDate}','yyyy-mm-dd hh24:mi:ss')
+			</if>
+			<if test="planModel.endDate !=null and planModel.endDate !=''"> 
+				and etpi0.first_site_date <![CDATA[<=]]> to_date('${planModel.endDate}','yyyy-mm-dd hh24:mi:ss')
+			</if>
+		  </when>
+		       
+		  <otherwise>
+		  	<choose>
+		  		<when test="planModel.day=='all'">
+		            and to_char(sysdate,'yyyy-mm-dd')<![CDATA[<=]]>to_char(etpi0.first_date,'yyyy-mm-dd')
+		        </when>
+		        <otherwise>
+		        	 and to_char(sysdate+#{planModel.day,jdbcType=BIGINT},'yyyy-mm-dd')=to_char(etpi0.first_date,'yyyy-mm-dd')
+		        </otherwise>
+		  	</choose>
+		  </otherwise>
+	    </choose>
+		<if test="planModel.pre_id!=null and planModel.pre_id!=''">
+			and etpi0.TEMPLATE_ID=#{planModel.pre_id}
+		</if>
+		<if test="planModel.siteId != null and planModel.siteId != ''">
+					and etpi0.site_id = #{planModel.siteId}	
+		</if>
+		
+		
+	</sql>
+	<sql id="select_base_line_condition">
+	  <choose>
+		  <when test="planModel.paramName=='first_date'">
+		        <if test="planModel.startDate !=null and planModel.startDate !=''"> 
+					and etpi0.first_date >= to_date('${planModel.startDate}','yyyy-mm-dd hh24:mi:ss')
+				</if>
+				<if test="planModel.endDate !=null and planModel.endDate !=''"> 
+					and etpi0.first_date <![CDATA[<=]]> to_date('${planModel.endDate}','yyyy-mm-dd hh24:mi:ss')
+				</if>
+				
+		  </when>
+		  <when test="planModel.paramName=='first_site_date'">
+		 	<if test="planModel.startDate !=null and planModel.startDate !=''"> 
+			and etpi0.first_site_date >= to_date('${planModel.startDate}','yyyy-mm-dd hh24:mi:ss')
+			</if>
+			<if test="planModel.endDate !=null and planModel.endDate !=''"> 
+				and etpi0.first_site_date <![CDATA[<=]]> to_date('${planModel.endDate}','yyyy-mm-dd hh24:mi:ss')
+			</if>
+		  </when>
+		       
+		  <otherwise>
+		  	<choose>
+		  		<when test="planModel.day=='all'">
+		           
+		        </when>
+		        <otherwise>
+		        	 and to_char(sysdate+#{planModel.day,jdbcType=BIGINT},'yyyy-mm-dd')=to_char(etpi0.first_date,'yyyy-mm-dd')
+		        </otherwise>
+		  	</choose>
+		  </otherwise>
+	    </choose>
+		<if test="planModel.pre_id!=null and planModel.pre_id!=''">
+			and etpi0.TEMPLATE_ID=#{planModel.pre_id}
+		</if>
+		<if test="planModel.siteId != null and planModel.siteId != ''">
+					and etpi0.site_id = #{planModel.siteId}	
+		</if>
+		
+	</sql>
+	<sql id="select_Schedule">
+		ID jobId,
+       to_char(FIRST_DATE,'yyyy-mm-dd hh24:mi:ss') jobName,
+       to_char(create_date,'yyyy-mm-dd hh24:mi:ss') jobGroup,
+       '1' jobStatus,
+       to_number(to_char(FIRST_DATE, 'ss')) || ' ' ||
+       to_number(to_char(FIRST_DATE, 'mi')) || ' ' ||
+       to_number(to_char(FIRST_DATE, 'hh24')) || ' ' ||
+       to_number(to_char(FIRST_DATE, 'dd')) || ' ' ||
+       to_number(to_char(FIRST_DATE, 'mm')) || ' ' ||'? '||
+        to_number(to_char(FIRST_DATE, 'yyyy')) cronExpression,
+        null decription,
+        null beanClass,
+        '0' isConcurrent,
+        'publicationService'  springId,
+        'runTiming' methodName 
+	</sql>
+	<sql id="base_schedule_condition">
+		<if test="template_id!=null and template_id!=''">
+			 and TEMPLATE_ID=#{template_id}
+		</if>
+		
+	</sql>
+	<select id="getScheduleJob" resultType="com.it.ocs.task.model.ScheduleJob">
+		select <include refid="select_Schedule" /> from EBAY_TIMING_PLAN_INFO  where ENABLED_FLAG='Y' and FIRST_DATE>sysdate and IS_SUCCESS=2
+	</select>
+	<select id="getScheduleJobByPId" resultType="com.it.ocs.task.model.ScheduleJob">
+		select <include refid="select_Schedule" /> from EBAY_TIMING_PLAN_INFO 
+		 where ENABLED_FLAG='Y' and FIRST_DATE>sysdate and IS_SUCCESS=2 <include refid="base_schedule_condition"/>
+	</select>
+	<select id="selectTimingPlans" resultMap="timingPlanResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from (select etpi0.* from EBAY_TIMING_PLAN_INFO etpi0 where ENABLED_FLAG='Y'  <include refid="select_base_condition"/>) etpi left join EBAY_PUBLICATION_INFO epi 
+				on etpi.TEMPLATE_ID=epi.TEMPLATE_ID 
+				
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="selectLineTimingPlans" resultMap="timingPlanResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_line_base" /> from (select etpi0.* from EBAY_TIMING_PLAN_INFO etpi0 where ENABLED_FLAG='Y' and (IS_SUCCESS=0 or IS_SUCCESS=1)  <include refid="select_base_line_condition"/>) etpi left join EBAY_PUBLICATION_Line epi 
+				on etpi.NEW_TEMPLATE_ID=epi.TEMPLATE_ID  
+				
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="countList" resultType="java.lang.Integer">
+	  select count(1) from (
+				select <include refid="select_base" /> from (select etpi0.* from EBAY_TIMING_PLAN_INFO etpi0 where ENABLED_FLAG='Y'   <include refid="select_base_condition"/>) etpi left join EBAY_PUBLICATION_INFO epi 
+				on etpi.TEMPLATE_ID=epi.TEMPLATE_ID ) 
+	</select>
+	<select id="countLinePub" resultType="int">
+		select count(1) from EBAY_TIMING_PLAN_INFO etpi0 where   ENABLED_FLAG='Y' and (IS_SUCCESS=0 or IS_SUCCESS=1)
+		<if test="siteId != null and siteId != ''">
+			and site_id = #{siteId}
+		</if>
+		<if test="day!=null or  day!=''">
+			<choose>
+		        <when test="day=='all'">
+		           
+		        </when>
+		        <otherwise>
+		            and to_char(sysdate+#{day,jdbcType=BIGINT},'yyyy-mm-dd')=to_char(etpi0.first_date,'yyyy-mm-dd')
+		        </otherwise>
+	        </choose>
+		</if>
+	</select>
+	<select id="countLineList" resultType="java.lang.Integer">
+	  select count(1) from EBAY_TIMING_PLAN_INFO etpi0 where ENABLED_FLAG='Y' and (IS_SUCCESS=0 or IS_SUCCESS=1)   <include refid="select_base_line_condition"/>
+	</select>
+	<select id="countPub" resultType="int">
+		select count(1) from EBAY_TIMING_PLAN_INFO etpi0 where  ENABLED_FLAG='Y' and  IS_SUCCESS=2
+		<if test="siteId != null and siteId != ''">
+			and site_id = #{siteId}
+		</if>
+		<if test="day!=null or  day!=''">
+			<choose>
+		        <when test="day=='all'">
+		            and to_char(sysdate,'yyyy-mm-dd')<![CDATA[<=]]>to_char(etpi0.first_date,'yyyy-mm-dd')
+		        </when>
+		        <otherwise>
+		            and to_char(sysdate+#{day,jdbcType=BIGINT},'yyyy-mm-dd')=to_char(etpi0.first_date,'yyyy-mm-dd')
+		        </otherwise>
+	        </choose>
+		</if>
+	</select>
+</mapper>

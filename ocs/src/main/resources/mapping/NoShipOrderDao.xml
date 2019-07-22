@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.NoShipOrderDao">
+	<select id="getAmazonUKNoShipOrders" resultType="java.util.HashMap">
+		select 	tbl.* 
+		from 	(select  'amazon' platform,
+						max(a.channel) platformAccount,
+				        '' shortOrderId,
+				        '' transactionid,
+				        wm_concat(b.id || '-' || b.amazon_item_id) itemid,
+				        to_char(a.id) id,
+				        'W_' || a.order_id || '_' || f.times  OrderNo,
+				        a.ORDER_ID CustOrderRef,
+				        to_char(max(a.purchase_at), 'YYYY-MM-DD') OrderDate,
+				        max(a.name) ShipToName,
+				        max(a.street) ShipToAddr1,
+				        '' ShipToAddr2,
+				        max(a.country_code) ShipToCounty,
+				        max(a.postal_code) ShipPC,
+				        max(a.phone) ShipTel,
+				        max(a.country_code) ShipCC,
+				        wm_concat(nvl(s.sku, f.sku)) SellingSKU,
+				        wm_concat(nvl(s.qty, 1) * f.qty) QTY,
+				        sum(nvl(b.price, 0)) price,
+				        '' shippingService,
+				        to_char(sysdate, 'YYYY-MM-DD') SubDate
+				from    amazon_order           a,
+				        amazon_order_item      b,
+				        sys_return_order_final f,
+				        sys_sku_link           s,
+				        sys_return_order       g
+				where   a.id = b.parent_id and a.order_id = f.order_id and a.channel = f.site 
+				        and b.sku = f.m_sku and g.id = f.parent_id and f.sku = s.p_sku(+)
+				        and f.platform = 'amazon'
+				        and f.tarcking_num is null
+				        and f.order_type = 1
+				        and (a.country_code in ('UK', 'GB') or a.channel='Amazon.co.uk')
+				group by a.id, a.order_id, f.times
+				union all
+				select 'amazon' platform,
+						max(o.account) platformAccount,
+				        '' shortOrderId,
+				        '' transactionid,
+				        wm_concat(f.id || '-' || f.id) itemid,
+				        o.id || substr(o.order_id, 4, length(o.order_id) - 4) id,
+				        'W_' || o.order_id || '_' || f.times OrderNo,
+				        o.order_id CustOrderRef,
+				        to_char(max(o.create_date), 'YYYY-MM-DD') OrderDate,
+					    json_ext.get_string(json(max(o.delivery_address)), 'name') ShipToName,
+					   	json_ext.get_string(json(max(o.delivery_address)), 'addressLine1') ShipToAddr1,
+					   	json_ext.get_string(json(max(o.delivery_address)), 'addressLine2') ShipToAddr2,
+					    json_ext.get_string(json(max(o.delivery_address)), 'country') ShipToCounty,
+					   	json_ext.get_string(json(max(o.delivery_address)), 'postalCode') ShipPC,
+					   	json_ext.get_string(json(max(o.delivery_address)), 'phone') ShipTel,
+					   	json_ext.get_string(json(max(o.delivery_address)), 'country') ShipCC,
+				       	wm_concat(replace(nvl(f.sku, 0), ',', '^')) SellingSKU,
+				       	wm_concat(nvl(f.qty, 0)) QTY,
+				       	sum(nvl(i.row_total, 0)) price,
+				        '' shippingService,
+				        to_char(sysdate, 'YYYY-MM-DD') SubDate
+				from   	sys_return_order o, 
+						sys_return_order_item i,
+				       	sys_return_order_final f
+				where  	o.id=f.parent_id and f.order_type=2 and o.order_id like 'OCS%' and o.approve_result=1 and o.platform='amazon'
+            and o.id=i.parent_id and i.sku=f.sku and (o.site like '%co.uk' or o.site in ('UK', 'GB') or o.account in ('UK','GB'))
+        group by o.id, o.platform, o.account, o.order_id, f.times) tbl, (select lms.* from light_mark_shipment lms where lms.platform='amazon') ms
+		where	tbl.OrderNo=ms.order_id(+) and ms.id is null
+	</select>
+	
+	<select id="getLightUKNoShipOrders" resultType="java.util.HashMap">
+	    select   tbl.* 
+	    from   (SELECT 'light' platform,
+	                max(lo.platform) platformAccount,
+	                '' shortOrderId,
+	                '' transactionid,
+	                wm_concat(li.entity_id|| '-' || li.light_item_id) itemid,
+	                to_char(LO.ENTITY_ID) id,
+	                LO.ORDER_ID OrderNo,
+	                LO.ORDER_ID CustOrderRef,
+	                to_char(max(LO.LIGHT_CREATED_AT), 'YYYY-MM-DD') OrderDate,
+	                max(LI.SHIPPING_FIRSTNAME) || ' ' || max(LI.SHIPPING_MIDDLENAME) || ' ' || max(LI.SHIPPING_LASTNAME) ShipToName,
+	                max(LI.STREET) ShipToAddr1,
+	                '' ShipToAddr2,
+	                max(li.company) ShipToAddr3,
+	                max(LI.CITY) ShipToCounty,
+	                max(LI.POSTCODE) ShipPC,
+	                <!-- case when max(LI.TELEPHONE) is null then '' else  '’' || max(LI.TELEPHONE) end ShipTel, -->
+	                max(LI.TELEPHONE) ShipTel,
+	                max(Li.Country_Id) ShipCC,
+	                wm_concat(LI.SKU) SellingSKU,
+	                wm_concat(LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -  LI.QTY_SHIPPED) QTY,
+	                sum(li.row_total) price,
+	                max(lo.shipping_description) shippingService,
+	                to_char(sysdate, 'YYYY-MM-DD') SubDate
+	            FROM   LIGHT_ORDER LO, 
+	                   (select a.entity_id, a.light_item_id, a.SHIPPING_FIRSTNAME, a.SHIPPING_MIDDLENAME, a.SHIPPING_LASTNAME, a.STREET, a.CITY, a.POSTCODE, a.parent_id,
+	                           a.TELEPHONE, a.Country_Id, a.SKU, a.QTY_ORDERED, a.QTY_CANCELED, a.QTY_REFUNDED, a.QTY_SHIPPED, a.row_total, a.company from light_order_item a 
+	                    union all 
+	                    select b.entity_id, b.light_item_id, b.SHIPPING_FIRSTNAME, b.SHIPPING_MIDDLENAME, b.SHIPPING_LASTNAME, b.STREET, b.CITY, b.POSTCODE, b.parent_id,  
+	                           b.TELEPHONE, b.Country_Id, b.SKU, b.QTY_ORDERED, b.QTY_CANCELED, b.QTY_REFUNDED, b.QTY_SHIPPED, b.row_total, b.company from light_order_item_b b) LI
+	            WHERE   LO.ENTITY_ID = LI.PARENT_ID
+	                AND LO.PLATFORM = 'UK'
+	                AND LO.STATUS = 'processing'
+	                AND LO.AVS = 1
+	                AND LI.SKU NOT LIKE 'B%'
+	                AND LI.SKU IS NOT NULL
+	                AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED - LI.QTY_SHIPPED > 0
+	                AND STREET IS NOT NULL
+	                AND LI.SKU NOT LIKE 'OS%'
+	            group by LO.ENTITY_ID, LO.ORDER_ID
+	            UNION ALL
+	            SELECT   'light' platform,
+	                max(lo.platform) platformAccount,
+	                '' shortOrderId,
+	                '' transactionid,
+	                wm_concat(li.entity_id || '-' || li.light_item_id) itemid,
+	                to_char(LO.ENTITY_ID) id,
+	                    'W_' || LO.ORDER_ID || '_' || sf.times OrderNo,
+	                    'W_' || LO.ORDER_ID || '_' || sf.times CustOrderRef,
+	                    to_char(max(LO.LIGHT_CREATED_AT), 'YYYY-MM-DD') OrderDate,
+	                    max(LI.SHIPPING_FIRSTNAME) || ' ' || max(LI.SHIPPING_MIDDLENAME) || ' ' || max(LI.SHIPPING_LASTNAME) ShipToName,
+	                    max(LI.STREET) ShipToAddr1,
+	                    '' ShipToAddr2,
+	                	max(li.company) ShipToAddr3,
+	                    max(LI.CITY) ShipToCounty,
+	                    max(LI.POSTCODE) ShipPC,
+	                    <!-- case when max(LI.TELEPHONE) is null then '' else  '’' || max(LI.TELEPHONE) end ShipTel, -->
+	                	max(LI.TELEPHONE) ShipTel,
+	                    max(li.country_id) ShipCC,
+	                    wm_concat(SF.SKU) SellingSKU,
+	                    wm_concat(SF.QTY) QTY,
+	                    0 price,
+	                    max(lo.shipping_description) shippingService,
+	                    to_char(sysdate, 'YYYY-MM-DD') SubDate
+	            FROM   LIGHT_ORDER            LO,
+	                    (select a.entity_id, a.light_item_id, a.SHIPPING_FIRSTNAME, a.SHIPPING_MIDDLENAME, a.SHIPPING_LASTNAME, a.STREET, a.CITY, a.POSTCODE, a.parent_id,
+	                           a.TELEPHONE, a.Country_Id, a.SKU, a.QTY_ORDERED, a.QTY_CANCELED, a.QTY_REFUNDED, a.QTY_SHIPPED, a.row_total, a.company from light_order_item a 
+	                    union all 
+	                    select b.entity_id, b.light_item_id, b.SHIPPING_FIRSTNAME, b.SHIPPING_MIDDLENAME, b.SHIPPING_LASTNAME, b.STREET, b.CITY, b.POSTCODE, b.parent_id,  
+	                           b.TELEPHONE, b.Country_Id, b.SKU, b.QTY_ORDERED, b.QTY_CANCELED, b.QTY_REFUNDED, b.QTY_SHIPPED, b.row_total, b.company from light_order_item_b b)       LI,
+	                    sys_return_order_final sf
+	            WHERE   LO.ENTITY_ID = LI.PARENT_ID
+	                  AND LO.PLATFORM = 'UK'
+	                  AND SF.PLATFORM = 'light'
+	                   AND LO.ORDER_ID = SF.ORDER_ID
+	                           and li.sku = sf.m_sku
+	                  AND SF.ORDER_TYPE = 1
+	                  AND SF.TARCKING_NUM IS NULL
+	            group by LO.ENTITY_ID, LO.ORDER_ID, sf.times
+	            union all
+	            select 'light' platform,
+	                max(o.account) platformAccount,
+	                    '' shortOrderId,
+	                    '' transactionid,
+	                    wm_concat(f.id || '-' || f.id) itemid,
+	                    o.id || substr(o.order_id, 4, length(o.order_id) - 4) id,
+	                    'W_' || o.order_id || '_' || f.times OrderNo,
+	                    o.order_id CustOrderRef,
+	                    to_char(max(o.create_date), 'YYYY-MM-DD') OrderDate,
+	                  json_ext.get_string(json(max(o.delivery_address)), 'name') ShipToName,
+	                   json_ext.get_string(json(max(o.delivery_address)), 'addressLine1') ShipToAddr1,
+	                   json_ext.get_string(json(max(o.delivery_address)), 'addressLine2') ShipToAddr2,
+	                   '' ShipToAddr3,
+	                  json_ext.get_string(json(max(o.delivery_address)), 'country') ShipToCounty,
+	                   json_ext.get_string(json(max(o.delivery_address)), 'postalCode') ShipPC,
+	                   <!-- case when json_ext.get_string(json(max(o.delivery_address)), 'phone') is null then '' else  '’' || json_ext.get_string(json(max(o.delivery_address)), 'phone') end ShipTel, -->
+	                	json_ext.get_string(json(max(o.delivery_address)), 'phone') ShipTel,
+	                   json_ext.get_string(json(max(o.delivery_address)), 'country') ShipCC,
+	                     wm_concat(replace(nvl(f.sku, 0), ',', '^')) SellingSKU,
+	                     wm_concat(nvl(f.qty, 0)) QTY,
+	                     sum(nvl(i.row_total, 0)) price,
+	                    '' shippingService,
+	                    to_char(sysdate, 'YYYY-MM-DD') SubDate
+	            from     sys_return_order o, 
+	                sys_return_order_item i,
+	                     sys_return_order_final f
+	            where    o.id=f.parent_id and f.order_type=2 and o.order_id like 'OCS%' and o.approve_result=1 and o.platform='light'
+	                and o.id=i.parent_id and i.sku=f.sku and (o.site like '%co.uk' or o.site in ('UK', 'GB') or o.account in ('UK','GB'))
+	            group by o.id, o.platform, o.account, o.order_id, f.times) tbl, light_mark_shipment lml
+	    where  tbl.OrderNo=lml.order_id(+) and lml.id is null
+	</select>
+	
+	<select id="getUKNoShipOrderInfo" resultType="java.util.HashMap">
+		  select 'ebay' platform,
+             e.id id,
+             e.account platformAccount,
+             (select distinct short_code from ebay_account_manager where account = e.account)||e.shortOrderId shortOrderId,
+             e.transaction_id transactionid,
+             e.item_id itemid,
+             e.OrderNo OrderNo,
+             e.CustOrderRef CustOrderRef,
+             e.OrderDate,
+             json_ext.get_string(json(es.shipping_address), 'Name') ShipToName,
+             json_ext.get_string(json(es.shipping_address), 'Street1') ShipToAddr1,
+             json_ext.get_string(json(es.shipping_address), 'Street2') ShipToAddr2,
+             json_ext.get_string(json(es.shipping_address), 'CityName') ShipToCounty,
+             json_ext.get_string(json(es.shipping_address), 'PostalCode') ShipPC,
+             json_ext.get_string(json(es.shipping_address), 'Phone') ShipTel,
+             json_ext.get_string(json(es.shipping_address), 'Country') ShipCC,
+             e.SellingSKU,
+             e.QTY,
+             e.price,
+             e.shippingService,
+             to_char(sysdate, 'YYYY-MM-DD') SubDate
+        from (SELECT EO.ID id,
+                     eo.account,
+                     max(eo.sales_record_number) shortOrderId,
+                     EO.ORDER_ID OrderNo,
+                     EO.Order_Id CustOrderRef,
+                     wm_concat(ei.transaction_id) transaction_id,
+                     wm_concat(ei.item_id) item_id,
+                     to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') OrderDate,
+                     wm_concat(REPLACE(EI.ITEM_SKU,',','^')) SellingSKU,
+                     wm_concat(EI.QUANTITY_PURCHASED) QTY,
+                     sum(ei.price * ei.quantity_purchased) price,
+                     max(eo.shipping_service) shippingService
+                FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI,ebay_publication_line l
+               WHERE EO.ID = EI.PARENT_ID
+                and ei.item_id = l.item_id
+               and l.region != 'CN'
+                 AND EO.PAID_TIME IS NOT NULL
+                 AND EO.SHIPPED_TIME IS NULL
+                 AND EO.PAY_STATUS = 'Complete'
+                 and ei.ship_time is null
+                 and eo.order_status = 'Completed'
+                 and eo.tag = 0
+                    and eo.sales_record_number is not null
+                <![CDATA[ and eo.created_time >
+                     to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')]]>
+               group by eo.id, eo.account, EO.ORDER_ID
+              union all
+              SELECT EO.ID id,
+                     eo.account,
+                     'W_'||max(eo.sales_record_number)||'_'||sf.times shortOrderId,
+                     'W_' || EO.ORDER_ID||'_'||sf.times OrderNo,
+                     'W_' || EO.Order_Id||'_'||sf.times CustOrderRef,
+                     wm_concat(ei.transaction_id) transaction_id,
+                     wm_concat(ei.item_id) item_id,
+                     to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') OrderDate,
+                     wm_concat(REPLACE(sf.sku,',','^')) SellingSKU,
+                     wm_concat(sf.qty) QTY,
+                     0 price,
+                     max(eo.shipping_service) shippingService
+                FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI, sys_return_order_final sf,ebay_publication_line l
+               WHERE EO.ID = EI.PARENT_ID
+                and ei.item_id = l.item_id
+               and l.region != 'CN'
+                 and sf.platform = 'ebay'
+                 AND SF.ORDER_TYPE = 1
+                 and eo.order_id = sf.order_id
+                 and eo.account = sf.account
+                 and ei.item_sku = sf.m_sku
+                 and sf.tarcking_num is null
+               group by eo.id, eo.account, EO.ORDER_ID,sf.times) e,
+             EBAY_ORDER_SUB ES
+       where e.ID = ES.PARENT_ID
+         AND to_char(ES.SHIPPING_ADDRESS) like '%"GB"%'
+         
+          union all
+         
+         select 'ebay' platform,
+             a.id id,
+             a.account platformAccount,
+             'OCS'||a.id shortOrderId,
+             wm_concat(a.cause) transactionid,
+             wm_concat(replace(nvl(c.sku, 0), ',', '^')) itemid,
+             a.order_id OrderNo,
+             a.order_id CustOrderRef,
+             to_char(max(a.create_date), 'YYYY-MM-DD') OrderDate,
+            json_ext.get_string(json(max(a.delivery_address)), 'name') ShipToName,
+            json_ext.get_string(json(max(a.delivery_address)), 'city') ShipToCounty,
+            json_ext.get_string(json(max(a.delivery_address)), 'addressLine1') ADDRESS_ONE,
+            json_ext.get_string(json(max(a.delivery_address)), 'addressLine2') ADDRESS_TWO,
+            json_ext.get_string(json(max(a.delivery_address)), 'postalCode') ShipPC,
+            json_ext.get_string(json(max(a.delivery_address)), 'phone') ShipTel,
+            json_ext.get_string(json(max(a.delivery_address)), 'country') ShipCC,
+            wm_concat(replace(nvl(c.sku, 0), ',', '^')) SellingSKU,
+            wm_concat(nvl(c.qty, 0)) QTY,
+            max(to_number(a.delivery_warehouse)) price,
+            '' shippingService,
+            to_char(sysdate, 'YYYY-MM-DD') SubDate
+           from sys_return_order a, sys_return_order_final b,sys_return_order_item c
+          where a.id = b.parent_id
+            and a.id = c.parent_id
+            and b.sku = c.sku
+            and b.order_type = 2
+            and b.platform = 'ebay'
+            and a.site = 'UK'
+            and b.tarcking_num is null
+            group by a.id,a.platform,a.account,a.order_id
+		  <!-- 
+		  SELECT *
+		   FROM ((select 'ebay' platform,
+		                 e.id id,
+		                 e.OrderNo OrderNo,
+		                 e.CustOrderRef CustOrderRef,
+		                 e.OrderDate,
+		                 json_ext.get_string(json(es.shipping_address), 'Name') ShipToName,
+		                 json_ext.get_string(json(es.shipping_address), 'Street1') ShipToAddr1,
+		                 json_ext.get_string(json(es.shipping_address), 'Street2') ShipToAddr2,
+		                 json_ext.get_string(json(es.shipping_address), 'CityName') ShipToCounty,
+		                 json_ext.get_string(json(es.shipping_address), 'PostalCode') ShipPC,
+		                 json_ext.get_string(json(es.shipping_address), 'Phone') ShipTel,
+		                 json_ext.get_string(json(es.shipping_address), 'Country') ShipCC,
+		                 e.SellingSKU,
+		                 e.QTY,
+		                 e.price,
+		                 e.shippingService,
+		                 to_char(sysdate, 'YYYY-MM-DD') SubDate
+		            from (
+		                  
+		                  SELECT EO.ID id,
+		                          eo.account,
+		                          EO.ORDER_ID OrderNo,
+		                          EO.Order_Id CustOrderRef,
+		                          to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') OrderDate,
+		                          wm_concat(EI.ITEM_SKU) SellingSKU,
+		                          wm_concat(EI.QUANTITY_PURCHASED) QTY,
+		                          sum(ei.price * ei.quantity_purchased) price,
+		                          max(eo.shipping_service) shippingService
+		                    FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+		                   WHERE EO.ID = EI.PARENT_ID
+		                     AND EO.PAID_TIME IS NOT NULL
+		                     AND EO.SHIPPED_TIME IS NULL
+		                     AND EO.PAY_STATUS = 'Complete'
+		                   group by eo.id, eo.account, EO.ORDER_ID
+		                  union all
+		                  SELECT EO.ID id,
+		                         eo.account,
+		                         'W_' || EO.ORDER_ID OrderNo,
+		                         'W_' || EO.Order_Id CustOrderRef,
+		                         to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') OrderDate,
+		                         wm_concat(sf.sku) SellingSKU,
+		                         wm_concat(sf.qty) QTY,
+		                         0 price,
+		                         max(eo.shipping_service) shippingService
+		                    FROM EBAY_ORDER             EO,
+		                         EBAY_ORDER_ITEM        EI,
+		                         sys_return_order_final sf
+		                   WHERE EO.ID = EI.PARENT_ID
+		                     and sf.platform = 'ebay'
+		                     AND SF.ORDER_TYPE = 1
+		                     and eo.order_id = sf.order_id
+		                     and eo.account = sf.account
+		                     and sf.tarcking_num is null
+		                   group by eo.id, eo.account, EO.ORDER_ID) e,
+		                 EBAY_ORDER_SUB ES
+		           where e.ID = ES.PARENT_ID
+		             AND to_char(ES.SHIPPING_ADDRESS) like '%"GB"%') UNION ALL
+		         (SELECT 'light' platform,
+		                 LO.ENTITY_ID id,
+		                 LO.ORDER_ID OrderNo,
+		                 LO.ORDER_ID CustOrderRef,
+		                 to_char(max(LO.LIGHT_CREATED_AT), 'YYYY-MM-DD') OrderDate,
+		                 max(LI.SHIPPING_FIRSTNAME) || ' ' ||
+		                 max(LI.SHIPPING_MIDDLENAME) || ' ' ||
+		                 max(LI.SHIPPING_LASTNAME) ShipToName,
+		                 max(LI.STREET) ShipToAddr1,
+		                 '' ShipToAddr2,
+		                 max(LI.CITY) ShipToCounty,
+		                 max(LI.POSTCODE) ShipPC,
+		                 max(LI.TELEPHONE) ShipTel,
+		                 max(LO.PLATFORM) ShipCC,
+		                 wm_concat(LI.SKU) SellingSKU,
+		                 wm_concat(LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+		                           LI.QTY_SHIPPED) QTY,
+		                 sum(li.row_total) price,
+		                 max(lo.shipping_description) shippingService,
+		                 to_char(sysdate, 'YYYY-MM-DD') SubDate
+		            FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+		           WHERE LO.ENTITY_ID = LI.PARENT_ID
+		             AND LO.PLATFORM = 'UK'
+		             AND LO.STATUS = 'processing'
+		             AND LO.AVS = 1
+		             AND LI.SKU NOT LIKE 'B%'
+		             AND LI.SKU IS NOT NULL
+		             AND LI.SKU IS NOT NULL
+		             <![CDATA[AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+		                 LI.QTY_SHIPPED > 0
+		             AND LO.LIGHT_CREATED_AT > TO_DATE('2017-9-01', 'YYYY-MM-DD')]]>
+		             AND STREET IS NOT NULL
+		             AND (LI.SKU NOT LIKE 'OS%' OR
+		                 (LI.SKU LIKE 'OS%' AND
+		                 LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		           group by LO.ENTITY_ID, LO.ORDER_ID) UNION ALL
+		         (SELECT 'light' platform,
+		                 LO.ENTITY_ID id,
+		                 'W_' || LO.ORDER_ID OrderNo,
+		                 'W_' || LO.ORDER_ID CustOrderRef,
+		                 to_char(max(LO.LIGHT_CREATED_AT), 'YYYY-MM-DD') OrderDate,
+		                 max(LI.SHIPPING_FIRSTNAME) || ' ' ||
+		                 max(LI.SHIPPING_MIDDLENAME) || ' ' ||
+		                 max(LI.SHIPPING_LASTNAME) ShipToName,
+		                 max(LI.STREET) ShipToAddr1,
+		                 '' ShipToAddr2,
+		                 max(LI.CITY) ShipToCounty,
+		                 max(LI.POSTCODE) ShipPC,
+		                 max(LI.TELEPHONE) ShipTel,
+		                 max(LO.PLATFORM) ShipCC,
+		                 wm_concat(SF.SKU) SellingSKU,
+		                 wm_concat(SF.QTY) QTY,
+		                 0 price,
+		                 max(lo.shipping_description) shippingService,
+		                 to_char(sysdate, 'YYYY-MM-DD') SubDate
+		            FROM LIGHT_ORDER            LO,
+		                 LIGHT_ORDER_ITEM       LI,
+		                 sys_return_order_final sf
+		           WHERE LO.ENTITY_ID = LI.PARENT_ID
+		             AND LO.PLATFORM = 'UK'
+		             AND SF.PLATFORM = 'light'
+		             AND LO.ORDER_ID = SF.ORDER_ID
+		             AND SF.ORDER_TYPE = 1
+		             AND SF.TARCKING_NUM IS NULL
+		           group by LO.ENTITY_ID, LO.ORDER_ID))
+		  ORDER BY platform ASC
+		 -->
+	</select>
+	<select id="getSkusByPSku" resultType="com.it.ocs.salesStatistics.model.NoShipSKUModel">
+		  select s.sku,
+		         s.qty,
+		         TRUNC((p.gross_weight + (p.outer_weight / p.packing_qty))*s.qty,4) weight
+		    from sys_sku_link s, cal_product_entity p
+		   where s.sku = p.sku
+		     and p.is_active = 1
+		     and s.p_sku = #{psku}
+	</select>
+	<select id="getSkusWeight" resultType="com.it.ocs.salesStatistics.model.NoShipSKUModel">
+		select TRUNC(p.gross_weight + (p.outer_weight / p.packing_qty),4) weight
+		from cal_product_entity p
+		where p.sku = #{sku}
+		and p.is_active = 1
+	</select>
+	<select id="getSku" resultType="com.it.ocs.salesStatistics.model.NoShipSKUModel">
+		select p.sku
+		from cal_product_entity p
+		where p.sku = #{psku}
+		and p.is_active = 1
+	</select>
+	<select id="getDENoShipOrderInfo" resultType="java.util.HashMap">
+		    select 'ebay' platform,
+		    <!-- 
+           (select distinct short_code
+          from ebay_account_manager
+         where account = e.account) ||e.ids id, -->
+           e.ids id,
+           e.account platformAccount,
+           (select distinct short_code from ebay_account_manager where account = e.account)||e.shortOrderId shortOrderId,
+           e.transaction_id transactionid,
+           e.item_id itemid,
+           e.MerchantFulfillmentOrderID,
+           e.DisplayableOrderID,
+           e.DisplayableOrderDate,
+           json_ext.get_string(json(es.shipping_address), 'Name') AddressName,
+           json_ext.get_string(json(es.shipping_address), 'Street1') AddressFieldOne,
+           json_ext.get_string(json(es.shipping_address), 'Street2') AddressFieldTwo,
+           json_ext.get_string(json(es.shipping_address), 'CityName') AddressCity,
+           json_ext.get_string(json(es.shipping_address), 'PostalCode') AddressPostalCode,
+           case
+             when json_ext.get_string(json(es.shipping_address), 'Phone') = 'Invalid Request' then
+              null
+             else
+              substr(json_ext.get_string(json(es.shipping_address), 'Phone'),1,1) || ' ' ||
+              substr(json_ext.get_string(json(es.shipping_address), 'Phone'), 2)
+           end AddressPhoneNumber,
+           case
+             when json_ext.get_string(json(es.transaction_array),'Transaction.Buyer.Email') = 'Invalid Request' then
+              null
+             else
+              json_ext.get_string(json(es.transaction_array),'Transaction.Buyer.Email')
+           end NOTIFICATIONEMAIL,
+           json_ext.get_string(json(es.shipping_address), 'StateOrProvince') AddressStateOrRegion,
+           json_ext.get_string(json(es.shipping_address), 'Country') AddressCountryCode,
+           e.SellingSKU,
+           e.QTY
+      from (SELECT  EO.ID id,
+                   to_char(EO.ID) ids,
+                   eo.account,
+                   max(eo.sales_record_number) shortOrderId,
+                   EO.ORDER_ID MerchantFulfillmentOrderID,
+                   EO.Order_Id DisplayableOrderID,
+                   wm_concat(ei.transaction_id) transaction_id,
+                   wm_concat(ei.item_id) item_id,
+                   to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') DisplayableOrderDate,
+                   wm_concat(REPLACE(EI.ITEM_SKU,',','^')) SellingSKU,
+                   wm_concat(EI.QUANTITY_PURCHASED) QTY
+              FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI, ebay_publication_line l
+             WHERE EO.ID = EI.PARENT_ID
+               and ei.item_id = l.item_id
+                and l.region != 'CN'
+               AND EO.PAID_TIME IS NOT NULL
+               AND EO.SHIPPED_TIME IS NULL
+               and eo.tag = 0
+               and eo.order_status = 'Completed'
+               and eo.sales_record_number is not null
+               AND EO.PAY_STATUS = 'Complete'
+               and ei.ship_time is null
+              <![CDATA[  and eo.created_time >
+                   to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss') ]]>
+             group by eo.id, eo.account, EO.ORDER_ID
+            union all
+            SELECT EO.ID id,
+            	   'W_'||EO.ID||'_'||sf.times ids,
+                   eo.account,
+                   'W_'||max(eo.sales_record_number)||'_'||sf.times shortOrderId,
+                   'W_' || EO.ORDER_ID||'_'||sf.times MerchantFulfillmentOrderID,
+                   'W_' || EO.Order_Id||'_'||sf.times DisplayableOrderID,
+                   wm_concat(ei.transaction_id) transaction_id,
+                   wm_concat(ei.item_id) item_id,
+                   to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') DisplayableOrderDate,
+                   wm_concat(REPLACE(sf.sku,',','^')) SellingSKU,
+                   wm_concat(sf.qty) QTY
+              FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI, sys_return_order_final sf,ebay_publication_line l
+             WHERE EO.ID = EI.PARENT_ID
+              and ei.item_id = l.item_id
+               and l.region != 'CN'
+               and sf.platform = 'ebay'
+               AND SF.ORDER_TYPE = 1
+               and eo.order_id = sf.order_id
+               and eo.account = sf.account
+               and ei.item_sku = sf.m_sku
+               and sf.tarcking_num is null
+             group by eo.id, eo.account, EO.ORDER_ID,sf.times) e,
+           EBAY_ORDER_SUB ES
+     where e.ID = ES.PARENT_ID
+       AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"GB"%'
+       AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"US"%'
+		<!--  
+		  SELECT *
+		   FROM ((select 'ebay' platform,
+		                 e.id id,
+		                 e.MerchantFulfillmentOrderID,
+		                 e.DisplayableOrderID,
+		                 e.DisplayableOrderDate,
+		                 json_ext.get_string(json(es.shipping_address), 'Name') AddressName,
+		                 json_ext.get_string(json(es.shipping_address), 'Street1') AddressFieldOne,
+		                 json_ext.get_string(json(es.shipping_address), 'Street2') AddressFieldTwo,
+		                 json_ext.get_string(json(es.shipping_address), 'CityName') AddressCity,
+		                 json_ext.get_string(json(es.shipping_address), 'PostalCode') AddressPostalCode,
+		                 json_ext.get_string(json(es.shipping_address), 'Phone') AddressPhoneNumber,
+		                 json_ext.get_string(json(es.shipping_address),
+		                                     'StateOrProvince') AddressStateOrRegion,
+		                 json_ext.get_string(json(es.shipping_address), 'Country') AddressCountryCode,
+		                 e.SellingSKU,
+		                 e.QTY
+		            from (
+		                  
+		                  SELECT EO.ID id,
+		                          eo.account,
+		                          EO.ORDER_ID MerchantFulfillmentOrderID,
+		                          EO.Order_Id DisplayableOrderID,
+		                          to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') DisplayableOrderDate,
+		                          wm_concat(EI.ITEM_SKU) SellingSKU,
+		                          wm_concat(EI.QUANTITY_PURCHASED) QTY
+		                    FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+		                   WHERE EO.ID = EI.PARENT_ID
+		                     AND EO.PAID_TIME IS NOT NULL
+		                     AND EO.SHIPPED_TIME IS NULL
+		                     AND EO.PAY_STATUS = 'Complete'
+		                   group by eo.id, eo.account, EO.ORDER_ID
+		                  union all
+		                  SELECT EO.ID id,
+		                         eo.account,
+		                         'W_' || EO.ORDER_ID MerchantFulfillmentOrderID,
+		                         'W_' || EO.Order_Id DisplayableOrderID,
+		                         to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') DisplayableOrderDate,
+		                         wm_concat(sf.sku) SellingSKU,
+		                         wm_concat(sf.qty) QTY
+		                    FROM EBAY_ORDER             EO,
+		                         EBAY_ORDER_ITEM        EI,
+		                         sys_return_order_final sf
+		                   WHERE EO.ID = EI.PARENT_ID
+		                     and sf.platform = 'ebay'
+		                     AND SF.ORDER_TYPE = 1
+		                     and eo.order_id = sf.order_id
+		                     and eo.account = sf.account
+		                     and sf.tarcking_num is null
+		                   group by eo.id, eo.account, EO.ORDER_ID) e,
+		                 EBAY_ORDER_SUB ES
+		           where e.ID = ES.PARENT_ID
+		             AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"GB"%'
+		             AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"US"%') UNION ALL
+		         (SELECT 'light' platform,
+		                 LO.ENTITY_ID id,
+		                 LO.ORDER_ID MerchantFulfillmentOrderID,
+		                 LO.ORDER_ID DisplayableOrderID,
+		                 to_char(max(LO.LIGHT_CREATED_AT), 'YYYY-MM-DD') DisplayableOrderDate,
+		                 max(LI.SHIPPING_FIRSTNAME) || ' ' ||
+		                 max(LI.SHIPPING_MIDDLENAME) || ' ' ||
+		                 max(LI.SHIPPING_LASTNAME) AddressName,
+		                 max(LI.STREET) AddressFieldOne,
+		                 '' AddressFieldTwo,
+		                 max(LI.CITY) AddressCity,
+		                 max(LI.POSTCODE) AddressPostalCode,
+		                 max(LI.TELEPHONE) AddressPhoneNumber,
+		                 MAX(LI.REGION) AddressStateOrRegion,
+		                 max(LO.PLATFORM) AddressCountryCode,
+		                 wm_concat(LI.SKU) SellingSKU,
+		                 wm_concat(LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+		                           LI.QTY_SHIPPED) QTY
+		            FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+		           WHERE LO.ENTITY_ID = LI.PARENT_ID
+		             AND LO.PLATFORM not in ('UK', 'US')
+		             AND LO.STATUS = 'processing'
+		             AND LO.AVS = 1
+		             AND LI.SKU NOT LIKE 'B%'
+		             AND LI.SKU IS NOT NULL
+		             AND LI.SKU IS NOT NULL
+		             <![CDATA[AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED -
+		                 LI.QTY_SHIPPED > 0
+		             AND LO.LIGHT_CREATED_AT > TO_DATE('2017-9-01', 'YYYY-MM-DD')]]>
+		             AND STREET IS NOT NULL
+		             AND (LI.SKU NOT LIKE 'OS%' OR
+		                 (LI.SKU LIKE 'OS%' AND
+		                 LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		           group by LO.ENTITY_ID, LO.ORDER_ID) UNION ALL
+		         (SELECT 'light' platform,
+		                 LO.ENTITY_ID id,
+		                 'W_' || LO.ORDER_ID MerchantFulfillmentOrderID,
+		                 'W_' || LO.ORDER_ID DisplayableOrderID,
+		                 to_char(max(LO.LIGHT_CREATED_AT), 'YYYY-MM-DD') DisplayableOrderDate,
+		                 max(LI.SHIPPING_FIRSTNAME) || ' ' ||
+		                 max(LI.SHIPPING_MIDDLENAME) || ' ' ||
+		                 max(LI.SHIPPING_LASTNAME) AddressName,
+		                 max(LI.STREET) AddressFieldOne,
+		                 '' AddressFieldTwo,
+		                 max(LI.CITY) AddressCity,
+		                 max(LI.POSTCODE) AddressPostalCode,
+		                 max(LI.TELEPHONE) AddressPhoneNumber,
+		                 MAX(LI.REGION) AddressStateOrRegion,
+		                 max(LO.PLATFORM) AddressCountryCode,
+		                 wm_concat(SF.SKU) SellingSKU,
+		                 wm_concat(SF.QTY) QTY
+		            FROM LIGHT_ORDER            LO,
+		                 LIGHT_ORDER_ITEM       LI,
+		                 sys_return_order_final sf
+		           WHERE LO.ENTITY_ID = LI.PARENT_ID
+		             AND LO.PLATFORM not in ('UK', 'US')
+		             AND SF.PLATFORM = 'light'
+		             AND LO.ORDER_ID = SF.ORDER_ID
+		             AND SF.ORDER_TYPE = 1
+		             AND SF.TARCKING_NUM IS NULL
+		           group by LO.ENTITY_ID, LO.ORDER_ID))
+		  ORDER BY platform ASC
+	-->
+	</select>
+	<select id="getOSOrderNoShip" resultType="java.util.HashMap">
+		  select 
+	             (select distinct short_code from ebay_account_manager where account = e.account)||e.shortOrderId leOrderId,
+	             json_ext.get_string(json(es.shipping_address), 'Name') buyerName,
+	             json_ext.get_string(json(es.shipping_address), 'Street1') ||' '||
+	             json_ext.get_string(json(es.shipping_address), 'Street2') address,
+	             json_ext.get_string(json(es.shipping_address), 'CityName') city,
+	             json_ext.get_string(json(es.shipping_address), 'PostalCode') postCode,
+	             json_ext.get_string(json(es.shipping_address), 'Phone') phone,
+	             json_ext.get_string(json(es.shipping_address), 'StateOrProvince') province,
+	             e.SellingSKU leSku,
+	             e.QTY qty,
+	             e.iSaleRecordNumber,
+	             e.shippingService
+	        from (SELECT EO.ID id,
+	                     eo.account,
+	                     eo.sales_record_number shortOrderId,
+	                     NVL(L.SKU,EI.ITEM_SKU) SellingSKU,
+	                     EI.QUANTITY_PURCHASED*NVL(L.QTY,1) QTY,
+	                     EI.Sales_Record_Number iSaleRecordNumber,
+	                     eo.shipping_service shippingService
+	                FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI,sys_sku_link l
+	               WHERE EO.ID = EI.PARENT_ID
+	                 AND EI.ITEM_SKU = L.P_SKU(+)
+	                 AND EO.PAID_TIME IS NOT NULL
+	                 AND EO.SHIPPED_TIME IS NULL
+	                 AND EO.PAY_STATUS = 'Complete'
+	                 and ei.ship_time is null
+	                 and eo.order_status = 'Completed'
+	                 and eo.tag = 0
+	                 and eo.sales_record_number is not null
+	                 and eo.created_time >
+	                     to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')
+	             <!--  union all
+	              SELECT EO.ID id,
+	                     eo.account,
+	                     'W_'||eo.sales_record_number||'_'||sf.times shortOrderId,
+	                     NVL(L.SKU,EI.ITEM_SKU) SellingSKU,
+	                     sf.qty*NVL(L.QTY,1) QTY,
+	                     EI.Sales_Record_Number iSaleRecordNumber,
+	                     eo.shipping_service shippingService
+	                FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI, sys_return_order_final sf,sys_sku_link l
+	               WHERE EO.ID = EI.PARENT_ID
+	                 and sf.platform = 'ebay'
+	                 AND SF.ORDER_TYPE = 1
+	                 and eo.order_id = sf.order_id
+	                 and eo.account = sf.account
+	                 and ei.item_sku = sf.sku
+	                 AND EI.ITEM_SKU = L.P_SKU(+)
+	                 and sf.tarcking_num is null -->
+	              ) e,
+	             EBAY_ORDER_SUB ES
+	       where e.ID = ES.PARENT_ID
+	         AND to_char(ES.SHIPPING_ADDRESS) like '%"US"%'
+	         and e.SellingSKU like '%OS%'
+	</select>
+	<select id="getEBayOrderInfo" resultType="java.util.HashMap">
+		 select distinct eo.order_id       orderId,
+                  eo.account        account,
+                  ei.transaction_id transactionId,
+                  ei.item_id        itemId
+             from ebay_order           eo,
+                  ebay_order_item      ei,
+                  ebay_account_manager ea
+            where eo.id = ei.parent_id
+              and eo.account = ea.account
+              and eo.sales_record_number = #{orderSaleRecordNumber}
+              and ei.sales_record_number = #{orderInfoSaleRecordNumber}
+              and ea.short_code = #{accountShort}
+	</select>
+	<select id="getUSWOrder" resultType="java.util.HashMap">
+		select 'ebay' platform,
+		       e.id id,
+		       e.account platformAccount,
+		       (select distinct short_code
+		          from ebay_account_manager
+		         where account = e.account) || e.shortOrderId shortOrderId,
+		       e.transaction_id transactionid,
+		       e.item_id itemid,
+		       e.MerchantFulfillmentOrderID,
+		       e.DisplayableOrderID,
+		       e.DisplayableOrderDate,
+		       json_ext.get_string(json(es.shipping_address), 'Name') AddressName,
+		       json_ext.get_string(json(es.shipping_address), 'Street1') AddressFieldOne,
+		       json_ext.get_string(json(es.shipping_address), 'Street2') AddressFieldTwo,
+		       json_ext.get_string(json(es.shipping_address), 'CityName') AddressCity,
+		       json_ext.get_string(json(es.shipping_address), 'PostalCode') AddressPostalCode,
+		       case
+		         when json_ext.get_string(json(es.shipping_address), 'Phone') =
+		              'Invalid Request' then
+		          null
+		         else
+		          substr(json_ext.get_string(json(es.shipping_address), 'Phone'),
+		                 1,
+		                 1) || ' ' ||
+		          substr(json_ext.get_string(json(es.shipping_address), 'Phone'), 2)
+		       end AddressPhoneNumber,
+		       case
+		         when json_ext.get_string(json(es.transaction_array),
+		                                  'Transaction.Buyer.Email') =
+		              'Invalid Request' then
+		          null
+		         else
+		          json_ext.get_string(json(es.transaction_array),
+		                              'Transaction.Buyer.Email')
+		       end NOTIFICATIONEMAIL,
+		       json_ext.get_string(json(es.shipping_address), 'StateOrProvince') AddressStateOrRegion,
+		       json_ext.get_string(json(es.shipping_address), 'Country') AddressCountryCode,
+		       e.SellingSKU,
+		       e.QTY
+		  from (SELECT EO.ID id,
+		               eo.account,
+		               'W_' || max(eo.sales_record_number) || '_' || sf.times shortOrderId,
+		               'W_' || EO.ORDER_ID || '_' || sf.times MerchantFulfillmentOrderID,
+		               'W_' || EO.Order_Id || '_' || sf.times DisplayableOrderID,
+		               wm_concat(ei.transaction_id) transaction_id,
+		               wm_concat(ei.item_id) item_id,
+		               to_char(max(EO.CREATED_TIME), 'YYYY-MM-DD') DisplayableOrderDate,
+		               wm_concat(REPLACE(sf.sku, ',', '^')) SellingSKU,
+		               wm_concat(sf.qty) QTY
+		          FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI, sys_return_order_final sf
+		         WHERE EO.ID = EI.PARENT_ID
+		           and sf.platform = 'ebay'
+		           AND SF.ORDER_TYPE = 1
+		           and eo.order_id = sf.order_id
+		           and eo.account = sf.account
+		           and ei.item_sku = sf.m_sku
+		           and sf.tarcking_num is null
+		         group by eo.id, eo.account, EO.ORDER_ID, sf.times) e,
+		       EBAY_ORDER_SUB ES
+		 where e.ID = ES.PARENT_ID
+		   AND to_char(ES.SHIPPING_ADDRESS) like '%"US"%'
+	</select>
+	<select id="getWOrderNewAddress" resultType="java.lang.String">
+		select F.DELIVERY_ADDRESS
+		  from sys_return_order f,sys_return_order_final l
+		 where f.id = l.parent_id
+		   and l.platform = 'ebay'
+		   and l.account = #{account}
+		   and l.order_id = #{orderId}
+		   and l.times = #{times} and rownum=1
+	</select>
+	<select id="getLightWOrderNewAddress" resultType="java.lang.String">
+		select F.DELIVERY_ADDRESS
+		  from sys_return_order f,sys_return_order_final l
+		 where f.id = l.parent_id
+		   and l.platform = 'light'
+		   and l.account in('UK', 'GB')
+		   and l.order_id = #{orderId}
+		   and l.times = #{times} and rownum=1
+	</select>
+	<select id="getAmazonWOrderNewAddress" resultType="java.lang.String">
+		select F.DELIVERY_ADDRESS
+		  from sys_return_order f,sys_return_order_final l
+		 where f.id = l.parent_id
+		   and l.platform = 'amazon'
+		   and (f.account in ('UK', 'GB') or f.site like '%co.uk')
+		   and l.order_id = #{orderId}
+		   and l.times = #{times} and rownum=1
+	</select>
+	<select id="getSmallPackageOrder" resultType="java.util.HashMap">
+		select e.account account,
+            e.orderId,
+            e.transactionId,
+            e.itemId,
+            nvl(s.sku, e.sku) sku,
+            nvl(s.qty, 1) * e.qty qty,
+            json_ext.get_string(json(es.shipping_address), 'Street1') addressLine1,
+            json_ext.get_string(json(es.shipping_address), 'Street2') addressLine2,
+            json_ext.get_string(json(es.shipping_address), 'CityName') city,
+            json_ext.get_string(json(es.shipping_address), 'Country') country,
+            json_ext.get_string(json(es.shipping_address), 'Name') name,
+            case
+              when json_ext.get_string(json(es.shipping_address), 'Phone') =
+                   'Invalid Request' then
+               null
+              else
+               json_ext.get_string(json(es.shipping_address), 'Phone')
+            end phone,
+            json_ext.get_string(json(es.shipping_address), 'PostalCode') postalCode,
+            json_ext.get_string(json(es.shipping_address),
+                                'StateOrProvince') provState
+       from (SELECT EO.ID id,
+                    eo.account,
+                    EO.ORDER_ID orderId,
+                    eo.shipping_service,
+                    ei.transaction_id transactionId,
+                    ei.item_id itemId,
+                    EI.ITEM_SKU sku,
+                    EI.QUANTITY_PURCHASED qty,
+                    ei.price / EI.QUANTITY_PURCHASED price
+               FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+              WHERE EO.ID = EI.PARENT_ID
+                AND EO.PAID_TIME IS NOT NULL
+                AND EO.SHIPPED_TIME IS NULL
+                and eo.tag = 0
+                and eo.order_status = 'Completed'
+                and ei.item_sku not like '%OS%'
+                and eo.sales_record_number is not null
+                AND EO.PAY_STATUS = 'Complete'
+                and ei.ship_time is null
+                and eo.created_time >
+                    to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')
+             union all
+             SELECT EO.ID id,
+                    eo.account,
+                    'W_' || EO.ORDER_ID || '_' || sf.times orderId,
+                    eo.shipping_service,
+                    ei.transaction_id transactionId,
+                    ei.item_id itemId,
+                    sf.sku sku,
+                    to_char(sf.qty) qty,
+                    ei.price / EI.QUANTITY_PURCHASED price
+               FROM EBAY_ORDER             EO,
+                    EBAY_ORDER_ITEM        EI,
+                    sys_return_order_final sf
+              WHERE EO.ID = EI.PARENT_ID
+                and sf.platform = 'ebay'
+                AND SF.ORDER_TYPE = 1
+                and eo.order_id = sf.order_id
+                and eo.account = sf.account
+                and ei.item_sku = sf.m_sku
+                and sf.tarcking_num is null) e,
+            EBAY_ORDER_SUB ES,
+            ebay_publication_line l,
+            sys_sku_link s
+      where e.ID = ES.PARENT_ID
+        and e.itemId = l.item_id
+        and e.itemId = s.p_sku(+)
+        and l.region = 'CN'
+	</select>
+	<select id="getSmallPackageOrderNew" resultType="java.util.HashMap">
+		select  e.account account,
+	            e.orderId,
+	            e.transactionId,
+	            e.itemId,
+	            nvl(s.sku, e.sku) sku,
+	            nvl(s.qty, 1) * e.qty qty,
+	            json_ext.get_string(json(es.shipping_address), 'Street1') address1,
+	            json_ext.get_string(json(es.shipping_address), 'Street2') address2,
+	            json_ext.get_string(json(es.shipping_address), 'CityName') city,
+	            json_ext.get_string(json(es.shipping_address), 'Country') country,
+	            json_ext.get_string(json(es.shipping_address), 'Name') name,
+	            case
+	              when json_ext.get_string(json(es.shipping_address), 'Phone') =
+	                   'Invalid Request' then
+	               ''
+	              else
+	               json_ext.get_string(json(es.shipping_address), 'Phone')
+	            end phone,
+	            json_ext.get_string(json(es.shipping_address), 'PostalCode') zip,
+	            json_ext.get_string(json(es.shipping_address),
+	                                'StateOrProvince') state,
+	            e.currencycode ||' '||e.price salePrice,
+	            e.currencycode ||' '||e.totalPrice totalPrice,
+	            e.orderId customerNumber,
+	            e.orderId salesRecordNumber,
+	            e.email,
+	            '' itemTitle,
+	            '' insurance,
+	            '' shippingService,
+	            '' declaredValue
+	       from (SELECT EO.ID id,
+	                    eo.account,
+	                    EO.ORDER_ID orderId,
+	                    eo.shipping_service,
+	                    ei.transaction_id transactionId,
+	                    ei.item_id itemId,
+	                    EI.ITEM_SKU sku,
+	                    EI.QUANTITY_PURCHASED qty,
+	                    ei.price  price,
+	                    ei.price * EI.QUANTITY_PURCHASED totalPrice,
+	                    ei.currencycode,
+	                    eo.buyer_email email
+	               FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+	              WHERE EO.ID = EI.PARENT_ID
+	                AND EO.PAID_TIME IS NOT NULL
+	                AND EO.SHIPPED_TIME IS NULL
+	                and eo.tag = 0
+	                and eo.order_status = 'Completed'
+	                and ei.item_sku not like '%OS%'
+	                and eo.sales_record_number is not null
+	                AND EO.PAY_STATUS = 'Complete'
+	                and ei.ship_time is null
+	                and eo.created_time >
+	                    to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')
+	             union all
+	             SELECT EO.ID id,
+	                    eo.account,
+	                    'W_' || EO.ORDER_ID || '_' || sf.times orderId,
+	                    eo.shipping_service,
+	                    ei.transaction_id transactionId,
+	                    ei.item_id itemId,
+	                    sf.sku sku,
+	                    to_char(sf.qty) qty,
+	                    ei.price  price,
+	                    ei.price * EI.QUANTITY_PURCHASED  totalPrice,
+	                    ei.currencycode,
+	                    eo.buyer_email email
+	               FROM EBAY_ORDER             EO,
+	                    EBAY_ORDER_ITEM        EI,
+	                    sys_return_order_final sf
+	              WHERE EO.ID = EI.PARENT_ID
+	                and sf.platform = 'ebay'
+	                AND SF.ORDER_TYPE = 1
+	                and eo.order_id = sf.order_id
+	                and eo.account = sf.account
+	                and ei.item_sku = sf.m_sku
+	                and sf.tarcking_num is null) e,
+	            EBAY_ORDER_SUB ES,
+	            ebay_publication_line l,
+	            sys_sku_link s
+	      where e.ID = ES.PARENT_ID
+	        and e.itemId = l.item_id
+	        and e.itemId = s.p_sku(+)
+	        and l.region = 'CN'
+	</select>
+</mapper>

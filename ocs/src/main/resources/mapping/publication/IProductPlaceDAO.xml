@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IProductPlaceDAO">
+	<resultMap type="com.it.ocs.publication.model.ProductPlaceModel" id="placeResult">
+		<id property="id" column="PLACE_ID" jdbcType="DECIMAL" />
+		<result property="productAddress" column="ADDRESS" jdbcType="VARCHAR" />
+		<result property="region" column="REGION" jdbcType="VARCHAR" />
+		<result property="postCode" column="POST_CODE" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_GOOD_PLACE where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<select id="getById" resultMap="placeResult">
+		<include refid="select_base" /> where PLACE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="placeResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			PLACE_ID id,
+			ADDRESS  productAddress,
+			REGION region,
+			POST_CODE postCode,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_GOOD_PLACE
+	</sql>
+	<select id="query" resultMap="placeResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.ProductPlaceModel">
+		insert into EBAY_GOOD_PLACE
+		(
+			PLACE_ID,
+			ADDRESS,
+			REGION,
+			POST_CODE,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{productAddress},
+			#{region},
+			#{postCode},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.ProductPlaceModel">
+		update EBAY_GOOD_PLACE set 
+			ADDRESS=#{productAddress},
+			REGION=#{region},
+			POST_CODE=#{postCode},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where PLACE_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_GOOD_PLACE set ENABLED_FLAG='N' where PLACE_ID=#{id}
+	</update>
+</mapper>

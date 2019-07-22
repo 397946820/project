@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.amazon.dao.IInboundShipmentDAO">
+	<insert id="batchAdd">
+		insert into AMAZON_INBOUND_SHIPMENT(
+		ID,
+		DESTINATIONFULFILLMENTCENTERID,
+		LABELPREPTYPE,
+		CITY,
+		COUNTRYCODE,
+		POSTALCODE,
+		NAME,
+		ADDRESSLINE1,
+		ADDRESSLINE2,
+		STATEORPROVINCECODE,
+		SHIPMENTID,
+		ARECASESREQUIRED,
+		SHIPMENTNAME,
+		SHIPMENTSTATUS,
+		PLATFORM
+		)
+		select AMAZON_INBOUND_SHIPMENT_SEQ.NEXTVAL,cd.* from
+		<foreach collection="list" item="data" index="index" close=")"
+			open="(" separator="union">
+			select
+			#{data.DestinationFulfillmentCenterId,jdbcType=VARCHAR},
+			#{data.LabelPrepType,jdbcType=VARCHAR},
+			#{data.City,jdbcType=VARCHAR},
+			#{data.CountryCode,jdbcType=VARCHAR},
+			#{data.PostalCode,jdbcType=VARCHAR},
+			#{data.Name,jdbcType=VARCHAR},
+			#{data.AddressLine1,jdbcType=VARCHAR},
+			#{data.AddressLine2,jdbcType=VARCHAR},
+			#{data.StateOrProvinceCode,jdbcType=VARCHAR},
+			#{data.ShipmentId,jdbcType=VARCHAR},
+			#{data.AreCasesRequired,jdbcType=VARCHAR},
+			#{data.ShipmentName,jdbcType=VARCHAR},
+			#{data.ShipmentStatus,jdbcType=VARCHAR},
+			#{data.platForm,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		cd
+	</insert>
+	<insert id="add">
+		insert into AMAZON_INBOUND_SHIPMENT(
+		ID,
+		DESTINATIONFULFILLMENTCENTERID,
+		LABELPREPTYPE,
+		CITY,
+		COUNTRYCODE,
+		POSTALCODE,
+		NAME,
+		ADDRESSLINE1,
+		ADDRESSLINE2,
+		STATEORPROVINCECODE,
+		SHIPMENTID,
+		ARECASESREQUIRED,
+		SHIPMENTNAME,
+		SHIPMENTSTATUS,
+		CREATE_AT,
+		UPDATED_AT,
+		PLATFORM
+		) values(AMAZON_INBOUND_SHIPMENT_SEQ.Nextval,
+		#{data.DestinationFulfillmentCenterId,jdbcType=VARCHAR},
+		#{data.LabelPrepType,jdbcType=VARCHAR},
+		#{data.City,jdbcType=VARCHAR},
+		#{data.CountryCode,jdbcType=VARCHAR},
+		#{data.PostalCode,jdbcType=VARCHAR},
+		#{data.Name,jdbcType=VARCHAR},
+		#{data.AddressLine1,jdbcType=VARCHAR},
+		#{data.AddressLine2,jdbcType=VARCHAR},
+		#{data.StateOrProvinceCode,jdbcType=VARCHAR},
+		#{data.ShipmentId,jdbcType=VARCHAR},
+		#{data.AreCasesRequired,jdbcType=VARCHAR},
+		#{data.ShipmentName,jdbcType=VARCHAR},
+		#{data.ShipmentStatus,jdbcType=VARCHAR},
+		sysdate,
+		sysdate,
+		#{data.platForm,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="update">
+		update AMAZON_INBOUND_SHIPMENT t1 set (t1.DESTINATIONFULFILLMENTCENTERID,
+		t1.LABELPREPTYPE,t1.CITY,t1.COUNTRYCODE,t1.POSTALCODE,t1.NAME,t1.ADDRESSLINE1,
+		t1.ADDRESSLINE2,t1.STATEORPROVINCECODE,t1.ARECASESREQUIRED,
+		t1.SHIPMENTNAME,t1.SHIPMENTSTATUS,
+		t1.UPDATED_AT)=(select #{data.DestinationFulfillmentCenterId,jdbcType=VARCHAR} DESTINATIONFULFILLMENTCENTERID,
+		#{data.LabelPrepType,jdbcType=VARCHAR} LABELPREPTYPE,
+		#{data.City,jdbcType=VARCHAR} CITY,
+		#{data.CountryCode,jdbcType=VARCHAR} COUNTRYCODE,
+		#{data.PostalCode,jdbcType=VARCHAR} POSTALCODE,
+		#{data.Name,jdbcType=VARCHAR} NAME,
+		#{data.AddressLine1,jdbcType=VARCHAR} ADDRESSLINE1,
+		#{data.AddressLine2,jdbcType=VARCHAR} ADDRESSLINE2,
+		#{data.StateOrProvinceCode,jdbcType=VARCHAR} STATEORPROVINCECODE,
+		#{data.AreCasesRequired,jdbcType=VARCHAR} ARECASESREQUIRED,
+		#{data.ShipmentName,jdbcType=VARCHAR} SHIPMENTNAME,
+		#{data.ShipmentStatus,jdbcType=VARCHAR} SHIPMENTSTATUS,
+		sysdate UPDATED_AT from dual)
+		where t1.SHIPMENTID=#{data.ShipmentId,jdbcType=VARCHAR} and t1.SHIPMENTSTATUS!=#{data.ShipmentStatus,jdbcType=VARCHAR}
+	</update>
+
+	<select id="getByShipmentIds" resultType="java.util.Map">
+		select * from AMAZON_INBOUND_SHIPMENT where SHIPMENTID in
+		<foreach collection="list" item="shipmentId" open="(" close=")"
+			separator=",">
+			#{shipmentId}
+		</foreach>
+	</select>
+	<select id="getByShipmentId" resultType="java.util.Map">
+		select * from
+		AMAZON_INBOUND_SHIPMENT where SHIPMENTID=#{shipmentId}
+	</select>
+	<select id="getLastUpdate" resultType="java.util.Map">
+		select * from
+		AMAZON_INBOUND_SHIPMENT where rownum=1 order by UPDATED_AT desc
+	</select>
+
+</mapper>

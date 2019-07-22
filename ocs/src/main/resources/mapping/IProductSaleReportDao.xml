@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.cal.dao.IProductSaleReportDao">
+	<select id="queryByPage" resultType="com.it.ocs.cal.vo.SaleCountReportVO">
+		select sr.field,
+		nvl(am.amazon_qty,0) amazonQty,
+		nvl(am.amazon_price,0) amazonPrice,
+		nvl(eb.ebay_qty,0) ebayQty,
+		nvl(eb.ebay_price,0) ebayPrice,
+		nvl(li.light_qty,0) lightQty,
+		nvl(li.light_price,0) lightPrice,
+		rownum id
+		from (select distinct field from sys_sku_field_relaction) sr,
+		(select t.field, sum(t.qty) amazon_qty, sum(price) amazon_price
+		from (select a.sku, a.qty, b.field, b.is_new isNew,
+		a.price*cr.currency_rate price
+		from sale_order_report a, sys_sku_field_relaction b,(select distinct
+		currency_code,currency_rate from cal_currency_rate) cr
+		where a.sku = b.s_sku
+		and a.currencycode = cr.currency_code
+		and a.date_type = 1
+		and a.status = 'Shipped'
+		and a.order_day between
+		to_date(#{param.startTime}, 'YYYY-MM-DD') and
+		to_date(#{param.endTime}, 'YYYY-MM-DD')) t
+		group by t.field) am,
+		(
+		select t.field, sum(t.qty) ebay_qty, sum(price) ebay_price
+		from (select n.s_sku sku,
+		to_number(m.quantity_purchased) qty,
+		n.field,
+		n.is_new isNew,
+		m.price price
+		from (select item_sku,
+		sum(quantity_purchased) quantity_purchased,
+		sum(price) price
+		from (select tr.item_sku,
+		tr.quantity_purchased,
+		tr.price * cr.currency_rate price
+		from (select item_sku,
+		currencycode,
+		sum(quantity_purchased) quantity_purchased,
+		sum(price) price
+		from (select a.item_sku,
+		a.quantity_purchased,
+		a.price * a.quantity_purchased price,
+		a.currencycode
+		from ebay_order b, ebay_order_item a
+		where b.order_id = a.order_id
+		and b.created_time between
+		to_date(#{param.startTime}, 'YYYY-MM-DD') and
+		to_date(#{param.endTime}, 'YYYY-MM-DD')
+		and a.item_sku not like '%*%')
+		group by item_sku, currencycode) tr,
+		(select distinct currency_code, currency_rate
+		from cal_currency_rate) cr
+		where tr.currencycode = cr.currency_code)
+		group by item_sku) m,
+		sys_sku_field_relaction n
+		where (m.item_sku = n.s_sku or
+		m.item_sku like '%-' || n.s_sku)
+		union all
+		select n.s_sku sku,
+		m.quantity_purchased qty,
+		n.field,
+		n.is_new isNew,
+		m.price price
+		from (select item_sku,
+		sum(quantity_purchased) quantity_purchased,
+		sum(price) price
+		from (select tr.item_sku,
+		tr.quantity_purchased,
+		tr.price * cr.currency_rate price
+		from (select item_sku,
+		currencycode,
+		sum(quantity_purchased) quantity_purchased,
+		sum(price) price
+		from (select substr(a.item_sku,
+		instr(a.item_sku, '*', 1, 1) + 1,
+		length(a.item_sku) -
+		instr(a.item_sku, '*', 1, 1) + 1) item_sku,
+		(a.quantity_purchased *
+		ebay_sku_getCount(a.item_sku)) quantity_purchased,
+		a.price * a.quantity_purchased price,
+		a.currencycode
+		from ebay_order k, ebay_order_item a
+		where k.order_id = a.order_id
+		and k.created_time between
+		to_date(#{param.startTime}, 'YYYY-MM-DD') and
+		to_date(#{param.endTime}, 'YYYY-MM-DD')
+		and a.item_sku like '%*%')
+		group by item_sku, currencycode) tr,
+		(select distinct currency_code, currency_rate
+		from cal_currency_rate) cr
+		where tr.currencycode = cr.currency_code)
+		group by item_sku) m,
+		sys_sku_field_relaction n
+		where m.item_sku = n.s_sku) t
+		group by t.field) eb,
+		(
+		select t.field, sum(t.qty) light_qty, sum(price) light_price
+		from (select s.field,
+		m.sku,
+		m.qty_shipped qty,
+		s.is_new isNew,
+		m.row_total*cr.currency_rate price
+		from light_order r,
+		light_order_item m,
+		sys_sku_field_relaction s,
+		(select distinct currency_code,currency_rate from cal_currency_rate) cr
+		where r.entity_id = m.parent_id
+		and m.sku = s.s_sku
+		and r.order_currency_code = cr.currency_code
+		and r.light_created_at between
+		to_date(#{param.startTime}, 'YYYY-MM-DD') and
+		to_date(#{param.endTime}, 'YYYY-MM-DD')) t
+		group by t.field) li
+		where sr.field = am.field(+)
+		and sr.field = eb.field(+)
+		and sr.field = li.field(+)
+	</select>
+	<select id="queryCatCount" resultType="com.it.ocs.cal.vo.SaleCatCountReportVO">
+		<include refid="querycatbase" />
+	</select>
+	<select id="queryDisCount" resultType="com.it.ocs.cal.vo.SaleDisCountReportVO">
+		<include refid="querydisbase" />
+	</select>
+	<sql id="querydisbase">
+		select rr.account,rr.site,sum(rr.price)
+		price,sum(rr.orderqty) orderqty,sum(rr.saleqty) saleqty,
+		min(rr.currencycode) currencycode,sum(rr.deduction)
+		deduction,sum(rr.taxrate) taxrate,rr.disflag disflag from (
+		select r.sku sku,r.account account,r.site,r.price price,r.orderQty orderQty,
+		r.saleQty saleQty,r.currencycode currencycode,r.deduction
+		deduction,r.taxrate taxrate,
+		case when nvl(d.is_dis,0)=0 then 'CONTINUE' ELSE 'DISCONTINUE' end disflag
+		from(
+		select a.sku,
+		a.platform platform,
+		a.account account,
+		a.site,
+		sum(a.price) price,
+		sum(a.qty) orderQty,
+		sum(a.count) saleQty,
+		max(a.currencycode) currencycode,
+		sum(a.deduction) deduction,
+		sum(a.taxrate) taxrate
+		from (select case
+		when instr(b.sku, 'N', 1, 1) = 1 then
+		substr(b.sku, 2)
+		else
+		b.sku
+		end sku,
+		b.terrace platform,
+		b.account,case when b.site='Amazon.it' then 'IT'
+		when b.site='Amazon.es' then 'ES' when b.site='Amazon.fr' then 'FR'
+		when b.site='Amazon.co.uk' then 'UK' else b.account end site,b.price
+		price,b.qty qty,b.count count,b.currencycode currencycode,
+		b.deduction deduction,b.taxrate taxrate,b.status status from
+		ocs_ebay.SALE_ORDER_REPORT b where
+		b.date_type=3 and b.terrace='amazon' and
+		b.order_day between
+		to_date(#{param.startTime},'yyyy-MM-dd') and to_date(#{param.endTime},'yyyy-MM-dd')
+		) a
+		group by a.sku,a.account,a.site,a.platform) r,ocs_ebay.cal_product_dis d
+		where r.sku=d.sku(+) and
+		r.site=d.country_id(+) and r.platform=d.platform(+)) rr group by
+		rr.account,rr.site,rr.disflag order by rr.account,rr.site
+	</sql>
+
+	<sql id="querycatbase">
+		select zr.product_type productType,zr.account
+		account,zr.site site,
+		sum(zr.price) price,
+		sum(zr.orderqty) orderQty,sum(zr.saleqty) saleQty,max(zr.currencycode) currencycode,
+		sum(zr.deduction) deduction,sum(zr.taxrate) taxrate from (
+		select r.*,cp.product_type from (
+		select a.sku,
+		a.account account,
+		a.site site,
+		sum(a.price) price,
+		sum(a.qty) orderQty,
+		sum(a.count) saleQty,
+		max(a.currencycode) currencycode,
+		sum(a.deduction) deduction,
+		sum(a.taxrate) taxrate
+		from (select case
+		when instr(b.sku, 'N', 1, 1) = 1 then
+		substr(b.sku, 2)
+		else
+		b.sku
+		end sku,b.account,b.site site,b.price price,b.qty qty,b.count
+		count,b.currencycode currencycode,
+		b.deduction deduction,b.taxrate taxrate,b.status status from
+		ocs_ebay.SALE_ORDER_REPORT b where
+		b.terrace='amazon' and b.date_type='3' and
+		b.order_day between
+		to_date(#{param.startTime},'yyyy-MM-dd') and to_date(#{param.endTime},'yyyy-MM-dd')
+		) a
+		group by a.sku,a.account,a.site) r,cal_product_entity cp where
+		r.sku=cp.sku(+) and cp.product_type is not null) zr
+		group by zr.product_type,zr.account,zr.site
+	</sql>
+	<select id="findProductTypes" resultType="com.it.ocs.cal.vo.SaleCatCountReportVO">
+		select distinct a.product_type productType from ocs_ebay.cal_product_entity a where a.product_type is not null
+	</select>
+	
+	<select id="findSitesByAccount" resultType="com.it.ocs.cal.vo.SaleCatCountReportVO">
+		select distinct a.site site from ocs_ebay.SALE_ORDER_REPORT a where a.terrace='amazon' and a.site!='Non-Amazon' 
+		and a.account=#{account}
+	</select>
+</mapper>

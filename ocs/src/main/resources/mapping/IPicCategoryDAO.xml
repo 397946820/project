@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.pic.dao.IPicCategoryDAO">
+	<resultMap type="com.it.ocs.pic.model.PicCategoryModel" id="picCategoryResult">
+		<id property="id" column="PIC_CATEGORY_ID" jdbcType="DECIMAL" />
+		<result property="name" column="CATEGORY_NAME" jdbcType="VARCHAR" />
+		<result property="ebayRelationInfo" column="EBAY_RELATION_INFO" jdbcType="VARCHAR" />
+		<result property="pid" column="PARENT_ID" jdbcType="DECIMAL" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+		<result column="CATEGORY_ID" property="categoryId"  />
+	</resultMap>
+	<select id="getById" resultMap="picCategoryResult">
+		<include refid="select_base" /> where PIC_CATEGORY_ID=#{id}
+	</select>
+	<select id="queryByIds" resultMap="picCategoryResult">
+		 select PIC_CATEGORY_ID id,CATEGORY_NAME  name from EBAY_PIC_CATEGORY where PIC_CATEGORY_ID in 
+		 <foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+	<sql id="select_base">
+		select 
+			PIC_CATEGORY_ID id,
+			CATEGORY_NAME  name,
+			EBAY_RELATION_INFO ebayRelationInfo,
+			PARENT_ID pid,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_PIC_CATEGORY
+	</sql>
+	<select id="query" resultMap="picCategoryResult">
+		 <include refid="select_base" /> where ENABLED_FLAG='Y'
+	</select>
+	<insert id="add" parameterType="com.it.ocs.pic.model.PicCategoryModel">
+		insert into EBAY_PIC_CATEGORY
+		(
+			PIC_CATEGORY_ID,
+			CATEGORY_NAME,
+			PARENT_ID,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			EBAY_SITE_INFO_S.Nextval,
+			#{name},
+			#{pid},
+			'Y',
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.pic.model.PicCategoryModel">
+		update EBAY_PIC_CATEGORY set 
+			CATEGORY_NAME=#{name},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where PIC_CATEGORY_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_PIC_CATEGORY set ENABLED_FLAG='N' where PIC_CATEGORY_ID=#{id}
+	</update>
+	<update id="batchDel">
+		update EBAY_PIC_CATEGORY set ENABLED_FLAG='N' where PIC_CATEGORY_ID in 
+		<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	<update id="deleteCategoryById">
+		begin
+			update EBAY_PIC_CATEGORY set ENABLED_FLAG='N' where PIC_CATEGORY_ID = #{picCategoryId} ;
+			update ebay_pic_info f set f.enabled_flag = 'N' where f.category_id = #{picCategoryId};
+		end;
+	</update>
+</mapper>

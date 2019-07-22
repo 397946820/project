@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.ILightOrderSubDao">
+	<resultMap type="com.it.ocs.task.model.LightOrderSubModel" id="lightOrderSubResult">
+		<id column="ID" property="id"  />
+		<result column="PARENT_ID" property="parent_id"  />
+		<result column="CUSTOMER_NOTE" property="customer_note"  />
+		<result column="ORDER_ID" property="order_id"  />
+	</resultMap>
+	<select id="getOrderSubSeqs" resultType="java.lang.Long">
+		select TOTAL_ORDER_SUB_SEQ.Nextval from dual
+	</select>
+	<select id="findLightOrderSubs" resultMap="lightOrderSubResult">
+		select ORDER_ID from LIGHT_ORDER_SUB
+	</select>
+	<insert id="insertLightOrderSubs" parameterType="java.util.List">
+		INSERT INTO LIGHT_ORDER_SUB(
+			ID,
+			PARENT_ID,
+			CUSTOMER_NOTE,
+			ORDER_ID)  
+		select TOTAL_ORDER_SUB_SEQ.Nextval,c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.parent_id,jdbcType=BIGINT},
+				#{item.customer_note,jdbcType=VARCHAR},
+				#{item.order_id,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateLightOrderSubs" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update LIGHT_ORDER_SUB bao 
+	   	set
+			CUSTOMER_NOTE = #{item.customer_note,jdbcType=VARCHAR}
+	   where bao.ORDER_ID = #{item.order_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

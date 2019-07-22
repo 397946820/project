@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IPublicationRelationDAO">
+	<resultMap type="com.it.ocs.publication.model.PublicationRelationModel" id="relationResult">
+		<id property="id" column="PUBLICATION_RELATION_ID" jdbcType="DECIMAL" />
+		<result property="publicationId" column="PUBLICATION_ID" jdbcType="VARCHAR" />
+		<result property="productCommentId" column="PRODUCT_COMMENT_ID" jdbcType="DECIMAL" />
+		<result property="auctionId" column="AUCTION_ID" jdbcType="VARCHAR" />
+		<result property="paymentId" column="PAYMENT_ID" jdbcType="VARCHAR" />
+		<result property="buyerRequireId" column="BUYER_REQUIRE_ID" jdbcType="VARCHAR" />
+		<result property="returnPolicyId" column="RETURN_POLICY_ID" jdbcType="VARCHAR" />
+		<result property="productPlaceId" column="PRODUCT_PLACE_ID" jdbcType="VARCHAR" />
+		<result property="transChooseId" column="TRANSCHOOSE_ID" jdbcType="VARCHAR" />
+		<result property="advertFeatureId" column="ADVERTFEATURE_ID" jdbcType="VARCHAR" />
+		<result property="otherId" column="OTHER_ID" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+		<result column="CORRELATION_ID" property="correlation_id"  />
+		<result column="Product_UST_IDNR" property="product_ust"/>
+	</resultMap>
+	<resultMap type="com.it.ocs.publication.model.RelationDataModel" id="relationDataResult">
+		<id property="id" />
+		<result property="name" />
+		<result property="siteId" />
+		<result property="publicationType" />
+		<result property="ebayAccount"  />
+		<result property="sku" />
+		<result property="productFirstCategory" />
+		<result property="creationDate" />
+		<result property="price" />
+		<result property="publicationDays" />
+		<result property="autionItemInfo" />
+		<result property="postCode" />
+	</resultMap>
+	<select id="queryRelationDatas" resultMap="relationDataResult">
+		<!-- select 
+			RELATION.PUBLICATION_RELATION_ID id,
+			PUB.TEMPLATE_NAME name,
+			PUB.SITE_ID siteId,
+			PUB.PUBLICATION_TYPE publicationType,
+			PUB.EBAY_ACCOUNT ebayAccount,
+			PUB.SKU sku,
+			PUB.PRODUCT_FIRST_CATEGORY_ID productFirstCategory,
+			PUB.CREATION_DATE creationDate,
+			AUCTION.PRICE price,
+			AUCTION.PUBLICATION_DAYS publicationDays,
+			AUCTION.AUTION_ITEM_INFO autionItemInfo,
+			PLACE.POST_CODE postCode
+		from Ebay_Publication_Relation RELATION
+			left join EBAY_PUBLICATION_INFO PUB on RELATION.PUBLICATION_ID=PUB.TEMPLATE_ID
+			left join EBAY_AUCTION AUCTION on RELATION.AUCTION_ID=AUCTION.AUCTION_ID
+			left join EBAY_GOOD_PLACE PLACE on RELATION.PRODUCT_PLACE_ID=PLACE.PLACE_ID
+		where PUBLICATION_RELATION_ID in
+		<foreach collection="relationModels" item="model" index="index" open="(" separator="," close=")">
+			#{model.id}
+		</foreach>
+		 order by RELATION.CREATION_DATE desc -->
+		 
+		select pi.template_id id,
+		       pi.template_name name,
+		       pi.sku sku,
+		       pi.site_id siteId,
+		       pi.publication_type publicationType,
+		       pi.ebay_account ebayAccount,
+		       pi.price price,
+		       pi.publication_days publicationDays,
+		       pi.product_first_category_id productFirstCategoryId,
+		       pi.creation_date creationDate,
+		       pi.post_code postCode
+		  from ebay_publication_info pi
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		<!-- select count(1) from EBAY_PUBLICATION_RELATION where ENABLED_FLAG='Y' -->
+		select count(id) from (
+			select pi.template_id id,
+		       pi.template_name name,
+		       pi.sku sku,
+		       pi.site_id siteId,
+		       pi.publication_type publicationType,
+		       pi.ebay_account ebayAccount,
+		       pi.price price,
+		       pi.publication_days publicationDays,
+		       pi.product_first_category_id productFirstCategoryId,
+		       pi.creation_date creationDate,
+		       pi.post_code postCode
+		  from ebay_publication_info pi
+		  where pi.ENABLED_FLAG='Y'
+		)
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_PUBLICATION_line_Seq.Nextval from dual
+	</select>
+	<select id="getById" resultMap="relationResult">
+		<include refid="select_base" /> where PUBLICATION_RELATION_ID=#{id}
+	</select>
+	
+	<select id="queryByPage" resultType="com.it.ocs.publication.model.PublicationModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" /> where pi.ENABLED_FLAG='Y' order by pi.CREATION_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<select id="selectPubByCondition" resultType="com.it.ocs.publication.model.PublicationModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_group" /> where 1=1 
+				<include refid="l_select_base_condition"/>
+				order by <include refid="sort_base" /> 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="queryByPageList" resultType="com.it.ocs.publication.model.PublicationModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" /> where pi.ENABLED_FLAG='Y' 
+				<include refid="select_base_condition"/>
+				order by <include refid="sort_base" /> 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<select id="queryLineList" resultType="com.it.ocs.publication.model.PublicationModel">
+		<include refid="select_line_base" /> where pi.ENABLED_FLAG='Y' 
+		<include refid="l_select_base_condition"/>
+	</select>
+	<select id="queryLineByPageList" resultType="com.it.ocs.publication.model.PublicationModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_line_base" /> where pi.ENABLED_FLAG='Y' 
+				<include refid="l_select_base_condition"/>
+				order by <include refid="sort_base" /> 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="countList" resultType="java.lang.Integer">
+		<!-- select count(1) from EBAY_PUBLICATION_RELATION where ENABLED_FLAG='Y' -->
+		select count(id) from (
+			<include refid="select_base" /> where pi.ENABLED_FLAG='Y'
+			<include refid="select_base_condition"/>
+		)
+	</select>
+	<select id="countLineList" resultType="java.lang.Integer">
+			select count(id) from (
+			<include refid="select_line_base" /> where pi.ENABLED_FLAG='Y'
+			<include refid="l_select_base_condition"/>
+		     )
+	</select>
+	<select id="conditionCountList" resultType="java.lang.Integer">
+		<!-- select count(1) from EBAY_PUBLICATION_RELATION where ENABLED_FLAG='Y' -->
+		select count(id) from (
+			<include refid="select_group" /> where 1=1
+			<include refid="l_select_base_condition"/>
+		)
+	</select>
+	<sql id="line_select" >
+	    	   pi.id,
+			   pi.name,
+	    	   pi.tNmae,
+			   pi.sku,
+			   pi.siteId,
+			   pi.itemId,
+			   pi.enabled_flag,
+               pi.creation_date,
+			   pi.productAddress,
+			   pi.publicationType,
+			   pi.quantity_sold,
+			   pi.ebayAccount,
+			   pi.price,
+			   pi.publicationDays,
+			   pi.productFirstCategoryId,
+			   pi.creationDate,
+			   pi.productPlacePost,
+			   pi.productCount,
+			   pi.ebayImages,
+			   pi.original_price,
+					   pi.productSubtitle,
+				       pi.productTitle,
+				       pi.variations,
+				       pi.buyoutPrice,
+				       pi.reserverPrice,
+				       pi.quantity_available,
+				       pi.ebayProductURL,
+				       pi.advert_id,
+				       pi.timing_publication_date,
+				       pi.end_publication_date,
+				       pi.discount_start_date,
+				       pi.discount_end_date,
+				       pi.correlation_id,
+				       pi.hit_count,
+				       to_char(pi.TIMING_PUBLICATION_DATE,'yyyy-mm-dd hh24:mi:ss') publicationDate,
+			           to_char(pi.END_PUBLICATION_DATE,'yyyy-mm-dd hh24:mi:ss') publicationDateEnd
+			           
+	</sql>
+	<sql id="l_select_base_condition">
+		<choose>  
+            <when test="pubModel.conditions=='line'">  
+                <![CDATA[and  pi.ENDING_STATE='N' and pi.END_PUBLICATION_DATE>sysdate ]]>
+            </when>
+            
+            <when test="pubModel.conditions=='timing'">  
+               <![CDATA[ and  pi.TIMING_PUBLICATION_DATE>pi.PUBLICATION_DATE]]>
+            </when>
+            <when test="pubModel.conditions=='downline'">  
+                 and  pi.ENDING_STATE='Y' or pi.END_PUBLICATION_DATE<![CDATA[<]]>sysdate 
+            </when>
+        </choose>
+        <if test="pubModel.labelId !=null and pubModel.labelId !='' and pubModel.labelId!=1">
+			and pi.id in (select TEMPLATE_ID from ITEM_LABLE_MIDDLE where LABEL_ID = #{pubModel.labelId} and ENABLED_FLAG='Y')
+		</if>
+		<if test="pubModel.correlation_id !=null and pubModel.correlation_id !=''">
+			and pi.correlation_id = #{pubModel.correlation_id}
+		</if>
+		<if test="pubModel.templateName !=null and pubModel.templateName !=''">
+			and (pi.tNmae like '%'||#{pubModel.templateName}||'%' or pi.name like '%'||#{pubModel.templateName}||'%')
+		</if>
+		<if test="pubModel.sku !=null and pubModel.sku !=''">
+			and pi.sku like '%'||#{pubModel.sku}||'%'
+		</if>
+		<if test="pubModel.itemId !=null and pubModel.itemId !=''">
+			and pi.itemId like '%'|| #{pubModel.itemId}||'%'
+		</if>
+		<if test="pubModel.productTitle !=null and pubModel.productTitle !=''">
+			and pi.productTitle like '%'||#{pubModel.productTitle}||'%'
+		</if>
+		<if test="pubModel.publicationType !=null and pubModel.publicationType !=''">
+			
+			and pi.publicationType in (${pubModel.publicationType})
+		</if>
+		<if test="pubModel.siteId !=null and pubModel.siteId !=''">
+			and pi.siteId = #{pubModel.siteId}
+		</if>
+		<if test="pubModel.ebayAccount !=null and pubModel.ebayAccount !=''">
+			and pi.ebayAccount = #{pubModel.ebayAccount}
+		</if>
+		<if test="pubModel.other!=null and pubModel.other!=''">
+			<choose>
+				<when test="pubModel.other==0">
+					and pi.quantity_available=0
+				</when>
+				<when test="pubModel.other==1">
+					and pi.quantity_available>0
+				</when>
+				<when test="pubModel.other==2">
+					and pi.original_price is not null 
+				</when>
+				<when test="pubModel.other==3">
+				 and pi.original_price is null 
+				</when>
+			</choose>
+		</if>
+		<if test="pubModel.publicationDays !=null and pubModel.publicationDays!=''">
+			and pi.publicationDays=#{pubModel.publicationDays}
+		</if>
+		<choose>  
+            <when test="pubModel.pubStatus==1">  
+                and pi.itemId is null
+            </when>
+            <when test="pubModel.pubStatus==2">  
+                and pi.itemId is not null
+            </when>
+            <when test="pubModel.pubStatus==3">  
+            		<![CDATA[ 
+            			and pi.publicationDays < pi.TIMING_PUBLICATION_DATE
+            			and pi.TIMING_PUBLICATION_DATE < sysdate 
+            		]]>
+               
+            </when>
+            <when test="pubModel.pubStatus==4">  
+            <![CDATA[ 
+                and pi.TIMING_PUBLICATION_DATE < sysdate - to_number(substr(pi.publicationDays,6,length(pi.publicationDays)-5))
+             ]]>
+            </when>  
+        </choose>
+
+	</sql>
+	<sql id="sort_base">
+	  <choose>
+		<when test="sort!=null and sort!=''">
+			<choose>
+				<when test="sort=='c_date'">
+					pi.creation_date ${order}
+				</when>
+		        <when test="sort=='publicationType'">
+		            pi.publicationType ${order}
+		        </when>
+		        <when test="sort=='quantity_sold'">
+		            to_number(nvl(pi.quantity_sold,'0'))  ${order}
+		        </when>
+		        <when test="sort=='quantity_available'">
+				      pi.quantity_available ${order}
+		        </when>
+		        <when test="sort=='publicationDays'">
+		            pi.publicationDays ${order}
+		        </when>
+		        <when test="sort=='hit_count'">
+		        	pi.hit_count ${order}
+		        </when>
+		        <when test="sort=='price'">
+		            to_number(pi.price) ${order}
+		        </when>
+		        <when test="sort=='productCount'">
+		             to_number(nvl(pi.productCount,'0')) ${order}
+		        </when>
+		        <when test="sort=='productFirstCategoryId'">
+		            to_number(pi.productFirstCategoryId) ${order}
+		        </when>
+		        <when test="sort=='publicationDate'">
+		            pi.TIMING_PUBLICATION_DATE ${order}
+		        </when>
+		        <when test="sort=='publicationDateEnd'">
+		            pi.END_PUBLICATION_DATE ${order}
+		        </when>
+		        <when test="sort=='ebayAccount'">
+		            pi.ebayAccount ${order}
+		        </when>
+		         <when test="sort=='siteId'">
+		             pi.siteId ${order}
+		        </when>
+		        <when test="sort=='pre_count'">
+		        	pi.pre_count ${order}
+		        </when>
+		        <when test="sort=='correlationCount'">
+		        	pi.correlationCount ${order}
+		        </when>
+		    </choose>
+		   </when>
+		 <otherwise>
+		        pi.CREATION_DATE desc
+		  </otherwise>
+		</choose>
+	</sql>
+	<sql id="select_base_condition">
+		<if test="pubModel.labelId !=null and pubModel.labelId !='' and pubModel.labelId!=1">
+			and pi.id in (select TEMPLATE_ID from ITEM_LABLE_MIDDLE where LABEL_ID = #{pubModel.labelId} and ENABLED_FLAG='Y')
+		</if>
+		<if test="pubModel.publicationType !=null and pubModel.publicationType !=''">
+			and pi.publicationType in (${pubModel.publicationType})
+		</if>
+		<if test="pubModel.publicationDays !=null and pubModel.publicationDays!=''">
+			and pi.publicationDays=#{pubModel.publicationDays}
+		</if>
+		<if test="pubModel.templateName !=null and pubModel.templateName !=''">
+			and pi.name like '%'||#{pubModel.templateName}||'%'
+		</if>
+		<if test="pubModel.sku !=null and pubModel.sku !=''">
+			and pi.sku like '%'||#{pubModel.sku}||'%'
+		</if>
+		<if test="pubModel.itemId !=null and pubModel.itemId !=''">
+			and pi.itemId = #{pubModel.itemId}
+		</if>
+		<if test="pubModel.productTitle !=null and pubModel.productTitle !=''">
+			and pi.productTitle like '%'||#{pubModel.productTitle}||'%'
+		</if>
+		<if test="pubModel.siteId !=null and pubModel.siteId !=''">
+			and pi.siteId = #{pubModel.siteId}
+		</if>
+		<if test="pubModel.ebayAccount !=null and pubModel.ebayAccount !=''">
+			and pi.ebayAccount = #{pubModel.ebayAccount}
+		</if>
+		<choose>  
+            <when test="pubModel.pubStatus==1">  
+                and pi.itemId is null
+            </when>
+            <when test="pubModel.pubStatus==2">  
+                and pi.itemId is not null
+            </when>
+            <when test="pubModel.pubStatus==3">  
+            		<![CDATA[ 
+            			and pi.publicationDays < pi.TIMING_PUBLICATION_DATE
+            			and pi.TIMING_PUBLICATION_DATE < sysdate 
+            		]]>
+               
+            </when>
+            <when test="pubModel.pubStatus==4">  
+            <![CDATA[ 
+                and pi.TIMING_PUBLICATION_DATE < sysdate - to_number(substr(pi.publicationDays,6,length(pi.publicationDays)-5))
+             ]]>
+            </when>  
+        </choose>
+
+	</sql>
+	
+	<sql id="select_line_base">
+		select <include refid="line_select"/> from (select epl.template_id id,
+			   epl.template_name name,
+			   epi.template_name tNmae,
+			   epl.sku sku,
+			   epl.site_id siteId,
+			   epl.item_id itemId,
+			   epl.enabled_flag enabled_flag,
+               epl.creation_date,
+			   epl.product_address productAddress,
+			   epl.publication_type publicationType,
+			   epl.PRODUCT_QUANTITY_SOLD quantity_sold,
+			   epl.ebay_account ebayAccount,
+			   epl.price price,
+			   epl.publication_days publicationDays,
+			   epl.product_first_category_id productFirstCategoryId,
+			   epl.creation_date creationDate,
+			   epl.post_code productPlacePost,
+			   epl.product_count productCount,
+			   epl.ending_state ending_state,
+			   epl.ebay_images ebayImages,
+					   epl.product_subtilte productSubtitle,
+				       epl.product_title productTitle,
+				       epl.variations variations,
+				       epl.buyout_Price buyoutPrice,
+				       epl.reserver_Price reserverPrice,
+				       epl.quantity_available quantity_available,
+				       epl.ebay_product_url ebayProductURL,
+				       epl.ADVERT_ID advert_id,
+				       epl.CORRELATION_ID correlation_id,
+				       epl.TIMING_PUBLICATION_DATE,
+			           epl.END_PUBLICATION_DATE,
+			           epl.DISCOUNT_START_DATE,
+			           epl.DISCOUNT_END_DATE,
+			           epl.PUBLICATION_DATE,
+			           epl.hit_count,
+			           epl.original_price
+		  from EBAY_PUBLICATION_line epl
+		  left join EBAY_PUBLICATION_info epi
+		    on epl.correlation_id = epi.template_id) pi
+	</sql>
+	<sql id="select_base">
+			select pi.* from 
+			 (select pi4.*,etpi2.pre_count from (select pi2.template_id id,
+                 pi2.template_name name,
+                 pi2.sku sku,
+                 pi2.site_id siteId,
+                 pi2.item_id itemId,
+                 pi2.enabled_flag enabled_flag,
+                 pi2.creation_date,
+                 to_char(pi2.creation_date,'yyyy-mm-dd hh24:mi:ss') c_date,
+                 pi2.product_address productAddress,
+                 pi2.publication_type publicationType,
+                 pi2.PRODUCT_QUANTITY_SOLD quantity_sold,
+                 pi2.ebay_account ebayAccount,
+                 pi2.price price,
+                 pi2.publication_days publicationDays,
+                 pi2.product_first_category_id productFirstCategoryId,
+                 pi2.creation_date creationDate,
+	             pi2.post_code productPlacePost,
+	             pi2.product_count productCount,
+	             pi2.ebay_images ebayImages,
+	             pi2.product_subtilte productSubtitle,
+	               pi2.product_title productTitle,
+	               pi2.variations variations,
+	               pi2.buyout_Price buyoutPrice,
+	               pi2.reserver_Price reserverPrice,
+	               pi2.quantity_available quantity_available,
+	               pi3.url ebayProductURL,
+	               pi2.ADVERT_ID advert_id,
+	               pi2.TIMING_PUBLICATION_DATE timing_publication_date,
+	               pi2.END_PUBLICATION_DATE end_publication_date,
+	               pi2.CORRELATION_ID correlation_id,
+	               to_char(pi2.TIMING_PUBLICATION_DATE,'yyyy-mm-dd hh24:mi:ss') publicationDate,
+	                 to_char(pi2.END_PUBLICATION_DATE,'yyyy-mm-dd hh24:mi:ss') publicationDateEnd,
+	                 pi3.countCID correlationCount
+	         from ebay_publication_info pi2
+	         left join (
+	        select epl.correlation_id, count(epl.correlation_id) countCID,max(epl.ebay_product_url) url
+	          from ebay_publication_line epl
+	         where 
+	         epl.ENDING_STATE='N' and (epl.end_publication_date>sysdate) group by epl.correlation_id) pi3 
+	         on pi2.template_id=pi3.correlation_id ) pi4 left join(
+	            select etpi.template_id pre_id,count(etpi.template_id) pre_count  from EBAY_TIMING_PLAN_INFO etpi where ENABLED_FLAG='Y'and etpi.first_date>sysdate group by etpi.template_id) etpi2 on pi4.id=etpi2.pre_id
+	         ) pi
+	</sql>
+	<sql id="select_group">
+	    
+		select pi.* from (select pi4.template_id id,
+		                       pi4.template_name name,
+		                       pi4.sku sku,
+		                       pi4.CREATION_DATE,
+		                       pi4.site_id siteId,
+		                       pi4.item_id itemId,
+		                       pi4.product_address productAddress,
+		                       pi4.publication_type publicationType,
+		                       pi4.PRODUCT_QUANTITY_SOLD quantity_sold,
+		                       pi4.ebay_account ebayAccount,
+		                       pi4.price price,
+		                       pi4.ENDING_STATE ending_state,
+		                       pi4.publication_days publicationDays,
+		                       pi4.product_first_category_id productFirstCategoryId,
+		                       pi4.creation_date creationDate,
+		                       pi4.post_code productPlacePost,
+		                       pi4.product_count productCount,
+		                       pi4.original_price,
+		                       pi4.ebay_images ebayImages,
+		                       pi4.product_subtilte productSubtitle,
+		                       pi4.product_title productTitle,
+		                       pi4.variations variations,
+		                       pi4.buyout_Price buyoutPrice,
+		                       pi4.reserver_Price reserverPrice,
+		                       pi4.quantity_available quantity_available,
+		                       pi4.ebay_product_url ebayProductURL,
+		                       to_char(pi4.TIMING_PUBLICATION_DATE,
+		                               'yyyy-mm-dd hh24:mi:ss') publicationDate,
+		                       to_char(pi4.END_PUBLICATION_DATE,
+		                               'yyyy-mm-dd hh24:mi:ss') publicationDateEnd
+		                  from ebay_publication_line pi4,(select pi5.ebay_account,
+		                           pi5.sku,
+		                           pi5.product_title,
+		                           pi5.template_name,
+		                           max(pi5.timing_publication_date) timing_publication_date
+		                  from ebay_publication_line pi5
+		                  group by pi5.ebay_account,
+		                           pi5.sku,
+		                           pi5.product_title,
+		                           pi5.template_name)b
+		                  where pi4.ebay_account = b.ebay_account
+		                      and     pi4.sku = b.sku
+		                      and     pi4.product_title = b.product_title
+		                      and     pi4.template_name = b.template_name
+		                      and pi4.TIMING_PUBLICATION_DATE = b.timing_publication_date
+		                      and pi4.item_id is not null
+		                      and pi4.ENABLED_FLAG = 'Y') pi
+				 	
+	</sql>
+	<select id="query" resultMap="relationResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.PublicationRelationModel">
+		insert into EBAY_PUBLICATION_RELATION
+		(
+			PUBLICATION_RELATION_ID,
+			PUBLICATION_ID,
+			PRODUCT_COMMENT_ID,
+			AUCTION_ID,
+			PAYMENT_ID,
+			BUYER_REQUIRE_ID,
+			RETURN_POLICY_ID,
+			PRODUCT_PLACE_ID,
+			TRANSCHOOSE_ID,
+			ADVERTFEATURE_ID,
+			OTHER_ID,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{publicationId},
+			#{productCommentId},
+			#{auctionId},
+			#{paymentId},
+			#{buyerRequireId},
+			#{returnPolicyId},
+			#{productPlaceId},
+			#{transChooseId},
+			#{advertFeatureId},
+			#{otherId},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.PublicationRelationModel">
+		update EBAY_PUBLICATION_RELATION set 
+		LAST_UPDATE_BY=#{lastUpdateBy},LAST_UPDATE_DATE=#{lastUpdationDate}
+		 where PUBLICATION_RELATION_ID=#{id}
+	</update>
+	
+	<update id="cancelTimingPlan" parameterType="java.lang.Long">
+	   update EBAY_TIMING_PLAN_INFO set ENABLED_FLAG='N' where  to_char(sysdate,'yyyy-mm-dd hh24:mi:ss')<![CDATA[<=]]>to_char(first_date,'yyyy-mm-dd hh24:mi:ss') and TEMPLATE_ID in (${id}) 
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_PUBLICATION_INFO set ENABLED_FLAG='N' where TEMPLATE_ID in (${id})
+	</update>
+	<update id="lineDelete">
+	    update EBAY_PUBLICATION_line set ENABLED_FLAG='N' where TEMPLATE_ID in (${id})
+	</update>
+</mapper>

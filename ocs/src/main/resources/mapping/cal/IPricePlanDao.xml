@@ -1,0 +1,1078 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.IPricePlanDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.PricePlanModel" >
+	    <id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+	    <result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+	    <result column="SHIPPING_TYPE" property="shippingType" jdbcType="VARCHAR" />
+	    <result column="SKU" property="sku" jdbcType="VARCHAR" />
+	    <result column="IS_OVERSIZE" property="isOversize" jdbcType="VARCHAR" />
+	    <result column="CIF" property="cif" jdbcType="VARCHAR" />
+	    <result column="CIFUSD" property="cifusd" jdbcType="VARCHAR" />
+	    <result column="CIFRMB" property="cifrmb" jdbcType="VARCHAR" />
+	    <result column="SOURCING_COST" property="sourcingCost" jdbcType="VARCHAR" />
+	    <result column="FBA_FEE" property="fbaFee" jdbcType="DECIMAL" />
+	    <result column="AMZ_FBA" property="amzFba" jdbcType="DECIMAL" />
+	    <result column="STORAGE_FEE" property="storageFee" jdbcType="DECIMAL" />
+	    <result column="FINAL_COST" property="finalCost" jdbcType="DECIMAL" />
+	    <result column="REFERRAL_RATE" property="referralRate" jdbcType="DECIMAL" />
+	    <result column="UNFULLIABLE_RATE" property="unfulliableRate" jdbcType="DECIMAL" />
+	    <result column="REPLACEMENT_RATE" property="replacementRate" jdbcType="DECIMAL" />
+	    <result column="PROFIT_RATE" property="profitRate" jdbcType="DECIMAL" />
+	    <result column="PROFIT_RATE_ACTION" property="profitRateAction" jdbcType="DECIMAL" />
+	    <result column="VAT" property="vat" jdbcType="DECIMAL" />
+	    <result column="FINAL_PRICE" property="finalPrice" jdbcType="DECIMAL" />
+	    <result column="UNEXPECTED_LOSS" property="unexpectedLoss" jdbcType="DECIMAL" />
+	    <result column="USER_ID" property="userId" jdbcType="DECIMAL" />
+	    <result column="CURRENCY_SYMBOL" property="currencySymbol" jdbcType="VARCHAR" />
+	    <result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+	    <result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="baseSql">
+		select ENTITY_ID as entityId,
+			   COUNTRY_ID as countryId,
+			   SHIPPING_TYPE as shippingType,
+			   SKU,
+			   IS_OVERSIZE as isOversize,
+			   CIF as cif,
+			   CIFUSD as cifusd,
+			   CIFRMB as cifrmb,
+			   SOURCING_COST as sourcingCost,
+			   FBA_FEE as fbaFee,
+			   AMZ_FBA as amzFba,
+			   STORAGE_FEE as storageFee,
+			   FINAL_COST as finalCost,
+			   REFERRAL_RATE as referralRate,
+			   UNFULLIABLE_RATE as unfulliableRate,
+			   REPLACEMENT_RATE as replacementRate,
+			   PROFIT_RATE as profitRate,
+			   PROFIT_RATE_ACTION as profitRateAction,
+			   VAT,
+			   FINAL_PRICE as finalPrice,
+			   UNEXPECTED_LOSS as unexpectedLoss,
+			   USER_ID as userId,
+			   CREATED_AT as createdAt,
+			   UPDATED_AT as updatedAt,
+			   CURRENCY_SYMBOL as currencySymbol
+		from CAL_PRICE_PLAN
+	</sql>
+	
+	
+	<select id="queryBySkuAndCountry" resultMap="BaseResultMap">
+		<include refid="baseSql"/>
+		where SKU = #{sku} and COUNTRY_ID = #{country}
+	</select>
+	<select id="getReturnRate" resultType="java.util.Map">
+		select * from CAL_PRODUCT_ENTITY_OTHER a where a.country_id=#{param.countryId}
+		 and a.parent_id in (
+		 	select entity_id from cal_product_entity b where b.sku=#{param.sku} and
+		 	 b.is_active=1 and b.status=1
+		 )
+	</select>
+	<select id="getFinalPrice" statementType="CALLABLE">
+		 {#{param.result,mode=OUT,jdbcType=DECIMAL} = call f_get_finalprice(
+		        #{param.countryId,mode=IN,jdbcType=VARCHAR},
+		        #{param.finalCost,mode=IN,jdbcType=DECIMAL},
+		        #{param.referralRate,mode=IN,jdbcType=DECIMAL},
+		        #{param.unfulliableRate,mode=IN,jdbcType=DECIMAL},
+		        #{param.replacementRate,mode=IN,jdbcType=DECIMAL},
+		        #{param.profitRate,mode=IN,jdbcType=DECIMAL},
+		        #{param.vat,mode=IN,jdbcType=DECIMAL},
+		        #{param.returnRate,mode=IN,jdbcType=DECIMAL}
+	      )}
+	</select>
+	
+	<select id="queryBySkuAndCountryAndType" resultType="com.it.ocs.cal.model.PricePlanModel">
+		<include refid="baseSql"/>
+		where SKU = #{sku} and COUNTRY_ID = #{country} and SHIPPING_TYPE = #{shippingType}
+	</select>
+	
+	<select id="findBySkus" resultMap="BaseResultMap">
+		<include refid="baseSql"/>
+		<where>
+			<foreach collection="list" item="sku" index="index" open="and sku in (" separator="," close=")">
+					#{sku}
+			</foreach>
+		</where>
+	</select>
+	
+	<select id="findBySkusAndStatus" resultMap="BaseResultMap">
+		<include refid="baseSql"/>
+		where status = #{status}
+		<foreach collection="list" item="sku" index="index" open="and sku in (" separator="," close=")">
+				#{sku}
+		</foreach>
+	</select>
+	
+	<sql id="sql_where">
+		<where>
+			<if test="list != null">
+				<foreach collection="list" item="countryId" index="index" open="and COUNTRY_ID in (" separator="," close=")">
+					#{countryId}
+				</foreach>
+			</if>
+			<if test="param != null">
+				<if test="param.status != '' and param.status != null">
+					and STATUS = #{param.status}
+				</if>
+				<if test="param.userId != '' and param.userId != null">
+					and USER_ID = #{param.userId}
+				</if>
+				<if test="param.shippingType != '' and param.shippingType != null">
+					and SHIPPING_TYPE = #{param.shippingType}
+				</if>
+				<if test="param.countryId != '' and param.countryId != null">
+					and COUNTRY_ID = #{param.countryId}
+				</if>
+				<if test="param.sku != '' and param.sku != null">
+					and UPPER(SKU) like '%' || UPPER(#{param.sku}) || '%'
+				</if>
+				<if test="param.isOversize != '' and param.isOversize != null">
+					and IS_OVERSIZE = #{param.isOversize}
+				</if>
+				<if test="param.cif != '' and param.cif != null">
+					and CIF like '%${param.cif}%'
+				</if>
+				<if test="param.fbaFee != '' and param.fbaFee != null or param.fbaFee == 0">
+					and FBA_FEE = #{param.fbaFee}
+				</if>
+				<if test="param.amzFba != '' and param.amzFba != null or param.amzFba == 0">
+					and AMZ_FBA = #{param.amzFba}
+				</if>
+				<if test="param.storageFee != '' and param.storageFee != null or param.storageFee == 0">
+					and STORAGE_FEE = #{param.storageFee}
+				</if>
+				<if test="param.finalCost != '' and param.finalCost != null or param.finalCost == 0">
+					and FINAL_COST = #{param.finalCost}
+				</if>
+				<if test="param.referralRate != '' and param.referralRate != null or param.referralRate ==0">
+					and REFERRAL_RATE = #{param.referralRate}
+				</if>
+				<if test="param.unfulliableRate != '' and param.unfulliableRate != null or param.unfulliableRate == 0">
+					and UNFULLIABLE_RATE = #{param.unfulliableRate}
+				</if>
+				<if test="param.replacementRate != '' and param.replacementRate != null or param.replacementRate == 0">
+					and REPLACEMENT_RATE = #{param.replacementRate}
+				</if>
+				<if test="param.profitRate != '' and param.profitRate != null or param.profitRate == 0">
+					and PROFIT_RATE = #{param.profitRate}
+				</if>
+				<if test="param.profitRateAction != '' and param.profitRateAction != null or param.profitRateAction == 0">
+					and PROFIT_RATE_ACTION = #{param.profitRateAction}
+				</if>
+				<if test="param.vat != '' and param.vat != null or param.vat == 0">
+					and VAT = #{param.vat}
+				</if>
+				<if test="param.finalPrice != '' and param.finalPrice != null or param.finalPrice == 0">
+					and FINAL_PRICE = #{param.finalPrice}
+				</if>
+				<include refid="com.it.ocs.cal.dao.IFbaRuleDao.sql_time"/>
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 分页以及条件查询 -->
+	<sql id="baseSql1">
+		select a.ENTITY_ID as entityId,
+			   a.COUNTRY_ID as countryId,
+			   a.SHIPPING_TYPE as shippingType,
+			   a.SKU,
+			   a.IS_OVERSIZE as isOversize,
+			   a.CIF as cif,
+			   a.CIFUSD as cifusd,
+			   a.CIFRMB as cifrmb,
+			   a.SOURCING_COST as sourcingCost,
+			   a.FBA_FEE as fbaFee,
+			   a.AMZ_FBA as amzFba,
+			   a.STORAGE_FEE as storageFee,
+			   a.FINAL_COST as finalCost,
+			   a.REFERRAL_RATE as referralRate,
+			   a.UNFULLIABLE_RATE as unfulliableRate,
+			   a.REPLACEMENT_RATE as replacementRate,
+			   a.PROFIT_RATE as profitRate,
+			   a.PROFIT_RATE_ACTION as profitRateAction,
+			   a.VAT,
+			   a.FINAL_PRICE as finalPrice,
+			   a.UNEXPECTED_LOSS as unexpectedLoss,
+			   a.USER_ID as userId,
+			   a.CREATED_AT as createdAt,
+			   a.UPDATED_AT as updatedAt,
+			   a.CURRENCY_SYMBOL as currencySymbol
+		from CAL_PRICE_PLAN a,cal_product_entity b,((select d.id,
+													       case
+													         when d.country_id = 'UK' then
+													          'GB'
+													         else
+													          d.country_id
+													       end country_id,
+													       d.sku,
+													       d.is_dis,
+													       d.platform
+													  from CAL_PRODUCT_DIS d)) c
+    where a.sku = b.sku
+    and a.sku = c.sku(+)
+    and a.country_id = c.country_id(+)
+    and b.is_active = 1
+    and a.SHIPPING_TYPE not in('af_efn','sf_efn','co_efn')
+    and nvl(c.platform,'amazon') = 'amazon'
+    
+	</sql>
+		<sql id="sql_where1">
+
+			<if test="list != null">
+				<foreach collection="list" item="countryId" index="index" open="and a.COUNTRY_ID in (" separator="," close=")">
+					#{countryId}
+				</foreach>
+			</if>
+			<if test="param != null">
+				<if test="param.status != '' and param.status != null">
+					and a.STATUS = #{param.status}
+				</if>
+				<if test="param.userId != '' and param.userId != null">
+					and a.USER_ID = #{param.userId}
+				</if>
+				<if test="param.shippingType != '' and param.shippingType != null">
+					and a.SHIPPING_TYPE = #{param.shippingType}
+				</if>
+				<if test="param.countryId != '' and param.countryId != null">
+					and a.COUNTRY_ID = #{param.countryId}
+					and c.country_id = #{param.countryId}
+				</if>
+				<if test="param.sku != '' and param.sku != null">
+					and UPPER(a.SKU) like '%' || UPPER(#{param.sku}) || '%'
+				</if>
+				<if test="param.isOversize != '' and param.isOversize != null">
+					and a.IS_OVERSIZE = #{param.isOversize}
+				</if>
+				<if test="param.cif != '' and param.cif != null">
+					and a.CIF like '%${param.cif}%'
+				</if>
+				<if test="param.fbaFee != '' and param.fbaFee != null or param.fbaFee == 0">
+					and a.FBA_FEE = #{param.fbaFee}
+				</if>
+				<if test="param.amzFba != '' and param.amzFba != null or param.amzFba == 0">
+					and a.AMZ_FBA = #{param.amzFba}
+				</if>
+				<if test="param.storageFee != '' and param.storageFee != null or param.storageFee == 0">
+					and a.STORAGE_FEE = #{param.storageFee}
+				</if>
+				<if test="param.finalCost != '' and param.finalCost != null or param.finalCost == 0">
+					and a.FINAL_COST = #{param.finalCost}
+				</if>
+				<if test="param.referralRate != '' and param.referralRate != null or param.referralRate ==0">
+					and a.REFERRAL_RATE = #{param.referralRate}
+				</if>
+				<if test="param.unfulliableRate != '' and param.unfulliableRate != null or param.unfulliableRate == 0">
+					and a.UNFULLIABLE_RATE = #{param.unfulliableRate}
+				</if>
+				<if test="param.replacementRate != '' and param.replacementRate != null or param.replacementRate == 0">
+					and a.REPLACEMENT_RATE = #{param.replacementRate}
+				</if>
+				<if test="param.profitRate != '' and param.profitRate != null or param.profitRate == 0">
+					and a.PROFIT_RATE = #{param.profitRate}
+				</if>
+				<if test="param.profitRateAction != '' and param.profitRateAction != null or param.profitRateAction == 0">
+					and a.PROFIT_RATE_ACTION = #{param.profitRateAction}
+				</if>
+				<if test="param.vat != '' and param.vat != null or param.vat == 0">
+					and a.VAT = #{param.vat}
+				</if>
+				<if test="param.finalPrice != '' and param.finalPrice != null or param.finalPrice == 0">
+					and a.FINAL_PRICE = #{param.finalPrice}
+				</if>
+				<if test="param.productType != '' and param.productType != null">
+					and b.product_type =  #{param.productType} 
+				</if>
+				<if test="param.discontinue != '' and param.discontinue != null">
+					and c.is_dis = #{param.discontinue}
+				</if>
+				
+				<if test="param.cstarttime != null or param.cendtime != null">
+					<if test="param.cstarttime != null and param.cendtime != null">
+						and to_char(a.CREATED_AT,'yyyy-mm-dd') between #{param.cstarttime} and #{param.cendtime}
+					</if>
+					<if test="param.cstarttime == null and param.cendtime != null">
+						and to_char(a.CREATED_AT,'yyyy-mm-dd') <![CDATA[  <= ]]>#{param.cendtime}
+					</if>
+					<if test="param.cstarttime != null and param.cendtime == null">
+						and to_char(a.CREATED_AT,'yyyy-mm-dd') = #{param.cstarttime}
+					</if>
+				</if>
+				<if test="param.ustarttime != null or param.uendtime != null">
+					<if test="param.ustarttime != null and param.uendtime != null">
+						and to_char(a.UPDATED_AT,'yyyy-mm-dd') between #{param.ustarttime} and #{param.uendtime}
+					</if>
+					<if test="param.ustarttime == null and param.uendtime != null">
+						and to_char(a.UPDATED_AT,'yyyy-mm-dd') <![CDATA[  <= ]]>#{param.uendtime}
+					</if>
+					<if test="param.ustarttime != null and param.uendtime == null">
+						and to_char(a.UPDATED_AT,'yyyy-mm-dd') = #{param.ustarttime}
+					</if>
+				</if>
+			</if>
+
+	</sql>
+	<sql id="order_sql1">
+		<if test="sort!= null and order!=null">
+			order by a.${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			order by a.entity_id desc
+		</if>
+	</sql>
+	<select id="query" resultMap="BaseResultMap">
+		<include refid="baseSql1" />
+		<include refid="sql_where1" />
+		<include refid="order_sql1"/>
+	</select>
+	
+	<!-- 数量 -->
+	<select id="total" resultType="java.lang.Integer">
+		select count(1) from CAL_PRICE_PLAN
+		<include refid="sql_where1" />
+	</select>
+	
+	<select id="findAllSkuByStatus" resultType="java.lang.String">
+		select distinct sku from CAL_PRICE_PLAN where status = #{status}
+	</select>
+	
+	<select id="findByTemplate" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		order by entity_id desc
+	</select>
+	
+	<select id="getPriceTestData" resultType="java.util.Map">
+		select r.*,
+		       p.is_oversize      ISOVERSIZE,
+		       p.shipping_type    SHIPPINGTYPE,
+		       p.sourcing_cost    SOURCINGCOST,
+		       p.storage_fee      STORAGEFEE,
+		       p.final_cost       FINALCOST,
+		       p.referral_rate    REFERRALRATE,
+		       p.unfulliable_rate UNFULLIABLERATE,
+		       p.replacement_rate REPLACEMENTRATE,
+		       p.profit_rate      PROFITRATE,
+		       p.vat,
+		       P.CIF
+		  from (SELECT T2.SKU,
+		               T2.COUNTRY_ID COUNTRYID,
+		               T2.LENGTH,
+		               T2.WIDTH,
+		               T2.HEIGHT,
+		               T2.GROSS_WEIGHT GROSSWEIGHT,
+		               T2.NET_WEIGHT NETWEIGHT,
+		               T2.PACKING_QTY PACKINGQTY,
+		               T2.OUTER_VOLUME OUTERVOLUME,
+		               T2.OUTER_WEIGHT OUTERWEIGHT,
+		               T2.FBA,
+		               t2.amz_fba amzfba,
+		               T2.C_PRICE CPRICE,
+		               T2.B_PRICE BPRICE,
+		               T2.CLEAR_PRICE CLEARPRICE,
+		               T2.DUTY_RATE DUTYRATE,
+		               
+		               T2.AVERAGE_MONTH, --平均存储月份
+		               T2.OPERATING_FEE,
+		               T2.UNFULLIABLE_RATE,
+		               T2.RETURNRATE,
+		               T2.REPLACEMENT_RATE,
+		               T2.TAX_REBATE_RATE,
+               		   T2.INTEREST_RATE,
+               		   (SELECT max(F.CALCULATE_FACTOR) FROM CAL_CALCULATE_FACTOR_ERP F) CALCULATE_FACTOR,
+		               T2.AF_FLUCTUATION AFFLUCTUATION,
+		               T2.SF_FLUCTUATION SFFLUCTUATION,
+		               T2.CO_FLUCTUATION COFLUCTUATION,
+		               ROUND(T2.AF, 4) AF,
+		               ROUND(T2.SF, 4) SF,
+		               ROUND(T2.CO, 4) CO,
+		               T2.CURRENCY_RATE CURRENCYRATE,
+		               T2.RISK_FACTOR RISKFACTOR,
+		               T2.afProductVolWeight,
+		               T2.COProductVolWeight,
+		               T2.volume,
+		               T2.af_cost AFCOST,
+		               T2.af_cost_fluctuation AFCOSTFLUCTUATION,
+		               T2.sf_cost SFCOST,
+		               T2.sf_cost_fluctuation SFCOSTFLUCTUATION,
+		               T2.co_cost COCOST,
+		               T2.co_cost_fluctuation COCOSTFLUCTUATION,
+		               T2.RMBRISK_FACTOR RMBRISKFACTOR,
+		               T2.RMBCURRENCY_RATE RMBCURRENCYRATE,
+		               T2.COVOLUMEWEIGHT,
+		               T2.AFVOLUMEWEIGHT,
+		               T2.productWeight
+		          FROM (SELECT T1.SKU,
+		                       T1.LENGTH,
+		                       T1.WIDTH,
+		                       T1.HEIGHT,
+		                       T1.GROSS_WEIGHT,
+		                       T1.NET_WEIGHT,
+		                       T1.PACKING_QTY,
+		                       T1.OUTER_VOLUME,
+		                       T1.OUTER_WEIGHT,
+		                       T1.COUNTRY_ID,
+		                       T1.FBA,
+		                       t1.amz_fba,
+		                       T1.SF,
+		                       T1.C_PRICE,
+		                       T1.B_PRICE,
+		                       T1.CLEAR_PRICE,
+		                       T1.DUTY_RATE,
+		                       
+		                         T1.AVERAGE_MONTH, --平均存储月份
+		               T1.OPERATING_FEE,
+		               T1.UNFULLIABLE_RATE,
+		               T1.RETURNRATE,
+		               T1.REPLACEMENT_RATE,
+		               T1.TAX_REBATE_RATE,
+               		   T1.INTEREST_RATE,
+		                       
+		                       T1.AF_FLUCTUATION,
+		                       T1.SF_FLUCTUATION,
+		                       T1.CO_FLUCTUATION,
+		                       T1.CURRENCY_RATE,
+		                       T1.RISK_FACTOR,
+		                       T1.afProductVolWeight,
+		                       T1.coProductVolWeight,
+		                       T1.volume,
+		                       (json_ext.get_string(json(json_list(T1.AF).get(1)),
+		                                            'cost') * T1.afProductVolWeight *
+		                       json_ext.get_string(json(json_list(T1.AF).get(1)),
+		                                            'cost_fluctuation')) AF,
+		                       (json_ext.get_string(json(json_list(T1.CO).get(1)),
+		                                            'cost') * T1.coProductVolWeight *
+		                       json_ext.get_string(json(json_list(T1.CO).get(1)),
+		                                            'cost_fluctuation')) *
+		                       (T1.RMBRISK_FACTOR / T1.RMBCURRENCY_RATE) CO,
+		                       T1.af_cost,
+		                       T1.af_cost_fluctuation,
+		                       T1.sf_cost,
+		                       T1.sf_cost_fluctuation,
+		                       T1.co_cost,
+		                       T1.co_cost_fluctuation,
+		                       T1.RMBRISK_FACTOR,
+		                       T1.RMBCURRENCY_RATE,
+		                       T1.COVOLUMEWEIGHT,
+		                       T1.AFVOLUMEWEIGHT,
+		                       T1.productWeight
+		                  FROM (SELECT T.SKU,
+		                               T.LENGTH,
+		                               T.WIDTH,
+		                               T.HEIGHT,
+		                               T.GROSS_WEIGHT,
+		                               T.NET_WEIGHT,
+		                               T.PACKING_QTY,
+		                               T.OUTER_VOLUME,
+		                               T.OUTER_WEIGHT,
+		                               T.COUNTRY_ID,
+		                               SUBSTR(T.fba, 0, INSTR(T.fba, '-', 1, 1) - 1) FBA,
+		                               t.amz_fba,
+		                               T.C_PRICE,
+		                               T.B_PRICE,
+		                               T.CLEAR_PRICE,
+		                               T.DUTY_RATE,
+		                               
+		                                 T.AVERAGE_MONTH, --平均存储月份
+		               T.OPERATING_FEE,
+		               T.UNFULLIABLE_RATE,
+		               T.RETURNRATE,
+		               T.REPLACEMENT_RATE,
+		               T.TAX_REBATE_RATE,
+               		   T.INTEREST_RATE,
+		                               
+		                               T.AF_FLUCTUATION,
+		                               T.SF_FLUCTUATION,
+		                               T.CO_FLUCTUATION,
+		                               T.AF,
+		                               T.RMBRISK_FACTOR,
+		                               T.RMBCURRENCY_RATE,
+		                               T.CURRENCY_RATE,
+		                               T.RISK_FACTOR,
+		                               T.volume,
+		                               json_ext.get_string(json(json_list(T.AF).get(1)),
+		                                                   'cost') af_cost,
+		                               json_ext.get_string(json(json_list(T.AF).get(1)),
+		                                                   'cost_fluctuation') af_cost_fluctuation,
+		                               json_ext.get_string(json(json_list(T.SF).get(1)),
+		                                                   'cost') sf_cost,
+		                               json_ext.get_string(json(json_list(T.SF).get(1)),
+		                                                   'cost_fluctuation') sf_cost_fluctuation,
+		                               json_ext.get_string(json(json_list(T.CO).get(1)),
+		                                                   'cost') co_cost,
+		                               json_ext.get_string(json(json_list(T.CO).get(1)),
+		                                                   'cost_fluctuation') co_cost_fluctuation,
+		                               
+		                               (json_ext.get_string(json(json_list(T.SF).get(1)),
+		                                                    'cost') * T.volume *
+		                               json_ext.get_string(json(json_list(T.SF).get(1)),
+		                                                    'cost_fluctuation')) SF,
+		                               T.CO,
+		                               case
+		                                 when T.afVolumeWeight > T.productWeight then
+		                                  T.afVolumeWeight
+		                                 else
+		                                  T.productWeight
+		                               end afProductVolWeight,
+		                               case
+		                                 when T.coVolumeWeight > T.productWeight then
+		                                  T.coVolumeWeight
+		                                 else
+		                                  T.productWeight
+		                               end coProductVolWeight,
+		                               T.COVOLUMEWEIGHT,
+		                               T.AFVOLUMEWEIGHT,
+		                               T.productWeight
+		                          FROM (SELECT A.SKU,
+		                                       A.LENGTH,
+		                                       A.WIDTH,
+		                                       A.HEIGHT,
+		                                       A.GROSS_WEIGHT,
+		                                       A.NET_WEIGHT,
+		                                       A.PACKING_QTY,
+		                                       A.OUTER_VOLUME,
+		                                       A.OUTER_WEIGHT,
+		                                       C.COUNTRY_ID,
+		                                       c.amz_fba,
+		                                       C.CLEAR_PRICE,
+		                                       C.DUTY_RATE,
+		                                       
+		                                       C.AVERAGE_MONTH, --平均存储月份
+								               D.OPERATING_FEE,
+								               C.UNFULLIABLE_RATE,
+								               C.RETURNRATE,
+								               C.REPLACEMENT_RATE,
+								               B.TAX_REBATE_RATE,
+						               		   B.INTEREST_RATE,
+		                                       
+		                                       D.AF_SHIPPING_FEE AF,
+		                                       D.CO_SHIPPING_FEE CO,
+		                                       D.SF_SHIPPING_FEE SF,
+		                                       F.AF_FLUCTUATION,
+		                                       F.SF_FLUCTUATION,
+		                                       F.CO_FLUCTUATION,
+		                                       RMB.RISK_FACTOR RMBRISK_FACTOR,
+		                                       RMB.CURRENCY_RATE RMBCURRENCY_RATE,
+		                                       E.CURRENCY_RATE,
+		                                       E.RISK_FACTOR,
+		                                       CASE WHEN C.COUNTRY_ID = 'AU' THEN
+                                                 SKU_STATIC_PRICE.AMAZON_SKU_AU_FBA_PRICE(A.LENGTH,
+                                                                                          A.WIDTH,
+                                                                                          A.HEIGHT,
+                                                                                          A.GROSS_WEIGHT+A.OUTER_WEIGHT/A.PACKING_QTY)
+                                               ELSE
+                                                 SKU_STATIC_PRICE.AMAZON_SKU_FBA_PRICE(C.COUNTRY_ID,
+                                                                                     A.LENGTH,
+                                                                                     A.WIDTH,
+                                                                                     A.HEIGHT,
+                                                                                     A.GROSS_WEIGHT,
+                                                                                     C.QTY_ORDERED,
+                                                                                     '',
+                                                                                     C.EFN_FEE)
+                                               END fba,
+		                                       CASE
+		                                         WHEN B.CURRENCY = 'USD' THEN
+		                                          '$' ||
+		                                          TO_CHAR(B.PRICE, 'fm999999990.0999999')
+		                                         ELSE
+		                                          '￥' ||
+		                                          TO_CHAR(B.PRICE, 'fm999999990.0999999')
+		                                       END B_PRICE,
+		                                       CASE
+		                                         WHEN B.TAX_REBATE_RATE > 0 AND
+		                                              (B.CURRENCY = 'RMB' OR
+		                                              B.CURRENCY = 'CNY') THEN
+		                                          (B.PRICE -
+		                                          (B.PRICE / 1.16 * B.TAX_REBATE_RATE) *
+		                                          (1 - B.INTEREST_RATE)) /
+		                                          RMB.CURRENCY_RATE
+		                                         WHEN B.TAX_REBATE_RATE = 0 AND
+		                                              (B.CURRENCY = 'RMB' OR
+		                                              B.CURRENCY = 'CNY') THEN
+		                                          (B.PRICE - (B.PRICE / 1.16) *
+		                                          (1 - B.INTEREST_RATE)) /
+		                                          RMB.CURRENCY_RATE
+		                                         ELSE
+		                                          B.PRICE
+		                                       END C_PRICE,
+		                                       (A.LENGTH * A.WIDTH * A.HEIGHT +
+		                                       A.OUTER_VOLUME / A.PACKING_QTY) VOLUME,
+		                                       (A.LENGTH * A.WIDTH * A.HEIGHT +
+		                                       A.OUTER_VOLUME / A.PACKING_QTY) *
+		                                       1000000 / 6000 afVolumeWeight,
+		                                       (A.LENGTH * A.WIDTH * A.HEIGHT +
+		                                       A.OUTER_VOLUME / A.PACKING_QTY) *
+		                                       1000000 / 5000 coVolumeWeight,
+		                                       A.OUTER_WEIGHT / A.PACKING_QTY +
+		                                       A.GROSS_WEIGHT productWeight
+		                                  FROM CAL_PRODUCT_ENTITY A,
+		                                       CAL_PRODUCT_ENTITY_COST B,
+		                                       CAL_PRODUCT_ENTITY_OTHER C,
+		                                       CAL_SHIPPING D,
+		                                       CAL_CURRENCY_RATE E,
+		                                       CAL_TAX F,
+		                                       (SELECT risk_factor, currency_rate
+		                                          FROM CAL_CURRENCY_RATE
+		                                         where currency_code = 'RMB') RMB
+		                                 WHERE A.ENTITY_ID = B.PARENT_ID
+		                                   AND C.PARENT_ID = A.ENTITY_ID
+		                                   AND C.COUNTRY_ID = D.COUNTRY_ID
+		                                   AND C.COUNTRY_ID = E.COUNTRY_ID
+		                                   AND C.COUNTRY_ID = F.COUNTRY_ID
+		                                   AND A.SKU = #{param.sku}
+		                                   and c.country_id = #{param.countryId}
+		                                   AND A.IS_ACTIVE = 1
+		                                   and a.status != '0'
+		                                   AND A.PACKING_QTY > 0) T) T1) T2) r,
+		       cal_price_plan p
+		 where p.country_id = r.countryid
+		   and p.sku = r.sku
+		   and p.shipping_type in ('af', 'sf', 'co')
+				
+	</select>
+	
+	<!-- 刷新 -->
+	<insert id="refresh" statementType="CALLABLE">
+	      {call SKU_STATIC_PRICE.UPDATE_SATIC_PRICE(
+		        #{sku,mode=IN,jdbcType=VARCHAR}, 
+		        #{userId,mode=IN,jdbcType=DECIMAL}
+	      )}
+	</insert>
+	
+	<!-- 移到临时表 -->
+	<insert id="insertPlanToTemp" parameterType="java.lang.Long">
+		insert into CAL_PRICE_PLAN_TEMP
+		<include refid="baseSql"/> 
+		<if test="userId != -1">
+			where user_id = #{userId}
+		</if>
+	</insert>
+	<!-- 清空表 -->
+	<delete id="deletePricePlan" parameterType="java.lang.Long">
+	 	delete from CAL_PRICE_PLAN 
+	 	<if test="userId != -1">
+			where user_id = #{userId}
+		</if>
+	</delete>
+	<!-- 根据id查找 -->
+	<select id="getById" parameterType="java.lang.Long" resultType="com.it.ocs.cal.model.PricePlanModel">
+		<include refid="baseSql"/>
+		where ENTITY_ID = #{id}
+	</select>
+	<!-- 修改 -->
+	<update id="update" parameterType="com.it.ocs.cal.model.PricePlanModel">
+	 	update CAL_PRICE_PLAN c set c.PROFIT_RATE_ACTION = #{profitRateAction} , c.FINAL_PRICE = #{finalPrice},
+	 	c.UPDATED_AT = #{updatedAt} where c.entity_id = #{entityId}
+	</update>
+	<!-- 可用利润率不等于1的 -->
+	<select id="findAllLessByUserId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+	 	<include refid="baseSql"/> where PROFIT_RATE_ACTION != 1 and status = #{status}
+	 	<if test="userId != -1">
+			and USER_ID = #{userId}
+		</if>
+	</select>
+	 <!-- 导出查询 -->
+	<select id="findAllByUserId"  resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<if test="userId != -1">
+			where user_id = #{userId}
+		</if>
+		order by entity_id
+	</select>
+	
+	<!-- 批量插入 -->
+	<insert id="addAll" parameterType="java.util.List">  
+   	 	insert into CAL_PRICE_PLAN(
+   	 		ENTITY_ID,
+			COUNTRY_ID,
+			SHIPPING_TYPE,
+			SKU,
+			IS_OVERSIZE,
+			CIF,
+			CIFUSD,
+			CIFRMB,
+			SOURCING_COST,
+			FBA_FEE,
+			AMZ_FBA,
+			STORAGE_FEE,
+			FINAL_COST,
+			REFERRAL_RATE,
+			UNFULLIABLE_RATE,
+			REPLACEMENT_RATE,
+			PROFIT_RATE,
+			PROFIT_RATE_ACTION,
+			VAT,
+			FINAL_PRICE,
+			USER_ID,
+			CURRENCY_SYMBOL,
+			CREATED_AT,
+			UPDATED_AT)  
+   		select CAL_PRICE_PLAN_SEQ.NEXTVAL,c.* from(
+		    <foreach collection="list" item="item" index="index" separator="union all">
+		    	select  
+					#{item.countryId,jdbcType=VARCHAR},
+					#{item.shippingType,jdbcType=VARCHAR},
+					#{item.sku,jdbcType=VARCHAR},
+					#{item.isOversize,jdbcType=VARCHAR},
+					#{item.cif,jdbcType=VARCHAR},
+					#{item.cifusd,jdbcType=VARCHAR},
+					#{item.cifrmb,jdbcType=VARCHAR},
+					#{item.sourcingCost,jdbcType=VARCHAR},
+					#{item.fbaFee,jdbcType=BIGINT},
+					#{item.amzFba,jdbcType=BIGINT},
+					#{item.storageFee,jdbcType=BIGINT},
+					#{item.finalCost,jdbcType=BIGINT},
+					#{item.referralRate,jdbcType=BIGINT},
+					#{item.unfulliableRate,jdbcType=BIGINT},
+					#{item.replacementRate,jdbcType=BIGINT},
+					#{item.profitRate,jdbcType=BIGINT},
+					#{item.profitRateAction,jdbcType=BIGINT},
+					#{item.vat,jdbcType=BIGINT},
+					#{item.finalPrice,jdbcType=BIGINT},
+					#{item.userId,jdbcType=BIGINT},
+					#{item.currencySymbol,jdbcType=VARCHAR},
+					#{item.createdAt,jdbcType=TIMESTAMP},
+					#{item.updatedAt,jdbcType=TIMESTAMP}
+		        from dual
+		    </foreach>  
+   		) c
+    </insert>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.PricePlanModel">
+ 	 insert into CAL_PRICE_PLAN
+	   <trim prefix="(" suffix=")" suffixOverrides="," >
+	  
+	       ENTITY_ID,
+	
+	     <if test="countryId != null" >
+	       COUNTRY_ID,
+	     </if>
+	     <if test="shippingType != null" >
+	       SHIPPING_TYPE,
+	     </if>
+	     <if test="sku != null" >
+	       SKU,
+	     </if>
+	     <if test="isOversize != null" >
+	       IS_OVERSIZE,
+	     </if>
+	     <if test="cif != null" >
+	       CIF,
+	     </if>
+	     <if test="cifusd != null" >
+	       CIFUSD,
+	     </if>
+	     <if test="cifrmb != null" >
+	       CIFRMB,
+	     </if>
+	     <if test="sourcingCost != null" >
+	       SOURCING_COST,
+	     </if>
+	     <if test="fbaFee != null" >
+	       FBA_FEE,
+	     </if>
+	     <if test="amzFba != null" >
+	       AMZ_FBA,
+	     </if>
+	     <if test="storageFee != null" >
+	       STORAGE_FEE,
+	     </if>
+	     <if test="finalCost != null" >
+	       FINAL_COST,
+	     </if>
+	     <if test="referralRate != null" >
+	       REFERRAL_RATE,
+	     </if>
+	     <if test="unfulliableRate != null" >
+	       UNFULLIABLE_RATE,
+	     </if>
+	     <if test="replacementRate != null" >
+	       REPLACEMENT_RATE,
+	     </if>
+	     <if test="profitRate != null" >
+	       PROFIT_RATE,
+	     </if>
+	     <if test="profitRateAction != null" >
+	       PROFIT_RATE_ACTION,
+	     </if>
+	     <if test="vat != null" >
+	       VAT,
+	     </if>
+	     <if test="finalPrice != null" >
+	       FINAL_PRICE,
+	     </if>
+	     <if test="userId != null" >
+	       USER_ID,
+	     </if>
+	     <if test="currencySymbol != null" >
+	       CURRENCY_SYMBOL,
+	     </if>
+	     <if test="createdAt != null" >
+	       CREATED_AT,
+	     </if>
+	     <if test="updatedAt != null" >
+	       UPDATED_AT,
+	     </if>
+	   </trim>
+	   <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    
+	    CAL_PRICE_PLAN_SEQ.NEXTVAL,
+	    
+	     <if test="countryId != null" >
+	       #{countryId,jdbcType=VARCHAR},
+	     </if>
+	     <if test="shippingType != null" >
+	       #{shippingType,jdbcType=VARCHAR},
+	     </if>
+	     <if test="sku != null" >
+	       #{sku,jdbcType=VARCHAR},
+	     </if>
+	     <if test="isOversize != null" >
+	       #{isOversize,jdbcType=DECIMAL},
+	     </if>
+	     <if test="cif != null" >
+	       #{cif,jdbcType=VARCHAR},
+	     </if>
+	     <if test="cifusd != null" >
+	       #{cifusd,jdbcType=VARCHAR},
+	     </if>
+	     <if test="cifrmb != null" >
+	       #{cifrmb,jdbcType=VARCHAR},
+	     </if>
+	     <if test="sourcingCost != null" >
+	       #{sourcingCost},
+	     </if>
+	     <if test="fbaFee != null" >
+	       #{fbaFee,jdbcType=DECIMAL},
+	     </if>
+	     <if test="amzFba != null" >
+	       #{amzFba,jdbcType=DECIMAL},
+	     </if>
+	     <if test="storageFee != null" >
+	       #{storageFee,jdbcType=DECIMAL},
+	     </if>
+	     <if test="finalCost != null" >
+	       #{finalCost,jdbcType=DECIMAL},
+	     </if>
+	     <if test="referralRate != null" >
+	       #{referralRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="unfulliableRate != null" >
+	       #{unfulliableRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="replacementRate != null" >
+	       #{replacementRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="profitRate != null" >
+	       #{profitRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="profitRateAction != null" >
+	       #{profitRateAction,jdbcType=DECIMAL},
+	     </if>
+	     <if test="vat != null" >
+	       #{vat,jdbcType=DECIMAL},
+	     </if>
+	     <if test="finalPrice != null" >
+	       #{finalPrice,jdbcType=DECIMAL},
+	     </if>
+	     <if test="userId != null" >
+	       #{userId,jdbcType=DECIMAL},
+	     </if>
+	     <if test="currencySymbol != null" >
+	       #{currencySymbol,jdbcType=VARCHAR},
+	     </if>
+	     <if test="createdAt != null" >
+	       #{createdAt},
+	     </if>
+	     <if test="updatedAt != null" >
+	       #{updatedAt},
+	     </if>
+	   </trim>
+	</insert>
+	
+	<insert id="addTemp" parameterType="com.it.ocs.cal.model.PricePlanModel">
+ 	 insert into CAL_PRICE_PLAN_TEMP
+	   <trim prefix="(" suffix=")" suffixOverrides="," >
+	  
+	       ENTITY_ID,
+	
+	     <if test="countryId != null" >
+	       COUNTRY_ID,
+	     </if>
+	     <if test="shippingType != null" >
+	       SHIPPING_TYPE,
+	     </if>
+	     <if test="sku != null" >
+	       SKU,
+	     </if>
+	     <if test="isOversize != null" >
+	       IS_OVERSIZE,
+	     </if>
+	     <if test="cif != null" >
+	       CIF,
+	     </if>
+	     <if test="cifusd != null" >
+	       CIFUSD,
+	     </if>
+	     <if test="cifrmb != null" >
+	       CIFRMB,
+	     </if>
+	     <if test="sourcingCost != null" >
+	       SOURCING_COST,
+	     </if>
+	     <if test="fbaFee != null" >
+	       FBA_FEE,
+	     </if>
+	     <if test="amzFba != null" >
+	       AMZ_FBA,
+	     </if>
+	     <if test="storageFee != null" >
+	       STORAGE_FEE,
+	     </if>
+	     <if test="finalCost != null" >
+	       FINAL_COST,
+	     </if>
+	     <if test="referralRate != null" >
+	       REFERRAL_RATE,
+	     </if>
+	     <if test="unfulliableRate != null" >
+	       UNFULLIABLE_RATE,
+	     </if>
+	     <if test="replacementRate != null" >
+	       REPLACEMENT_RATE,
+	     </if>
+	     <if test="profitRate != null" >
+	       PROFIT_RATE,
+	     </if>
+	     <if test="profitRateAction != null" >
+	       PROFIT_RATE_ACTION,
+	     </if>
+	     <if test="vat != null" >
+	       VAT,
+	     </if>
+	     <if test="finalPrice != null" >
+	       FINAL_PRICE,
+	     </if>
+	     <if test="userId != null" >
+	       USER_ID,
+	     </if>
+	     <if test="currencySymbol != null" >
+	       CURRENCY_SYMBOL,
+	     </if>
+	     <if test="createdAt != null" >
+	       CREATED_AT,
+	     </if>
+	     <if test="updatedAt != null" >
+	       UPDATED_AT,
+	     </if>
+	   </trim>
+	   <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    
+	    CAL_PRICE_PLAN_TEMP_SEQ.NEXTVAL,
+	    
+	     <if test="countryId != null" >
+	       #{countryId,jdbcType=VARCHAR},
+	     </if>
+	     <if test="shippingType != null" >
+	       #{shippingType,jdbcType=VARCHAR},
+	     </if>
+	     <if test="sku != null" >
+	       #{sku,jdbcType=VARCHAR},
+	     </if>
+	     <if test="isOversize != null" >
+	       #{isOversize,jdbcType=DECIMAL},
+	     </if>
+	     <if test="cif != null" >
+	       #{cif,jdbcType=VARCHAR},
+	     </if>
+	     <if test="cifusd != null" >
+	       #{cifusd,jdbcType=VARCHAR},
+	     </if>
+	     <if test="cifrmb != null" >
+	       #{cifrmb,jdbcType=VARCHAR},
+	     </if>
+	     <if test="sourcingCost != null" >
+	       #{sourcingCost},
+	     </if>
+	     <if test="fbaFee != null" >
+	       #{fbaFee,jdbcType=DECIMAL},
+	     </if>
+	     <if test="amzFba != null" >
+	       #{amzFba,jdbcType=DECIMAL},
+	     </if>
+	     <if test="storageFee != null" >
+	       #{storageFee,jdbcType=DECIMAL},
+	     </if>
+	     <if test="finalCost != null" >
+	       #{finalCost,jdbcType=DECIMAL},
+	     </if>
+	     <if test="referralRate != null" >
+	       #{referralRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="unfulliableRate != null" >
+	       #{unfulliableRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="replacementRate != null" >
+	       #{replacementRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="profitRate != null" >
+	       #{profitRate,jdbcType=DECIMAL},
+	     </if>
+	     <if test="profitRateAction != null" >
+	       #{profitRateAction,jdbcType=DECIMAL},
+	     </if>
+	     <if test="vat != null" >
+	       #{vat,jdbcType=DECIMAL},
+	     </if>
+	     <if test="finalPrice != null" >
+	       #{finalPrice,jdbcType=DECIMAL},
+	     </if>
+	     <if test="userId != null" >
+	       #{userId,jdbcType=DECIMAL},
+	     </if>
+	     <if test="currencySymbol != null" >
+	       #{currencySymbol,jdbcType=VARCHAR},
+	     </if>
+	     <if test="createdAt != null" >
+	       #{createdAt},
+	     </if>
+	     <if test="updatedAt != null" >
+	       #{updatedAt},
+	     </if>
+	   </trim>
+	</insert>
+	<select id="getProductField" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select distinct t.product_type value,t.product_type displayname
+		  from cal_product_entity t
+		 where t.product_type is not null
+		 order by t.product_type
+	</select>
+	<select id="getProductTypeBySku" resultType="java.lang.String">
+		select  max(t.product_type) 
+		  from cal_product_entity t
+		  where t.sku = #{sku}
+		  and t.is_active = 1
+	</select>
+	<select id="getDISInfo" resultType="java.lang.String">
+		  select case
+		           when t.is_dis = 1 then
+		            '是'
+		           when t.is_dis = 0 then
+		            '否'
+		           else
+		            '未设置'
+		         end
+		    from CAL_PRODUCT_DIS t
+		   where t.sku = #{sku}
+		     and t.country_id = #{countryId}
+		     and t.platform = 'amazon'
+	</select>
+	<select id="getReturnRateBySkuAndCountry" resultType="java.lang.Double">
+		select max(nvl(a.returnrate,0)) from CAL_PRODUCT_ENTITY_OTHER a where a.country_id=#{param.countryId}
+		 and a.parent_id in (
+		 	select entity_id from cal_product_entity b where b.sku=#{param.sku} and
+		 	 b.is_active=1 and b.status=1
+		 )
+	</select>
+</mapper>

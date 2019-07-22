@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.returnpolicy.dao.IReturnPolicyDAO" >
+  <resultMap id="BaseResultMap" type="com.it.ocs.returnpolicy.model.ReturnPolicyModel" >
+    <id column="RETURN_POLICY_ID" property="returnPolicyId" jdbcType="DECIMAL" />
+    <result column="RETURN_POLICY_NAME" property="returnPolicyName" jdbcType="VARCHAR" />
+    <result column="SITE_ID" property="siteId" jdbcType="DECIMAL" />
+    <result column="POLICY_TYPE" property="policyType" jdbcType="VARCHAR" />
+    <result column="DAYS_ALLOWED" property="daysAllowed" jdbcType="DECIMAL" />
+    <result column="ALLOW_EXTENSION" property="allowExtension" jdbcType="CHAR" />
+    <result column="REFUND_METHOD" property="refundMethod" jdbcType="VARCHAR" />
+    <result column="FREIGHT_CARRIER" property="freightCarrier" jdbcType="VARCHAR" />
+    <result column="DEPRECIATION_COST" property="depreciationCost" jdbcType="VARCHAR" />
+    <result column="POLICY_DETAIL" property="policyDetail" jdbcType="VARCHAR" />
+    <result column="ENABLED_FLAG" property="enabledFlag" jdbcType="CHAR" />
+    <result column="CREATION_DATE" property="creationDate" jdbcType="TIMESTAMP" />
+    <result column="CREATE_BY" property="createBy" jdbcType="DECIMAL" />
+    <result column="LAST_UPDATE_DATE" property="lastUpdateDate" jdbcType="TIMESTAMP" />
+    <result column="LAST_UPDATE_BY" property="lastUpdateBy" jdbcType="DECIMAL" />
+    <result column="ICO" property="ico"/>
+  </resultMap>
+
+  <sql id="Base_Column_join_List" >
+  	SELECT
+    rp.RETURN_POLICY_ID, 
+    rp.RETURN_POLICY_NAME,
+    rp.SITE_ID, 
+    rp.POLICY_TYPE, 
+    rp.DAYS_ALLOWED, 
+    rp.ALLOW_EXTENSION,  
+    rp.REFUND_METHOD, 
+    rp.FREIGHT_CARRIER, 
+    rp.DEPRECIATION_COST, 
+    rp.POLICY_DETAIL, 
+    rp.ENABLED_FLAG, 
+    rp.CREATION_DATE, 
+    rp.CREATE_BY, 
+    rp.LAST_UPDATE_DATE, 
+    rp.LAST_UPDATE_BY,
+    si.ICO
+    FROM EBAY_RETURN_POLICY rp left join EBAY_SITE_INFO si on rp.SITE_ID=si.SITE_ID
+  </sql>
+  
+    <sql id="Base_Column_List" >
+  	SELECT
+    rp.RETURN_POLICY_ID, 
+    rp.RETURN_POLICY_NAME,
+    rp.SITE_ID, 
+    rp.POLICY_TYPE, 
+    rp.DAYS_ALLOWED, 
+    rp.ALLOW_EXTENSION, 
+    rp.REFUND_METHOD, 
+    rp.FREIGHT_CARRIER, 
+    rp.DEPRECIATION_COST, 
+    rp.POLICY_DETAIL, 
+    rp.ENABLED_FLAG, 
+    rp.CREATION_DATE, 
+    rp.CREATE_BY, 
+    rp.LAST_UPDATE_DATE, 
+    rp.LAST_UPDATE_BY
+    FROM EBAY_RETURN_POLICY rp
+  </sql>
+  <sql id="where">
+		<choose>
+			<when test="param!=null">
+				<where>
+					1=1 
+					<if test="param.enabledFlag!=null">
+						AND rp.ENABLED_FLAG=#{param.enabledFlag}
+					</if>
+				</where>
+			</when>
+			<otherwise>
+				<where>
+					rp.ENABLED_FLAG='Y'
+				</where>
+			</otherwise>
+		</choose>
+  </sql>
+  
+  	<select id="getById" resultMap="BaseResultMap">
+		<include refid="Base_Column_List" />
+	</select>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_RETURN_POLICY rp
+		<include refid="where" />
+	</select>
+
+	<select id="queryByPage" resultMap="BaseResultMap">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="Base_Column_join_List" />
+				<include refid="where" />
+				order by rp.CREATION_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+
+
+  
+  <insert id="insert2" parameterType="com.it.ocs.returnpolicy.model.ReturnPolicyModel" >
+    insert into EBAY_RETURN_POLICY (RETURN_POLICY_ID, RETURN_POLICY_NAME, 
+      SITE_ID, POLICY_TYPE, DAYS_ALLOWED, 
+      ALLOW_EXTENSION, REFUND_METHOD, FREIGHT_CARRIER, 
+      DEPRECIATION_COST, POLICY_DETAIL, ENABLED_FLAG, 
+      CREATION_DATE, CREATE_BY)
+    values (EBAY_RETURN_POLICY_SEQ.Nextval, #{returnPolicyName,jdbcType=VARCHAR}, 
+      #{siteId,jdbcType=DECIMAL}, #{policyType,jdbcType=VARCHAR}, #{daysAllowed,jdbcType=DECIMAL}, 
+      #{allowExtension,jdbcType=CHAR}, #{refundMethod,jdbcType=VARCHAR}, #{freightCarrier,jdbcType=VARCHAR}, 
+      #{depreciationCost,jdbcType=VARCHAR}, #{policyDetail,jdbcType=VARCHAR}, #{enabledFlag,jdbcType=CHAR}, 
+      #{creationDate,jdbcType=TIMESTAMP}, #{createBy,jdbcType=DECIMAL} 
+      )
+  </insert>
+  <insert id="add" parameterType="com.it.ocs.returnpolicy.model.ReturnPolicyModel" >
+    insert into EBAY_RETURN_POLICY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+     
+        RETURN_POLICY_ID,
+      <if test="returnPolicyName != null" >
+        RETURN_POLICY_NAME,
+      </if>
+      <if test="siteId != null" >
+        SITE_ID,
+      </if>
+      <if test="policyType != null" >
+        POLICY_TYPE,
+      </if>
+      <if test="daysAllowed != null" >
+        DAYS_ALLOWED,
+      </if>
+      <if test="allowExtension != null" >
+        ALLOW_EXTENSION,
+      </if>
+      <if test="refundMethod != null" >
+        REFUND_METHOD,
+      </if>
+      <if test="freightCarrier != null" >
+        FREIGHT_CARRIER,
+      </if>
+      <if test="depreciationCost != null" >
+        DEPRECIATION_COST,
+      </if>
+      <if test="policyDetail != null" >
+        POLICY_DETAIL,
+      </if>
+      <if test="enabledFlag != null" >
+        ENABLED_FLAG,
+      </if>
+      <if test="creationDate != null" >
+        CREATION_DATE,
+      </if>
+      <if test="createBy != null" >
+        CREATE_BY,
+      </if>
+      <if test="lastUpdateDate != null" >
+        LAST_UPDATE_DATE,
+      </if>
+      <if test="lastUpdateBy != null" >
+        LAST_UPDATE_BY,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      EBAY_RETURN_POLICY_SEQ.Nextval,
+      <if test="returnPolicyName != null" >
+        #{returnPolicyName,jdbcType=VARCHAR},
+      </if>
+      <if test="siteId != null" >
+        #{siteId,jdbcType=DECIMAL},
+      </if>
+      <if test="policyType != null" >
+        #{policyType,jdbcType=VARCHAR},
+      </if>
+      <if test="daysAllowed != null" >
+        #{daysAllowed,jdbcType=DECIMAL},
+      </if>
+      <if test="allowExtension != null" >
+        #{allowExtension,jdbcType=CHAR},
+      </if>
+      <if test="refundMethod != null" >
+        #{refundMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="freightCarrier != null" >
+        #{freightCarrier,jdbcType=VARCHAR},
+      </if>
+      <if test="depreciationCost != null" >
+        #{depreciationCost,jdbcType=VARCHAR},
+      </if>
+      <if test="policyDetail != null" >
+        #{policyDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="enabledFlag != null" >
+        #{enabledFlag,jdbcType=CHAR},
+      </if>
+      <if test="creationDate != null" >
+        #{creationDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=DECIMAL},
+      </if>
+      <if test="lastUpdateDate != null" >
+        #{lastUpdateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateBy != null" >
+        #{lastUpdateBy,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="update" parameterType="com.it.ocs.returnpolicy.model.ReturnPolicyModel" >
+    update EBAY_RETURN_POLICY
+    <set >
+      <if test="returnPolicyName != null" >
+        RETURN_POLICY_NAME = #{returnPolicyName,jdbcType=VARCHAR},
+      </if>
+      <if test="siteId != null" >
+        SITE_ID = #{siteId,jdbcType=DECIMAL},
+      </if>
+      <if test="policyType != null" >
+        POLICY_TYPE = #{policyType,jdbcType=VARCHAR},
+      </if>
+      <if test="daysAllowed != null" >
+        DAYS_ALLOWED = #{daysAllowed,jdbcType=DECIMAL},
+      </if>
+      <if test="allowExtension != null" >
+        ALLOW_EXTENSION = #{allowExtension,jdbcType=CHAR},
+      </if>
+      <if test="refundMethod != null" >
+        REFUND_METHOD = #{refundMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="freightCarrier != null" >
+        FREIGHT_CARRIER = #{freightCarrier,jdbcType=VARCHAR},
+      </if>
+      <if test="depreciationCost != null" >
+        DEPRECIATION_COST = #{depreciationCost,jdbcType=VARCHAR},
+      </if>
+      <if test="policyDetail != null" >
+        POLICY_DETAIL = #{policyDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="enabledFlag != null" >
+        ENABLED_FLAG = #{enabledFlag,jdbcType=CHAR},
+      </if>
+      <if test="creationDate != null" >
+        CREATION_DATE = #{creationDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        CREATE_BY = #{createBy,jdbcType=DECIMAL},
+      </if>
+      <if test="lastUpdateDate != null" >
+        LAST_UPDATE_DATE = #{lastUpdateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateBy != null" >
+        LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where RETURN_POLICY_ID = #{returnPolicyId,jdbcType=DECIMAL}
+  </update>
+ 
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.amazon.dao.IInboundShipmentDetailDAO">
+	<update id="update">
+		update AMAZON_INBOUND_SHIPMENT_DETAIL a
+		set a.QuantityInCase=#{QuantityInCase},
+		a.QuantityReceived=#{QuantityReceived}
+		where a.ShipmentId=#{ShipmentId}
+		and a.SellerSKU=#{SellerSKU}
+	</update>
+	<insert id="add">
+		insert into AMAZON_INBOUND_SHIPMENT_DETAIL(
+		ID,
+		ShipmentId,
+		SellerSKU,
+		QuantityShipped,
+		QuantityInCase,
+		QuantityReceived,
+		FulfillmentNetworkSKU
+		) values(AMAZON_INBOUND_DETAIL_SEQ.Nextval,
+		#{ShipmentId},
+		#{SellerSKU},
+		#{QuantityShipped},
+		#{QuantityInCase},
+		#{QuantityReceived},
+		#{FulfillmentNetworkSKU}
+		)
+	</insert>
+
+	<select id="getShipIdSku" resultType="java.util.Map">
+		select * from
+		AMAZON_INBOUND_SHIPMENT_DETAIL where ShipmentId=#{shipmentId} and
+		SellerSKU=#{sku}
+	</select>
+	<select id="getShipmentIds" resultType="java.util.Map">
+		select ShipmentId
+		from ocs_ebay.AMAZON_INBOUND_SHIPMENT
+		where (ShipmentId not in
+		(select ShipmentId from ocs_ebay.AMAZON_INBOUND_SHIPMENT_DETAIL)
+		or ShipmentId in (
+		select ShipmentId from ocs_ebay.AMAZON_INBOUND_SHIPMENT_DETAIL where
+		QuantityReceived=0
+		) or SHIPMENTSTATUS != 'CLOSED') and PLATFORM=#{platform}
+
+	</select>
+</mapper>

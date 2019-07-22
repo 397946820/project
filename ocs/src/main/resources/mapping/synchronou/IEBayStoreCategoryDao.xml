@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayStoreCategoryDao">
+	<resultMap type="com.it.ocs.synchronou.model.EBayStoreCategoryModel" id="storeCategoryResult">
+		<id column="ID" property="id"  />
+		<result column="CATEGORY_ID" property="category_id"  />
+		<result column="NAME" property="name"  />
+		<result column="PARENT_CATEGORY_ID" property="parent_category_id"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="CATEGORY_ORDER" property="category_order"  />
+		<result column="CHILD_CATEGORY" property="child_category"  />
+		<result column="CREATION_DATE" property="creationDate"  />
+		<result column="LAST_UPDATE_DATE" property="lastUpdationDate"  />
+		<result column="MARKETPLACE_ID" property="marketplace_id"  />
+		<result column="USER_NAME" property="user_name"  />
+	</resultMap>
+	<sql id="select_base">
+			ID,
+			CATEGORY_ID,
+			NAME,
+			PARENT_CATEGORY_ID,
+			CHILD_CATEGORY,
+			CREATION_DATE,
+			CATEGORY_ORDER,
+			LAST_UPDATE_DATE,
+			MARKETPLACE_ID
+	</sql>
+	<select id="query" resultMap="storeCategoryResult" >
+		select <include refid="select_base" /> from EBAY_STORE_CATEGORY_INFO where ENABLED_FLAG='Y' and MARKETPLACE_ID=#{param.marketplace_id,jdbcType=BIGINT}
+	</select>
+	<select id="internalSelectStoreCategorys" resultMap="storeCategoryResult">
+		select <include refid="select_base" /> from EBAY_STORE_CATEGORY_INFO
+		where 1=1
+		<if test="param.marketplace_id!=null">
+			and MARKETPLACE_ID=#{param.marketplace_id,jdbcType=BIGINT}
+		</if>
+		<if test="param.user_name!=null">
+			and USER_NAME=#{param.user_name,jdbcType=VARCHAR}
+		</if>
+		<if test="param.parent_category_id!=null">
+			and PARENT_CATEGORY_ID=#{param.parent_category_id,jdbcType=BIGINT}
+		</if>
+	</select>
+	<update id="update"  parameterType="com.it.ocs.synchronou.model.EBayStoreCategoryModel">
+		update EBAY_STORE_CATEGORY_INFO set 
+			NAME=#{name,jdbcType=VARCHAR},
+			CATEGORY_ORDER=#{category_order,jdbcType=DOUBLE},
+			LAST_UPDATE_DATE=sysdate
+		where
+			CATEGORY_ID=#{category_id,jdbcType=DOUBLE}	
+	</update>
+	<insert id="add" parameterType="com.it.ocs.synchronou.model.EBayStoreCategoryModel">
+		insert into EBAY_STORE_CATEGORY_INFO(
+		ID,
+		CATEGORY_ID,
+		CREATION_DATE,
+		ENABLED_FLAG,
+		NAME,
+		PARENT_CATEGORY_ID,
+		CATEGORY_ORDER
+		
+		)
+		values(
+			EBAY_STORE_CATEGORY_INFO_SEQ.NEXTVAL,
+			EBAY_STORE_CATEGORY_ID_SEQ.NEXTVAL,
+			sysdate,
+			'Y',
+			#{name,jdbcType=VARCHAR},
+			#{parent_category_id,jdbcType=DOUBLE},
+			#{category_order,jdbcType=DOUBLE}	
+		)
+	</insert>
+	<delete id="deleteStoreCategoryAll">
+		delete EBAY_STORE_CATEGORY_INFO
+	</delete>
+	<insert id="insertStoreCategoryList" parameterType="java.util.List">
+		INSERT INTO EBAY_STORE_CATEGORY_INFO(
+			ID,
+			CATEGORY_ID,
+			NAME,
+			PARENT_CATEGORY_ID,
+			CHILD_CATEGORY,
+			CATEGORY_ORDER,
+			MARKETPLACE_ID,
+			USER_NAME,
+			STORE_NAME,
+			STORE_URL,
+			CREATION_DATE)  
+		select EBAY_STORE_CATEGORY_INFO_SEQ.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				 #{item.category_id,jdbcType=BIGINT},
+	             #{item.name,jdbcType=VARCHAR},
+	             #{item.parent_category_id,jdbcType=BIGINT},
+	             #{item.child_category,jdbcType=VARCHAR},
+	             #{item.category_order,jdbcType=BIGINT},
+	             #{item.marketplace_id,jdbcType=BIGINT},
+	             #{item.user_name,jdbcType=VARCHAR},
+	             #{item.store_name,jdbcType=VARCHAR},
+				 #{item.store_url,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="selectStoreCategoryByPIDAndMIDAndName" resultMap="storeCategoryResult">
+		select <include refid="select_base" /> from EBAY_STORE_CATEGORY_INFO 
+		where MARKETPLACE_ID=#{marketplaceId,jdbcType=DOUBLE} and PARENT_CATEGORY_ID=#{parentCategoryId,jdbcType=DOUBLE} and NAME=#{categoryName,jdbcType=VARCHAR}
+	</select>
+	<select id="selectStoreUrlByUserId" resultMap="storeCategoryResult">
+		select store_url from EBAY_STORE_CATEGORY_INFO esci where esci.user_name=#{userId} group by esci.store_url 
+	</select>
+	<select id="selectStoreCategoryByCIDAndMID" resultMap="storeCategoryResult">
+		select <include refid="select_base" /> from EBAY_STORE_CATEGORY_INFO 
+		where USER_NAME=#{userId} and CATEGORY_ID=#{categoryId,jdbcType=DOUBLE}
+	</select>
+	<select id="selectChildStoreCategorysByCIDAndMID" resultMap="storeCategoryResult">
+		select <include refid="select_base" /> from EBAY_STORE_CATEGORY_INFO 
+		where  PARENT_CATEGORY_ID=#{categoryId,jdbcType=DOUBLE} and USER_NAME=#{userId}
+	</select>
+	
+	<select id="selectStoreCategorysByMarketplaceId" resultMap="storeCategoryResult">
+		select <include refid="select_base" /> from EBAY_STORE_CATEGORY_INFO where MARKETPLACE_ID=#{marketplaceId} and ENABLED_FLAG='Y'
+	</select>
+</mapper>

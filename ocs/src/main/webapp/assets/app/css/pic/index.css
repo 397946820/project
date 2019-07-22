@@ -1,0 +1,90 @@
+#pp{
+   border:1px solid #ccc; 
+   clear: both;
+   bottom: 0;
+  }
+  
+  .image-box{
+   border:1px solid #ccc; 
+   width:150px; 
+   height:200px; 
+   float:left; 
+   margin: 5px; 
+   text-align: center;
+   font-size: 12px;
+  }
+  
+  .image-box span{
+   margin: 0 10px;
+   cursor: pointer;
+  }
+  
+  .image-box img{
+   width: 135px;
+   height:135px;
+   margin-top: 5px;
+  }
+  
+  .image-box .image-title{
+   line-height: 18px;
+   max-width: 200px;
+   max-height: 18px;
+   padding: 0;
+   margin: 0;
+   overflow: hidden;
+  }
+  .easyui-pagination{
+   width: 100%;
+  }
+  .ssi-uploader{
+  display:none;
+  }
+  .addImgBoxShow{
+  display:block;
+  }
+  .addButton{
+  margin-bottom:10px;
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  }
+  #content{
+  padding:10px;
+  position: relative;
+  height: 500px;
+  }
+  #ssi-DropZoneBack{
+    font-size: 24px;
+    letter-spacing: 1px;
+    font-family: sans-serif;
+  }
+  .ssi-button.ssi-removeBtn{
+  	background: white !important;
+    color: #00e;
+    border: none;
+    width: 25px;
+    font-size: 14px;
+    border-radius: 0;
+  }
+  .ssi-removeBtn span.trash10, span.trash7{
+  	width: 32px;
+  }
+  .editImg{
+  font-size:14px;
+  }
+.ssi-statusLabel{font-size:12px;}
+.ssi-buttonWrapper{
+	margin-left: 105px;
+}
+.img-box{
+   margin-top: 42px;
+}
+.ssi-button.success,.ssi-button.info{
+	background:#698cba !important;
+}
+td .ssi-statusLabel{
+    width: 58px;
+    float: right;
+    display: inline-block;
+    padding: 2px 0;
+}

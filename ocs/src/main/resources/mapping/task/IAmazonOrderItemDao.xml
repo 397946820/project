@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IAmazonOrderItemDao">
+	<resultMap type="com.it.ocs.task.model.AmazonOrderItemModel" id="amazonOrderItemResult">
+		<id column="ID" property="id"  />
+		<result column="PARENT_ID" property="parent_id"  />
+		<result column="AMAZON_ITEM_ID" property="amazon_item_id"  />
+		<result column="TITLE" property="title"  />
+		<result column="ASIN" property="asin"  />
+		<result column="SKU" property="sku"  />
+		<result column="PRICE" property="price"  />
+		<result column="QTY" property="qty"  />
+		<result column="SHIPPING_AMOUNT" property="shipping_amount"  />
+		<result column="SHIPPING_DISCOUNT" property="shipping_discount"  />
+		<result column="TAX" property="tax"  />
+		<result column="GIFT_PRICE" property="gift_price"  />
+		<result column="PROMOTION_ID" property="promotion_id"  />
+		<result column="PROMOTION_DISCOUNT" property="promotion_discount"  />
+		<result column="SHIPPING_TAX" property="shipping_tax"  />
+		<result column="CONDITION_ID" property="condition_id"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="PUSH_STATUS" property="push_status"  />
+		<result column="SOURCE_ID" property="source_id"  />
+	</resultMap>
+
+	<insert id="insertAmazonOrderItems" parameterType="java.util.List">
+		INSERT INTO AMAZON_ORDER_ITEM (
+			ID,
+			PARENT_ID,
+			AMAZON_ITEM_ID,
+			TITLE,
+			ASIN,
+			SKU,
+			PRICE,
+			QTY,
+			SHIPPING_AMOUNT,
+			SHIPPING_DISCOUNT,
+			TAX,
+			GIFT_PRICE,
+			PROMOTION_ID,
+			PROMOTION_DISCOUNT,
+			SHIPPING_TAX,
+			CONDITION_ID,
+			CREATED_AT,
+			UPDATED_AT,
+			PUSH_STATUS,
+			SOURCE_ID)   
+		select TOTAL_ORDER_ITEM_SEQ.Nextval,c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.parent_id,jdbcType=BIGINT},
+				#{item.amazon_item_id,jdbcType=VARCHAR},
+				#{item.title,jdbcType=VARCHAR},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.price,jdbcType=DOUBLE},
+				#{item.qty,jdbcType=BIGINT},
+				#{item.shipping_amount,jdbcType=DOUBLE},
+				#{item.shipping_discount,jdbcType=DOUBLE},
+				#{item.tax,jdbcType=DOUBLE},
+				#{item.gift_price,jdbcType=DOUBLE},
+				#{item.promotion_id,jdbcType=VARCHAR},
+				#{item.promotion_discount,jdbcType=DOUBLE},
+				#{item.shipping_tax,jdbcType=DOUBLE},
+				#{item.condition_id,jdbcType=VARCHAR},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.push_status,jdbcType=BIGINT},
+				#{item.id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="findAmazonOrderItems" resultMap="amazonOrderItemResult" parameterType="java.util.List">
+		select AMAZON_ITEM_ID,PARENT_ID from AMAZON_ORDER_ITEM 
+		where AMAZON_ITEM_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.amazon_item_id}  
+        </foreach> 
+	</select>
+	<select id="selectOrderItemRepeat" resultType="java.lang.Long">
+		select count(cn) from (select count(aoi.amazon_item_id) CN 
+          from amazon_order_item aoi
+         group by aoi.amazon_item_id
+        having count(aoi.amazon_item_id) > 1)
+	</select>
+	<delete id="deleteOrderItemRepeat">
+		delete amazon_order_item aoi3 where aoi3.amazon_item_id in (select aoi.amazon_item_id 
+          from amazon_order_item aoi
+          group by aoi.amazon_item_id 
+        having count(aoi.amazon_item_id) > 1)  and  aoi3.updated_at in (select min(aoi.updated_at)
+          from amazon_order_item aoi
+          group by aoi.amazon_item_id 
+        having count(aoi.amazon_item_id)>1) 
+	</delete>
+	<update id="updateAmazonOrderItems" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update AMAZON_ORDER_ITEM baoi 
+	   	set
+			TITLE = #{item.title,jdbcType=VARCHAR},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=DOUBLE},
+			QTY = #{item.qty,jdbcType=BIGINT},
+			SHIPPING_AMOUNT = #{item.shipping_amount,jdbcType=DOUBLE},
+			SHIPPING_DISCOUNT = #{item.shipping_discount,jdbcType=DOUBLE},
+			TAX = #{item.tax,jdbcType=DOUBLE},
+			GIFT_PRICE = #{item.gift_price,jdbcType=DOUBLE},
+			PROMOTION_ID = #{item.promotion_id,jdbcType=VARCHAR},
+			PROMOTION_DISCOUNT = #{item.promotion_discount,jdbcType=DOUBLE},
+			SHIPPING_TAX = #{item.shipping_tax,jdbcType=DOUBLE},
+			CONDITION_ID = #{item.condition_id,jdbcType=VARCHAR},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP},
+			PUSH_STATUS = #{item.push_status,jdbcType=BIGINT},
+			SOURCE_ID = #{item.id,jdbcType=BIGINT}	
+	   		where baoi.AMAZON_ITEM_ID = #{item.amazon_item_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

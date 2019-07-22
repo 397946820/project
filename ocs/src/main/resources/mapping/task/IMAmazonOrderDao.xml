@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IMAmazonOrderDao">
+	<resultMap type="com.it.ocs.task.model.AmazonOrderModel" id="amazonOrderResult">
+		<id column="id" property="id"  />
+		<result column="platform" property="platform"  />
+		<result column="channel" property="channel"  />
+		<result column="order_id" property="order_id"  />
+		<result column="status" property="status"  />
+		<result column="payment_method" property="payment_method"  />
+		<result column="purchase_at" property="purchase_at"  />
+		<result column="created_at" property="created_at"  />
+		<result column="updated_at" property="updated_at"  />
+		<result column="amazon_updated_at" property="amazon_updated_at"  />
+		<result column="lastest_ship_date" property="lastest_ship_date"  />
+		<result column="lastest_delivery_date" property="lastest_delivery_date"  />
+		<result column="customer_name" property="customer_name"  />
+		<result column="email" property="email"  />
+		<result column="amount" property="amount"  />
+		<result column="currency_code" property="currency_code"  />
+		<result column="country_code" property="country_code"  />
+		<result column="name" property="name"  />
+		<result column="state_or_region" property="state_or_region"  />
+		<result column="postal_code" property="postal_code"  />
+		<result column="phone" property="phone"  />
+		<result column="city" property="city"  />
+		<result column="street" property="street"  />
+	</resultMap>
+	<select id="selectMaxCreatedAt" resultType="java.lang.String">
+		select date_format(max(updated_at), '%Y-%c-%e %T') as created_at from leamazon.amazon_order
+	</select>
+	<select id="selectAmazonOrderByStartTAndEndT" resultMap="amazonOrderResult">
+		select * from amazon_order where updated_at>STR_TO_DATE('${startT}', '%Y-%m-%d %H:%i:%s') and updated_at<![CDATA[<=]]>STR_TO_DATE('${endT}', '%Y-%m-%d %H:%i:%s') 
+	</select>
+</mapper>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.discount.dao.IDiscountDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.discount.model.DiscountModel">
+		<id column="DISCOUNTID" property="id" jdbcType="DECIMAL" />
+		<result column="DISCOUNT_NAME" property="name" jdbcType="VARCHAR" />
+		<result column="EBAY_ACCOUNT" property="ebayAccount" jdbcType="VARCHAR" />
+		<result column="START_TIME" property="startTime" jdbcType="TIMESTAMP" />
+		<result column="END_TIME" property="endTime" jdbcType="TIMESTAMP" />
+		<result column="DISCOUNT_DETAIL" property="discountDetail" jdbcType="VARCHAR" />
+		<result column="ENABLED_FLAG" property="enabledFlag" jdbcType="CHAR" />
+		<result column="CREATION_DATE" property="creationDate" jdbcType="TIMESTAMP" />
+		<result column="CREATE_BY" property="createBy" jdbcType="DECIMAL" />
+		<result column="LAST_UPDATE_DATE" property="lastUpdationDate" jdbcType="TIMESTAMP" />
+		<result column="LAST_UPDATE_BY" property="lastUpdateBy" jdbcType="DECIMAL" />
+	</resultMap>
+	
+	<sql id="sqlBase">
+		SELECT
+		DISCOUNTID as id,
+		DISCOUNT_NAME AS name,
+		EBAY_ACCOUNT AS ebayAccount,
+		START_TIME AS startTime,
+		END_TIME AS endTime,
+		DISCOUNT_DETAIL AS discountDetail,
+		ENABLED_FLAG AS enabledFlag,
+		CREATION_DATE AS creationDate,
+		CREATE_BY AS createBy,
+		LAST_UPDATE_DATE AS lastUpdationDate,
+		LAST_UPDATE_BY AS lastUpdateBy
+		FROM
+		EBAY_DISCOUNT
+	</sql>
+	
+	<sql id="seachWhere">
+		<choose>
+			<when test="param!=null">
+				<where>
+					1=1 
+					<if test="param.name!=null">
+						AND NAME=#{param.name}
+					</if>
+					<if test="param.enabledFlag!=null">
+						AND ENABLED_FLAG=#{param.enabledFlag}
+					</if>
+				</where>
+			</when>
+			<otherwise>
+				<where>
+					ENABLED_FLAG='Y'
+				</where>
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="queryByPage" resultMap="BaseResultMap">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="sqlBase" />
+				<include refid="seachWhere" />
+				order by LAST_UPDATE_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(DISCOUNTID) from ebay_discount 
+		<include refid="seachWhere"/>
+	</select>
+
+	<insert id="add" parameterType="com.it.ocs.discount.vo.DiscountVo">
+		insert into EBAY_DISCOUNT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			DISCOUNTID,
+
+			<if test="name != null">
+				DISCOUNT_NAME,
+			</if>
+			<if test="ebayAccount != null">
+				EBAY_ACCOUNT,
+			</if>
+			<if test="startTime != null">
+				START_TIME,
+			</if>
+			<if test="endTime != null">
+				END_TIME,
+			</if>
+			<if test="discountDetail != null">
+				DISCOUNT_DETAIL,
+			</if>
+			<if test="enabledFlag != null">
+				ENABLED_FLAG,
+			</if>
+			<if test="creationDate != null">
+				CREATION_DATE,
+			</if>
+			<if test="createBy != null">
+				CREATE_BY,
+			</if>
+			<if test="lastUpdationDate != null">
+				LAST_UPDATE_DATE,
+			</if>
+			<if test="lastUpdateBy != null">
+				LAST_UPDATE_BY,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			EBAY_DISCOUNT_SEQ.NEXTVAL,
+
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="ebayAccount != null">
+				#{ebayAccount,jdbcType=VARCHAR},
+			</if>
+			<if test="startTime != null">
+				#{startTime},
+			</if>
+			<if test="endTime != null">
+				#{endTime},
+			</if>
+			<if test="discountDetail != null">
+				#{discountDetail,jdbcType=VARCHAR},
+			</if>
+			<if test="enabledFlag != null">
+				#{enabledFlag,jdbcType=CHAR},
+			</if>
+			<if test="creationDate != null">
+				#{creationDate},
+			</if>
+			<if test="createBy != null">
+				#{createBy,jdbcType=DECIMAL},
+			</if>
+			<if test="lastUpdationDate != null">
+				#{lastUpdationDate},
+			</if>
+			<if test="lastUpdateBy != null">
+				#{lastUpdateBy,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+
+	<select id="getById" parameterType="java.lang.Long"
+		resultType="com.it.ocs.discount.vo.DiscountVo">
+		<include refid="sqlBase"/>
+		WHERE DISCOUNTID = #{id}
+	</select>
+
+	<update id="update" parameterType="com.it.ocs.discount.vo.DiscountVo">
+		update EBAY_DISCOUNT
+		<set>
+			<if test="name != null">
+				DISCOUNT_NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="ebayAccount != null">
+				EBAY_ACCOUNT = #{ebayAccount,jdbcType=VARCHAR},
+			</if>
+			<if test="startTime != null">
+				START_TIME = #{startTime},
+			</if>
+			<if test="endTime != null">
+				END_TIME = #{endTime},
+			</if>
+			<if test="discountDetail != null">
+				DISCOUNT_DETAIL = #{discountDetail,jdbcType=VARCHAR},
+			</if>
+			<if test="enabledFlag != null">
+				ENABLED_FLAG = #{enabledFlag,jdbcType=CHAR},
+			</if>
+			<if test="creationDate != null">
+				CREATION_DATE = #{creationDate},
+			</if>
+			<if test="createBy != null">
+				CREATE_BY = #{createBy,jdbcType=DECIMAL},
+			</if>
+			<if test="lastUpdationDate != null">
+				LAST_UPDATE_DATE = #{lastUpdationDate},
+			</if>
+			<if test="lastUpdateBy != null">
+				LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where DISCOUNTID = #{id,jdbcType=DECIMAL}
+	</update>
+	
+</mapper>

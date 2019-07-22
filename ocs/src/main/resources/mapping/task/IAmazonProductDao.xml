@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.task.dao.IAmazonProductDao">
+	<resultMap type="com.it.ocs.task.model.AmazonProductModel" id="amazonProductResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="NAME" property="name"  />
+		<result column="CATEGORY" property="category"  />
+		<result column="REVIEWS_TOTAL" property="reviews_total"  />
+		<result column="ASIN" property="asin"  />
+		<result column="AMAZON_STOCK" property="amazon_stock"  />
+		<result column="AVERAGE_RATE" property="average_rate"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="PRODUCT_URL" property="product_url"  />
+		<result column="SKU" property="sku"  />
+		<result column="HAS_NEW" property="has_new"  />
+		<result column="STATUS" property="status"  />
+		<result column="COUNTRY" property="country"  />
+		<result column="PRICE" property="price"  />
+		<result column="SPECIAL_PRICE" property="special_price"  />
+		<result column="IMAGE" property="image"  />
+		<result column="OFFER_TOTAL" property="offer_total"  />
+		<result column="STAR_ALL" property="star_all"  />
+		<result column="BULLET_POINTS" property="bullet_points"  />
+		<result column="SHORT_DESCRIPTION" property="short_description"  />
+		<result column="DESCRIPTION" property="description"  />
+		<result column="DETAILS" property="details"  />
+		<result column="HAS_UPDATE" property="has_update"  />
+		<result column="IMPORTANT_LEVEL" property="important_level"  />
+		<result column="IF_CONTINUE" property="if_continue"  />
+		<result column="TYPE" property="type"  />
+		<result column="DEMAND_SCORE" property="demand_score"  />
+		<result column="IF_INVITE" property="if_invite"  />
+		<result column="INVITE_COUNT" property="invite_count"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="CREATE_BY" property="create_by"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+		<result column="LAST_UPDATE_BY" property="last_update_by"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="SOURCE_ID" property="source_id"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(UPDATED_AT) ,'yyyy-mm-dd HH24:mi:ss') from amazon_product
+	</select>
+	<select id="selectMySqlDate" resultMap="amazonProductResult">
+		select * from amazon_product aba where aba.UPDATED_AT>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectAmazonProducts" resultMap="amazonProductResult" parameterType="java.util.List">
+		select SOURCE_ID from amazon_product 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id}  
+        </foreach> 
+	</select>
+	<update id="updateAmazonProducts" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_product baoi 
+	   	 set
+			NAME = #{item.name,jdbcType=VARCHAR},
+			CATEGORY = #{item.category,jdbcType=VARCHAR},
+			REVIEWS_TOTAL = #{item.reviews_total,jdbcType=BIGINT},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			AMAZON_STOCK = #{item.amazon_stock,jdbcType=BIGINT},
+			AVERAGE_RATE = #{item.average_rate,jdbcType=VARCHAR},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP},
+			PRODUCT_URL = #{item.product_url,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			HAS_NEW = #{item.has_new,jdbcType=BIGINT},
+			STATUS = #{item.status,jdbcType=BIGINT},
+			COUNTRY = #{item.country,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=VARCHAR},
+			SPECIAL_PRICE = #{item.special_price,jdbcType=VARCHAR},
+			IMAGE = #{item.image,jdbcType=VARCHAR},
+			OFFER_TOTAL = #{item.offer_total,jdbcType=BIGINT},
+			STAR_ALL = #{item.star_all,jdbcType=VARCHAR},
+			BULLET_POINTS = #{item.bullet_points,jdbcType=VARCHAR},
+			SHORT_DESCRIPTION = #{item.short_description,jdbcType=VARCHAR},
+			DESCRIPTION = #{item.description,jdbcType=VARCHAR},
+			DETAILS = #{item.details,jdbcType=VARCHAR},
+			HAS_UPDATE = #{item.has_update,jdbcType=BIGINT},
+			IMPORTANT_LEVEL = #{item.important_level,jdbcType=BIGINT},
+			IF_CONTINUE = #{item.if_continue,jdbcType=BIGINT},
+			TYPE = #{item.type,jdbcType=BIGINT},
+			DEMAND_SCORE = #{item.demand_score,jdbcType=VARCHAR},
+			IF_INVITE = #{item.if_invite,jdbcType=BIGINT},
+			INVITE_COUNT = #{item.invite_count,jdbcType=BIGINT},
+			LAST_UPDATE_DATE = #{item.last_update_date}
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+	<insert id="insertAmazonProducts" parameterType="java.util.List">
+		INSERT INTO AMAZON_PRODUCT (
+			ENTITY_ID,
+			NAME,
+			CATEGORY,
+			REVIEWS_TOTAL,
+			ASIN,
+			AMAZON_STOCK,
+			AVERAGE_RATE,
+			CREATED_AT,
+			UPDATED_AT,
+			PRODUCT_URL,
+			SKU,
+			HAS_NEW,
+			STATUS,
+			COUNTRY,
+			PRICE,
+			SPECIAL_PRICE,
+			IMAGE,
+			OFFER_TOTAL,
+			STAR_ALL,
+			BULLET_POINTS,
+			SHORT_DESCRIPTION,
+			DESCRIPTION,
+			DETAILS,
+			HAS_UPDATE,
+			IMPORTANT_LEVEL,
+			IF_CONTINUE,
+			TYPE,
+			DEMAND_SCORE,
+			IF_INVITE,
+			INVITE_COUNT,
+			SOURCE_ID,
+			CREATION_DATE
+			)   
+		select amazon_product_SEQ.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.name,jdbcType=VARCHAR},
+				#{item.category,jdbcType=VARCHAR},
+				#{item.reviews_total,jdbcType=BIGINT},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.amazon_stock,jdbcType=BIGINT},
+				#{item.average_rate,jdbcType=VARCHAR},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.product_url,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.has_new,jdbcType=BIGINT},
+				#{item.status,jdbcType=BIGINT},
+				#{item.country,jdbcType=VARCHAR},
+				#{item.price,jdbcType=VARCHAR},
+				#{item.special_price,jdbcType=VARCHAR},
+				#{item.image,jdbcType=VARCHAR},
+				#{item.offer_total,jdbcType=BIGINT},
+				#{item.star_all,jdbcType=VARCHAR},
+				#{item.bullet_points,jdbcType=VARCHAR},
+				#{item.short_description,jdbcType=VARCHAR},
+				#{item.description,jdbcType=VARCHAR},
+				#{item.details,jdbcType=VARCHAR},
+				#{item.has_update,jdbcType=BIGINT},
+				#{item.important_level,jdbcType=BIGINT},
+				#{item.if_continue,jdbcType=BIGINT},
+				#{item.type,jdbcType=BIGINT},
+				#{item.demand_score,jdbcType=VARCHAR},
+				#{item.if_invite,jdbcType=BIGINT},
+				#{item.invite_count,jdbcType=BIGINT},
+				#{item.source_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateInsertData" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_product baoi 
+	   	 set
+			BULLET_POINTS = #{item.bullet_points,jdbcType=VARCHAR},
+			SHORT_DESCRIPTION = #{item.short_description,jdbcType=VARCHAR},
+			DESCRIPTION = #{item.description,jdbcType=VARCHAR},
+			DETAILS = #{item.details,jdbcType=VARCHAR}
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+
+</mapper>

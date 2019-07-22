@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.compare.dao.IEbayOrderCompareDAO">
+	<resultMap type="com.it.ocs.compare.model.EbayDBModel" id="ebayCampareResult">
+		<result property="itemTotalPrice" column="ITEM_TOTAL_PRICE" jdbcType="VARCHAR" />
+		<result property="subTotal" column="SUB_TOTAL" jdbcType="VARCHAR" />
+		<result property="total" column="TOTAL" jdbcType="VARCHAR" />
+		<result property="sku" column="ITEM_SKU" jdbcType="VARCHAR" />
+		<result property="account" column="ACCOUNT" jdbcType="VARCHAR" />
+		<result property="orderStatus" column="ORDER_STATUS" jdbcType="VARCHAR" />
+		<result property="createdTime" column="CREATED_TIME" jdbcType="TIMESTAMP" />
+		<result property="shipDate" column="SHIPPED_TIME" jdbcType="TIMESTAMP" />
+		<result property="salesRecordNumber" column="SALES_RECORD_NUMBER"
+			jdbcType="VARCHAR" />
+		<result property="payStatus" column="PAY_STATUS" jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="queryByParam" resultMap="ebayCampareResult" parameterType="java.util.Map">
+		select
+		c.total,c.sub_total,c.account,c.created_time,c.shipped_time,
+		(d.price * d.QUANTITY_PURCHASED) as ITEM_TOTAL_PRICE,c.order_status,c.Pay_Status,d.* from ebay_order_test c,(
+		select b.* from ebay_order_item_test b where b.order_id in (
+		select a.order_id from ebay_order_test a where a.account=#{param.account}
+		<![CDATA[   and a.shipped_time>=to_date(#{param.startTime}, 'yyyy-mm-dd hh24:mi:ss')
+		 and a.shipped_time<=to_date(#{param.endTime}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
+		) and (b.transaction_site_id=#{param.site}
+		<if test="param.site=='US'">
+			 or b.transaction_site_id='eBayMotors'
+		</if> 
+		)
+		)
+		d where c.order_id=d.order_id
+	</select>
+	<select id="getDateBySaleNumber" resultType="date">
+		select a.shipped_time from ebay_order_test a left join ebay_order_item_test b on a.order_id=b.order_id
+		 where b.sales_record_number=#{srn} 
+	</select>
+	<select id="queryCountryBySN" resultType="string">
+		select TRANSACTION_SITE_ID from ebay_order_item_test where SALES_RECORD_NUMBER in 
+		<foreach collection="list" item="srn" separator="," open="(" close=")">
+			#{srn}
+		</foreach>
+		group by TRANSACTION_SITE_ID
+	</select>
+	<select id="queryLightAccount" resultType="string">
+		select distinct platform from light_account_manager_test
+	</select>
+	<select id="queryEbayAccount" resultType="string">
+		select distinct account from ebay_account_manager_test
+	</select>
+	<select id="queryAmazonAccount" resultType="string">
+		select distinct site_name platform from AMAZON_REPORT_COLUMN_SET
+	</select>
+
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IEbayOrderSubDao">
+	<resultMap type="com.it.ocs.task.model.EbayOrderSubModel" id="ebayOrderSubResult">
+		<result column="ID" property="id"  />
+		<result column="PARENT_ID" property="parent_id"  />
+		<result column="CHECKOUT_STATUS" property="checkout_status"  />
+		<result column="SHIPPING_DETAILS" property="shipping_details"  />
+		<result column="SHIPPING_ADDRESS" property="shipping_address"  />
+		<result column="SHIPPING_SERVICE_SELECTED" property="shipping_service_selected"  />
+		<result column="EXTERNAL_TRANSACTION" property="external_transaction"  />
+		<result column="TRANSACTION_ARRAY" property="transaction_array"  />
+		<result column="MONETARY_DETAILS" property="monetary_details"  />
+		<result column="ORDER_ID" property="order_id"  />
+	</resultMap>
+
+	<select id="getOrderSubSeqs" resultType="java.lang.Long">
+		select TOTAL_ORDER_SUB_SEQ.Nextval from dual
+	</select>
+	<select id="findEbayOrderSubs" resultMap="ebayOrderSubResult">
+		select ORDER_ID from EBAY_ORDER_SUB
+	</select>
+	<insert id="insertLightOrderSubs" parameterType="java.util.List">
+		INSERT INTO EBAY_ORDER_SUB(
+			ID,
+			PARENT_ID,
+			CHECKOUT_STATUS,
+			SHIPPING_DETAILS,
+			SHIPPING_ADDRESS,
+			SHIPPING_SERVICE_SELECTED,
+			EXTERNAL_TRANSACTION,
+			TRANSACTION_ARRAY,
+			MONETARY_DETAILS,
+			ORDER_ID)  
+		select TOTAL_ORDER_SUB_SEQ.Nextval,c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.parent_id,jdbcType=BIGINT},
+				#{item.checkout_status,jdbcType=VARCHAR},
+				#{item.shipping_details,jdbcType=VARCHAR},
+				#{item.shipping_address,jdbcType=VARCHAR},
+				#{item.shipping_service_selected,jdbcType=VARCHAR},
+				#{item.external_transaction,jdbcType=VARCHAR},
+				#{item.transaction_array,jdbcType=VARCHAR},
+				#{item.monetary_details,jdbcType=VARCHAR},
+				#{item.order_id,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	
+
+</mapper>

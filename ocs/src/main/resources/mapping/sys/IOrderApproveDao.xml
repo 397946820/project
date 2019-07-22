@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOrderApproveDao">
+	<sql id="query_base">
+		select so.id,
+		       so.platform,
+		       so.account,
+		       so.site,
+		       so.order_id         orderId,
+		       so.order_type       orderType,
+		       so.cause,
+		       so.descriptions,
+		       so.is_consumer_paid isConsumerPaid,
+		       so.tracking_service trankingService,
+		       so.tracking_num     trankingNum,
+		       so.eda_order_num  edaOrderNum,
+		       so.warehouse_num warehouseNum,
+		       to_char(so.return_cost_time,'yyyy-MM-dd hh24:mi:ss') returnCostTime,
+		       so.reissued_order_id reissuedOrderId,
+		       to_char(so.reissued_order_time,'yyyy-MM-dd hh24:mi:ss') ressuedOrderTime,
+		       so.approve_user approveUser,
+		       to_char(so.approve_time,'yyyy-MM-dd hh24:mi:ss') approveTime,
+		       so.approve_description approveDescription,
+		       so.approve_result approveResult,
+		       (select nvl(nick,username) from sys_user where user_id = so.create_by) createBy,
+		       to_char(so.create_date,'yyyy-MM-dd hh24:mi:ss') createDate,
+		       so.CURRENCY_CODE currencyCode,
+		       so.ADJUSTMENT_POSITIVE adjustmentPositive,
+		       so.DELIVERY_WAREHOUSE deliveryWarehouse,
+		       so.DELIVERY_ADDRESS deliveryAddress,
+		       case when so.platform='light' then to_char(so.adjustment_positive) 
+		       		else (select to_char(sum(i.return_cost)) from sys_return_order_item i where i.parent_id=so.id) 
+		       end returnCost
+		  from SYS_RETURN_ORDER so, SYS_ORDER_APPROVE_SET ss
+		 where so.platform = ss.platform
+		 and so.enabled_flag = 'Y'
+		and ss.approve_user = #{param.userId}
+	</sql>
+	<sql id="query_condition">
+		<if test="param.orderId != null and param.orderId !='' ">
+			and so.order_id = #{param.orderId}
+		</if>
+		<if test="param.platform != null and param.platform !='' ">
+			and so.PLATFORM = #{param.platform}
+		</if>
+		<if test="param.orderType != null and param.orderType !='' ">
+			and so.ORDER_TYPE = #{param.orderType}
+		</if>
+		<if test="param.startCreateDate != null and param.startCreateDate != ''">
+			<![CDATA[and so.create_date >= to_date(CONCAT(#{param.startCreateDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.endCreateDate != null and param.endCreateDate != ''">
+			<![CDATA[and so.create_date <= to_date(CONCAT(#{param.endCreateDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+	</sql>
+	<select id="queryDataByPage" resultType="com.it.ocs.sys.model.OrderApproveModel">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="query_base"></include>
+				<include refid="query_condition"></include>
+				order by so.create_date desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="queryDataCount" resultType="int">
+		select count(*) from (
+			<include refid="query_base"></include>
+			<include refid="query_condition"></include>
+		)
+	</select>
+	<select id="queryData" resultType="java.util.HashMap">
+		<include refid="query_base"></include>
+		<include refid="query_condition"></include>
+		order by so.create_date desc
+	</select>
+	<select id="getInfoById" resultType="com.it.ocs.sys.model.ReturnOrderItemModel">
+		 select roi.ID entityId,
+		        roi.PARENT_ID parentId,
+		        roi.SKU sku,
+		        roi.QTY qty,
+		        roi.RETURN_COST returnCost,
+		        roi.BAD_PRODUCT_QTY badProductQty,
+		        roi.PRODUCT_CASE_TYPE productCaseType,
+		        roi.REMARKS remarks,
+		        roi.QTY_ORDERED qtyOrdered,
+		        roi.ROW_TOTAL rowTotal,
+		        roi.LINE_NUMBER lineNumber,
+		        roi.ASIN asin
+		 from SYS_RETURN_ORDER ro,sys_return_order_item roi 
+		 where ro.id = roi.parent_id
+		 and ro.id = #{id}
+		 and ro.order_type = #{type}
+	</select>
+	<update id="saveApproveData">
+		  update SYS_RETURN_ORDER t set t.is_confirm_order = #{isConfirmOrder},t.is_reissue = #{isReissue},t.approve_result = #{isPass} ,t.approve_description = #{approveCase},t.approve_time = sysdate,t.approve_user = #{userId} where t.id = #{id}
+	</update>
+	<update id="cancelOrder">
+		update sys_return_order o set o.prev_approval_result=o.approve_result, o.approve_result=2, o.canceller=#{param.canceller} where o.id=#{param.id}
+	</update>
+	<select id="refcount" resultType="int" parameterType="java.lang.Long">
+		select count(1) count
+		from   (select distinct 'W_' || o.order_id || '_' || f.times order_id, o.id from sys_return_order o, sys_return_order_final f 
+		        where o.id=f.parent_id and o.order_id=f.order_id and o.approve_result=1) a,
+		       (select o.order_id from wms_de_out_order o where o.order_id like 'W_%_%'
+		        union select s.merchantfulfillmentorderid order_id from sys_uswest_shipping s where s.merchantfulfillmentorderid like 'W_%_%'
+		        union select ms.order_id from light_mark_shipment ms where ms.order_id like 'W_%_%') b
+		where a.order_id=b.order_id and a.id=#{id}
+	</select>
+	
+	<insert id="addDataToFinal">
+	declare
+		n_times number :=0;
+	begin
+		select count(*) into n_times
+		  from sys_return_order_final a,
+		       (select platform, account, order_id
+		          from sys_return_order
+		         where id =  #{id}) b
+		 where a.platform = b.platform
+		   and a.account = b.account
+		   and a.order_id = b.order_id;
+		insert into sys_return_order_final(id,account,site,order_id,sku,qty,order_type,create_by,create_date,update_by,update_date,times,platform,parent_id,m_sku)
+	    select SYS_RETURN_ORDER_FINAL_SEQ.NEXTVAL,
+	           r.account,
+	           r.site,
+	           r.order_id,
+	           i.sku,
+	           i.qty,
+	           r.order_type,
+	           r.create_by,
+	           r.create_date,
+	           r.update_by,
+	           r.update_date,
+	           n_times+1,
+	           r.platform,
+	           r.id,
+	           i.m_sku
+	      from SYS_RETURN_ORDER r, sys_return_order_item i
+	     where r.id = i.parent_id
+	     and r.id = #{id};
+	end;
+	</insert>
+	<insert id="addReplaceOrRefound">
+		declare
+		  exist number;
+		
+		begin
+		  for A in (select distinct nvl(l.sku, i.sku) v_sku
+		                  from SYS_RETURN_ORDER      r,
+		                       sys_return_order_item i,
+		                       sys_sku_link          l
+		                 where r.id = i.parent_id
+		                   and i.sku = l.p_sku(+)
+		                   and r.id = #{id}) loop
+		      exist := 0;    
+		      select count(*) into exist from MAPPING_SKU_INFO m where A.v_sku  like m.sku || '-%' or m.sku = A.v_sku;
+		      if exist = 0 then
+		        INSERT INTO CUSTOMER_TICKETS(
+		                  TICKETS_ID,
+		                COUNTRY,
+		                ORDER_NUMBER,
+		                SKU,
+		                ORDER_DATE,
+		                DEFECTIVE_QUANTITY,
+		                CATAGORIES,
+		                PROBLEM_TYPE_LVL2,
+		                TOTAL_DAYS,
+		                PROBLEM_DATE,
+		                SOLUTION,
+		                REPLACEMENT_TIMES,
+		                OPERATORS,
+		                REMARK,
+		                PARENT_CATEGORY,
+		                PLATFORM,
+		                AMOUNT,
+		                CURRENCY,
+		                CREATE_DATE,
+		                UPDATE_DATE) 
+		              select CUSTOMER_TICKETS_SEQ.NEXTVAL,
+		                     m1.COUNTRY,
+		                     m1.ORDER_NUMBER,
+		                     m1.SKU,
+		                     m1.ORDER_DATE,
+		                     m1.DEFECTIVE_QUANTITY,
+		                     ''        CATAGORIES,
+		                     m1.PROBLEM_TYPE_LVL2,
+		                     m1.TOTAL_DAYS - trunc(m1.ORDER_DATE) TOTAL_DAYS,
+		                     m1.PROBLEM_DATE,
+		                     m1.SOLUTION,
+		                     m1.REPLACEMENT_TIMES,
+		                     m1.OPERATORS,
+		                     m1.REMARK,
+		                     ''  PARENT_CATEGORY,
+		                     m1.PLATFORM,
+		                     m1.AMOUNT,
+		                     m1.CURRENCY,
+		                     m1.CREATE_DATE,
+		                     m1.UPDATE_DATE
+		                from (select f_format_site_name(r.site) COUNTRY,
+		                             r.order_id ORDER_NUMBER,
+		                             r.account,
+		                             nvl(l.sku, i.sku) SKU,
+		                             case
+		                               when r.platform = 'amazon' then
+		                                (select purchase_at + 8/24
+		                                   from amazon_order
+		                                  where order_id = r.order_id)
+		                               when r.platform = 'ebay' then
+		                                (select created_time + 8/24
+		                                   from ebay_order
+		                                  where order_id = r.order_id
+		                                    AND ACCOUNT = r.account)
+		                               when r.platform = 'light' then
+		                                (select light_created_at + 8/24
+		                                   from light_order
+		                                  where order_id = r.order_id)
+		                               when r.platform = 'walmart' then
+		                                (select order_date_utc + 8/24
+		                                   from walmart_order
+		                                  where purchase_order_id = r.order_id)
+		                             end ORDER_DATE,
+		                             i.bad_product_qty * nvl(l.qty,1) DEFECTIVE_QUANTITY,
+		                             --CATAGORIES
+		                             i.product_case_type PROBLEM_TYPE_LVL2,
+		                             trunc(r.approve_time) TOTAL_DAYS,
+		                             r.approve_time + 0 PROBLEM_DATE,
+		                             '补发' SOLUTION,
+		                             1 REPLACEMENT_TIMES,
+		                             u.nick OPERATORS,
+		                             r.cause REMARK,
+		                             --PARENT_CATEGORY
+		                             f_format_site_name(r.platform) PLATFORM,
+		                             i.return_cost AMOUNT,
+		                             (select r.currency_symbol
+		                                from cal_currency_rate r
+		                               where r.country_id = f_format_site_name(r.site)) CURRENCY,
+		                             r.create_date + 0 CREATE_DATE,
+		                             r.create_date + 0 UPDATE_DATE
+		                        from SYS_RETURN_ORDER      r,
+		                             sys_return_order_item i,
+		                             sys_sku_link          l,
+		                             sys_user              u
+		                       where r.id = i.parent_id
+		                         and i.sku = l.p_sku(+)
+		                         and r.create_by = u.user_id
+		                         and nvl(l.sku, i.sku) = A.v_sku
+		                         and r.id = #{id}
+		                         ) m1;
+		      else
+		        INSERT INTO CUSTOMER_TICKETS(
+		              TICKETS_ID,
+		            COUNTRY,
+		            ORDER_NUMBER,
+		            SKU,
+		            ORDER_DATE,
+		            DEFECTIVE_QUANTITY,
+		            CATAGORIES,
+		            PROBLEM_TYPE_LVL2,
+		            TOTAL_DAYS,
+		            PROBLEM_DATE,
+		            SOLUTION,
+		            REPLACEMENT_TIMES,
+		            OPERATORS,
+		            REMARK,
+		            PARENT_CATEGORY,
+		            PLATFORM,
+		            AMOUNT,
+		            CURRENCY,
+		            CREATE_DATE,
+		            UPDATE_DATE) 
+		          select CUSTOMER_TICKETS_SEQ.NEXTVAL,
+		                 m1.COUNTRY,
+		                 m1.ORDER_NUMBER,
+		                 m1.SKU,
+		                 m1.ORDER_DATE,
+		                 m1.DEFECTIVE_QUANTITY,
+		                 m2.catagories         CATAGORIES,
+		                 m1.PROBLEM_TYPE_LVL2,
+		                 m1.TOTAL_DAYS - trunc(m1.ORDER_DATE) TOTAL_DAYS,
+		                 m1.PROBLEM_DATE,
+		                 m1.SOLUTION,
+		                 m1.REPLACEMENT_TIMES,
+		                 m1.OPERATORS,
+		                 m1.REMARK,
+		                 m2.parent_catagories  PARENT_CATEGORY,
+		                 m1.PLATFORM,
+		                 m1.AMOUNT,
+		                 m1.CURRENCY,
+		                 m1.CREATE_DATE,
+		                 m1.UPDATE_DATE
+		            from (select f_format_site_name(r.site) COUNTRY,
+		                         r.order_id ORDER_NUMBER,
+		                         r.account,
+		                         nvl(l.sku, i.sku) SKU,
+		                         case
+		                           when r.platform = 'amazon' then
+		                            (select purchase_at + 8/24
+		                               from amazon_order
+		                              where order_id = r.order_id)
+		                           when r.platform = 'ebay' then
+		                            (select created_time + 8/24
+		                               from ebay_order
+		                              where order_id = r.order_id
+		                                AND ACCOUNT = r.account)
+		                           when r.platform = 'light' then
+		                            (select light_created_at + 8/24
+		                               from light_order
+		                              where order_id = r.order_id)
+		                           when r.platform = 'walmart' then
+		                            (select order_date_utc + 8/24
+		                               from walmart_order
+		                              where purchase_order_id = r.order_id)
+		                         end ORDER_DATE,
+		                         i.bad_product_qty * nvl(l.qty,1) DEFECTIVE_QUANTITY,
+		                         --CATAGORIES
+		                         i.product_case_type PROBLEM_TYPE_LVL2,
+		                         trunc(r.approve_time) TOTAL_DAYS,
+		                         r.approve_time + 0 PROBLEM_DATE,
+		                         '补发' SOLUTION,
+		                         1 REPLACEMENT_TIMES,
+		                         u.nick OPERATORS,
+		                         r.cause REMARK,
+		                         --PARENT_CATEGORY
+		                         f_format_site_name(r.platform) PLATFORM,
+		                         i.return_cost AMOUNT,
+		                         (select r.currency_symbol
+		                            from cal_currency_rate r
+		                           where r.country_id = f_format_site_name(r.site)) CURRENCY,
+		                         r.create_date + 0 CREATE_DATE,
+		                         r.create_date + 0 UPDATE_DATE
+		                    from SYS_RETURN_ORDER      r,
+		                         sys_return_order_item i,
+		                         sys_sku_link          l,
+		                         sys_user              u
+		                   where r.id = i.parent_id
+		                     and i.sku = l.p_sku(+)
+		                     and r.create_by = u.user_id
+		                     and nvl(l.sku, i.sku) = A.v_sku
+		                     and r.id = #{id}
+		                     ) m1,
+		                 MAPPING_SKU_INFO m2
+		           where m1.sku like m2.sku || '-%' or m1.sku = m2.sku ;
+		      end if;
+		  end loop;
+		
+		end;
+
+	</insert>
+	
+	<select id="getOrderById" resultType="com.it.ocs.sys.utils.CamelKeyMap">
+		SELECT I.PLATFORM,
+               I.ACCOUNT,
+               I.SITE,
+               I.ORDER_ID,
+               I.ID,
+               I.CAUSE,
+               I.ADJUSTMENT_POSITIVE,
+               I.CURRENCY_CODE
+        FROM SYS_RETURN_ORDER I WHERE I.ID = #{id}
+	</select>
+	
+	<select id="getItemsByParentId" resultType="com.it.ocs.sys.utils.CamelKeyMap">
+		SELECT I.SKU,
+               I.QTY,
+               I.RETURN_COST,
+               I.PRODUCT_CASE_TYPE,
+               I.LINE_NUMBER
+        FROM SYS_RETURN_ORDER_ITEM I WHERE I.PARENT_ID = #{id}
+	</select>
+</mapper>

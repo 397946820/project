@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.customerCenter.dao.ICustomerRefundDao">
+	
+	<resultMap type="com.it.ocs.customerCenter.model.CustomerRefundModel" id="customerRefundResult">
+	   <id column="REPORT_ID" property="report_id"  />
+		<result column="REFUND_DATE" property="refund_date"  />
+		<result column="SKU" property="sku"  />
+		<result column="QTY" property="qty"  />
+		<result column="CURRENCY" property="currency"  />
+		<result column="PAYMENT_MENTHOD" property="payment_menthod"  />
+		<result column="FULL_OR_PARTIAL" property="full_or_partial"  />
+		<result column="REFUND_TIMES" property="refund_times"  />
+		<result column="RETURNS" property="returns"  />
+		<result column="REPLACE_TIMES" property="replace_times"  />
+		<result column="REASON" property="reason"  />
+		<result column="PROBLEM_TYPES" property="problem_types"  />
+		<result column="APPROVAL" property="approval"  />
+		<result column="WEB_SITE" property="web_site"  />
+		<result column="ORDER_DATE" property="order_date"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="ORDER_ID" property="order_id"  />
+		<result column="AMOUNT" property="amount"  />
+	</resultMap>
+	
+	<sql id="base_map_conditions">
+		<if test="refund.sku !=null and refund.sku !=''"> 
+			and cr.SKU like '%'||#{refund.sku}||'%'
+		</if>
+		<if test="refund.web_site !=null and refund.web_site !=''"> 
+			and cr.WEB_SITE=#{refund.web_site}
+		</if>
+		<if test="refund.order_id !=null and refund.order_id !=''"> 
+			and cr.order_id like '%'||#{refund.order_id}||'%'
+		</if>
+		<if test="refund.startDate !=null and refund.startDate !=''"> 
+			and cr.REFUND_DATE >= to_date('${refund.startDate}','YYYY-MM-DD')
+		</if>
+		<if test="refund.endDate !=null and refund.endDate !=''"> 
+			and cr.REFUND_DATE <![CDATA[<=]]> to_date('${refund.endDate}','YYYY-MM-DD')
+		</if>
+	</sql>
+	<sql id="base_conditions">
+		<choose>
+			<when test="order!=null and order!=''">
+				order by 'cr.'||${sort} ${order}
+			</when>
+			<otherwise>
+			 order by cr.create_date desc
+			</otherwise>
+		</choose>
+	</sql>
+	<sql id="select_base">
+		cr.REPORT_ID,
+		to_char(cr.REFUND_DATE,'yyyy-mm-dd') refund_date,
+		cr.SKU,
+		cr.QTY,
+		cr.CURRENCY,
+		cr.PAYMENT_MENTHOD,
+		cr.FULL_OR_PARTIAL,
+		cr.REFUND_TIMES,
+		cr.RETURNS,
+		cr.REPLACE_TIMES,
+		cr.REASON,
+		cr.PROBLEM_TYPES,
+		cr.APPROVAL,
+		cr.WEB_SITE,
+		to_char(cr.ORDER_DATE,'yyyy-mm-dd') order_date,
+		cr.PLATFORM,
+		cr.ORDER_ID,
+		cr.AMOUNT
+	</sql>
+	
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from CUSTOMER_PRODUCT_REPORT cr where ENABLED_FLAG='Y' <include refid="base_map_conditions" />
+	</select>
+	<insert id="insertRefunds" parameterType="java.util.List">
+		INSERT INTO CUSTOMER_PRODUCT_REPORT(
+		    REPORT_ID,
+			REFUND_DATE,
+			SKU,
+			QTY,
+			CURRENCY,
+			PAYMENT_MENTHOD,
+			FULL_OR_PARTIAL,
+			REFUND_TIMES,
+			RETURNS,
+			REPLACE_TIMES,
+			REASON,
+			PROBLEM_TYPES,
+			APPROVAL,
+			WEB_SITE,
+			ORDER_DATE,
+			PLATFORM,
+			ORDER_ID,
+			AMOUNT,
+			CREATE_DATE,
+			UPDATE_DATE)  
+		select CUSTOMER_PRODUCT_REPORT_SEQ.NEXTVAL,c.*,sysdate,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				to_date(#{item.refund_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.qty,jdbcType=BIGINT},
+				#{item.currency,jdbcType=VARCHAR},
+				#{item.payment_menthod,jdbcType=VARCHAR},
+				#{item.full_or_partial,jdbcType=VARCHAR},
+				#{item.refund_times,jdbcType=BIGINT},
+				#{item.returns,jdbcType=VARCHAR},
+				#{item.replace_times,jdbcType=BIGINT},
+				#{item.reason,jdbcType=VARCHAR},
+				#{item.problem_types,jdbcType=VARCHAR},
+				#{item.approval,jdbcType=VARCHAR},
+				#{item.web_site,jdbcType=VARCHAR},
+				to_date(#{item.order_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.order_id,jdbcType=VARCHAR},
+				#{item.amount,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateRefunds" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			update CUSTOMER_PRODUCT_REPORT baoi
+			set 
+			REFUND_DATE = to_date(#{item.refund_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			QTY = #{item.qty,jdbcType=BIGINT},
+			CURRENCY = #{item.currency,jdbcType=VARCHAR},
+			PAYMENT_MENTHOD = #{item.payment_menthod,jdbcType=VARCHAR},
+			FULL_OR_PARTIAL = #{item.full_or_partial,jdbcType=VARCHAR},
+			REFUND_TIMES = #{item.refund_times,jdbcType=BIGINT},
+			RETURNS = #{item.returns,jdbcType=VARCHAR},
+			REPLACE_TIMES = #{item.replace_times,jdbcType=BIGINT},
+			REASON = #{item.reason,jdbcType=VARCHAR},
+			PROBLEM_TYPES = #{item.problem_types,jdbcType=VARCHAR},
+			APPROVAL = #{item.approval,jdbcType=VARCHAR},
+			WEB_SITE = #{item.web_site,jdbcType=VARCHAR},
+			ORDER_DATE = to_date(#{item.order_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			ORDER_ID = #{item.order_id,jdbcType=VARCHAR},
+			AMOUNT = #{item.amount,jdbcType=BIGINT},
+			UPDATE_DATE = #{item.lastUpdationDate,jdbcType=TIMESTAMP}
+			where baoi.REPORT_ID = #{item.report_id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+	<select id="selectCustomerR" resultType="java.util.HashMap">
+		select  <include refid="select_base"/>  from CUSTOMER_PRODUCT_REPORT cr where ENABLED_FLAG='Y' <include refid="base_map_conditions"/> 
+	</select>
+	<select id="selectCustomerRefund" resultMap="customerRefundResult">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  <include refid="select_base"/>  from CUSTOMER_PRODUCT_REPORT cr where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+					  <include refid="base_conditions"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	<update id="remove">
+		update CUSTOMER_PRODUCT_REPORT set ENABLED_FLAG='N' where REPORT_ID=#{report_id,jdbcType=BIGINT}
+	</update>
+</mapper>

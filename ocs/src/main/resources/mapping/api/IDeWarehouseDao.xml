@@ -1,0 +1,1240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.api.dao.IDeWarehouseDao">
+	<resultMap type="com.it.ocs.api.model.DeOutWmsOrderMainModel" id="DeOutWmsOrderMainResultMap">
+			<result column="ID" property="id"  />
+			<result column="PLATFORM" property="platform"  />
+			<result column="ORDER_OCS_ID" property="orderOcsId"  />
+			<result column="ORDER_OUT_TYPE" property="orderOutType"  />
+			<result column="IS_UPLOAD" property="isUpload"  />
+			<result column="ORDER_ID" property="orderId"  />
+			<result column="WAREHOUSE_ID" property="warehouseId"  />
+			<result column="TRACKING_NUMBER" property="trackingNumber"  />
+			<result column="SHIP_DATE" property="shipDate"  />
+			<result column="SHIP_BY" property="shipBy"  />
+			<result column="STORE_CODE" property="storeCode"/>
+			<result column="OCS_ORDER_CREATE_DATE" property="ocsOrderCreateDate"/>
+			<result column="carrier_id" property="carrierId"/>
+			<result column="customer_name" property="customerName"/>
+			<result column="customer_country" property="customerCountry"/>
+			<result column="customer_province" property="customerProvince"/>
+			<result column="customer_city" property="customerCity"/>
+			<result column="customer_address" property="customerAddress"/>
+			<result column="customer_zip" property="customerZip"/>
+			<result column="customer_email" property="customerEmail"/>
+			<result column="customer_phone" property="customerPhone"/>
+			<result column="IS_SEND_WMS" property="isSendWms"/>
+			<result column="IS_ABNORMAL" property="isAbnormal"/>
+			<result column="send_date" property="sendDate"/>
+			<result column="feedback_date" property="feedbackDate"/>
+	</resultMap>
+	
+	<resultMap type="com.it.ocs.api.model.DeOutWmsOrderDetailModel" id="DeOutWmsOrderDetailResultMap">
+			<result column="ID" property="id"  />
+			<result column="PARENT_ID" property="parentId"  />
+			<result column="SKU" property="sku"  />
+			<result column="ITEM_NUMBER" property="itemNumber"  />
+			<result column="ITEM_QTY" property="itemQty"  />
+			<result column="SKU_PROPERTY" property="skuProperty"  />
+			<result column="ITEM" property="item"  />
+			<result column="ACTUAL_QTY" property="actualQty"  />
+			<result column="price" property="price"  />
+	</resultMap>
+	
+	<resultMap type="com.it.ocs.api.model.DeInWmsOrderMainModel" id="DeInWmsOrderMainResultMap">
+			<result column="OWNER_CODE" property="ownerCode"  />
+			<result column="STORE_CODE" property="storeCode"  />
+			<result column="WAREHOUSE_ID" property="warehouseId"  />
+			<result column="ID" property="id"  />
+			<result column="ORDER_TYPE" property="orderType"  />
+			<result column="PLATFORM" property="platform"  />
+			<result column="ACCOUNT" property="account"  />
+			<result column="CREATED_DATE" property="createDate"  />
+			<result column="CREATE_BY" property="createBy"  />
+			<result column="ORDER_ID" property="orderId"  />
+			<result column="TRACKING_NUMBER" property="trackingNumber"  />
+			<result column="NEW_TRACKING_NUMBER" property="newTrackingNumber"  />
+			<result column="REMARK" property="remark"  />
+			<result column="RMA" property="rma"  />
+			<result column="WAIT_CLAIM" property="waitClaim"  />
+			<result column="IS_SEND_WMS" property="isSendWms"/>
+			<result column="RETURN_ORDER_ID" property="returnOrderId"/>
+			<result column="send_date" property="sendDate"/>
+			<result column="feedback_date" property="feedbackDate"/>
+	</resultMap>
+	
+	<resultMap type="com.it.ocs.api.model.DeInWmsOrderDetailModel" id="DeInWmsOrderDetailResultMap">
+			<result column="ID" property="id"  />
+			<result column="PARENT_ID" property="parentId"  />
+			<result column="SKU" property="sku"  />
+			<result column="QTY" property="qty"  />
+			<result column="PACKAGE_CODE" property="packageCode"  />
+			<result column="UNIT" property="unit"  />
+			<result column="SKU_PROPERTY" property="skuProperty"  />
+			<result column="RETURN_REASON" property="returnReason"  />
+			<result column="ITEM_NUMBER" property="itemNumber"  />
+			<result column="CUSTOMER_NAME" property="customerName"  />
+			<result column="MOBILE" property="mobile"  />
+			<result column="ADDRESS" property="address"  />
+			<result column="PIC_URL" property="picUrl"  />
+			<result column="BAD_REASON" property="badReason"  />
+			<result column="ITEM" property="item"  />
+			<result column="ACTUAL_QTY" property="actualQty"  />
+	</resultMap>
+	
+	<sql id="DeOutWmsOrderMain_Base_Column_List" >
+		id,platform,order_ocs_id,order_out_type,is_upload,ocs_order_create_date,order_id, warehouse_id, 
+		tracking_number, ship_date,ship_by, store_code, created_date, update_date,
+		carrier_id,customer_name,customer_country,customer_province,customer_city,
+		customer_address,customer_zip,customer_email,customer_phone,is_send_wms,is_abnormal
+		,send_date,feedback_date
+	</sql>
+	<sql id="DeInWmsOrderMain_Base_Column_List" >
+		owner_code, store_code, warehouse_id, id, order_type, 
+        		platform,account, created_date, create_by, order_id, tracking_number, 
+        		new_tracking_number, remark,rma,wait_claim, update_date,is_send_wms,return_order_id
+		,send_date,feedback_date
+	</sql>
+
+	<select id="getDENoShipOrderInfoFromEbay" resultType="java.util.HashMap">
+		select 'ebay' platform,
+	           to_char(e.order_ocs_id) order_ocs_id,
+	           e.order_id,
+	           e.item_id,
+	           e.ocs_order_create_date,
+	           e.sku,
+	           e.item_qty,
+	           e.account platformAccount,
+	           (select distinct short_code from ocs_ebay.ebay_account_manager where account = e.account) || e.shortOrderId shortOrderId,
+	           e.transaction_id transactionid,
+	           e.MerchantFulfillmentOrderID,
+	           e.DisplayableOrderID,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'name'), json_ext.get_string(json(es.shipping_address), 'Name')) customer_name,
+             nvl(json_ext.get_string(json(e.delivery_address), 'phone'), 
+	           case when json_ext.get_string(json(es.shipping_address), 'Phone') = 'Invalid Request' then null
+	                else substr(json_ext.get_string(json(es.shipping_address), 'Phone'), 1, 1) || ' ' || substr(json_ext.get_string(json(es.shipping_address), 'Phone'), 2)
+	           end) customer_phone,
+	           case when json_ext.get_string(json(es.transaction_array), 'Transaction.Buyer.Email') = 'Invalid Request' then null
+	                else json_ext.get_string(json(es.transaction_array), 'Transaction.Buyer.Email')
+	           end customer_email,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'postalCode'), json_ext.get_string(json(es.shipping_address), 'PostalCode')) customer_zip,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'addressLine1'), json_ext.get_string(json(es.shipping_address), 'Street1')) address_one,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'addressLine2'), json_ext.get_string(json(es.shipping_address), 'Street2')) address_two,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'city'), json_ext.get_string(json(es.shipping_address), 'CityName')) customer_city,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'provState'), json_ext.get_string(json(es.shipping_address), 'StateOrProvince')) customer_province,
+	           nvl(json_ext.get_string(json(e.delivery_address), 'country'), json_ext.get_string(json(es.shipping_address), 'Country')) customer_country,
+	           e.price
+	    from  (select  eo.id order_ocs_id,
+	                   eo.order_id,
+                     eo.account,
+                     max(eo.sales_record_number) shortOrderId,
+                     EO.ORDER_ID MerchantFulfillmentOrderID,
+                     EO.Order_Id DisplayableOrderID,
+                     wm_concat(ei.transaction_id) transaction_id,
+                     wm_concat(ei.item_id) item_id,
+                     to_char(max(EO.CREATED_TIME), 'yyyy-MM-dd HH24:mi:ss') ocs_order_create_date,
+                     wm_concat(REPLACE(EI.ITEM_SKU, ',', '^')) sku,
+                     wm_concat(EI.QUANTITY_PURCHASED) item_qty,
+                     wm_concat(ei.price) price,
+                     '' delivery_address
+              FROM   ocs_ebay.ebay_order eo,
+                     ocs_ebay.ebay_order_item ei,
+                     ocs_ebay.ebay_publication_line l
+              WHERE  EO.ID = EI.PARENT_ID
+                     and ei.item_id = l.item_id
+                     and l.region != 'CN'
+                     AND EO.PAID_TIME IS NOT NULL
+                     AND EO.SHIPPED_TIME IS NULL
+                     and eo.tag = 0
+                     and eo.order_status = 'Completed'
+                     and eo.sales_record_number is not null
+                     AND EO.PAY_STATUS = 'Complete'
+                     and ei.ship_time is null
+                     and eo.created_time > to_date('2018-01-26 00:00:00', 'yyyy-MM-dd hh24:mi:ss')
+              group by eo.id, eo.account, EO.ORDER_ID
+              union all
+              SELECT eo.id order_ocs_id,
+                     'W_' || eo.order_id || '_' || sf.times order_id,
+                     eo.account,
+                     'W_' || max(eo.sales_record_number) || '_' || sf.times shortOrderId,
+                     'W_' || EO.ORDER_ID || '_' || sf.times MerchantFulfillmentOrderID,
+                     'W_' || EO.Order_Id || '_' || sf.times DisplayableOrderID,
+                     wm_concat(ei.transaction_id) transaction_id,
+                     wm_concat(ei.item_id) item_id,
+                     to_char(max(EO.CREATED_TIME), 'yyyy-MM-dd HH24:mi:ss') ocs_order_create_date,
+                     wm_concat(REPLACE(nvl(d.sku, sf.sku), ',', '^')) sku,
+                     wm_concat(nvl(d.qty, 1) * sf.qty) item_qty,
+                     wm_concat(0) price,
+                     max(ro.delivery_address) delivery_address
+              FROM   ocs_ebay.ebay_order eo,
+                     ocs_ebay.ebay_order_item ei,
+                     ocs_ebay.sys_return_order_final sf,
+                     ocs_ebay.ebay_publication_line l,
+                  sys_sku_link d,
+                  sys_return_order ro
+              WHERE  EO.ID = EI.PARENT_ID
+                     and ei.item_id = l.item_id
+                     and l.region != 'CN'
+                     and sf.platform = 'ebay'
+                     AND SF.ORDER_TYPE = 1
+                     and eo.order_id = sf.order_id
+                     and eo.account = sf.account
+                     and ei.item_sku = nvl(sf.m_sku, sf.sku)
+                and sf.sku = d.p_sku(+)
+                     and sf.tarcking_num is null
+                     and eo.order_id=ro.order_id
+                     and ro.id=sf.parent_id
+                     and ro.approve_result=1
+              group by eo.id, eo.account, EO.ORDER_ID, sf.times) e, ocs_ebay.EBAY_ORDER_SUB ES
+		where e.ORDER_OCS_ID = ES.PARENT_ID AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"GB"%' AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"US"%'
+		union all
+		select o.platform,
+				o.id || substr(o.order_id, 4, length(o.order_id) - 4) order_ocs_id,
+	           'W_' || o.order_id || '_' || f.times order_id,
+	             wm_concat(f.id) item_id,
+	          	 to_char(max(o.create_date), 'yyyy-MM-dd hh24:mi:ss') ocs_order_create_date,
+	           	wm_concat(replace(nvl(f.sku, 0), ',', '^')) sku,
+	           	wm_concat(nvl(f.qty, 0)) qty,
+	           	o.account platformAccount,
+	             '' shortOrderId,
+	             '' transactionid,
+	             '' merchantFulfillmentOrderID,
+	             '' DisplayableOrderID,
+		         json_ext.get_string(json(max(o.delivery_address)), 'name') customer_name,
+		         json_ext.get_string(json(max(o.delivery_address)), 'phone') customer_phone,
+		         '' customer_email,
+		         json_ext.get_string(json(max(o.delivery_address)), 'postalCode') customer_zip,
+		         json_ext.get_string(json(max(o.delivery_address)), 'addressLine1') address_one,
+		         json_ext.get_string(json(max(o.delivery_address)), 'addressLine2') address_two,
+		         json_ext.get_string(json(max(o.delivery_address)), 'city') customer_city,
+		         json_ext.get_string(json(max(o.delivery_address)), 'provState') customer_province,
+		         json_ext.get_string(json(max(o.delivery_address)), 'country') customer_country,
+	             wm_concat(i.row_total) price
+	    from   sys_return_order o, 
+	         sys_return_order_item i,
+	           sys_return_order_final f
+	    where  o.id=f.parent_id and o.id=i.parent_id and f.order_type=2 and o.order_id like 'OCS%' and o.approve_result=1 and o.platform='ebay' and o.site in ('DE', 'Germany')
+	    group by o.id, o.platform, o.account, o.order_id, f.times
+	</select>
+	
+	<select id="getDeNoshipOrderInfoFromLight" resultType="java.util.Map">
+		select distinct tbl.*
+		from   (SELECT to_char(LO.ENTITY_ID) ORDER_OCS_ID,
+				       LO.ORDER_ID,
+				       to_char(max(LO.LIGHT_CREATED_AT), 'yyyy-MM-dd HH24:mi:ss') OCS_ORDER_CREATE_DATE,
+				       max(LI.SHIPPING_FIRSTNAME) || ' ' || max(LI.SHIPPING_MIDDLENAME) || ' ' || max(LI.SHIPPING_LASTNAME) CUSTOMER_NAME,
+				       max(LO.CUSTOMER_EMAIL) CUSTOMER_EMAIL,
+				       max(LI.STREET) ADDRESS_ONE,
+				       max(LI.COMPANY) ADDRESS_TWO,
+				       max(LI.CITY) CUSTOMER_CITY,
+				       max(LI.POSTCODE) CUSTOMER_ZIP,
+				       max(LI.TELEPHONE) CUSTOMER_PHONE,
+				       MAX(LI.REGION) CUSTOMER_PROVINCE,
+				       max(LI.COUNTRY_ID) CUSTOMER_COUNTRY,
+				       wm_concat(REPLACE(LI.SKU, ',', '^')) SKU,
+				       wm_concat(LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED - LI.QTY_SHIPPED) ITEM_QTY,
+				       wm_concat(LI.entity_id) ITEM_ID,
+				       wm_concat(li.price) price
+				FROM   LIGHT_ORDER LO,
+					   (select a.entity_id, a.light_item_id, a.SHIPPING_FIRSTNAME, a.SHIPPING_MIDDLENAME, a.SHIPPING_LASTNAME, a.STREET, a.CITY, a.POSTCODE, a.parent_id, a.COMPANY,
+	                           a.REGION, a.TELEPHONE, a.Country_Id, a.SKU, a.QTY_ORDERED, a.QTY_CANCELED, a.QTY_REFUNDED, a.QTY_SHIPPED, a.row_total, a.price from light_order_item a 
+	                    union all 
+	                    select b.entity_id, b.light_item_id, b.SHIPPING_FIRSTNAME, b.SHIPPING_MIDDLENAME, b.SHIPPING_LASTNAME, b.STREET, b.CITY, b.POSTCODE, b.parent_id, b.COMPANY,
+	                           b.REGION, b.TELEPHONE, b.Country_Id, b.SKU, b.QTY_ORDERED, b.QTY_CANCELED, b.QTY_REFUNDED, b.QTY_SHIPPED, b.row_total, b.price from light_order_item_b b) LI	
+				WHERE  LO.ENTITY_ID = LI.PARENT_ID
+				       AND LO.PLATFORM not in ('UK', 'US')
+				       AND LO.STATUS = 'processing'
+				       AND LO.AVS = 1
+				       AND LI.SKU NOT LIKE 'B%'
+				       AND LI.SKU IS NOT NULL
+				       AND LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_REFUNDED - LI.QTY_SHIPPED > 0
+				       AND STREET IS NOT NULL
+				       AND LI.SKU NOT LIKE 'OS%'
+				group by LO.ENTITY_ID, LO.ORDER_ID
+				UNION ALL
+				SELECT to_char(LO.ENTITY_ID) ORDER_OCS_ID,
+				       'W_' || LO.ORDER_ID || '_' || sf.times as ORDER_ID,
+				       to_char(max(LO.LIGHT_CREATED_AT), 'yyyy-MM-dd HH24:mi:ss') OCS_ORDER_CREATE_DATE,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'name'), max(LI.SHIPPING_FIRSTNAME) || ' ' || max(LI.SHIPPING_MIDDLENAME) || ' ' || max(LI.SHIPPING_LASTNAME)) CUSTOMER_NAME,
+				       max(LO.CUSTOMER_EMAIL) CUSTOMER_EMAIL,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'addressLine1'), max(li.street)) ADDRESS_ONE,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'addressLine2'), max(li.COMPANY)) address_two,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'city'), max(li.CITY)) customer_city,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'postalCode'), max(li.POSTCODE)) customer_zip,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'phone'), max(li.TELEPHONE)) customer_phone,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'provState'), max(li.REGION)) customer_province,
+					   nvl(json_ext.get_string(json(max(g.delivery_address)), 'country'), max(nvl(LI.COUNTRY_ID, LO.PLATFORM))) customer_country,
+				       wm_concat(REPLACE(SF.SKU, ',', '^')) SKU,
+				       wm_concat(SF.QTY) ITEM_QTY,
+				       wm_concat(LI.entity_id) ITEM_ID,
+				       wm_concat(0) price
+				FROM   ocs_ebay.LIGHT_ORDER            LO,
+				        (select a.entity_id, a.light_item_id, a.SHIPPING_FIRSTNAME, a.SHIPPING_MIDDLENAME, a.SHIPPING_LASTNAME, a.STREET, a.CITY, a.POSTCODE, a.parent_id, a.COMPANY,
+	                           a.REGION, a.TELEPHONE, a.Country_Id, a.SKU, a.QTY_ORDERED, a.QTY_CANCELED, a.QTY_REFUNDED, a.QTY_SHIPPED, a.row_total, a.price from ocs_ebay.light_order_item a 
+	                    union all 
+	                    select b.entity_id, b.light_item_id, b.SHIPPING_FIRSTNAME, b.SHIPPING_MIDDLENAME, b.SHIPPING_LASTNAME, b.STREET, b.CITY, b.POSTCODE, b.parent_id, b.COMPANY,
+	                           b.REGION, b.TELEPHONE, b.Country_Id, b.SKU, b.QTY_ORDERED, b.QTY_CANCELED, b.QTY_REFUNDED, b.QTY_SHIPPED, b.row_total, b.price from ocs_ebay.light_order_item_b b)       LI,
+				       ocs_ebay.sys_return_order_final sf,
+				       ocs_ebay.sys_return_order g
+				WHERE  LO.ENTITY_ID = LI.PARENT_ID
+				       AND LO.PLATFORM not in ('UK', 'US')
+				       AND SF.PLATFORM = 'light'
+               		   and li.sku = sf.m_sku
+               		   and g.id = sf.parent_id
+				       AND LO.ORDER_ID = SF.ORDER_ID
+				       AND SF.ORDER_TYPE = 1
+				       AND SF.TARCKING_NUM IS NULL
+               		   and g.approve_result=1
+				group by LO.ENTITY_ID, LO.ORDER_ID, sf.times
+		        union all
+		        select o.id || substr(o.order_id, 4, length(o.order_id) - 4) order_ocs_id,
+				       'W_' || o.order_id || '_' || f.times order_id,
+				       to_char(max(o.create_date), 'yyyy-MM-dd hh24:mi:ss') ocs_order_create_date,
+					   json_ext.get_string(json(max(o.delivery_address)), 'name') customer_name,
+					   '' customer_email,
+					   json_ext.get_string(json(max(o.delivery_address)), 'addressLine1') address_one,
+					   json_ext.get_string(json(max(o.delivery_address)), 'addressLine2') address_two,
+					   json_ext.get_string(json(max(o.delivery_address)), 'city') customer_city,
+					   json_ext.get_string(json(max(o.delivery_address)), 'postalCode') customer_zip,
+					   json_ext.get_string(json(max(o.delivery_address)), 'phone') customer_phone,
+					   json_ext.get_string(json(max(o.delivery_address)), 'provState') customer_province,
+					   json_ext.get_string(json(max(o.delivery_address)), 'country') customer_country,
+				       wm_concat(replace(nvl(f.sku, 0), ',', '^')) sku,
+				       wm_concat(nvl(f.qty, 0)) qty,
+			           wm_concat(f.id) item_id,
+				       wm_concat(i.row_total) price
+				from   sys_return_order o, 
+					   sys_return_order_item i,
+				       sys_return_order_final f
+				where  o.id=f.parent_id and o.id=i.parent_id and f.order_type=2 and o.order_id like 'OCS%' and o.approve_result=1 and o.platform='light' and o.site='DE'
+				group by o.id, o.platform, o.account, o.order_id, f.times) tbl, (select lms.* from light_mark_shipment lms where lms.platform='light') ms
+		where tbl.ORDER_ID=ms.order_id(+) and ms.id is null
+	</select>
+	
+	<select id="getDeNoshipOrderInfoFromVC" resultType="java.util.Map">
+	    select	to_char(max(v.order_ocs_id)) ORDER_OCS_ID,
+	            v.po ORDER_ID,
+	            to_char(max(v.shipping_date), 'yyyy-MM-dd hh24:mi:ss') OCS_ORDER_CREATE_DATE,
+	            max(v.ship_to_name) CUSTOMER_NAME,
+	            '' CUSTOMER_EMAIL,
+	            '' CUSTOMER_PHONE,
+	            max(v.ship_to_addr1) ADDRESS_ONE,
+	            max(v.ship_to_addr2) ADDRESS_TWO,
+	            max(v.ship_pc) CUSTOMER_ZIP,
+	            max(v.ship_to_addr3) CUSTOMER_CITY,
+	            max(v.ship_to_country) CUSTOMER_PROVINCE,
+	            max(v.delivery_to) CUSTOMER_COUNTRY,
+	            wm_concat(nvl(s.sku, v.model_number)) SKU,
+	            wm_concat(nvl(s.qty, 1) * nvl(v.accepted_quantity, 0)) ITEM_QTY,
+	            wm_concat(v.id) ITEM_ID,
+	            wm_concat(case 
+	                        when s.qty=0 or v.accepted_quantity is null or v.accepted_quantity=0 then 0 
+                          	else nvl(case when v.unit_cost is not null then substr(v.unit_cost,4) else v.unit_cost end, 0) / (nvl(s.qty, 1) * v.accepted_quantity) 
+	                      end) price
+	    from     amazon_sale_vc v, sys_sku_link s, wms_de_out_order o
+	    where    v.model_number=s.p_sku(+) and v.tracking_no is null and v.delivery_from='DE' 
+	             and v.po=o.order_id(+) and o.order_id is null
+	    group by v.po
+	</select>
+	
+	<select id="getDeNoshipOrderInfoFromAmazon" resultType="java.util.Map">
+		select 	to_char(a.id) ORDER_OCS_ID,
+				'W_' || a.order_id || '_' || f.times ORDER_ID,
+				to_char(max(a.purchase_at), 'yyyy-MM-dd hh24:mi:ss') OCS_ORDER_CREATE_DATE,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'name'), max(a.name)) CUSTOMER_NAME,
+				max(a.email) CUSTOMER_EMAIL,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'phone'), max(a.phone)) CUSTOMER_PHONE,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'addressLine1'), max(a.street)) ADDRESS_ONE,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'addressLine2'), '') ADDRESS_TWO,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'postalCode'), max(a.postal_code)) CUSTOMER_ZIP,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'city'), max(a.city)) CUSTOMER_CITY,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'provState'), max(a.state_or_region)) CUSTOMER_PROVINCE,
+				nvl(json_ext.get_string(json(max(g.delivery_address)), 'country'), max(a.country_code)) CUSTOMER_COUNTRY,
+				wm_concat(nvl(s.sku, f.sku)) SKU,
+				wm_concat(nvl(s.qty, 1) * f.qty) ITEM_QTY,
+				wm_concat(b.id) ITEM_ID,
+			    wm_concat(0) price
+		from 	ocs_ebay.amazon_order           a,
+				ocs_ebay.amazon_order_item      b,
+				ocs_ebay.sys_return_order_final f,
+				ocs_ebay.sys_sku_link           s,
+				ocs_ebay.sys_return_order       g
+		where 	a.id = b.parent_id and a.order_id = f.order_id and a.channel = f.site 
+				and b.sku = f.m_sku and g.id = f.parent_id and f.sku = s.p_sku(+)
+				and f.platform = 'amazon'
+				and f.tarcking_num is null
+				and f.order_type = 1
+				and (a.country_code in ('DE') or f.site in ('DE', 'Germany', 'Amazon.de', 'Amazon.fr', 'Amazon.it', 'Amazon.es'))
+		group by a.id, a.platform, a.channel, a.order_id, f.times
+        union all
+        select o.id || substr(o.order_id, 4, length(o.order_id) - 4) order_ocs_id,
+		       'W_' || o.order_id || '_' || f.times order_id,
+		       to_char(max(o.create_date), 'yyyy-MM-dd hh24:mi:ss') ocs_order_create_date,
+			   json_ext.get_string(json(max(o.delivery_address)), 'name') customer_name,
+			   '' customer_email,
+			   json_ext.get_string(json(max(o.delivery_address)), 'phone') customer_phone,
+			   json_ext.get_string(json(max(o.delivery_address)), 'addressLine1') address_one,
+			   json_ext.get_string(json(max(o.delivery_address)), 'addressLine2') address_two,
+			   json_ext.get_string(json(max(o.delivery_address)), 'postalCode') customer_zip,
+			   json_ext.get_string(json(max(o.delivery_address)), 'city') customer_city,
+			   json_ext.get_string(json(max(o.delivery_address)), 'provState') customer_province,
+			   json_ext.get_string(json(max(o.delivery_address)), 'country') customer_country,
+		       wm_concat(replace(nvl(f.sku, 0), ',', '^')) sku,
+		       wm_concat(nvl(f.qty, 0)) qty,
+	           wm_concat(f.id) item_id,
+			   wm_concat(i.row_total) price
+		from   sys_return_order o, 
+			   sys_return_order_item i,
+		       sys_return_order_final f
+		where  o.id=f.parent_id and o.id=i.parent_id and f.order_type=2 and o.order_id like 'OCS%' and o.approve_result=1 and o.platform='amazon' 
+			   	and o.account='DE' and o.site not like '%co.uk'
+		group by o.id, o.platform, o.account, o.order_id, f.times
+	</select>
+	
+	<!-- 从退款退货单获取入库单 -->
+	<select id="getDeInWmsOrderInfos" resultType="java.util.Map">
+		select a.ID RETURN_ORDER_ID,
+		       a.PLATFORM,
+		       a.ACCOUNT,
+		       a.ORDER_ID,
+		       wm_concat(REPLACE(b.sku, ',', '^')) SKU,
+		       wm_concat(b.qty) QTY,
+		       wm_concat(b.product_case_type) PRODUCT_CASE_TYPE,
+		       a.eda_order_num as RMA
+		from   ocs_ebay.sys_return_order a, ocs_ebay.sys_return_order_item b,
+		       (select l.entity_id as ocs_id, l.order_id from ocs_ebay.light_order l where l.PLATFORM not in ('UK', 'US') 
+            union all select e.id as ocs_id, e.order_id from ocs_ebay.ebay_order e, EBAY_ORDER_SUB es 
+            where e.id=es.parent_id and to_char(ES.SHIPPING_ADDRESS) NOT like '%"GB"%' AND to_char(ES.SHIPPING_ADDRESS) NOT like '%"US"%') c
+		where  a.id = b.parent_id and a.order_id=c.order_id and a.eda_order_num is not null
+		       and a.order_type=0 and a.approve_result=1 and b.qty>0
+		group by a.id, a.platform, a.account, a.order_id, a.eda_order_num, c.ocs_id
+	</select>
+	
+	
+	<insert id="batchInsertDeOutWmsOrderMain" parameterType="java.util.List">  
+        insert into wms_de_out_order
+              (id,platform,
+              order_ocs_id,order_out_type,
+              is_upload,ocs_order_create_date,
+              order_id,  warehouse_id, 
+              tracking_number, ship_date, 
+              ship_by,  store_code, 
+              carrier_id,customer_name,
+               customer_country,customer_province,
+              customer_city,customer_address,
+              customer_zip,customer_email,
+              customer_phone,customer_address_2, send_date, feedback_date,
+              created_date, update_date)
+               select c.*,sysdate,sysdate from(
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" >  
+		    select 
+		    #{item.id,jdbcType=NUMERIC},#{item.platform,jdbcType=VARCHAR},
+		    #{item.orderOcsId,jdbcType=NUMERIC}, #{item.orderOutType,jdbcType=VARCHAR},
+		    #{item.isUpload,jdbcType=VARCHAR},#{item.ocsOrderCreateDate,jdbcType=TIMESTAMP}, 
+		    #{item.orderId,jdbcType=VARCHAR},  #{item.warehouseId,jdbcType=VARCHAR}, 
+		    #{item.trackingNumber,jdbcType=VARCHAR},  #{item.shipDate,jdbcType=TIMESTAMP},
+		    #{item.shipBy,jdbcType=VARCHAR},#{item.storeCode,jdbcType=VARCHAR},
+		    #{item.carrierId,jdbcType=VARCHAR},#{item.customerName,jdbcType=VARCHAR},
+		    #{item.customerCountry,jdbcType=VARCHAR},#{item.customerProvince,jdbcType=VARCHAR},
+		    #{item.customerCity,jdbcType=VARCHAR},#{item.customerAddress,jdbcType=VARCHAR},
+		    #{item.customerZip,jdbcType=VARCHAR},#{item.customerEmail,jdbcType=VARCHAR},
+		    #{item.customerPhone,jdbcType=VARCHAR},#{item.customerAddress2,jdbcType=VARCHAR},
+		     #{item.sendDate,jdbcType=TIMESTAMP},#{item.feedbackDate,jdbcType=TIMESTAMP}
+		       from dual
+        </foreach>) c
+     </insert>
+     
+     <insert id="batchInsertDeInWmsOrderMain" parameterType="java.util.List">  
+        insert into wms_de_in_order(owner_code, store_code, warehouse_id, id, order_type, 
+        		platform,account, create_by, order_id, tracking_number, 
+        		new_tracking_number, remark,rma,wait_claim,return_order_id,created_date,update_date, send_date, feedback_date)
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" >  
+		    select #{item.ownerCode,jdbcType=VARCHAR},  #{item.storeCode,jdbcType=VARCHAR}, 
+		     #{item.warehouseId,jdbcType=VARCHAR},  #{item.id,jdbcType=NUMERIC},
+		     #{item.orderType,jdbcType=VARCHAR},#{item.platform,jdbcType=VARCHAR},#{item.account,jdbcType=VARCHAR},
+		     #{item.createBy,jdbcType=VARCHAR},#{item.orderId,jdbcType=VARCHAR},#{item.trackingNumber,jdbcType=VARCHAR},
+		     #{item.newTrackingNumber,jdbcType=VARCHAR},#{item.remark,jdbcType=VARCHAR},
+		     #{item.rma,jdbcType=NUMERIC},#{item.waitClaim,jdbcType=VARCHAR},#{item.returnOrderId,jdbcType=NUMERIC},sysdate,sysdate,
+		     #{item.sendDate,jdbcType=TIMESTAMP},#{item.feedbackDate,jdbcType=TIMESTAMP} from dual
+        </foreach>
+     </insert>
+     
+     <insert id="batchInsertDeOutWmsOrderDetail" parameterType="java.util.List">  
+        insert into wms_de_out_order_detail(id,parent_id, sku, item_number, item_qty,sku_property,item,ACTUAL_QTY,price,created_date, update_date)
+        select WMS_DE_OUT_ORDER_DETAIL_SEQ.NEXTVAL,c.*,sysdate,sysdate from (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" >  
+		    select #{item.parentId,jdbcType=NUMERIC},#{item.sku,jdbcType=VARCHAR},#{item.itemNumber,jdbcType=VARCHAR}
+		    ,#{item.itemQty,jdbcType=VARCHAR},#{item.skuProperty,jdbcType=VARCHAR},#{item.item,jdbcType=VARCHAR},#{item.actualQty,jdbcType=VARCHAR}
+		    ,#{item.price,jdbcType=NUMERIC}
+		    from dual
+        </foreach>) c
+     </insert>
+     
+     <insert id="batchInsertDeInWmsOrderDetail" useGeneratedKeys="false" parameterType="java.util.List">  
+        insert into wms_de_in_order_detail(id,parent_id, sku, qty, package_code, unit, sku_property, 
+        		return_reason,item_number, customer_name, mobile, address, 
+   				pic_url, bad_reason, item,ACTUAL_QTY, created_date, update_date)
+   		select WMS_DE_IN_ORDER_DETAIL_SEQ.NEXTVAL,c.*,sysdate,sysdate from (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" >  
+		    select 
+		    #{item.parentId,jdbcType=NUMERIC},#{item.sku,jdbcType=VARCHAR},
+		    #{item.qty,jdbcType=VARCHAR},#{item.packageCode,jdbcType=VARCHAR},
+		    #{item.unit,jdbcType=VARCHAR},#{item.skuProperty,jdbcType=VARCHAR},
+		    #{item.returnReason,jdbcType=VARCHAR},#{item.itemNumber,jdbcType=VARCHAR},
+		    #{item.customerName,jdbcType=VARCHAR},
+		    #{item.mobile,jdbcType=VARCHAR},#{item.address,jdbcType=VARCHAR},
+		    #{item.picUrl,jdbcType=VARCHAR}, #{item.badReason,jdbcType=VARCHAR},
+		    #{item.item,jdbcType=VARCHAR},#{item.actualQty,jdbcType=VARCHAR}
+		    from dual
+        </foreach>) c
+     </insert>
+	
+	<select id="getOut" resultMap="DeOutWmsOrderMainResultMap">
+		select <include refid="DeOutWmsOrderMain_Base_Column_List" /> from wms_de_out_order 
+		where order_ocs_id=#{orderOcsId,jdbcType=NUMERIC} and order_id=#{orderId,jdbcType=VARCHAR}
+	</select> 
+    
+      <select id="getOutWmsOrderMailByMap" resultMap="DeOutWmsOrderMainResultMap" parameterType="java.util.HashMap">
+	  		select 
+	  			<include refid="DeOutWmsOrderMain_Base_Column_List" /> from wms_de_out_order 
+	  		<where>
+		  		<if test="id != null and id >0 ">
+					AND id = #{id}
+				</if>
+				<if test="orderOcsId != null">
+					AND order_ocs_id = #{orderOcsId}
+				</if>
+				<if test="orderId != null">
+					AND order_id = #{orderId}
+				</if>
+				<if test="platform != null and platform !='' ">
+					AND platform = #{platform}
+				</if>
+				<if test="warehouseId != null and warehouseId !='' ">
+					AND warehouse_id = #{warehouseId}
+				</if>
+				<if test="trackingNumber != null and trackingNumber !='' ">
+					AND TRACKING_NUMBER = #{trackingNumber}
+				</if>
+	  		</where>
+	  </select>
+	  
+	  <select id="getOutWmsOrderDetailByMap" resultMap="DeOutWmsOrderDetailResultMap" parameterType="java.util.Map">
+	  		select d.ID, d.PARENT_ID, nvl(b.SKU,d.sku) as SKU, d.ITEM_NUMBER, nvl(b.qty,1)*d.ITEM_QTY ITEM_QTY, d.SKU_PROPERTY, d.ITEM, d.ACTUAL_QTY, d.price
+	  		from wms_de_out_order_detail d, sys_sku_link b
+	  		where  d.sku=b.p_sku(+)	
+  			<if test="id != null and id >0 ">
+				AND d.id = #{id}
+			</if>
+			<if test="parentId != null and parentId >0 ">
+				AND d.PARENT_ID = #{parentId}
+			</if>
+	  </select>
+	  
+	  <select id="getInWmsOrderMailByMap" resultMap="DeInWmsOrderMainResultMap" parameterType="java.util.HashMap">
+	  		select 
+	  			<include refid="DeInWmsOrderMain_Base_Column_List" /> from wms_de_in_order 
+	  		<where>
+		  		<if test="id != null and id >0 ">
+					AND id = #{id}
+				</if>
+		  		<if test="warehouseId != null and warehouseId !='' ">
+					AND warehouse_id = #{warehouseId}
+				</if>
+		  		<if test="rma != null and rma !='' ">
+					AND rma = #{rma}
+				</if>
+		  		<if test="returnOrderId != null and returnOrderId >0 ">
+					AND return_order_id = #{returnOrderId}
+				</if>
+	  		</where>
+	  </select>
+	  
+	  <select id="getInWmsOrderDetailByMap" resultMap="DeInWmsOrderDetailResultMap"  parameterType="java.util.HashMap">
+	  		select 	d.id, d.parent_id, nvl(b.sku, d.sku) as sku, nvl(b.qty,1)*d.qty qty, d.package_code, d.unit, d.sku_property, 
+	  				d.return_reason, d.item_number, d.customer_name, d.mobile, d.address, d.pic_url, d.bad_reason 
+	  		from 	wms_de_in_order_detail d, sys_sku_link b
+	  		where  	d.sku=b.p_sku(+)
+	  			<if test="id != null and id >0 ">
+					and id = #{id}
+				</if>
+				<if test="parentId != null and parentId >0 ">
+					and parent_id = #{parentId}
+				</if>
+	  </select>
+	
+	<select id="getOutWmsOrderSequences" resultType="long">
+		select WMS_DE_OUT_ORDER_SEQ.NEXTVAL from dual
+	</select>
+	
+	<select id="getInWmsOrderSequences" resultType="long">
+		select WMS_DE_IN_ORDER_SEQ.NEXTVAL from dual
+	</select>
+	
+	<select id="getSkuInfoFromItemEbay" resultType="java.util.Map" parameterType="java.util.Map">
+     	select * from (
+      select nvl(l.sku,t.item_sku) SKU, t.price PRICE, t.QUANTITY_PURCHASED QTY
+      from ocs_ebay.ebay_order_item t, ocs_ebay.sys_sku_link l
+     where t.item_sku=l.p_sku(+) and t.parent_id = #{parentId}) s
+     where s.SKU=#{sku}
+	</select>
+	
+	<select id="getSkuInfoFromItemLight" resultType="java.util.Map" parameterType="java.util.Map">
+	select * from (
+	select nvl(l.sku,t.sku) SKU, t.price PRICE, t.qty_ordered QTY
+      from (select sku, price, qty_ordered from ocs_ebay.light_order_item union all select sku, price, qty_ordered from ocs_ebay.light_order_item_b) t, ocs_ebay.sys_sku_link l
+     where t.sku=l.p_sku(+) and t.parent_id = #{parentId}) s 
+       where s.SKU=#{sku}
+	</select>
+	
+	<select id="getSkuInfoFromItemAmazon" resultType="java.util.Map" parameterType="java.util.Map">
+	select * from (
+	select nvl(l.sku,t.sku) SKU, t.price PRICE, t.qty QTY
+      from ocs_ebay.amazon_order_item t, ocs_ebay.sys_sku_link l
+     where t.sku=l.p_sku(+) and t.parent_id = #{parentId}) s 
+       where s.SKU=#{sku}
+	</select>
+	
+	<select id="getProduct" resultType="java.util.Map">
+		select a.sku, b.price, #{qty} qty from cal_product_entity a, cal_product_entity_cost b where a.entity_id=b.parent_id and a.sku=#{sku} and rownum=1
+		<!-- 
+		select r.sku, r.qty, b.price * r.qty price
+		from (select a.entity_id entity_id, nvl(c.sku, a.sku) sku, nvl(c.qty, #{qty}) qty 
+		      from cal_product_entity a, sys_sku_link c
+		      where a.sku=c.p_sku(+) and a.is_active=1 and (a.sku=#{sku} or c.p_sku=#{sku})
+      		  order by a.created_at desc) r, 
+		     (select * from cal_product_entity_cost) b
+		where r.entity_id=b.parent_id and rownum=1
+		 -->
+	</select>
+	
+	<select id="getCalCurrencyCodeList" resultType="java.util.Map">
+		select * from cal_currency_rate
+	</select>
+	
+	
+	<update id="batchUpdateDeOutWmsOrderMain" parameterType="java.util.List">
+		 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update wms_de_out_order
+		   <set>
+ 				<if test="item.warehouseId != null and item.warehouseId !=''">
+ 					 WAREHOUSE_ID= #{item.warehouseId },
+ 				</if>
+ 				<if test="item.isUpload != null and item.isUpload !=''">
+ 					 is_upload= #{item.isUpload },
+ 				</if>
+ 				<if test="item.isSendWms != null and item.isSendWms !=''">
+ 					 is_send_wms= #{item.isSendWms },
+ 				</if>
+		   		<if test="item.trackingNumber != null and item.trackingNumber !=''">
+ 					TRACKING_NUMBER = #{item.trackingNumber },
+ 				</if>
+ 				<if test="item.shipDate != null and item.shipDate !=''">
+ 					SHIP_DATE = #{item.shipDate },
+ 				</if>
+ 				<if test="item.shipBy != null and item.shipBy !=''">
+ 					SHIP_BY = #{item.shipBy },
+ 				</if>
+ 				<if test="item.storeCode != null and item.storeCode !=''">
+ 					STORE_CODE = #{item.storeCode },
+ 				</if>
+ 				<if test="item.isAbnormal != null and item.isAbnormal !=''">
+ 					is_abnormal = #{item.isAbnormal },
+ 				</if>
+ 				<if test="item.sendDate != null">
+ 					send_date = #{item.sendDate},
+ 				</if>
+ 				<if test="item.feedbackDate != null">
+ 					feedback_date = #{item.feedbackDate},
+ 				</if>
+ 				UPDATE_DATE=sysdate
+		   </set>
+		   <where>
+		   		<if test="item.id != null and item.id >0">
+ 					AND ID=#{item.id }
+ 				</if>
+ 				AND order_id=#{item.orderId } and order_ocs_id=#{item.orderOcsId} 
+		   </where>
+		   </foreach>
+	</update>
+	
+	<update id="updateDeOutWmsOrderMainByMap" parameterType="java.util.Map">
+		   update wms_de_out_order
+		   <set>
+ 				<if test="warehouseId != null and warehouseId !=''">
+ 					 WAREHOUSE_ID= #{warehouseId },
+ 				</if>
+ 				<if test="isUpload != null and isUpload !=''">
+ 					 is_upload= #{isUpload },
+ 				</if>
+ 				<if test="isSendWms != null and isSendWms !=''">
+ 					 is_send_wms= #{isSendWms },
+ 				</if>
+		   		<if test="trackingNumber != null and trackingNumber !=''">
+ 					TRACKING_NUMBER = #{trackingNumber },
+ 				</if>
+ 				<if test="shipDate != null and shipDate !=''">
+ 					SHIP_DATE = #{shipDate },
+ 				</if>
+ 				<if test="shipBy != null and shipBy !=''">
+ 					SHIP_BY = #{shipBy },
+ 				</if>
+ 				<if test="storeCode != null and storeCode !=''">
+ 					STORE_CODE = #{storeCode },
+ 				</if>
+ 				<if test="isAbnormal != null and isAbnormal !=''">
+ 					is_abnormal = #{isAbnormal },
+ 				</if>
+ 				<if test="sendDate != null">
+ 					send_date=#{sendDate},
+ 				</if>
+ 				<if test="feedbackDate != null">
+ 					feedback_date=#{feedbackDate},
+ 				</if>
+ 				UPDATE_DATE=sysdate
+		   </set>
+		   <where>
+		   		<if test="id != null and id >0">
+ 					AND ID=#{id}
+ 				</if>
+		   </where>
+	</update>
+	
+	<update id="updateDeInWmsOrderMainByMap" parameterType="java.util.Map">
+		   update wms_de_in_order
+		   <set>
+ 				<if test="warehouseId != null and warehouseId !=''">
+ 					 WAREHOUSE_ID= #{warehouseId },
+ 				</if>
+ 				<if test="isSendWms != null and isSendWms !=''">
+ 					 is_send_wms= #{isSendWms },
+ 				</if>
+ 				<if test="returnOrderId != null and returnOrderId >0">
+ 					 return_order_id= #{returnOrderId },
+ 				</if>
+ 				<if test="sendDate != null">
+ 					send_date=#{sendDate},
+ 				</if>
+ 				<if test="feedbackDate != null">
+ 					feedback_date=#{feedbackDate},
+ 				</if>
+ 				UPDATE_DATE=sysdate
+		   </set>
+		   <where>
+		   		<if test="id != null and id >0">
+ 					 AND ID=#{id }
+ 				</if>
+		   </where>
+	</update>
+	
+	<!-- 更新入库单主表 -->
+	<update id="batchUpdateDeInWmsOrderMain" parameterType="java.util.List">
+		 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update wms_de_in_order
+		   <set>
+ 				<if test="item.orderType != null and item.orderType !=''">
+ 					ORDER_TYPE = #{item.orderType },
+ 				</if>
+ 				<if test="item.createDate != null and item.createDate !=''">
+ 					CREATED_DATE = #{item.createDate },
+ 				</if>
+ 				<if test="item.createBy != null and item.createBy !=''">
+ 					CREATE_BY = #{item.createBy },
+ 				</if>
+ 				<if test="item.newTrackingNumber != null and item.newTrackingNumber !=''">
+ 					NEW_TRACKING_NUMBER = #{item.newTrackingNumber },
+ 				</if>
+ 				<if test="item.remark != null and item.remark !=''">
+ 					REMARK = #{item.remark },
+ 				</if>
+ 				<if test="item.rma != null and item.rma >0">
+ 					rma = #{item.rma },
+ 				</if>
+ 				<if test="item.waitClaim != null and item.waitClaim !=''">
+ 					WAIT_CLAIM = #{item.waitClaim },
+ 				</if>
+ 				<if test="item.isSendWms != null and item.isSendWms !=''">
+ 					 is_send_wms= #{item.isSendWms },
+ 				</if>
+ 				<if test="item.warehouseId != null and item.warehouseId !=''">
+ 					 warehouse_id=#{item.warehouseId},
+ 				</if>
+ 				<if test="item.returnOrderId != null and item.returnOrderId >0">
+ 					 return_order_id=#{item.returnOrderId},
+ 				</if>
+ 				<if test="item.sendDate != null">
+ 					send_date = #{item.sendDate},
+ 				</if>
+ 				<if test="item.feedbackDate != null">
+ 					feedback_date = #{item.feedbackDate},
+ 				</if>
+ 				UPDATE_DATE=sysdate
+		   </set>
+		   <where>
+		   		<if test="item.id != null and item.id >0">
+ 					id=#{item.id}
+ 				</if>
+		   </where>
+		   </foreach>
+	</update>
+	
+	<update id="batchUpdateDeOutWmsOrderDetail" parameterType="java.util.List">
+		 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update wms_de_out_order_detail
+		   <set>
+ 				<if test="item.actualQty != null and item.actualQty !=''">
+ 					 ACTUAL_QTY= #{item.actualQty },
+ 				</if>
+ 				<if test="item.item != null and item.item !=''">
+ 					 ITEM= #{item.item },
+ 				</if>
+ 				UPDATE_DATE=sysdate
+		   </set>
+		   <where>
+		   		<if test="item.id != null and item.id >0 ">
+					and id=#{item.id }
+				</if>
+		   </where>
+		   </foreach>
+	</update>
+	
+	<!-- 更新入库单详情表 -->
+	<update id="batchUpdateDeInWmsOrderDetail" parameterType="java.util.List">
+		 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update WMS_DE_IN_ORDER_DETAIL
+		   <set>
+ 				<if test="item.actualQty != null and item.actualQty !=''">
+ 					ACTUAL_QTY = #{item.actualQty },
+ 				</if>
+ 				<if test="item.packageCode != null and item.packageCode !=''">
+ 					PACKAGE_CODE = #{item.packageCode },
+ 				</if>
+ 				<if test="item.unit != null and item.unit !=''">
+ 					UNIT = #{item.unit },
+ 				</if>
+ 				<if test="item.skuProperty != null and item.skuProperty !=''">
+ 					SKU_PROPERTY = #{item.skuProperty },
+ 				</if>
+ 				<if test="item.returnReason != null and item.returnReason !=''">
+ 					RETURN_REASON = #{item.returnReason },
+ 				</if>
+ 				<if test="item.customerName != null and item.customerName !=''">
+ 					CUSTOMER_NAME = #{item.customerName },
+ 				</if>
+ 				<if test="item.mobile != null and item.mobile !=''">
+ 					MOBILE = #{item.mobile },
+ 				</if>
+ 				<if test="item.address != null and item.address !=''">
+ 					ADDRESS = #{item.address },
+ 				</if>
+ 				<if test="item.picUrl != null and item.picUrl !=''">
+ 					PIC_URL = #{item.picUrl },
+ 				</if>
+ 				<if test="item.badReason != null and item.badReason !=''">
+ 					BAD_REASON = #{item.badReason },
+ 				</if>
+ 				<if test="item.item != null and item.item !=''">
+ 					item = #{item.item },
+ 				</if>
+ 				UPDATE_DATE=sysdate
+		   </set>
+		   <where>
+		   		<if test="item.parentId != null and item.parentId >0">
+ 					parent_id=#{item.parentId }
+ 				</if>
+ 				<if test="item.id != null and item.id >0">
+ 					AND id=#{item.id }
+ 				</if>
+ 				<if test="item.sku != null and item.sku !=''">
+ 					AND SKU=#{item.sku }
+ 				</if>
+		   </where>
+		   </foreach>
+	</update>
+	
+	<select id="getSkusByPSku" resultType="java.util.Map">
+		select s.sku,s.qty from ocs_ebay.sys_sku_link s, ocs_ebay.cal_product_entity p where s.sku=p.sku and p.is_active=1 and s.p_sku=#{psku}
+	</select>
+	
+	<select id="getSendDeOutWmsOrders" parameterType="int" resultType="java.util.Map">
+		select 	do.ID, do.ORDER_OCS_ID, do.ORDER_ID, do.PLATFORM, do.STORE_CODE, do.ORDER_OUT_TYPE, do.CUSTOMER_ADDRESS,
+				do.STORE_CODE, do.CUSTOMER_ZIP, to_char(OCS_ORDER_CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') OCS_ORDER_CREATE_DATE,
+				do.CUSTOMER_EMAIL, do.CARRIER_ID, do.CUSTOMER_COUNTRY, do.CUSTOMER_PROVINCE, do.CUSTOMER_CITY, do.CUSTOMER_NAME,
+		       	do.CUSTOMER_PHONE, do.CUSTOMER_ADDRESS_2 as CUSTOMER_ADDRESS_2, '' as CUSTOMER_ADDRESS_3
+		 from 	wms_de_out_order do
+		 where  do.is_send_wms='0' and do.PLATFORM=#{platform} order by do.ocs_order_create_date 
+	</select>
+	
+	<select id="getSendDeInWmsOrders" resultType="java.util.Map">
+		select OWNER_CODE, STORE_CODE, WAREHOUSE_ID, ID, IS_SEND_WMS, ORDER_TYPE, PLATFORM, 
+		 to_char(CREATED_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATED_DATE, 
+		CREATE_BY, ORDER_ID, TRACKING_NUMBER, NEW_TRACKING_NUMBER, REMARK, RMA, WAIT_CLAIM
+		from WMS_DE_IN_ORDER di where di.IS_SEND_WMS = '0' AND di.return_order_id is not null and di.wait_claim in ('oms_nonclaim', 'oms_bindclaim') order by di.created_date 
+	</select>
+	
+	<select id="getLightOrderInfosByMap" resultType="java.util.Map">
+		select 	max(LI.SHIPPING_FIRSTNAME) || ' ' || max(LI.SHIPPING_MIDDLENAME) || ' ' || max(LI.SHIPPING_LASTNAME) CUSTOMER_NAME,
+			 	max(LI.STREET) ADDRESS_ONE,
+			 	'' ADDRESS_TWO,
+			 	max(LI.CITY) CUSTOMER_CITY,
+			 	max(LI.POSTCODE) CUSTOMER_ZIP,
+				max(LI.TELEPHONE) CUSTOMER_PHONE,
+				MAX(LI.REGION) CUSTOMER_PROVINCE,
+				max(LO.CUSTOMER_EMAIL) CUSTOMER_EMAIL,
+				max(LO.PLATFORM) CUSTOMER_COUNTRY
+		from 	light_order LO, (
+				select SHIPPING_FIRSTNAME,SHIPPING_MIDDLENAME,SHIPPING_LASTNAME,STREET,CITY,POSTCODE,TELEPHONE,REGION,parent_id from light_order_item
+				union all
+				select SHIPPING_FIRSTNAME,SHIPPING_MIDDLENAME,SHIPPING_LASTNAME,STREET,CITY,POSTCODE,TELEPHONE,REGION,parent_id from light_order_item_b
+				) LI
+		where 	LO.entity_id=LI.parent_id and LO.order_id=#{orderId}
+		group by LO.ENTITY_ID
+	</select>
+	
+	<select id="getEbayOrderInfosByMap" resultType="java.util.Map" parameterType="java.util.Map">
+		select e.TRACKINGNUMBER,
+		       e.SKU,
+		       json_ext.get_string(json(es.shipping_address), 'Name') CUSTOMER_NAME,
+		       json_ext.get_string(json(es.shipping_address), 'Country') CUSTOMER_COUNTRY,
+		       json_ext.get_string(json(es.shipping_address), 'StateOrProvince') CUSTOMER_PROVINCE,
+		       json_ext.get_string(json(es.shipping_address), 'CityName') CUSTOMER_CITY,
+		       json_ext.get_string(json(es.shipping_address), 'Street1') ADDRESS_ONE,
+		       json_ext.get_string(json(es.shipping_address), 'Street2') ADDRESS_TWO,
+		       json_ext.get_string(json(es.shipping_address), 'PostalCode') CUSTOMER_ZIP,
+		       case
+		         when json_ext.get_string(json(es.transaction_array),'Transaction.Buyer.Email') = 'Invalid Request' then
+		          null
+		         else
+		          json_ext.get_string(json(es.transaction_array),'Transaction.Buyer.Email')
+		       end CUSTOMER_EMAIL,
+		       case
+		         when json_ext.get_string(json(es.shipping_address), 'Phone') ='Invalid Request' then
+		           null
+		         else
+		          substr(json_ext.get_string(json(es.shipping_address), 'Phone'),1,1) || ' ' ||
+		          substr(json_ext.get_string(json(es.shipping_address), 'Phone'), 2)
+		       end CUSTOMER_PHONE
+		
+		  from (select t.id,
+		               max(tt.shipment_tracking_number) trackingNumber,
+		                wm_concat(REPLACE(tt.item_sku, ',', '^')) sku
+		          from ocs_ebay.ebay_order t, ocs_ebay.ebay_order_item tt
+		         where t.id = tt.parent_id
+		           and t.order_id = #{orderId}
+		           and t.account = #{account} group by t.id) e,
+		       ocs_ebay.ebay_order_sub es
+		 where e.id = es.parent_id
+	</select>
+	
+	<select id="getWmsSkuBySku" parameterType="String" resultType="java.util.Map">
+		select t.ITEM_NUMBER,t.SKU,t.UOM from CUX_INV_SKU_ATTRIBUTES_V@YQ_DBLINK t where t.sku=#{sku}
+	</select>
+	
+	<select id="getSkuByWmsSku" parameterType="String" resultType="java.util.Map">
+		select t.ITEM_NUMBER,t.SKU,t.UOM from CUX_INV_SKU_ATTRIBUTES_V@YQ_DBLINK t where t.ITEM_NUMBER=#{itemNumber}
+	</select>
+	
+	<update id="updateOutUploadStatus" parameterType="java.util.Map">
+		update wms_de_out_order o set o.is_upload=#{status} where o.id=#{id}
+	</update>
+	
+	<select id="queryNoUploadTrackingNumberOuts" resultMap="DeOutWmsOrderMainResultMap">
+		select <include refid="DeOutWmsOrderMain_Base_Column_List" /> from wms_de_out_order 
+		where is_send_wms='2' and tracking_number is not null and is_upload in ('0', '2') and platform=#{platform}
+	</select>
+	
+	<insert id="addAbnormalReason">
+		insert into WMS_DE_ABNORMAL_REASON(id, parent_id, parent_type, action, reason, enabled_flag, created_at, updated_at) 
+		values (
+		<if test="reason.id != null">
+			reason.id,
+		</if>
+		<if test="reason.id == null">
+			WMS_DE_ABNORMAL_REASON_SEQ.nextval,
+		</if>
+		#{reason.parentId,jdbcType=NUMERIC}, #{reason.parentType,jdbcType=VARCHAR}, #{reason.action,jdbcType=VARCHAR}, #{reason.reason,jdbcType=VARCHAR},
+		#{reason.enabledFlag,jdbcType=VARCHAR}, #{reason.createdAt,jdbcType=TIMESTAMP}, #{reason.updatedAt,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	
+	<select id="queryAbnormalReasons" parameterType="java.util.Map" resultType="java.util.Map">
+		select r.* from wms_de_abnormal_reason r where 1=1 
+		<if test="param.parentId != null and param.parentId > 0">
+		and r.parent_id=#{param.parentId} 
+		</if>
+		<if test="param.parentType != null and param.parentType != ''">
+		and r.parent_type=#{param.parentType} 
+		</if>
+		<if test="param.action != null and param.action != ''">
+		and r.action=#{param.action} 
+		</if>
+		order by r.created_at desc
+	</select>
+	
+	<resultMap type="com.it.ocs.api.vo.OutOrderVO" id="outOrderVO">
+			<result column="id" property="id"  />
+			<result column="platform" property="platform"  />
+			<result column="order_ocs_id" property="orderOcsId"  />
+			<result column="order_out_type" property="orderOutType"  />
+			<result column="is_upload" property="isUpload"  />
+			<result column="order_id" property="orderId"  />
+			<result column="warehouse_id" property="warehouseId"  />
+			<result column="tracking_number" property="trackingNumber"  />
+			<result column="ship_date" property="shipDate"  />
+			<result column="ship_by" property="shipBy"  />
+			<result column="store_code" property="storeCode"/>
+			<result column="ocs_order_create_date" property="ocsOrderCreateDate"/>
+			<result column="carrier_id" property="carrierId"/>
+			<result column="customer_name" property="customerName"/>
+			<result column="customer_country" property="customerCountry"/>
+			<result column="customer_province" property="customerProvince"/>
+			<result column="customer_city" property="customerCity"/>
+			<result column="customer_address" property="customerAddress"/>
+			<result column="customer_address_2" property="customerAddress2"/>
+			<result column="customer_zip" property="customerZip"/>
+			<result column="customer_email" property="customerEmail"/>
+			<result column="customer_phone" property="customerPhone"/>
+			<result column="is_send_wms" property="isSendWms"/>
+			<result column="is_abnormal" property="isAbnormal"/>
+			<result column="send_date" property="sendDate"/>
+			<result column="created_date" property="createdDate"/>
+			<result column="update_date" property="updateDate"/>
+			<result column="feedback_date" property="feedbackDate"/>
+			<result column="detail_id" property="detailId"  />
+			<result column="sku" property="sku"  />
+			<result column="item_number" property="itemNumber"  />
+			<result column="item_qty" property="itemQty"  />
+			<result column="sku_property" property="skuProperty"  />
+			<result column="item" property="item"  />
+			<result column="actual_qty" property="actualQty"  />
+			<result column="price" property="price"  />
+	</resultMap>
+	
+	<sql id="base_query_outorder">
+		select 	o.* 
+		from wms_de_out_order o, 
+			 (select oo.id from wms_de_out_order oo, wms_de_out_order_detail ood  
+			  where oo.id=ood.parent_id
+			  <if test="param.orderId != null and param.orderId != ''">
+			  		and #{param.orderId} like '%' || oo.order_id || '%'
+			  </if>
+			  <if test="param.orderOcsId != null and param.orderOcsId != ''">
+			  		and #{param.orderOcsId} like '%' || to_char(oo.order_ocs_id) || '%'
+			  </if>
+			  <if test="param.platform != null and param.platform != ''">
+			  		and oo.platform=#{param.platform}
+			  </if>
+			  <if test="param.orderOutType != null and param.orderOutType != ''">
+			  		and oo.order_out_type=#{param.orderOutType}
+			  </if>
+			  <if test="param.isSendWms != null and param.isSendWms != ''">
+			  		and oo.is_send_wms=#{param.isSendWms}
+			  </if>
+			  <if test="param.isAbnormal != null and param.isAbnormal != ''">
+			  		and oo.is_abnormal=#{param.isAbnormal}
+			  </if>
+			  <if test="param.isUpload != null and param.isUpload != ''">
+			  		and oo.is_upload=#{param.isUpload}
+			  </if>
+			  <if test="param.sku != null and param.sku != ''">
+			  		and ood.sku like concat(concat('%',#{param.sku}),'%')
+			  </if>
+			  <if test="param.startOcsOrderCreateDate != null and param.startOcsOrderCreateDate != ''">
+				 <![CDATA[and oo.ocs_order_create_date >= to_date(CONCAT(#{param.startOcsOrderCreateDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.endOcsOrderCreateDate != null and param.endOcsOrderCreateDate != ''">
+				 <![CDATA[and oo.ocs_order_create_date <= to_date(CONCAT(#{param.endOcsOrderCreateDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.startSendDate != null and param.startSendDate != ''">
+				 <![CDATA[and oo.send_date >= to_date(CONCAT(#{param.startSendDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.endSendDate != null and param.endSendDate != ''">
+				 <![CDATA[and oo.send_date <= to_date(CONCAT(#{param.endSendDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.startFeedbackDate != null and param.startFeedbackDate != ''">
+				 <![CDATA[and oo.feedback_date >= to_date(CONCAT(#{param.startFeedbackDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  <if test="param.endFeedbackDate != null and param.endFeedbackDate != ''">
+				 <![CDATA[and oo.feedback_date <= to_date(CONCAT(#{param.endFeedbackDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  </if>
+			  group by oo.id) g
+		where o.id=g.id
+		<if test="(param.startAbnormalDate != null and param.startAbnormalDate != '') or (param.endAbnormalDate != null and param.endAbnormalDate != '')">
+			  and o.id in (select distinct r.parent_id from wms_de_abnormal_reason r where r.parent_type='out'
+			  	<if test="param.startAbnormalDate != null and param.startAbnormalDate != ''">
+				<![CDATA[and r.created_at >= to_date(CONCAT(#{param.startAbnormalDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  	</if>
+			  	<if test="param.endAbnormalDate != null and param.endAbnormalDate != ''">
+				<![CDATA[and r.created_at <= to_date(CONCAT(#{param.endAbnormalDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+			  	</if>
+			  )
+		</if>
+	</sql>
+	
+	<select id="countDeOutOrder" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_query_outorder" />) t
+	</select>
+	
+	<select id="findDeOutOrders" resultMap="outOrderVO" parameterType="java.util.HashMap">
+		select t3.*, t4.id as detail_id, t4.sku, t4.item_number, t4.item_qty, t4.sku_property, t4.item, t4.actual_qty, t4.price
+		from (select * 
+			  from (select t.*, rownum rn from (<include refid="base_query_outorder" /> order by o.created_date desc) t 
+			  <![CDATA[ 
+			  where rownum<=#{end}) t2 where t2.rn>=#{start}
+			  ]]>
+			  ) t3, wms_de_out_order_detail t4
+		where t3.id = t4.parent_id
+		order by t3.created_date desc, t3.id desc
+	</select>
+	
+	<select id="getDeOutOrderExportData" resultType="java.util.HashMap">
+		select t3.*, t4.id as detail_id, t4.sku, t4.item_number, t4.item_qty, t4.sku_property, t4.item, t4.actual_qty, t4.price
+		from (<include refid="base_query_outorder" />) t3, wms_de_out_order_detail t4
+		where t3.id = t4.parent_id
+		order by t3.created_date desc
+	</select>
+	
+	<update id="changeBeforeSendWms">
+		update wms_de_out_order
+		   <set>
+		   		customer_name=#{out.customerName,jdbcType=VARCHAR},
+		   		customer_country=#{out.customerCountry,jdbcType=VARCHAR},
+		   		customer_province=#{out.customerProvince,jdbcType=VARCHAR},
+		   		customer_city=#{out.customerCity,jdbcType=VARCHAR},
+		   		customer_zip=#{out.customerZip,jdbcType=VARCHAR},
+		   		customer_email=#{out.customerEmail,jdbcType=VARCHAR},
+		   		customer_phone=#{out.customerPhone,jdbcType=VARCHAR},
+		   		customer_address=#{out.customerAddress,jdbcType=VARCHAR},
+		   		customer_address_2=#{out.customerAddress2,jdbcType=VARCHAR},
+ 				update_date=sysdate
+		   </set>
+		   <where>
+		   		order_id=#{out.orderId,jdbcType=VARCHAR} and order_ocs_id=#{out.orderOcsId,jdbcType=NUMERIC} 
+		   		<if test="out.id != null and out.id > 0">
+ 					and id=#{out.id,jdbcType=NUMERIC}
+ 				</if>
+		   </where>
+	</update>
+	
+	<select id="getDeOutOrder" parameterType="java.util.Map" resultType="java.util.Map">
+		select 	do.ID, do.ORDER_OCS_ID, do.ORDER_ID, do.PLATFORM, do.STORE_CODE, do.ORDER_OUT_TYPE, do.CUSTOMER_ADDRESS,
+				do.STORE_CODE, do.CUSTOMER_ZIP, to_char(OCS_ORDER_CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') OCS_ORDER_CREATE_DATE,
+				do.CUSTOMER_EMAIL, do.CARRIER_ID, do.CUSTOMER_COUNTRY, do.CUSTOMER_PROVINCE, do.CUSTOMER_CITY, do.CUSTOMER_NAME,
+		       	do.CUSTOMER_PHONE, do.CUSTOMER_ADDRESS_2 as CUSTOMER_ADDRESS_2, '' as CUSTOMER_ADDRESS_3, do.IS_SEND_WMS
+		 from 	wms_de_out_order do
+		 where  do.id=#{param.id,jdbcType=NUMERIC} and do.ORDER_ID=#{param.orderId,jdbcType=VARCHAR} and do.order_ocs_id=#{param.orderOcsId,jdbcType=NUMERIC}
+	</select>
+	
+	<resultMap type="com.it.ocs.api.vo.AbnormalReasonVO" id="abnormalReasonVO">
+		<result column="id" property="id"  />
+		<result column="parent_id" property="parentId"  />
+		<result column="parent_type" property="parentType"  />
+		<result column="action" property="action"  />
+		<result column="reason" property="reason"  />
+		<result column="enabled_flag" property="enabledFlag"  />
+		<result column="created_at" property="createdAt"  />
+		<result column="updated_at" property="updatedAt"  />
+		<result column="parent_order_id" property="parentOrderId"  />
+	</resultMap>
+	
+	<sql id="base_query_abnormalreason">
+		select tbl.* from (
+			select a.*, b.order_id as parent_order_id 
+			from (select r.* from wms_de_abnormal_reason r where r.parent_id=#{param.parentId}) a, wms_de_out_order b 
+			where a.parent_id=b.id
+			union all
+			select a.*, b.order_id as parent_order_id 
+			from (select r.* from wms_de_abnormal_reason r where r.parent_id=#{param.parentId}) a, wms_de_in_order b 
+			where a.parent_id=b.id
+		) tbl where tbl.parent_type=#{param.parentType}
+	</sql>
+	
+	<select id="countAbnormalReason" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_query_abnormalreason" />) t
+	</select>
+	
+	<select id="findAbnormalReasons" resultMap="abnormalReasonVO" parameterType="java.util.HashMap">
+		select * 
+		from (select t.*, rownum rn from (select o.* from (<include refid="base_query_abnormalreason" />) o order by o.created_at desc) t 
+		<![CDATA[ 
+		where rownum<=#{end}) t2 where t2.rn>=#{start}
+		]]>
+	</select>
+	
+	<resultMap type="com.it.ocs.api.vo.OperateLogVO" id="operateLogVO">
+		<result column="id" property="id"  />
+		<result column="target" property="target"  />
+		<result column="object_id" property="objectId"  />
+		<result column="order_id" property="orderId"  />
+		<result column="order_ocs_id" property="orderOcsId"  />
+		<result column="operator" property="operator"  />
+		<result column="operator_text" property="operatorText"  />
+		<result column="result" property="result"  />
+		<result column="description" property="description"  />
+		<result column="enabled_flag" property="enabledFlag"  />
+		<result column="created_at" property="createdAt"  />
+		<result column="updated_at" property="updatedAt"  />
+	</resultMap>
+	
+	<insert id="addOperLog">
+		insert into WMS_DE_OPER_LOG(id, target, object_id, operator, result, description, enabled_flag, created_at, updated_at) 
+		values (
+		<if test="log.id != null">
+			reason.id,
+		</if>
+		<if test="log.id == null">
+			WMS_DE_OPER_LOG_SEQ.nextval,
+		</if>
+		#{log.target,jdbcType=VARCHAR}, #{log.objectId,jdbcType=NUMERIC}, #{log.operator,jdbcType=NUMERIC}, #{log.result,jdbcType=VARCHAR},
+		#{log.description,jdbcType=VARCHAR}, #{log.enabledFlag,jdbcType=VARCHAR}, #{log.createdAt,jdbcType=TIMESTAMP}, #{log.updatedAt,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	
+	<sql id="base_query_operlog">
+		select 	l.id, l.target, l.object_id, nvl(obj.order_id, '') as order_id, nvl(obj.order_ocs_id, '') as order_ocs_id
+				, l.operator, case when l.operator is null then '' else u.username || '(' || u.usercode || ')' end as operator_text
+				, l.result, l.description, l.enabled_flag, l.created_at, l.updated_at
+		from 	wms_de_oper_log l, sys_user u,
+				(select oo.id, oo.order_id, oo.order_ocs_id from wms_de_out_order oo where 1=1
+				 union all 
+				 select io.id, io.order_id, null as order_ocs_id from wms_de_in_order io where 1=1) obj
+		where 	l.operator=u.user_id(+) and l.object_id=obj.id(+)
+			    <if test="param.order != null and param.order != ''">
+			    and (#{param.order} like '%' || obj.order_id || '%' and obj.order_id is not null or #{param.order} like '%' || to_char(obj.order_ocs_id) || '%' and obj.order_ocs_id is not null)
+			    </if>
+				<if test="param.target != null and param.target != ''">
+				and l.target = #{param.target}
+				</if>
+				<if test="param.operatorText != null and param.operatorText != ''">
+				and (u.username like concat(concat('%',#{param.operatorText}),'%')
+					 or u.nick like concat(concat('%',#{param.operatorText}),'%')
+					 or u.usercode like concat(concat('%',#{param.operatorText}),'%'))
+				</if>
+				<if test="param.description != null and param.description != ''">
+				and l.description like concat(concat('%',#{param.description}),'%')
+				</if>
+				<if test="param.startCreatedAt != null and param.startCreatedAt != ''">
+				<![CDATA[and l.created_at >= to_date(CONCAT(#{param.startCreatedAt}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+				</if>
+				<if test="param.endCreatedAt != null and param.endCreatedAt != ''">
+				<![CDATA[and l.created_at <= to_date(CONCAT(#{param.endCreatedAt}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+				</if>
+	</sql>
+	
+	<select id="countOperLog" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_query_operlog" />) t
+	</select>
+	
+	<select id="queryOperLogs" resultMap="operateLogVO" parameterType="java.util.HashMap">
+		select * 
+		from (select t.*, rownum rn from (select o.* from (<include refid="base_query_operlog" />) o order by o.created_at desc) t 
+		<![CDATA[ 
+		where rownum<=#{end}) t2 where t2.rn>=#{start}
+		]]>
+	</select>
+	
+	<update id="uploadVcTranNumber" parameterType="java.util.HashMap">
+		update amazon_sale_vc v set v.tracking_no=#{param.tarckingNumber} where v.po=#{param.orderId} and v.order_ocs_id=#{param.orderOcsId}
+	</update>
+</mapper>

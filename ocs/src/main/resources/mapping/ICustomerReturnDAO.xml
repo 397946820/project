@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.amazon.dao.ICustomerReturnDAO">
+	<insert id="save">
+		 insert into amazon_report_customer_return(
+			  ID,
+			  RETURN_DATE,
+			  ORDER_ID,
+			  SKU,
+			  ASIN,
+			  FNSKU,
+			  PRODUCT_NAME,
+			  QUANTITY,
+			  FULFILLMENT_CENTER_ID,
+			  DETAILED_DISPOSITION,
+			  REASON,
+			  STATUS,
+			  LICENSE_PLATE_NUMBER,
+			  CUSTOMER_COMMENTS,
+			  REPORT_ID,
+			  SITE
+			  )values(
+			  AMAZON_CUSTOMER_RETURN_SEQ.Nextval,
+			  to_date(#{RETURN_DATE,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+			  #{ORDER_ID,jdbcType=VARCHAR},
+			  #{SKU,jdbcType=VARCHAR},
+			  #{ASIN,jdbcType=VARCHAR},
+			  #{FNSKU,jdbcType=VARCHAR},
+			  #{PRODUCT_NAME,jdbcType=VARCHAR},
+			  #{QUANTITY,jdbcType=VARCHAR},
+			  #{FULFILLMENT_CENTER_ID,jdbcType=VARCHAR},
+			  #{DETAILED_DISPOSITION,jdbcType=VARCHAR},
+			  #{REASON,jdbcType=VARCHAR},
+			  #{STATUS,jdbcType=VARCHAR},
+			  #{LICENSE_PLATE_NUMBER,jdbcType=VARCHAR},
+			  #{CUSTOMER_COMMENTS,jdbcType=VARCHAR},
+			  #{REPORT_ID,jdbcType=VARCHAR},
+			  #{SITE,jdbcType=VARCHAR}
+			  )
+	</insert>
+	<delete id="delByReportId" parameterType="java.lang.String">
+		delete amazon_report_customer_return where REPORT_ID=#{id}
+	</delete>
+
+
+</mapper>

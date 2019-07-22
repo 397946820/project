@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitSalaryDao">
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitSalaryModel">
+		SELECT ENTITY_ID             ENTITYID,
+		       WAGE_BONUSES          WAGEBONUSES,
+		       SOCIAL_SECURITY       SOCIALSECURITY,
+		       ACCUMULATION_FUND     ACCUMULATIONFUND,
+		       INDIVIDUAL_INCOME_TAX INDIVIDUALINCOMETAX,
+		       OTHER_FEE             OTHERFEE,
+		       MONTH_OF_YEAR         MONTHOFYEAR,
+		       CREATED_AT            CREATEDAT,
+		       UPDATED_AT            UPDATEDAT,
+		       PERSONNEL,
+		       DEPARTMENT
+		  FROM (SELECT S.ENTITY_ID,
+		               S.WAGE_BONUSES,
+		               S.SOCIAL_SECURITY,
+		               S.ACCUMULATION_FUND,
+		               S.INDIVIDUAL_INCOME_TAX,
+		               S.OTHER_FEE,
+		               S.MONTH_OF_YEAR,
+		               S.CREATED_AT,
+		               S.UPDATED_AT,
+		               R.NICK PERSONNEL,
+		               D.NAME DEPARTMENT
+		          FROM SYS_OPERATING_PROFIT_SALARY S, SYS_USER R, SYS_DEPARTMENT D
+		         WHERE S.DEPARTMENT = D.DEPARTMENT_ID(+)
+		           AND S.PERSONNEL = R.USER_ID(+)
+		           AND D.ENABLED_FLAG = 'Y'
+		           AND R.ENABLED_FLAG = 'Y'
+		           AND R.DEPARTMENT_ID = D.DEPARTMENT_ID
+		           AND S.PERSONNEL IS NOT NULL
+		        UNION ALL
+		        SELECT S.ENTITY_ID,
+		               S.WAGE_BONUSES,
+		               S.SOCIAL_SECURITY,
+		               S.ACCUMULATION_FUND,
+		               S.INDIVIDUAL_INCOME_TAX,
+		               S.OTHER_FEE,
+		               S.MONTH_OF_YEAR,
+		               S.CREATED_AT,
+		               S.UPDATED_AT,
+		               '' PERSONNEL,
+		               D.NAME DEPARTMENT
+		          FROM SYS_OPERATING_PROFIT_SALARY S, SYS_DEPARTMENT D
+		         WHERE S.DEPARTMENT = D.DEPARTMENT_ID(+)
+		           AND D.ENABLED_FLAG = 'Y'
+		           AND S.PERSONNEL IS NULL)
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.sys.dao.IOperatingProfitSkuDao.order_sql"/>
+	</select>
+	
+	<select id="findByParam" resultType="java.util.HashMap">
+		<choose>
+			<when test="param.personnel != null and param.personnel != ''">
+				SELECT S.ENTITY_ID ENTITYID,S.DEPARTMENT,S.PERSONNEL
+				  FROM SYS_OPERATING_PROFIT_SALARY S, SYS_USER R, SYS_DEPARTMENT D
+				 WHERE S.DEPARTMENT = D.DEPARTMENT_ID(+)
+				   AND S.PERSONNEL = R.USER_ID(+)
+				   AND D.ENABLED_FLAG = 'Y'
+				   AND R.ENABLED_FLAG = 'Y'
+				   AND R.DEPARTMENT_ID = D.DEPARTMENT_ID
+				   AND R.NICK = #{param.personnel}
+				   AND D.NAME = #{param.department}
+				   AND S.MONTH_OF_YEAR = #{param.monthOfYear}
+			</when>
+			<otherwise>
+				SELECT S.ENTITY_ID ENTITYID,S.DEPARTMENT
+				  FROM SYS_OPERATING_PROFIT_SALARY S,SYS_DEPARTMENT D
+				 WHERE S.DEPARTMENT = D.DEPARTMENT_ID(+)
+				   AND D.ENABLED_FLAG = 'Y'
+				   AND D.NAME = #{param.department}
+				   AND S.MONTH_OF_YEAR = #{param.monthOfYear}
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getByParam" resultType="java.util.HashMap">
+		<choose>
+			<when test="param.personnel != null and param.personnel != ''">
+				SELECT R.USER_ID PERSONNEL, D.DEPARTMENT_ID DEPARTMENT
+				  FROM SYS_USER R, SYS_DEPARTMENT D
+				 WHERE D.DEPARTMENT_ID = R.DEPARTMENT_ID(+)
+				   AND D.ENABLED_FLAG = 'Y'
+				   AND R.ENABLED_FLAG = 'Y'
+			 	   AND R.NICK = #{param.personnel}
+				   AND D.NAME = #{param.department}
+			</when>
+			<otherwise>
+				SELECT D.DEPARTMENT_ID DEPARTMENT
+				  FROM SYS_DEPARTMENT D
+				 WHERE D.ENABLED_FLAG = 'Y'
+				   AND UPPER(D.NAME) = UPPER(#{param.department})
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="add">
+	    insert into SYS_OPERATING_PROFIT_SALARY
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="department != null" >
+	        DEPARTMENT,
+	      </if>
+	      <if test="personnel != null" >
+	        PERSONNEL,
+	      </if>
+	      <if test="wageBonuses != null" >
+	        WAGE_BONUSES,
+	      </if>
+	      <if test="socialSecurity != null" >
+	        SOCIAL_SECURITY,
+	      </if>
+	      <if test="accumulationFund != null" >
+	        ACCUMULATION_FUND,
+	      </if>
+	      <if test="individualIncomeTax != null" >
+	        INDIVIDUAL_INCOME_TAX,
+	      </if>
+	      <if test="otherFee != null" >
+	        OTHER_FEE,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_PROFIT_SALARY_SEQ.NEXTVAL,
+	      
+	      <if test="department != null" >
+	        #{department,jdbcType=VARCHAR},
+	      </if>
+	      <if test="personnel != null" >
+	        #{personnel,jdbcType=VARCHAR},
+	      </if>
+	      <if test="wageBonuses != null" >
+	        #{wageBonuses,jdbcType=DECIMAL},
+	      </if>
+	      <if test="socialSecurity != null" >
+	        #{socialSecurity,jdbcType=DECIMAL},
+	      </if>
+	      <if test="accumulationFund != null" >
+	        #{accumulationFund,jdbcType=DECIMAL},
+	      </if>
+	      <if test="individualIncomeTax != null" >
+	        #{individualIncomeTax,jdbcType=DECIMAL},
+	      </if>
+	      <if test="otherFee != null" >
+	        #{otherFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>	
+	
+	<update id="update">
+		update SYS_OPERATING_PROFIT_SALARY
+	    <set >
+	      <if test="department != null" >
+	        DEPARTMENT = #{department,jdbcType=VARCHAR},
+	      </if>
+	      <if test="personnel != null" >
+	        PERSONNEL = #{personnel,jdbcType=VARCHAR},
+	      </if>
+	      <if test="wageBonuses != null" >
+	        WAGE_BONUSES = #{wageBonuses,jdbcType=DECIMAL},
+	      </if>
+	      <if test="socialSecurity != null" >
+	        SOCIAL_SECURITY = #{socialSecurity,jdbcType=DECIMAL},
+	      </if>
+	      <if test="accumulationFund != null" >
+	        ACCUMULATION_FUND = #{accumulationFund,jdbcType=DECIMAL},
+	      </if>
+	      <if test="individualIncomeTax != null" >
+	        INDIVIDUAL_INCOME_TAX = #{individualIncomeTax,jdbcType=DECIMAL},
+	      </if>
+	      <if test="otherFee != null" >
+	        OTHER_FEE = #{otherFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

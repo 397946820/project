@@ -1,0 +1,469 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.it.le</groupId>
+	<artifactId>ocs</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>ocs Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<encoding>UTF-8</encoding>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<commons-lang3.version>3.1</commons-lang3.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.oracle</groupId> <artifactId>oracle-connector-java</artifactId> 
+			<version>10.2.0.1.0</version> </dependency> -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>6.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>0.2.23</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.7.3</version>
+		</dependency>
+		<!-- <dependency> <groupId>org.freemaker.shiro</groupId> <artifactId>shiro-freemaker</artifactId> 
+			<version>1.0</version> </dependency> -->
+		<dependency>
+			<groupId>net.mingsoft</groupId>
+			<artifactId>shiro-freemarker-tags</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.12</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.20</version>
+		</dependency>
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>sitemesh</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.24</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.24</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.24</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>net.fckeditor</groupId>
+			<artifactId>java-core</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-core</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-web</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-spring</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<!-- 分页插件 -->
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
+		</dependency>
+		<!-- <dependency> <groupId>org.quartz-scheduler</groupId> <artifactId>quartz</artifactId> 
+			<version>1.8.5</version> </dependency> -->
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib-ext-spring</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>16.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+		<!-- fastjson -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.13</version>
+		</dependency>
+		<!-- ebay sdk 所需的第三方maven依赖 -->
+		<!-- <dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>activation</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>ebaycalls</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>ebaysdkcore</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>fastInfoset</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>helper</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>httpClient</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jakartaoro</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jaxbapi</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jaxbimpl</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jaxbxjc</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jaxwsapi</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jaxwsrt</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jaxwstools</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jsr173api</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jsr181api</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>jsr250api</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>log4j</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>mimepull</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>resolver</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>saajapi</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>saajimpl</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>serializer</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>sjsxp</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>slf4japi</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>slf4jlog4j</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>staxex</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>streambuffer</classifier> </dependency> 
+			<dependency> <groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>xalan</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> <classifier>xalan</classifier> </dependency> <dependency> 
+			<groupId>com.it.ocs.ebay.finding</groupId> <artifactId>developer-sdk</artifactId> 
+			<version>1.0</version> </dependency> -->
+		<!-- xml解析包 -->
+		<!-- https://mvnrepository.com/artifact/org.jdom/jdom -->
+		<!-- https://mvnrepository.com/artifact/dom4j/dom4j -->
+		<dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.it.ocs</groupId> <artifactId>jaxen</artifactId> 
+			<version>1.16</version> </dependency> <dependency> <groupId>com.it.ocs</groupId> 
+			<artifactId>xom</artifactId> <version>1.1</version> </dependency> -->
+		<!-- mysql 驱动 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.18</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.amazonservices.mws</groupId> <artifactId>MWSClientJavaRuntime</artifactId> 
+			<version>1.0</version> </dependency> <dependency> <groupId>org.apache.http</groupId> 
+			<artifactId>httpclient</artifactId> <version>4.2.3</version> </dependency> 
+			<dependency> <groupId>org.apache.http</groupId> <artifactId>httpcore</artifactId> 
+			<version>4.2</version> </dependency> <dependency> <groupId>org.apache.http</groupId> 
+			<artifactId>httpclient</artifactId> <version>4.2.3</version> </dependency> -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-mongodb</artifactId>
+			<version>1.10.6.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.amazonservices.mws</groupId> <artifactId>MWSOrders_2013-09-01_v2017-02-22</artifactId> 
+			<version>2013-09-01_v2017-02-22</version> </dependency> <dependency> <groupId>com.amazonservices.mws</groupId> 
+			<artifactId>MaWSJavaClientLibrary</artifactId> <version>1.1</version> </dependency> 
+			<dependency> <groupId>org.quartz-scheduler</groupId> <artifactId>quartz-jobs</artifactId> 
+			<version>2.21</version> </dependency> <dependency> <groupId>com.walmart.marketplace</groupId> 
+			<artifactId>digitalSignatureUtil</artifactId> <version>1.0.0</version> </dependency> 
+			<dependency> <groupId>com.aopalliance</groupId> <artifactId>aopalliance</artifactId> 
+			<version>1.0</version> </dependency> -->
+		<!-- XML解析 -->
+		<!-- <dependency> <groupId>com.it.ocs.xml</groupId> <artifactId>jsoup</artifactId> 
+			<version>1.10.2</version> </dependency> <dependency> <groupId>com.it.ocs.xml</groupId> 
+			<artifactId>jsoup-1.10.2-javadoc</artifactId> <version>1.10.2</version> <classifier>javadoc</classifier> 
+			</dependency> <dependency> <groupId>com.it.ocs.xml</groupId> <artifactId>jsoup-1.10.2-sources</artifactId> 
+			<version>1.0</version> <classifier>sources</classifier> </dependency> -->
+		<dependency>
+			<groupId>com.paypal.sdk</groupId>
+			<artifactId>rest-api-sdk</artifactId>
+			<version>1.14.0</version>
+		</dependency><!-- <dependency> <groupId>com.paypal.sdk</groupId> <artifactId>paypal-core</artifactId> 
+			<version>LATEST</version> </dependency> -->
+		<dependency>
+			<groupId>com.paypal.sdk</groupId>
+			<artifactId>merchantsdk</artifactId>
+			<version>2.15.122</version>
+		</dependency>
+		<dependency>
+			<groupId>com.braintreepayments.gateway</groupId>
+			<artifactId>braintree-java</artifactId>
+			<version>2.74.0</version>
+		</dependency>
+		<!-- FTPClient依赖 -->
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.49</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+		</dependency>
+
+		<!-- html parser -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.7.3</version>
+		</dependency>
+		<!-- 亚马逊jar本地依赖 -->
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>commons-logging-api</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>MWSClientJavaRuntime</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>MWSOrders_2013-09-01_v2018-10-31</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazon</groupId>
+			<artifactId>MaWSJavaClientLibrary</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<!-- <dependency> <groupId>javax.mail</groupId> <artifactId>javax.mail-api</artifactId> 
+			<version>1.6.0</version> </dependency> -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.mail </groupId>
+			<artifactId>javax.mail </artifactId>
+			<version>1.5.4 </version>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<id>jdk-1.8</id>
+			<!-- 另外一种激活方式 -->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<jdk>1.8</jdk>
+			</activation>
+			<properties>
+				<maven.compiler.source>1.8</maven.compiler.source>
+				<maven.compiler.target>1.8</maven.compiler.target>
+				<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+			</properties>
+		</profile>
+	</profiles>
+	<build>
+		<finalName>ocs</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

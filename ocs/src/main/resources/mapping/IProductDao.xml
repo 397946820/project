@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.product.dao.IProductDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.product.model.ProductModel">
+		<result column="PRODUCT_ID" property="id" jdbcType="DECIMAL" />
+	    <result column="PICTURE" property="picture" jdbcType="VARCHAR" />
+	    <result column="SKU" property="sku" jdbcType="VARCHAR" />
+	    <result column="NAME" property="name" jdbcType="VARCHAR" />
+	    <result column="CATEGORY" property="category" jdbcType="VARCHAR" />
+	    <result column="STOCK" property="stock" jdbcType="DECIMAL" />
+	    <result column="STOCK_WARNING" property="stockWarning" jdbcType="VARCHAR" />
+	    <result column="WEIGHT" property="weight" jdbcType="DECIMAL" />
+	    <result column="SOURCE_AREA" property="sourceArea" jdbcType="VARCHAR" />
+	    <result column="ENABLED_FLAG" property="enabledFlag" jdbcType="CHAR" />
+		<result column="CREATION_DATE" property="creationDate" jdbcType="TIMESTAMP" />
+		<result column="CREATE_BY" property="createBy" jdbcType="DECIMAL" />
+		<result column="LAST_UPDATE_DATE" property="lastUpdationDate" jdbcType="TIMESTAMP" />
+		<result column="LAST_UPDATE_BY" property="lastUpdateBy" jdbcType="DECIMAL" />
+		<result column="updated_at" property="updateDate" jdbcType="DATE" />
+	</resultMap>
+	
+	<sql id="sqlBase">
+		select sku sku,to_char(updated_at,'yyyy-mm-dd hh24:mi:ss') updateDate  from cal_product_entity 
+	</sql>
+	
+	<sql id="seachWhere">
+		<choose>
+			<when test="param!=null">
+				<where>
+					status = 1
+
+					<if test="param.sku !=null and param.sku!=''">
+						AND SKU like '%'||#{param.sku}||'%'
+					</if>
+
+				</where>
+			</when>
+			<otherwise>
+				<where>
+					status = 1
+				</where>
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="queryByPage" resultType="com.it.ocs.product.model.ProductModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="sqlBase" />
+				<include refid="seachWhere" />
+				order by updated_at desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from (<include refid="sqlBase" />
+		<include refid="seachWhere"/>)
+	</select>
+
+	<insert id="add" parameterType="com.it.ocs.product.vo.ProductVo">
+		insert into EBAY_PRODUCT
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        PRODUCT_ID,
+	      
+	      <if test="picture != null" >
+	        PICTURE,
+	      </if>
+	      <if test="sku != null" >
+	        SKU,
+	      </if>
+	      <if test="name != null" >
+	        NAME,
+	      </if>
+	      <if test="category != null" >
+	        CATEGORY,
+	      </if>
+	      <if test="stock != null" >
+	        STOCK,
+	      </if>
+	      <if test="stockWarning != null" >
+	        STOCK_WARNING,
+	      </if>
+	      <if test="weight != null" >
+	        WEIGHT,
+	      </if>
+	      <if test="sourceArea != null" >
+	        SOURCE_AREA,
+	      </if>
+	      <if test="enabledFlag != null" >
+	        ENABLED_FLAG,
+	      </if>
+	      <if test="creationDate != null" >
+	        CREATION_DATE,
+	      </if>
+	      <if test="createBy != null" >
+	        CREATE_BY,
+	      </if>
+	      <if test="lastUpdationDate != null" >
+	        LAST_UPDATE_DATE,
+	      </if>
+	      <if test="lastUpdateBy != null" >
+	        LAST_UPDATE_BY,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	       EBAY_PRODUCT_SEQ.NEXTVAL,
+	     
+	      <if test="picture != null" >
+	        #{picture,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sku != null" >
+	        #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="name != null" >
+	        #{name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="category != null" >
+	        #{category,jdbcType=VARCHAR},
+	      </if>
+	      <if test="stock != null" >
+	        #{stock,jdbcType=DECIMAL},
+	      </if>
+	      <if test="stockWarning != null" >
+	        #{stockWarning,jdbcType=VARCHAR},
+	      </if>
+	      <if test="weight != null" >
+	        #{weight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sourceArea != null" >
+	        #{sourceArea,jdbcType=VARCHAR},
+	      </if>
+	      <if test="enabledFlag != null" >
+	        #{enabledFlag,jdbcType=CHAR},
+	      </if>
+	      <if test="creationDate != null" >
+	        #{creationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="createBy != null" >
+	        #{createBy,jdbcType=DECIMAL},
+	      </if>
+	      <if test="lastUpdationDate != null" >
+	        #{lastUpdationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="lastUpdateBy != null" >
+	        #{lastUpdateBy,jdbcType=DECIMAL},
+	      </if>
+	    </trim>
+	</insert>
+
+	<select id="getById" parameterType="java.lang.Long"
+		resultType="com.it.ocs.product.vo.ProductVo">
+		<include refid="sqlBase"/>
+		WHERE PRODUCT_ID = #{id}
+	</select>
+
+	<update id="update" parameterType="com.it.ocs.product.vo.ProductVo">
+		update EBAY_PRODUCT
+	    <set >
+	      <if test="picture != null" >
+	        PICTURE = #{picture,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sku != null" >
+	        SKU = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="name != null" >
+	        NAME = #{name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="category != null" >
+	        CATEGORY = #{category,jdbcType=VARCHAR},
+	      </if>
+	      <if test="stock != null" >
+	        STOCK = #{stock,jdbcType=DECIMAL},
+	      </if>
+	      <if test="stockWarning != null" >
+	        STOCK_WARNING = #{stockWarning,jdbcType=VARCHAR},
+	      </if>
+	      <if test="weight != null" >
+	        WEIGHT = #{weight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sourceArea != null" >
+	        SOURCE_AREA = #{sourceArea,jdbcType=VARCHAR},
+	      </if>
+	      <if test="enabledFlag != null" >
+	        ENABLED_FLAG = #{enabledFlag,jdbcType=CHAR},
+	      </if>
+	      <if test="creationDate != null" >
+	        CREATION_DATE = #{creationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="createBy != null" >
+	        CREATE_BY = #{createBy,jdbcType=DECIMAL},
+	      </if>
+	      <if test="lastUpdationDate != null" >
+	        LAST_UPDATE_DATE = #{lastUpdationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="lastUpdateBy != null" >
+	        LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=DECIMAL},
+	      </if>
+	    </set>
+		where PRODUCT_ID = #{id,jdbcType=DECIMAL}
+	</update>
+	
+</mapper>
