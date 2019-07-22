@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ILightTaximeterDao">
+	<sql id="base_sql">
+		SELECT ENTITY_ID entityId,
+			   SKU,
+			   PLATFORM,
+			   COUNTRY,
+			   SHIPPING_TYPE shippingType,
+			   PURCHASE_COST purchaseCost,
+			   CIF,
+			   STORAGE_CHARGES storageCharges,
+			   SUNDRY_CHARGES sundryCharges,
+			   WEC,
+			   WAREHOUSE_OUT_CHARGE warehouseOutCharge,
+			   CONSUMABLE,
+			   LABOUR,
+			   ORDER_COST orderCost,
+			   PACKING_EXPENSE packingExpense,
+			   LOCAL_DELIVERY_FEE localDeliveryFee,
+			   FINAL_COST finalCost,
+			   REFERRAL_RATE referralRate,
+			   PAYPAL_FEE paypalFee,
+			   UNFULLIABLE_RATE unfulliableRate,
+			   REPLACEMENT_RATE replacementRate,
+			   PROFIT_RATE profitRate,
+			   VAT,
+			   ADVERTISING_RATE advertisingRate,
+			   PROFIT_RATE_ACTION profitRateAction,
+			   FINAL_PRICE finalPrice,
+			   IS_COST_OF isCostOf,
+			   CREATED_AT createdAt,
+			   UPDATED_AT updatedAt,
+			   IS_STORAGE_CHARGES isStorageCharges,
+			   TRANSACTIONMODE transactionMode,
+			   CURRENCY_SYMBOL currencySymbol,
+			   SEND_WEIGHT sendWeight,
+			   WAREHOUSING_WEIGHT warehousingWeight
+    	FROM LIGHT_TAXIMETER
+	</sql>
+	
+	<sql id="where_countrys">
+		<foreach collection="list" item="countryId" index="index" open="and COUNTRY in (" separator="," close=")">
+					#{countryId}
+		</foreach>
+		<if test="param.sku != null and param.sku != ''">
+				AND SKU LIKE '${param.sku}%'
+		</if>
+	</sql>
+	
+	<sql id="where_country">
+		<if test="param != null">
+			<if test="param.country != null and param.country != ''">
+				AND COUNTRY = #{param.country}
+			</if>
+		</if>
+		<if test="param.sku != null and param.sku != ''">
+				AND SKU = #{param.sku}
+		</if>
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<if test="param.platform != null and param.platform != ''">
+				AND PLATFORM = #{param.platform}
+			</if>
+			<if test="param.shippingType != null and param.shippingType != ''">
+				AND SHIPPING_TYPE = #{param.shippingType}
+			</if>
+			<if test="param.isCostOf != null and param.isCostOf != '' or param.isCostOf == 0">
+				AND IS_COST_OF = #{param.isCostOf}
+			</if>
+			<if test="param.isStorageCharges != null and param.isStorageCharges != '' or param.isStorageCharges == 0">
+				AND IS_STORAGE_CHARGES = #{param.isStorageCharges}
+			</if>
+			<if test="param.transactionMode != null and param.transactionMode != '' or param.transactionMode == 0">
+				AND TRANSACTIONMODE = #{param.transactionMode}
+			</if>
+		</if>
+	</sql>
+	
+	<select id="queryByCountry" resultType="com.it.ocs.cal.model.LightTaximeterModel">
+		<include refid="base_sql"/>
+		<where>
+			<include refid="where_countrys"/>
+			<include refid="where_sql"/>
+		</where>
+		<include refid="com.it.ocs.cal.dao.ILightEbayTaxDao.sql_order"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.cal.model.LightTaximeterModel">
+		<include refid="base_sql"/>
+		<where>
+			<include refid="where_country"/>
+			<include refid="where_sql"/>
+		</where>
+	</select>
+	
+	<!-- 刷新 -->
+	<insert id="refresh" statementType="CALLABLE">
+	      {call SKU_STATIC_PRICE.REFRESH_LIGHT_STATIC_TAXIMETER(
+		        #{sku,mode=IN,jdbcType=VARCHAR}, 
+		        #{userId,mode=IN,jdbcType=DECIMAL}
+	      )}
+	</insert>
+
+	<select id="queryByObjectAndCountrys" resultType="java.util.HashMap">
+		<include refid="base_sql"/>
+		<where>
+			<include refid="where_countrys"/>
+			<include refid="where_sql"/>
+		</where>
+		ORDER BY UPDATED_AT DESC
+	</select>
+	
+	<select id="getById" resultType="com.it.ocs.cal.model.LightTaximeterModel">
+		<include refid="base_sql"/> where entity_id = #{id}
+	</select>
+	
+	<select id="findAllLess" resultType="com.it.ocs.cal.model.LightTaximeterModel">
+		<include refid="base_sql"/> where PROFIT_RATE_ACTION != 1
+	</select>
+	
+	<select id="findAllSku" resultType="java.lang.String">
+		select distinct sku from LIGHT_TAXIMETER
+	</select>
+	
+	<select id="queryCustomer" resultType="java.util.Map">
+		select t.volume,
+		       t.carton_weight as weight,
+		       t.price - t.amount + t.fund + t.duty as price,
+		       t.packing_qty packingQty,
+		       t.sku,
+		       t.country,
+		       t.vat,
+		       t.unavailability,
+		       t.replacement_rate replacementRate,
+		       t.currencyRate,
+		       r.currency_rate as newCurrencyRate
+		  from (select t.*,
+		               e.packing_qty,
+		               case
+		                 when e.carton_length is null then
+		                  e.length * e.width * e.height * e.packing_qty +
+		                  e.outer_volume
+		                 else
+		                  e.carton_length * e.carton_width * e.carton_height
+		               end volume,
+		               case
+		                 when e.carton_weight is null then
+		                  e.gross_weight * e.packing_qty + e.outer_weight
+		                 else
+		                  e.carton_weight
+		               end carton_weight,
+		               case
+		                 when c.currency = 'USD' then
+		                  c.price * x.clear_coefficient * o.duty_rate
+		                 else
+		                  c.price / 1.17 / r.currency_rate * x.clear_coefficient *
+		                  o.duty_rate
+		               end duty, <!-- 进口关税 -->
+		               
+		               case
+		                 when c.currency = 'USD' then
+		                  0
+		                 else
+		                  c.price / 1.17 * c.tax_rebate_rate / r.currency_rate
+		               end amount, <!-- 退税金额 -->
+		               
+		               case
+		                 when c.currency = 'USD' then
+		                  0
+		                 else
+		                  c.price / 1.17 * c.tax_rebate_rate / r.currency_rate *
+		                  c.interest_rate
+		               end fund, <!-- 资金占用 -->
+		               
+		               case
+		                 when c.currency = 'USD' then
+		                  c.price
+		                 else
+		                  c.price / r.currency_rate
+		               end price, <!-- 采购成本 -->
+		               
+		               (1 + x.vat) vat,
+		               r.currency_rate currencyRate
+		          from (select case
+		                         when t.country = 'UK' then
+		                          'GB'
+		                         else
+		                          t.country
+		                       end newCountry,
+		                       t.country,
+		                       t.sku,
+		                       t.unavailability,
+		                       t.replacement_rate
+		                  from light_ebay_tax t) t,
+		               (select *
+		                  from cal_product_entity e
+		                 where e.packing_qty > 0
+		                   and e.carton_length > 0
+		                   and e.is_active = 1
+		                   and e.status != '0'
+		                union
+		                select *
+		                  from cal_product_entity e
+		                 where e.packing_qty > 0
+		                   and e.carton_length is null
+		                   and e.length > 0
+		                   and e.is_active = 1
+		                   and e.status != '0') e,
+		               cal_product_entity_cost c,
+		               cal_tax x,
+		               cal_currency_rate r,
+		               cal_product_entity_other o
+		         where e.entity_id = c.parent_id
+		           and e.entity_id = o.parent_id
+		           and o.country_id = t.newcountry
+		           and t.sku = e.sku
+		           and x.country_id = t.newcountry
+		           and r.currency_code = 'RMB') t,
+		       cal_currency_rate r
+		 where t.newcountry = r.country_id
+	</select>
+	
+	<select id="getPriceTestData" parameterType="com.it.ocs.cal.excel.vo.LECalculateExcelVO" resultType="java.util.Map">
+		select m.sku,
+		       m.SHIPPING_TYPE SHIPPINGTYPE,
+		       m.PURCHASE_COST PURCHASECOST,
+		       m.CIF,
+		       m.STORAGE_CHARGES STORAGECHARGES,
+		       m.SUNDRY_CHARGES SUNDRYCHARGES,
+		       m.WEC,
+		       m.WAREHOUSE_OUT_CHARGE WAREHOUSEOUTCHARGE,
+		       m.CONSUMABLE,
+		       m.LABOUR,
+		       m.ORDER_COST ORDERCOST,
+		       m.PACKING_EXPENSE PACKINGEXPENSE,
+		       m.LOCAL_DELIVERY_FEE LOCALDELIVERYFEE,
+		       m.REFERRAL_RATE REFERRALRATE,
+		       m.PAYPAL_FEE PAYPALFEE,
+		       m.UNFULLIABLE_RATE UNFULLIABLERATE,
+		       m.REPLACEMENT_RATE REPLACEMENTRATE,
+		       m.PROFIT_RATE PROFITRATE,
+		       m.VAT,
+		       m.CURRENCY_SYMBOL CURRENCYSYMBOL,
+		       m.SEND_WEIGHT SENDWEIGHT,
+		       m.WAREHOUSING_WEIGHT WAREHOUSINGWEIGHT,
+		       m.ADVERTISING_RATE ADVERTISINGRATE,
+		       m.FINAL_COST FINALCOST,
+      	 	   m.FINAL_PRICE FINALPRICE,
+		       a.INVENTORY_QUANTITY INVENTORYQUANTITY,
+		       a.SALE_TOTAL SALETOTAL,
+		       a.STORAGE_DAYS STORAGEDAYS,
+		       a.COST_THAN COSTTHAN,
+       		   a.VOLATILITY_FACTOR VOLATILITYFACTOR,
+		       t.LENGTH,
+		       t.WIDTH,
+		       t.HEIGHT,
+		       t.GROSS_WEIGHT GROSSWEIGHT,
+		       t.PACKING_QTY PACKINGQTY,
+		       t.OUTER_WEIGHT OUTERWEIGHT,
+       		   t.OUTER_VOLUME OUTERVOLUME,
+		       round(c.A,4) A,
+		       round(c.B,4) B,
+		       b.VOLUME,
+		       round(b.VOLUME_WEIGHT,4) VOLUMEWEIGHT,
+		       b.NEW_GROSS_WEIGHT NEWGROSSWEIGHT,
+		       round(b.GROSS_WEIGHT,4) NETWEIGHT,
+		  	   e.RENTAL_FEE_TOTAL RENTALFEETOTAL,
+		       e.SUNDRY_CHARGES_TOTAL SUNDRYCHARGESTOTAL,
+		       e.COST_TOTAL COSTTOTAL,
+		       e.LABOUR_COST_TOTAL LABOURCOSTTOTAL,
+		       e.FEE_TOTAL FEETOTAL,
+		       round(f.C_PRICE,4)     CPRICE,
+		       f.CLEAR_PRICE          CLEARPRICE,
+		       f.DUTY_RATE            DUTYRATE,
+		       f.AF_FLUCTUATION       AFFLUCTUATION,
+		       f.SF_FLUCTUATION       SFFLUCTUATION,
+		       f.CO_FLUCTUATION       COFLUCTUATION,
+		       f.AF,
+		       f.SF,
+		       f.CO,
+		       f.AF_DAPRICE           AFDAPRICE,
+		       f.SF_DAPRICE           SFDAPRICE,
+		       f.CO_DAPRICE           CODAPRICE,
+		       f.CURRENCY_RATE CURRENCYRATE,
+               f.RISK_FACTOR RISKFACTOR
+		  from light_ebay_tax     a,
+		       cal_product_entity t,
+		       light_taximeter    m,
+		       light_expenses e,
+		       (SELECT T.COUNTRY,
+		               T.SKU,
+		               C.GROSS_WEIGHT + C.OUTER_WEIGHT / C.PACKING_QTY GROSS_WEIGHT,
+		               SKU_STATIC_PRICE.GET_GROSS_WEIGHT(C.GROSS_WEIGHT +
+		                                                 C.OUTER_WEIGHT /
+		                                                 C.PACKING_QTY) NEW_GROSS_WEIGHT,
+		               (C.LENGTH * C.WIDTH * C.HEIGHT +
+		               C.OUTER_VOLUME / C.PACKING_QTY) * 200 VOLUME_WEIGHT,
+		               C.LENGTH * C.WIDTH * C.HEIGHT VOLUME
+		          FROM CAL_PRODUCT_ENTITY C, LIGHT_EBAY_TAX T
+		         WHERE C.SKU = T.SKU
+		           AND C.IS_ACTIVE = 1
+		           AND C.LENGTH > 0
+		           AND C.WIDTH > 0
+		           AND C.HEIGHT > 0
+		           AND C.GROSS_WEIGHT > 0
+		           AND C.PACKING_QTY > 0
+		           AND C.STATUS != '0'
+		           AND C.SKU = #{param.sku}) b,
+		       (SELECT T.COUNTRY,
+		               SUM((C.LENGTH * C.WIDTH * C.HEIGHT +
+		                   C.OUTER_VOLUME / C.PACKING_QTY) * 200 * T.STORAGE_DAYS *
+		                   T.INVENTORY_QUANTITY) A,
+		               SUM((C.LENGTH * C.WIDTH * C.HEIGHT +
+		                   C.OUTER_VOLUME / C.PACKING_QTY) * 200 * T.SALE_TOTAL) B
+		          FROM CAL_PRODUCT_ENTITY C, LIGHT_EBAY_TAX T
+		         WHERE C.SKU = T.SKU
+		           AND C.IS_ACTIVE = 1
+		           AND C.LENGTH > 0
+		           AND C.WIDTH > 0
+		           AND C.HEIGHT > 0
+		           AND C.GROSS_WEIGHT > 0
+		           AND C.PACKING_QTY > 0
+		           AND C.STATUS != '0'
+		         GROUP BY T.COUNTRY) c,
+       (SELECT T2.C_PRICE,
+               T2.CLEAR_PRICE,
+               T2.DUTY_RATE,
+               T2.AF_FLUCTUATION,
+               T2.SF_FLUCTUATION,
+               T2.CO_FLUCTUATION,
+               ROUND(T2.AF, 4) AF,
+               ROUND(T2.SF, 4) SF,
+               ROUND(T2.CO, 4) CO,
+               ROUND(T2.C_PRICE +
+                     (T2.CLEAR_PRICE * T2.DUTY_RATE * T2.AF_FLUCTUATION) +
+                     T2.AF,
+                     4) AF_DAPRICE,
+               ROUND(T2.C_PRICE +
+                     (T2.CLEAR_PRICE * T2.DUTY_RATE * T2.SF_FLUCTUATION) +
+                     T2.SF,
+                     4) SF_DAPRICE,
+               ROUND(T2.C_PRICE +
+                     (T2.CLEAR_PRICE * T2.DUTY_RATE * T2.CO_FLUCTUATION) +
+                     T2.CO,
+                     4) CO_DAPRICE,
+               CASE
+                 WHEN T2.COUNTRY_ID = 'GB' THEN
+                  'UK'
+                 ELSE
+                  T2.COUNTRY_ID
+               END COUNTRY_ID,
+               T2.CURRENCY_RATE,
+               T2.RISK_FACTOR
+          FROM (SELECT T1.COUNTRY_ID,
+                       T1.SF,
+                       T1.C_PRICE,
+                       T1.CLEAR_PRICE,
+                       T1.DUTY_RATE,
+                       T1.AF_FLUCTUATION,
+                       T1.SF_FLUCTUATION,
+                       T1.CO_FLUCTUATION,
+                       T1.CURRENCY_RATE,
+                       T1.RISK_FACTOR,
+                       (json_ext.get_string(json(json_list(T1.AF).get(1)),
+                                            'cost') * T1.afProductVolWeight *
+                       json_ext.get_string(json(json_list(T1.AF).get(1)),
+                                            'cost_fluctuation')) AF,
+                       (json_ext.get_string(json(json_list(T1.CO).get(1)),
+                                            'cost') * T1.coProductVolWeight *
+                       json_ext.get_string(json(json_list(T1.CO).get(1)),
+                                            'cost_fluctuation')) *
+                       (T1.RMBRISK_FACTOR / T1.RMBCURRENCY_RATE) CO
+                  FROM (SELECT T.COUNTRY_ID,
+                               T.C_PRICE,
+                               T.CLEAR_PRICE,
+                               T.DUTY_RATE,
+                               T.AF_FLUCTUATION,
+                               T.SF_FLUCTUATION,
+                               T.CO_FLUCTUATION,
+                               T.AF,
+                               T.RMBRISK_FACTOR,
+                               T.RMBCURRENCY_RATE,
+                               T.CURRENCY_RATE,
+                               T.RISK_FACTOR,
+                               (json_ext.get_string(json(json_list(T.SF).get(1)),
+                                                    'cost') * T.volume *
+                               json_ext.get_string(json(json_list(T.SF).get(1)),
+                                                    'cost_fluctuation')) SF,
+                               T.CO,
+                               case
+                                 when T.afVolumeWeight > T.productWeight then
+                                  T.afVolumeWeight
+                                 else
+                                  T.productWeight
+                               end afProductVolWeight,
+                               case
+                                 when T.coVolumeWeight > T.productWeight then
+                                  T.coVolumeWeight
+                                 else
+                                  T.productWeight
+                               end coProductVolWeight
+                          FROM (SELECT C.COUNTRY_ID,
+                                       C.CLEAR_PRICE,
+                                       C.DUTY_RATE,
+                                       D.AF_SHIPPING_FEE AF,
+                                       D.CO_SHIPPING_FEE CO,
+                                       D.SF_SHIPPING_FEE SF,
+                                       F.AF_FLUCTUATION,
+                                       F.SF_FLUCTUATION,
+                                       F.CO_FLUCTUATION,
+                                       RMB.RISK_FACTOR RMBRISK_FACTOR,
+                                       RMB.CURRENCY_RATE RMBCURRENCY_RATE,
+                                       E.CURRENCY_RATE,
+                               		   E.RISK_FACTOR,
+                                       CASE
+                                         WHEN B.CURRENCY = 'USD' THEN
+                                          '$' ||
+                                          TO_CHAR(B.PRICE, 'fm999999990.0999999')
+                                         ELSE
+                                          '￥' ||
+                                          TO_CHAR(B.PRICE, 'fm999999990.0999999')
+                                       END B_PRICE,
+                                       CASE
+                                         WHEN B.TAX_REBATE_RATE > 0 AND
+                                              (B.CURRENCY = 'RMB' OR
+                                              B.CURRENCY = 'CNY') THEN
+                                          (B.PRICE -
+                                          (B.PRICE / 1.17 * B.TAX_REBATE_RATE) *
+                                          (1 - B.INTEREST_RATE)) /
+                                          RMB.CURRENCY_RATE
+                                         WHEN B.TAX_REBATE_RATE = 0 AND
+                                              (B.CURRENCY = 'RMB' OR
+                                              B.CURRENCY = 'CNY') THEN
+                                          (B.PRICE - (B.PRICE / 1.17) *
+                                          (1 - B.INTEREST_RATE)) /
+                                          RMB.CURRENCY_RATE
+                                         ELSE
+                                          B.PRICE
+                                       END C_PRICE,
+                                       (A.LENGTH * A.WIDTH * A.HEIGHT +
+                                       A.OUTER_VOLUME / A.PACKING_QTY) VOLUME,
+                                       (A.LENGTH * A.WIDTH * A.HEIGHT +
+                                       A.OUTER_VOLUME / A.PACKING_QTY) *
+                                       1000000 / 6000 afVolumeWeight,
+                                       (A.LENGTH * A.WIDTH * A.HEIGHT +
+                                       A.OUTER_VOLUME / A.PACKING_QTY) *
+                                       1000000 / 5000 coVolumeWeight,
+                                       A.OUTER_WEIGHT / A.PACKING_QTY +
+                                       A.GROSS_WEIGHT productWeight
+                                  FROM CAL_PRODUCT_ENTITY A,
+                                       CAL_PRODUCT_ENTITY_COST B,
+                                       CAL_PRODUCT_ENTITY_OTHER C,
+                                       CAL_SHIPPING D,
+                                       CAL_CURRENCY_RATE E,
+                                       CAL_TAX F,
+                                       (SELECT risk_factor, currency_rate
+                                          FROM CAL_CURRENCY_RATE
+                                         where currency_code = 'RMB') RMB
+                                 WHERE A.ENTITY_ID = B.PARENT_ID
+                                   AND C.PARENT_ID = A.ENTITY_ID
+                                   AND C.COUNTRY_ID = D.COUNTRY_ID
+                                   AND C.COUNTRY_ID = E.COUNTRY_ID
+                                   AND C.COUNTRY_ID = F.COUNTRY_ID
+                                   AND A.SKU = #{param.sku}
+                                   AND A.IS_ACTIVE = 1
+                                   AND A.PACKING_QTY > 0) T) T1) T2) f
+		 where a.sku = t.sku
+		   and t.sku = m.sku
+		   and m.sku = b.sku
+		   and a.country = m.country
+		   and m.country = b.country
+		   and b.country = c.country
+		   and c.country = e.country
+		   and e.country = f.country_id
+		   and m.platform = #{param.platform}
+		   and m.transactionmode = to_number(#{param.transactionMode})
+		   and m.is_cost_of = to_number(#{param.isCostOf})
+		   and m.is_storage_charges = to_number(#{param.isStorageCharges})
+		   and a.country = #{param.countryId}
+		   and t.is_active = 1
+	</select>
+	
+	<select id="fobexw" resultType="java.util.Map">
+		select t.*, l.gross_profit_rate grossprofitrate <!-- 毛利率 -->
+			  from (select e.sku,
+			               e.length * e.width * e.height volume, <!-- 体积 -->
+			               t.unavailability, <!-- 不可用率 -->
+			               t.replacement_rate replacementrate, <!-- 补发率 -->
+			               t.country,
+			               c.currency,
+			               case
+			                 when c.currency = 'USD' then
+			                  0
+			                 else
+			                  c.price / 1.17 * c.tax_rebate_rate / r.currency_rate
+			               end amount, <!-- 退税金额 -->
+			               case
+			                 when c.currency = 'USD' then
+			                  0
+			                 else
+			                  c.price / 1.17 * c.tax_rebate_rate / r.currency_rate *
+			                  c.interest_rate
+			               end fund, <!-- 资金占用 -->
+			               case
+			                 when c.currency = 'USD' then
+			                  c.price
+			                 else
+			                  c.price / r.currency_rate
+			               end price <!-- 采购成本 -->
+			          from (select *
+			                  from cal_product_entity e
+			                 where e.length > 0
+			                   and e.is_active = 1
+			                   and e.status != '0') e,
+			               cal_product_entity_cost c,
+			               cal_currency_rate r,
+			               light_ebay_tax t
+			         where e.entity_id = c.parent_id
+			           and t.sku = e.sku
+			           and t.country = #{country}
+			           and r.currency_code = 'RMB') t,
+			       light_ebay_rate l
+			 where l.platform = 'light'
+			   and l.shipping_type = 'af'
+			   and l.country = t.country
+	</select>
+
+	<insert id="add" parameterType="com.it.ocs.cal.model.LightTaximeterModel">
+		insert into LIGHT_TAXIMETER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			
+				ENTITY_ID,
+			<if test="sku != null">
+				SKU,
+			</if>
+			<if test="platform != null">
+				PLATFORM,
+			</if>
+			<if test="country != null">
+				COUNTRY,
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE,
+			</if>
+			<if test="purchaseCost != null">
+				PURCHASE_COST,
+			</if>
+			<if test="cif != null">
+				CIF,
+			</if>
+			<if test="storageCharges != null">
+				STORAGE_CHARGES,
+			</if>
+			<if test="sundryCharges != null">
+				SUNDRY_CHARGES,
+			</if>
+			<if test="wec != null">
+				WEC,
+			</if>
+			<if test="warehouseOutCharge != null">
+				WAREHOUSE_OUT_CHARGE,
+			</if>
+			<if test="consumable != null">
+				CONSUMABLE,
+			</if>
+			<if test="labour != null">
+				LABOUR,
+			</if>
+			<if test="orderCost != null">
+				ORDER_COST,
+			</if>
+			<if test="packingExpense != null">
+				PACKING_EXPENSE,
+			</if>
+			<if test="localDeliveryFee != null">
+				LOCAL_DELIVERY_FEE,
+			</if>
+			<if test="finalCost != null">
+				FINAL_COST,
+			</if>
+			<if test="referralRate != null">
+				REFERRAL_RATE,
+			</if>
+			<if test="paypalFee != null">
+				PAYPAL_FEE,
+			</if>
+			<if test="unfulliableRate != null">
+				UNFULLIABLE_RATE,
+			</if>
+			<if test="replacementRate != null">
+				REPLACEMENT_RATE,
+			</if>
+			<if test="profitRate != null">
+				PROFIT_RATE,
+			</if>
+			<if test="vat != null">
+				VAT,
+			</if>
+			<if test="advertisingRate != null">
+				ADVERTISING_RATE,
+			</if>
+			<if test="profitRateAction != null">
+				PROFIT_RATE_ACTION,
+			</if>
+			<if test="finalPrice != null">
+				FINAL_PRICE,
+			</if>
+			<if test="isCostOf != null" >
+	        	IS_COST_OF,
+	      	</if>
+			<if test="transactionMode != null" >
+	        	TRANSACTIONMODE,
+	      	</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			
+				LIGHT_TAXIMETER_SEQ.NEXTVAL,
+			<if test="sku != null">
+				#{sku,jdbcType=VARCHAR},
+			</if>
+			<if test="platform != null">
+				#{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="country != null">
+				#{country,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				#{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="purchaseCost != null">
+				#{purchaseCost,jdbcType=VARCHAR},
+			</if>
+			<if test="cif != null">
+				#{cif,jdbcType=VARCHAR},
+			</if>
+			<if test="storageCharges != null">
+				#{storageCharges,jdbcType=DECIMAL},
+			</if>
+			<if test="sundryCharges != null">
+				#{sundryCharges,jdbcType=DECIMAL},
+			</if>
+			<if test="wec != null">
+				#{wec,jdbcType=DECIMAL},
+			</if>
+			<if test="warehouseOutCharge != null">
+				#{warehouseOutCharge,jdbcType=DECIMAL},
+			</if>
+			<if test="consumable != null">
+				#{consumable,jdbcType=DECIMAL},
+			</if>
+			<if test="labour != null">
+				#{labour,jdbcType=DECIMAL},
+			</if>
+			<if test="orderCost != null">
+				#{orderCost,jdbcType=DECIMAL},
+			</if>
+			<if test="packingExpense != null">
+				#{packingExpense,jdbcType=DECIMAL},
+			</if>
+			<if test="localDeliveryFee != null">
+				#{localDeliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test="finalCost != null">
+				#{finalCost,jdbcType=DECIMAL},
+			</if>
+			<if test="referralRate != null">
+				#{referralRate,jdbcType=DECIMAL},
+			</if>
+			<if test="paypalFee != null">
+				#{paypalFee,jdbcType=DECIMAL},
+			</if>
+			<if test="unfulliableRate != null">
+				#{unfulliableRate,jdbcType=DECIMAL},
+			</if>
+			<if test="replacementRate != null">
+				#{replacementRate,jdbcType=DECIMAL},
+			</if>
+			<if test="profitRate != null">
+				#{profitRate,jdbcType=DECIMAL},
+			</if>
+			<if test="vat != null">
+				#{vat,jdbcType=DECIMAL},
+			</if>
+			<if test="advertisingRate != null">
+				#{advertisingRate,jdbcType=DECIMAL},
+			</if>
+			<if test="profitRateAction != null">
+				#{profitRateAction,jdbcType=DECIMAL},
+			</if>
+			<if test="finalPrice != null">
+				#{finalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="isCostOf != null" >
+	        	#{isCostOf,jdbcType=DECIMAL},
+	      	</if>
+			<if test="transactionMode != null" >
+	        	#{transactionMode,jdbcType=DECIMAL},
+	      	</if>
+			<if test="createdAt != null">
+				#{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="com.it.ocs.cal.model.LightTaximeterModel">
+		update LIGHT_TAXIMETER
+		<set>
+			<if test="sku != null">
+				SKU = #{sku,jdbcType=VARCHAR},
+			</if>
+			<if test="platform != null">
+				PLATFORM = #{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="country != null">
+				COUNTRY = #{country,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE = #{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="purchaseCost != null">
+				PURCHASE_COST = #{purchaseCost,jdbcType=VARCHAR},
+			</if>
+			<if test="cif != null">
+				CIF = #{cif,jdbcType=VARCHAR},
+			</if>
+			<if test="storageCharges != null">
+				STORAGE_CHARGES = #{storageCharges,jdbcType=DECIMAL},
+			</if>
+			<if test="sundryCharges != null">
+				SUNDRY_CHARGES = #{sundryCharges,jdbcType=DECIMAL},
+			</if>
+			<if test="wec != null">
+				WEC = #{wec,jdbcType=DECIMAL},
+			</if>
+			<if test="warehouseOutCharge != null">
+				WAREHOUSE_OUT_CHARGE = #{warehouseOutCharge,jdbcType=DECIMAL},
+			</if>
+			<if test="consumable != null">
+				CONSUMABLE = #{consumable,jdbcType=DECIMAL},
+			</if>
+			<if test="labour != null">
+				LABOUR = #{labour,jdbcType=DECIMAL},
+			</if>
+			<if test="orderCost != null">
+				ORDER_COST = #{orderCost,jdbcType=DECIMAL},
+			</if>
+			<if test="packingExpense != null">
+				PACKING_EXPENSE = #{packingExpense,jdbcType=DECIMAL},
+			</if>
+			<if test="localDeliveryFee != null">
+				LOCAL_DELIVERY_FEE = #{localDeliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test="finalCost != null">
+				FINAL_COST = #{finalCost,jdbcType=DECIMAL},
+			</if>
+			<if test="referralRate != null">
+				REFERRAL_RATE = #{referralRate,jdbcType=DECIMAL},
+			</if>
+			<if test="paypalFee != null">
+				PAYPAL_FEE = #{paypalFee,jdbcType=DECIMAL},
+			</if>
+			<if test="unfulliableRate != null">
+				UNFULLIABLE_RATE = #{unfulliableRate,jdbcType=DECIMAL},
+			</if>
+			<if test="replacementRate != null">
+				REPLACEMENT_RATE = #{replacementRate,jdbcType=DECIMAL},
+			</if>
+			<if test="profitRate != null">
+				PROFIT_RATE = #{profitRate,jdbcType=DECIMAL},
+			</if>
+			<if test="vat != null">
+				VAT = #{vat,jdbcType=DECIMAL},
+			</if>
+			<if test="advertisingRate != null">
+				ADVERTISING_RATE = #{advertisingRate,jdbcType=DECIMAL},
+			</if>
+			<if test="profitRateAction != null">
+				PROFIT_RATE_ACTION = #{profitRateAction,jdbcType=DECIMAL},
+			</if>
+			<if test="finalPrice != null">
+				FINAL_PRICE = #{finalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="isCostOf != null" >
+	        	IS_COST_OF = #{isCostOf,jdbcType=DECIMAL},
+	      	</if>
+			<if test="transactionMode != null" >
+	        	TRANSACTIONMODE = #{transactionMode,jdbcType=DECIMAL},
+	      	</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+
+</mapper>

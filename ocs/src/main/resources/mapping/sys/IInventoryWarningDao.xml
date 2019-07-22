@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IInventoryWarningDao">
+	<sql id="query_base">
+		select b.id,
+               b.sku,
+               b.sku_and_scode,
+               b.sku_add_time,
+               b.scode,
+               b.has_sale,
+               b.ship_type,
+               b.product_level,
+               b.field,
+               b.platform,
+               b.oversize,
+               b.scode_ship_oversize,
+               b.opt_time,
+               b.ship_time,
+               b.listing_time,
+               b.ship_cycle_time,
+               b.purchase_cycle_time,
+               b.cycle_time,
+               b.coeff,
+               b.coeff1,
+               b.save_ity,
+               b.sale_day,
+               b.qty_one_day,
+               b.avg_3_day,
+               b.avg_7_day,
+               b.avg_30_day,
+               b.is_dis,
+               b.outer_Stock,
+               b.Quantity,
+               b.Inbound,
+               b.receiving,
+               b.reserved,
+               b.reserved_sale,
+               b.Month_Days_Sales,
+               b.Avg_Days_Sales,
+               b.bad_day,
+               b.is_bad,
+               b.total_sales,
+               b.Last_month_bad,
+               to_char(b.create_date, 'yyyy-MM-dd hh24:mi:ss') createDate
+       from sys_plan_stock_warn_set a,sys_plan_stock_warn b
+       where a.sku = b.sku(+)
+       and a.scode = b.scode(+)
+       and a.ship_type = b.ship_type(+)
+       and b.id is not null
+	</sql>
+	<sql id="query_condition">
+		<if test="param.sku !=null and param.sku !=''">
+			 AND b.sku = #{param.sku}
+		</if>
+		<if test="param.scode != null and param.scode != ''">
+			AND  b.scode = #{param.scode}
+		</if>
+		<if test="param.ship_type != null and param.ship_type != ''">
+			AND  b.ship_type = #{param.ship_type}
+		</if>
+		<if test="param.platform != null and param.platform != ''">
+			AND  b.platform = #{param.platform}
+		</if>
+		<if test="param.dayTime != null and param.dayTime != ''">
+			and TO_CHAR( b.CREATE_DATE,'yyyy-MM-dd') = #{param.dayTime}
+		</if>
+		
+	</sql>
+	<select id="queryInventoryWarningByPage" resultType="com.it.ocs.salereport.model.InventoryWarningModel">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="query_base"></include>
+				<include refid="query_condition"></include>
+				ORDER BY b.CREATE_DATE DESC
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+		<select id="countInventoryWarning" resultType="int">
+		select count(*) from (
+			<include refid="query_base"></include>
+			<include refid="query_condition"></include>
+		)
+	</select>
+	<select id="queryInventoryWarningSKUByPage" resultType="com.it.ocs.salereport.model.InventoryWarningModel">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				select * from CUX_INV_SHIPMENT_ATTRIBUTE_T
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+
+	<update id="updateErpData">
+		begin
+		  delete from CUX_INV_SHIPMENT_ATTRIBUTE_T;
+		  insert into CUX_INV_SHIPMENT_ATTRIBUTE_T select * from CUX_INV_SHIPMENT_ATTRIBUTE t ; 
+		end;
+	</update>
+	<select id="countInventoryWarningSku" resultType="int">
+		select count(*) from CUX_INV_SHIPMENT_ATTRIBUTE_T
+	</select>
+	
+	<insert id="addInventoryWarning">
+		insert into sys_plan_stock_warn(
+		       id ,
+		       sku ,
+		       sku_and_scode,
+		       sku_add_time,
+		       scode ,
+		       has_sale ,
+		       ship_type ,
+		       product_level ,
+		       field ,
+		       platform ,
+		       oversize ,
+		       scode_ship_oversize , 
+		       opt_time ,
+		       ship_time ,
+		       listing_time  ,
+		       ship_cycle_time ,
+		       purchase_cycle_time , 
+		       cycle_time ,
+		       coeff , 
+		       coeff1 ,
+		       save_ity ,
+		       sale_day ,
+		       qty_one_day ,
+		       avg_3_day ,
+		       avg_7_day ,
+		       avg_30_day ,
+		       is_dis ,
+		       outer_Stock ,
+		       Quantity ,
+		       Inbound  ,
+		       receiving ,
+		       reserved ,
+		       reserved_sale ,
+		       Month_Days_Sales ,
+		       Avg_Days_Sales ,
+		       bad_day ,
+		       is_bad ,
+		       total_sales ,
+		       Last_month_bad ,
+		       create_date 
+		)values(
+		       sys_plan_stock_warn_SEQ.Nextval,
+		       #{sku,jdbcType=VARCHAR},
+		       #{sku_and_scode,jdbcType=VARCHAR},
+		       #{sku_add_time,jdbcType=VARCHAR},
+		       #{scode,jdbcType=VARCHAR},
+		       #{has_sale,jdbcType=VARCHAR},
+		       #{ship_type,jdbcType=VARCHAR},
+		       #{product_level,jdbcType=VARCHAR},
+		       #{field,jdbcType=VARCHAR},
+		       #{platform,jdbcType=VARCHAR},
+		       #{oversize,jdbcType=VARCHAR},
+		       #{scode_ship_oversize,jdbcType=VARCHAR}, 
+		       #{opt_time,jdbcType=BIGINT},
+		       #{ship_time,jdbcType=BIGINT},
+		       #{listing_time ,jdbcType=BIGINT},
+		       #{ship_cycle_time,jdbcType=BIGINT},
+		       #{purchase_cycle_time,jdbcType=BIGINT}, 
+		       #{cycle_time,jdbcType=BIGINT},
+		       #{coeff,jdbcType=BIGINT}, 
+		       #{coeff1,jdbcType=BIGINT},
+		       #{save_ity,jdbcType=BIGINT},
+		       #{sale_day,jdbcType=BIGINT},
+		       #{qty_one_day,jdbcType=BIGINT},
+		       #{avg_3_day,jdbcType=BIGINT},
+		       #{avg_7_day,jdbcType=BIGINT},
+		       #{avg_30_day,jdbcType=BIGINT},
+		       #{is_dis,jdbcType=VARCHAR},
+		       #{outer_stock,jdbcType=BIGINT},
+		       #{quantity,jdbcType=BIGINT},
+		       #{inbound,jdbcType=BIGINT},
+		       #{receiving,jdbcType=BIGINT},
+		       #{reserved,jdbcType=BIGINT},
+		       #{reserved_sale,jdbcType=BIGINT},
+		       #{month_days_sales,jdbcType=BIGINT},
+		       #{avg_days_sales,jdbcType=BIGINT},
+		       #{bad_day,jdbcType=BIGINT},
+		       #{is_bad,jdbcType=VARCHAR},
+		       #{total_sales,jdbcType=BIGINT},
+		       #{last_month_bad,jdbcType=BIGINT},
+		       sysdate 
+		)
+	</insert>
+	<select id="isOversize" resultType="java.lang.String">
+		select case
+		         when oversize = 1 then
+		          'OVERSIZE'
+		         else
+		          ''
+		       end
+		  from (select SUBSTR(SKU_STATIC_PRICE.AMAZON_SKU_FBA_PRICE(#{platform},
+		                                                            A.LENGTH,
+		                                                            A.WIDTH,
+		                                                            A.HEIGHT,
+		                                                            A.GROSS_WEIGHT,
+		                                                            C.QTY_ORDERED,
+		                                                            '',
+		                                                            C.EFN_FEE),
+		                      -1,
+		                      1) oversize
+		        
+		          from CAL_PRODUCT_ENTITY A, CAL_PRODUCT_ENTITY_OTHER C
+		         where a.entity_id = c.parent_id
+		           and a.sku = #{sku}
+		           and c.country_id = #{platform}
+		          <![CDATA[ and rownum < 2)]]>
+	</select>
+	<select id="getPlanTimeBaseByCode" resultType="com.it.ocs.salereport.model.PlanBaseModel">
+		select t.scode_ship_oversize,t.purchase_cycle_time,t.ship_time
+		from SYS_PLAN_BASE_TIME_T t
+		where t.scode_ship_oversize = #{scode_ship_oversize}
+	</select>
+	<select id="getWarnCoeff" resultType="java.lang.Double">
+		select coeff from SYS_PLAN_WARN_COEFF where field = #{field} and platform = #{platform} and ship_type = #{ship_type}
+	</select>
+	<sql id="amazon_sale_query">
+		select nvl(sum(b.qty * nvl(l.qty, 1)), 0) qty
+		  from amazon_order a, amazon_order_item b, sys_sku_link l
+		 where a.id = b.parent_id
+		   and b.sku = l.p_sku(+)
+		   and a.status = 'Shipped'
+		   and nvl(l.sku, b.sku) = #{sku}
+		 <![CDATA[  and a.purchase_at > trunc(sysdate - #{day})]]>
+	</sql>
+	<select id="getUS01SaleQtyBySku" resultType="int">
+		<include refid="amazon_sale_query"></include>
+		and a.channel = 'Amazon.com'
+	</select>
+	<select id="getUS02SaleQtyBySku" resultType="int">
+		 select sum(qty) qty
+   from (SELECT nvl(sum(LI.QTY_SHIPPED), 0) qty
+           FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+          WHERE LO.ENTITY_ID = LI.PARENT_ID
+            AND LO.PLATFORM = 'US'
+            and li.COUNTRY_ID = 'US'
+            AND LO.STATUS = 'complete'
+            AND LO.AVS = 1
+            AND LI.SKU NOT LIKE 'B%'
+          <![CDATA[  AND LI.Ship_At > trunc(sysdate - #{day})]]>
+            AND (LI.SKU NOT LIKE 'OS%' OR
+                (LI.SKU LIKE 'OS%' AND
+                LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+            and li.sku = #{sku}
+         union all
+         SELECT nvl(sum(LI.QTY_SHIPPED), 0) qty
+           FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM_B LI
+          WHERE LO.ENTITY_ID = LI.PARENT_ID
+            AND LO.PLATFORM = 'US'
+            and li.COUNTRY_ID = 'US'
+            AND LO.STATUS = 'complete'
+            AND LO.AVS = 1
+          <![CDATA[  AND LI.Ship_At > trunc(sysdate - #{day})]]>
+            AND (LI.SKU NOT LIKE 'OS%' OR
+                (LI.SKU LIKE 'OS%' AND
+                LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+            and li.sku = #{sku}
+         union all
+         select nvl(sum(e.qty * nvl(s.qty, 1)),0) qty
+           from (SELECT EO.ID id, EI.ITEM_SKU sku, EI.QUANTITY_PURCHASED qty
+                   FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+                  WHERE EO.ID = EI.PARENT_ID
+                    AND EO.PAID_TIME IS NOT NULL
+                    and eo.tag = 0
+                    and eo.order_status = 'Completed'
+                    AND EO.PAY_STATUS = 'Complete'
+               <![CDATA[     and ei.ship_time > trunc(sysdate - #{day})) e,]]>
+                EBAY_ORDER_SUB ES,
+                sys_sku_link s
+          where e.ID = ES.PARENT_ID
+            and e.sku = s.p_sku(+)
+            AND to_char(ES.SHIPPING_ADDRESS) like '%"US"%'
+            and nvl(s.sku, e.sku) = #{sku})
+	</select>
+	<select id="getDE01SaleQtyBySku" resultType="int">
+		<include refid="amazon_sale_query"></include>
+		 and (a.channel in ('Amazon.de', 'Amazon.fr', 'Amazon.it', 'Amazon.es') or
+		       (a.channel = 'Amazon.co.uk' and nvl(l.sku, b.sku) not like '%UK'))
+	</select>
+	<select id="getDE02SaleQtyBySku" resultType="int">
+		 select sum(qty) qty
+		   from (SELECT nvl(sum(LI.QTY_SHIPPED), 0) qty
+		           FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+		          WHERE LO.ENTITY_ID = LI.PARENT_ID
+		            AND LO.PLATFORM = 'DE'
+		            and li.COUNTRY_ID = 'DE'
+		            AND LO.STATUS = 'complete'
+		            AND LO.AVS = 1
+		            AND LI.SKU NOT LIKE 'B%'
+		         <![CDATA[   AND LI.Ship_At > trunc(sysdate - #{day})]]>
+		            AND (LI.SKU NOT LIKE 'OS%' OR
+		                (LI.SKU LIKE 'OS%' AND
+		                LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		            and li.sku = #{sku}
+		         union all
+		         SELECT nvl(sum(LI.QTY_SHIPPED), 0) qty
+		           FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM_B LI
+		          WHERE LO.ENTITY_ID = LI.PARENT_ID
+		            AND LO.PLATFORM = 'DE'
+		            and li.COUNTRY_ID = 'DE'
+		            AND LO.STATUS = 'complete'
+		            AND LO.AVS = 1
+		          <![CDATA[  AND LI.Ship_At > trunc(sysdate - #{day})]]>
+		            AND (LI.SKU NOT LIKE 'OS%' OR
+		                (LI.SKU LIKE 'OS%' AND
+		                LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		            and li.sku = #{sku}
+		         union all
+		         select nvl(sum(e.qty * nvl(s.qty, 1)),0) qty
+		           from (SELECT EO.ID id, EI.ITEM_SKU sku, EI.QUANTITY_PURCHASED qty
+		                   FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+		                  WHERE EO.ID = EI.PARENT_ID
+		                    AND EO.PAID_TIME IS NOT NULL
+		                    and eo.tag = 0
+		                    and eo.order_status = 'Completed'
+		                    AND EO.PAY_STATUS = 'Complete'
+		                 <![CDATA[   and ei.ship_time > trunc(sysdate - #{day})) e,]]>
+		                EBAY_ORDER_SUB ES,
+		                sys_sku_link s
+		          where e.ID = ES.PARENT_ID
+		            and e.sku = s.p_sku(+)
+		            AND to_char(ES.SHIPPING_ADDRESS) like '%"DE"%'
+		            and nvl(s.sku, e.sku) = #{sku})
+	</select>
+	<select id="getUK01SaleQtyBySku" resultType="int">
+		<include refid="amazon_sale_query"></include>
+		 and a.channel = 'Amazon.co.uk' 
+		 and nvl(l.sku, b.sku)  like '%UK'
+	</select>
+	<select id="getUK02SaleQtyBySku" resultType="int">
+		 select sum(qty) qty
+		   from (SELECT nvl(sum(LI.QTY_SHIPPED), 0) qty
+		           FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+		          WHERE LO.ENTITY_ID = LI.PARENT_ID
+		            AND LO.PLATFORM = 'UK'
+		            and li.COUNTRY_ID = 'GB'
+		            AND LO.STATUS = 'complete'
+		            AND LO.AVS = 1
+		            AND LI.SKU NOT LIKE 'B%'
+		        <![CDATA[     AND LI.Ship_At > trunc(sysdate - #{day})]]>
+		            AND (LI.SKU NOT LIKE 'OS%' OR
+		                (LI.SKU LIKE 'OS%' AND
+		                LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		            and li.sku = #{sku}
+		         union all
+		         SELECT nvl(sum(LI.QTY_SHIPPED), 0) qty
+		           FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM_B LI
+		          WHERE LO.ENTITY_ID = LI.PARENT_ID
+		            AND LO.PLATFORM = 'UK'
+		            and li.COUNTRY_ID = 'GB'
+		            AND LO.STATUS = 'complete'
+		            AND LO.AVS = 1
+		        <![CDATA[    AND LI.Ship_At > trunc(sysdate - #{day})]]>
+		            AND (LI.SKU NOT LIKE 'OS%' OR
+		                (LI.SKU LIKE 'OS%' AND
+		                LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		            and li.sku = #{sku}
+		         union all
+		         select nvl(sum(e.qty * nvl(s.qty, 1)),0) qty
+		           from (SELECT EO.ID id, EI.ITEM_SKU sku, EI.QUANTITY_PURCHASED qty
+		                   FROM EBAY_ORDER EO, EBAY_ORDER_ITEM EI
+		                  WHERE EO.ID = EI.PARENT_ID
+		                    AND EO.PAID_TIME IS NOT NULL
+		                    and eo.tag = 0
+		                    and eo.order_status = 'Completed'
+		                    AND EO.PAY_STATUS = 'Complete'
+		             <![CDATA[       and ei.ship_time > trunc(sysdate - #{day})) e,]]>
+		                EBAY_ORDER_SUB ES,
+		                sys_sku_link s
+		          where e.ID = ES.PARENT_ID
+		            and e.sku = s.p_sku(+)
+		            AND to_char(ES.SHIPPING_ADDRESS) like '%"GB"%'
+		            and nvl(s.sku, e.sku) = #{sku})
+	</select>
+	<select id="getJP01SaleQtyBySku" resultType="int">
+		<include refid="amazon_sale_query"></include>
+		and a.channel = 'Amazon.jp'
+	</select>
+	<select id="getCA01SaleQtyBySku" resultType="int">
+		<include refid="amazon_sale_query"></include>
+		and a.channel = 'Amazon.ca'
+		   
+	</select>
+	<select id="getUSInventory" resultType="com.it.ocs.amazon.model.MyiUnsuppressedVO">
+		select sum(qty) afn_fulfillable_quantity
+		from (
+		select nvl(sum(e.qty),0)qty 
+		from eda_sku_stock_info_his e
+		where e.sku = #{sku}
+	 <![CDATA[	and e.create_date > trunc(sysdate)
+		union all
+		select nvl(sum(f.qty),0)qty 
+		from fpx_sku_stock_info f
+		where f.sku = #{sku}
+		and f.create_date > trunc(sysdate)]]>
+		)
+	</select>
+	<select id="countBadDay" resultType="int">
+		select count(*)
+		  from sys_plan_stock_warn t
+		 where t.sku = #{sku}
+		   and t.scode = #{scode}
+		   and t.ship_type = #{ship_type}
+		   and t.is_bad = '断货'
+		 <![CDATA[  and t.create_date > trunc(sysdate, 'mm')]]>
+	</select>
+	<select id="getSKUDis" resultType="int">
+		select d.is_dis
+		  from CAL_PRODUCT_DIS d
+		 where d.platform = #{platform}
+		   and d.country_id = #{country}
+		   and d.sku = #{sku}
+	</select>
+	<select id="getBadDayOfLastMonth" resultType="int">
+		select count(*)
+		  from sys_plan_stock_warn t
+		 where t.sku = #{sku}
+		   and t.scode = #{scode}
+		   and t.is_bad = '断货'
+		<![CDATA[   and t.create_date < trunc(sysdate, 'mm')
+           and t.create_date > trunc(add_months(sysdate,-1),'mm')]]>
+	</select>
+	<delete id="clearInventoryWarnDataThisDay">
+		delete sys_plan_stock_warn where create_date > trunc(sysdate)
+	</delete>
+	<select id="getUKInventory" resultType="com.it.ocs.amazon.model.MyiUnsuppressedVO">
+		select nvl(qty,0) afn_fulfillable_quantity 
+		from UK_INVENTORY t
+		where t.sku = #{sku}
+		<![CDATA[ and t.create_at > trunc(sysdate-1)
+		and t.create_at < trunc(sysdate) ]]>
+	</select>
+	<select id="getWMSInventory" resultType="com.it.ocs.amazon.model.MyiUnsuppressedVO">
+		select nvl(qty,0) afn_fulfillable_quantity 
+		  from WMS_SKU_STOCK_INFO t
+		  where t.sku = #{sku}
+		<![CDATA[   and t.create_date > trunc(sysdate-1)
+		  and t.create_date < trunc(sysdate) ]]>
+	</select>
+	<select id="countInventoryWarningTime" resultType="int">
+		select count(*) from SYS_PLAN_BASE_TIME_T where scode_ship_oversize = #{scode_ship_oversize}
+	</select>
+	<update id="updateInventoryWarningTime">
+		update SYS_PLAN_BASE_TIME_T set ship_time = #{ship_time},update_by = #{userId},update_date = sysdate where scode_ship_oversize = #{scode_ship_oversize}
+	</update>
+	<insert id="addInventoryWarningTime">
+		insert into SYS_PLAN_BASE_TIME_T(scode_ship_oversize,ship_time,update_by)values(#{scode_ship_oversize},#{ship_time},#{userId})
+	</insert>
+	<select id="countInventoryWarningCoeff" resultType="int">
+		select count(*) from SYS_PLAN_WARN_COEFF where field = #{field} and platform = #{platform} and ship_type = #{ship_type}
+	</select>
+	<update id="updateInventoryWarningCoeff">
+		update SYS_PLAN_WARN_COEFF set coeff = #{coeff} ,update_by=#{userId},update_date=sysdate where field = #{field} and platform = #{platform} and ship_type = #{ship_type}
+	</update>
+	<insert id="addInventoryWarningCoeff">
+		insert into SYS_PLAN_WARN_COEFF(field,platform,ship_type,coeff,update_by)
+		values(#{field},#{platform},#{ship_type},#{coeff},#{userId})
+	</insert>
+	<select id="queryInventoryWarning"  resultType="java.util.HashMap">
+		<include refid="query_base"></include>
+		<include refid="query_condition"></include>
+		ORDER BY b.CREATE_DATE DESC
+	</select>
+	<select id="inventorySetExist" resultType="int">
+		select count(*)
+		from sys_plan_stock_warn_set t
+		where t.sku = #{sku}
+		and t.scode = #{scode}
+	</select>
+	<insert id="addInventoryWarningSet">
+		insert into sys_plan_stock_warn_set(sku,scode,ship_type,update_by)values(#{sku},#{scode},#{ship_type},#{userId})
+	</insert>
+	<update id="updateInventoryWarningSet">
+		update sys_plan_stock_warn_set set ship_type = #{ship_type},update_by = #{userId},UPDATE_DATE = sysdate
+		where sku = #{sku}
+		and scode = #{scode}
+	</update>
+</mapper>

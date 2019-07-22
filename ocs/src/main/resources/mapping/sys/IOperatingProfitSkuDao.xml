@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitSkuDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID entityId,
+			   PLATFORM,
+			   COUNTRY,
+			   SKU,
+			   STOCK,
+			   STATUS,
+			   SHIPPING_TYPE shippingType,
+			   MONTH_OF_YEAR MONTHOFYEAR,
+			   CREATED_AT createdAt,
+			   UPDATED_AT updatedAt
+    	FROM SYS_OPERATING_PROFIT_SKU
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.platform != null and param.platform != ''">
+					and PLATFORM = #{param.platform}
+				</if>
+				<if test="param.country != null and param.country != ''">
+					and COUNTRY = #{param.country}
+				</if>
+				<if test="param.sku != null and param.sku != ''">
+					and SKU = #{param.sku}
+				</if>
+				<if test="param.shippingType != null and param.shippingType != ''">
+					and SHIPPING_TYPE = #{param.shippingType}
+				</if>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<sql id="order_sql">
+		<if test="sort != null and order != null">
+			ORDER BY ${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			ORDER BY UPDATED_AT DESC
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitSkuModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.sys.model.OperatingProfitSkuModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+	</select>
+	
+	<select id="queryByObject" resultType="java.util.Map">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		ORDER BY UPDATED_AT DESC
+	</select>
+	
+	<update id="updatePriceH">
+		update SYS_OPERATING_PROFIT_SKU set cif = #{cif}
+		where platform = #{platform} and country = #{country} and sku = #{sku}
+		and shipping_Type = #{shippingType} 
+		and month_of_year = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'), 'yyyy-mm')
+	</update>
+	
+	<update id="updatePriceS">
+		update SYS_OPERATING_PROFIT_STOCK SET SOURCING_COST = #{sourcingCost}
+		where sku = #{sku} and month_of_year = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'), 'yyyy-mm')
+	</update>
+	
+	<select id="queryPrice" resultType="java.util.Map">
+		<choose>
+			<when test="flag == 2">
+				SELECT SKU, STOCK
+				  FROM (SELECT T1.*, NVL(T2.PRICE, T1.SOURCING_COST) PRICE
+				          FROM (SELECT DISTINCT UPPER(SKU) SKU, STOCK, SOURCING_COST
+				                  FROM SYS_OPERATING_PROFIT_STOCK
+				                 WHERE MONTH_OF_YEAR =
+				                       TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'),
+				                               'yyyy-mm')) T1,
+				               (SELECT UPPER(N.SKU) SKU, MIN(PRICE) PRICE
+				                  FROM CAL_PRICE_PLAN N, CAL_PRODUCT_ENTITY Y
+				                 WHERE N.SKU = Y.SKU
+				                   AND Y.STATUS = '1'
+				                   AND Y.IS_ACTIVE = 1
+				                 GROUP BY UPPER(N.SKU)) T2
+				         WHERE T1.SKU = T2.SKU(+))
+				 WHERE PRICE = 0
+				   AND STOCK != 0
+			</when>
+			<when test="flag == 1">
+				SELECT PLATFORM, COUNTRY, SKU, SHIPPING_TYPE SHIPPINGTYPE, STOCK
+				  FROM (SELECT H.*, NVL(SUBSTR(N.CIFUSD, 2), H.CIF) CIFUSD
+				          FROM (SELECT DISTINCT UPPER(SKU) SKU,
+				                                PLATFORM,
+				                                COUNTRY,
+				                                STOCK,
+				                                SHIPPING_TYPE,
+				                                CIF
+				                  FROM SYS_OPERATING_PROFIT_SKU
+				                 WHERE MONTH_OF_YEAR =
+				                       TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'),
+				                               'yyyy-mm')) H,
+				               (SELECT UPPER(N.SKU) SKU,
+				                       N.COUNTRY_ID,
+				                       N.SHIPPING_TYPE,
+				                       N.CIFUSD
+				                  FROM CAL_PRICE_PLAN N, CAL_PRODUCT_ENTITY Y
+				                 WHERE N.SKU = Y.SKU
+				                   AND Y.STATUS = '1'
+				                   AND Y.IS_ACTIVE = 1
+				                   AND N.SHIPPING_TYPE IN ('af', 'sf', 'co')) N
+				         WHERE H.SKU = N.SKU(+)
+				           AND H.COUNTRY = N.COUNTRY_ID(+)
+				           AND H.SHIPPING_TYPE = N.SHIPPING_TYPE(+))
+				 WHERE CIFUSD = 0
+				   AND STOCK != 0
+			</when>
+		</choose>
+	</select>
+	
+	<update id="updateStatus">
+		begin
+			update SYS_OPERATING_PROFIT_SKU set STATUS = 1
+			<where>
+				<foreach collection="param.skus" item="sku" open="and sku in (" close=")" separator=",">
+					#{sku}
+				</foreach>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>;
+			update SYS_OPERATING_PROFIT_SKU set STATUS = null
+			<where>
+				<foreach collection="param.skus" item="sku" open="and sku not in (" close=")" separator=",">
+					#{sku}
+				</foreach>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>;
+		end;
+	</update>
+	
+	<select id="queryNewSkuByParam" resultType="com.it.ocs.sys.model.OperatingProfitNewSkuModel">
+		SELECT K.ENTITY_ID ENTITYID, K.SKU, K.MONTH_OF_YEAR MONTHOFYEAR
+		  FROM SYS_OPERATING_PROFIT_NEW_SKU K
+		 WHERE K.SKU = #{param.sku}
+		   AND K.MONTH_OF_YEAR = #{param.monthOfYear}
+	</select>
+	
+	<insert id="addNewSku">
+		insert into SYS_OPERATING_PROFIT_NEW_SKU
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	     
+	      <if test="sku != null" >
+	        SKU,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_PROFIT_NEW_SKU_SEQ.NEXTVAL,
+	      
+	      <if test="sku != null" >
+	        #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=CHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>
+	
+	<update id="updateNewSku">
+		update SYS_OPERATING_PROFIT_NEW_SKU
+	    <set>
+	      <if test="sku != null" >
+	        SKU = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=CHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+
+	<insert id="add">
+		insert into SYS_OPERATING_PROFIT_SKU
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	     
+	      <if test="platform != null" >
+	        PLATFORM,
+	      </if>
+	      <if test="country != null" >
+	        COUNTRY,
+	      </if>
+	      <if test="sku != null" >
+	        SKU,
+	      </if>
+	      <if test="stock != null" >
+	        STOCK,
+	      </if>
+	      <if test="status != null" >
+	        STATUS,
+	      </if>
+	      <if test="shippingType != null" >
+	        SHIPPING_TYPE,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	      <if test="quarter != null" >
+	        QUARTER,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_OPERATING_PROFIT_SKU_SEQ.NEXTVAL,
+	      
+	      <if test="platform != null" >
+	        #{platform,jdbcType=VARCHAR},
+	      </if>
+	      <if test="country != null" >
+	        #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sku != null" >
+	        #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="stock != null" >
+	        #{stock,jdbcType=DECIMAL},
+	      </if>
+	      <if test="status != null" >
+	        #{status,jdbcType=CHAR},
+	      </if>
+	      <if test="shippingType != null" >
+	        #{shippingType,jdbcType=CHAR},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=CHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="quarter != null" >
+	        #{quarter,jdbcType=DECIMAL},
+	      </if>
+	    </trim>
+	</insert>
+	
+	<update id="update">
+		update SYS_OPERATING_PROFIT_SKU
+	    <set>
+	      <if test="platform != null" >
+	        PLATFORM = #{platform,jdbcType=VARCHAR},
+	      </if>
+	      <if test="country != null" >
+	        COUNTRY = #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sku != null" >
+	        SKU = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="stock != null" >
+	        STOCK = #{stock,jdbcType=DECIMAL},
+	      </if>
+	      <if test="status != null" >
+	        STATUS = #{status,jdbcType=CHAR},
+	      </if>
+	      <if test="shippingType != null" >
+	        SHIPPING_TYPE = #{shippingType,jdbcType=CHAR},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=CHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

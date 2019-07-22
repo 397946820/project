@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.fourPX.dao.FpxOperLogDao">
+
+	<select id="generatePrimaryKey" resultType="java.lang.Long">
+		select fpx_seq.nextval from dual
+	</select>
+	
+	<insert id="insert">
+		insert into fpx_oper_log
+		(id,target,objectid,operator,result,request,response,createdat)
+		values 
+		(#{item.id,jdbcType=NUMERIC},#{item.target,jdbcType=VARCHAR},#{item.objectid,jdbcType=NUMERIC},#{item.operator,jdbcType=NUMERIC}
+		,#{item.result,jdbcType=VARCHAR},#{item.request,jdbcType=VARCHAR},#{item.response,jdbcType=VARCHAR},#{item.createdat,jdbcType=TIMESTAMP})
+	</insert>
+	
+	<sql id="base_log_sql">
+		select l.*, u.username as operatorText, oi.orderid
+		from fpx_oper_log l, sys_user u, (select o.id, o.orderid from fpx_out_warehouse o) oi
+		where l.operator=u.user_id(+) and l.objectid=oi.id(+)
+		<if test="item.orderId != null and item.orderId != ''">
+			and oi.orderId is not null and (oi.orderId like '%' || #{item.orderId} || '%' or #{item.orderId} like '%' || oi.orderId || '%') 
+		</if>
+		<if test="item.target != null and item.target != ''">
+			and l.target like '%' || #{item.target} || '%'
+		</if>
+		<if test="item.operatorText != null and item.operatorText != ''">
+			and (u.username like '%' || #{item.operatorText} || '%' or u.nick like '%' || #{item.operatorText} || '%' or u.usercode like '%' || #{item.operatorText} || '%')
+		</if>
+		<if test="item.description != null and item.description != ''">
+			and (l.request like '%' || #{item.description} || '%' or l.response like '%' || #{item.description} || '%')
+		</if>
+		<if test="item.startCreatedat != null and item.startCreatedat != ''">
+		<![CDATA[and l.createdat >= to_date(CONCAT(#{item.startCreatedat}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="item.endCreatedat != null and item.endCreatedat != ''">
+		<![CDATA[and l.createdat <= to_date(CONCAT(#{item.endCreatedat}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by l.createdat desc
+	</sql>
+	
+	<select id="count" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_log_sql" />) t 
+	</select>
+	
+	<select id="selectByPage" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select * 
+		from (select t.*, rownum rn from (<include refid="base_log_sql" />) t 
+		<![CDATA[ 
+		where rownum<=#{end}) t2 where t2.rn>=#{start}
+		]]>
+	</select>
+</mapper>

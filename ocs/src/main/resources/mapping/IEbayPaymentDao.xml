@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.payment.dao.IEbayPaymentDao" >
+  <resultMap id="BaseResultMap" type="com.it.ocs.payment.model.EbayPaymentModel" >
+    <id column="PAYID" property="payid" jdbcType="DECIMAL" />
+    <result column="PAY_NAME" property="payName" jdbcType="VARCHAR" />
+    <result column="SITE_ID" property="siteId" jdbcType="DECIMAL" />
+    <result column="PAY_ACCOUNT" property="payAccount" jdbcType="VARCHAR" />
+    <result column="SUPPORT_PAYMENT" property="supportPayment" jdbcType="VARCHAR" />
+    <result column="DESCRIPTION" property="description" jdbcType="VARCHAR" />
+    <result column="ENABLED_FLAG" property="enabledFlag" jdbcType="CHAR" />
+    <result column="CREATION_DATE" property="creationDate" jdbcType="TIMESTAMP" />
+    <result column="CREATE_BY" property="createBy" jdbcType="DECIMAL" />
+    <result column="LAST_UPDATE_DATE" property="lastUpdateDate" jdbcType="TIMESTAMP" />
+    <result column="LAST_UPDATE_BY" property="lastUpdateBy" jdbcType="DECIMAL" />
+  </resultMap>
+  
+   <sql id="select_base" >
+  	select
+    PAYID, PAY_NAME, SITE_ID, PAY_ACCOUNT, SUPPORT_PAYMENT, DESCRIPTION, ENABLED_FLAG, 
+    CREATION_DATE, CREATE_BY, LAST_UPDATE_DATE, LAST_UPDATE_BY
+    from EBAY_PAYMENT
+   </sql>
+	
+	<sql id="where">
+		<choose>
+			<when test="param!=null">
+				<where>
+					1=1 
+					<if test="param.payName!=null">
+						AND PAY_NAME=#{param.payName}
+					</if>
+					<if test="param.enabledFlag!=null">
+						AND ENABLED_FLAG=#{param.enabledFlag}
+					</if>
+				</where>
+			</when>
+			<otherwise>
+				<where>
+					ENABLED_FLAG='Y'
+				</where>
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_PAYMENT
+		<include refid="where" />
+	</select>
+
+	<select id="queryByPage" resultMap="BaseResultMap">
+	select * from
+    ( 
+	select S.*,ROWNUM RN from (
+    <include refid="select_base" />
+    <include refid="where" />
+    order by CREATION_DATE desc
+	) S 
+	<![CDATA[
+	where ROWNUM<=#{endRow}
+	)
+	WHERE RN>=#{starRow}
+  ]]>
+	</select>
+
+ 	<select id="query" resultMap="BaseResultMap" parameterType="com.it.ocs.payment.model.EbayPaymentModel">
+		 <include refid="select_base" />
+		 <include refid="where" />
+	</select>
+	
+	<select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+		 <include refid="select_base" />
+		 where PAYID= #{id}
+	</select>
+  	
+    <insert id="add" parameterType="com.it.ocs.payment.vo.EbayPaymentVO" >
+    insert into EBAY_PAYMENT
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        PAYID,
+      <if test="payName != null" >
+        PAY_NAME,
+      </if>
+      <if test="siteId != null" >
+        SITE_ID,
+      </if>
+      <if test="payAccount != null" >
+        PAY_ACCOUNT,
+      </if>
+      <if test="supportPayment != null" >
+        SUPPORT_PAYMENT,
+      </if>
+      <if test="description != null" >
+        DESCRIPTION,
+      </if>
+      <if test="enabledFlag != null" >
+        ENABLED_FLAG,
+      </if>
+      <if test="creationDate != null" >
+        CREATION_DATE,
+      </if>
+      <if test="createBy != null" >
+        CREATE_BY,
+      </if>
+      <if test="lastUpdateDate != null" >
+        LAST_UPDATE_DATE,
+      </if>
+      <if test="lastUpdateBy != null" >
+        LAST_UPDATE_BY,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      EBAY_PAYMENT_SEQ.Nextval,
+      <if test="payName != null" >
+        #{payName,jdbcType=VARCHAR},
+      </if>
+      <if test="siteId != null" >
+        #{siteId,jdbcType=DECIMAL},
+      </if>
+      <if test="payAccount != null" >
+        #{payAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="supportPayment != null" >
+        #{supportPayment,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="enabledFlag != null" >
+        'Y',
+      </if>
+      <if test="creationDate != null" >
+        #{creationDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=DECIMAL},
+      </if>
+      <if test="lastUpdateDate != null" >
+        #{lastUpdateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateBy != null" >
+        #{lastUpdateBy,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+
+  
+  <update id="update" parameterType="com.it.ocs.payment.vo.EbayPaymentVO" >
+    update EBAY_PAYMENT
+    <set >
+      <if test="payName != null" >
+        PAY_NAME = #{payName,jdbcType=VARCHAR},
+      </if>
+      <if test="siteId != null" >
+        SITE_ID = #{siteId,jdbcType=DECIMAL},
+      </if>
+      <if test="payAccount != null" >
+        PAY_ACCOUNT = #{payAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="supportPayment != null" >
+        SUPPORT_PAYMENT = #{supportPayment,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="enabledFlag != null" >
+        ENABLED_FLAG = #{enabledFlag,jdbcType=CHAR},
+      </if>
+      <if test="creationDate != null" >
+        CREATION_DATE = #{creationDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        CREATE_BY = #{createBy,jdbcType=DECIMAL},
+      </if>
+      <if test="lastUpdateDate != null" >
+        LAST_UPDATE_DATE = #{lastUpdateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateBy != null" >
+        LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where PAYID = #{payid,jdbcType=DECIMAL}
+  </update>
+  
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IMLightOrderDao">
+
+	<resultMap type="com.it.ocs.task.model.LightOrderModel" id="lightOrderResult">
+		<id column="entity_id" property="entity_id"  />
+		<result column="platform" property="platform"  />
+		<result column="order_id" property="order_id"  />
+		<result column="state" property="state"  />
+		<result column="status" property="status"  />
+		<result column="discount_amount" property="discount_amount"  />
+		<result column="subtotal" property="subtotal"  />
+		<result column="grand_total" property="grand_total"  />
+		<result column="shipping_amount" property="shipping_amount"  />
+		<result column="tax_amount" property="tax_amount"  />
+		<result column="total_canceled" property="total_canceled"  />
+		<result column="total_invoiced" property="total_invoiced"  />
+		<result column="total_paid" property="total_paid"  />
+		<result column="total_qty_ordered" property="total_qty_ordered"  />
+		<result column="total_refunded" property="total_refunded"  />
+		<result column="gift_message" property="gift_message"  />
+		<result column="weight" property="weight"  />
+		<result column="customer_email" property="customer_email"  />
+		<result column="customer_firstname" property="customer_firstname"  />
+		<result column="customer_lastname" property="customer_lastname"  />
+		<result column="customer_middlename" property="customer_middlename"  />
+		<result column="global_currency_code" property="global_currency_code"  />
+		<result column="order_currency_code" property="order_currency_code"  />
+		<result column="remote_ip" property="remote_ip"  />
+		<result column="shipping_method" property="shipping_method"  />
+		<result column="customer_note" property="customer_note"  />
+		<result column="light_created_at" property="light_created_at"  />
+		<result column="paid_time" property="paid_time"  />
+		<result column="light_updated_at" property="light_updated_at"  />
+		<result column="created_at" property="created_at"  />
+		<result column="updated_at" property="updated_at"  />
+	</resultMap>
+	<select id="selectMaxCreatedAt" resultType="java.lang.String">
+		select date_format(max(light_updated_at), '%Y-%c-%e %T') as created_at from light_order 
+	</select>
+	<select id="selectLightOrderByStartTAndEndT" resultMap="lightOrderResult">
+		select * from light_order where updated_at>STR_TO_DATE('${startT}', '%Y-%m-%d %H:%i:%s') and updated_at<![CDATA[<=]]>STR_TO_DATE('${endT}', '%Y-%m-%d %H:%i:%s')
+	</select>
+</mapper>

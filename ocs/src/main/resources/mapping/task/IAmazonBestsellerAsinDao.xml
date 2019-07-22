@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.task.dao.IAmazonBestsellerAsinDao">
+	<resultMap type="com.it.ocs.task.model.AmazonBestsellerAsinModel" id="amazonBestsellerAsinResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="BESTSELLER_ID" property="bestseller_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="CATEGORY_NAME" property="category_name"  />
+		<result column="ASIN" property="asin"  />
+		<result column="SKU" property="sku"  />
+		<result column="OWN" property="own"  />
+		<result column="URL" property="url"  />
+		<result column="BRAND" property="brand"  />
+		<result column="PRICE" property="price"  />
+		<result column="AVG_RATE" property="avg_rate"  />
+		<result column="REVIEWS_TOTAL" property="reviews_total"  />
+		<result column="RANK" property="rank"  />
+		<result column="TITLE" property="title"  />
+		<result column="IMAGES" property="images"  />
+		<result column="PICI" property="pici"  />
+		<result column="UPDATE_DATE" property="update_date"  />
+		<result column="SORT_INFO" property="sort_info"  />
+		<result column="DATE" property="date"  />
+		<result column="SOURCE_ID" property="source_id"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(UPDATE_DATE) ,'yyyy-mm-dd HH24:mi:ss') from amazon_bestseller_asin
+	</select>
+	<select id="selectMySqlDate" resultMap="amazonBestsellerAsinResult">
+		select * from amazon_bestseller_asin aba where aba.date>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s') and aba.date<![CDATA[<=]]>STR_TO_DATE('2017-01-08 00:00:00', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectAmazonBestsellerAsinModels" resultMap="amazonBestsellerAsinResult" parameterType="java.util.List">
+		select SOURCE_ID from AMAZON_BESTSELLER_ASIN 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id}  
+        </foreach> 
+	</select>
+	<update id="updateAmazonBestsellerAsins" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update AMAZON_BESTSELLER_ASIN baoi 
+	   	 set
+			BESTSELLER_ID = #{item.bestseller_id,jdbcType=BIGINT},
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			CATEGORY_NAME = #{item.category_name,jdbcType=VARCHAR},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			OWN = #{item.own,jdbcType=BIGINT},
+			URL = #{item.url,jdbcType=VARCHAR},
+			BRAND = #{item.brand,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=VARCHAR},
+			AVG_RATE = #{item.avg_rate,jdbcType=VARCHAR},
+			REVIEWS_TOTAL = #{item.reviews_total,jdbcType=VARCHAR},
+			RANK = #{item.rank,jdbcType=BIGINT},
+			TITLE = #{item.title,jdbcType=VARCHAR},
+			IMAGES = #{item.images,jdbcType=VARCHAR},
+			PICI = #{item.pici,jdbcType=VARCHAR},
+			UPDATE_DATE = #{item.date,jdbcType=TIMESTAMP},
+			SORT_INFO = #{item.sort_info,jdbcType=VARCHAR},
+			LAST_UPDATE_DATE = #{item.last_update_date}	
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+	<insert id="insertAmazonBestsellerAsins" parameterType="java.util.List">
+		INSERT INTO AMAZON_BESTSELLER_ASIN (
+			ENTITY_ID,
+			BESTSELLER_ID,
+			PLATFORM,
+			CATEGORY_NAME,
+			ASIN,
+			SKU,
+			OWN,
+			URL,
+			BRAND,
+			PRICE,
+			AVG_RATE,
+			REVIEWS_TOTAL,
+			RANK,
+			TITLE,
+			IMAGES,
+			PICI,
+			UPDATE_DATE,
+			SORT_INFO,
+			SOURCE_ID,
+			CREATION_DATE)   
+		select AMAZON_BESTSELLER_ASIN_SEQ.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				
+				#{item.bestseller_id,jdbcType=BIGINT},
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.category_name,jdbcType=VARCHAR},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.own,jdbcType=BIGINT},
+				#{item.url,jdbcType=VARCHAR},
+				#{item.brand,jdbcType=VARCHAR},
+				#{item.price,jdbcType=VARCHAR},
+				#{item.avg_rate,jdbcType=VARCHAR},
+				#{item.reviews_total,jdbcType=VARCHAR},
+				#{item.rank,jdbcType=BIGINT},
+				#{item.title,jdbcType=VARCHAR},
+				#{item.images,jdbcType=VARCHAR},
+				#{item.pici,jdbcType=VARCHAR},
+				#{item.date,jdbcType=TIMESTAMP},
+				#{item.sort_info,jdbcType=VARCHAR},
+				#{item.entity_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+</mapper>

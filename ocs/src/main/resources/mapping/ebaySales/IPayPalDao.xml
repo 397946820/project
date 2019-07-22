@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.paymentManagement.dao.IPayPalDao">
+		<resultMap type="com.it.ocs.paymentManagement.model.PayPalModel" id="payPalResult">
+			<result column="ID" property="id"  />
+			<result column="ACCOUNT" property="account"  />
+			<result column="ACCESS_TOKEN" property="access_token"  />
+			<result column="CREDIT_CARD_NUMBER" property="credit_card_number"  />
+			<result column="CREDIT_CARD_TYPE" property="credit_card_type"  />
+			<result column="USER_NAME" property="user_name"  />	
+			<result column="PASSWORD" property="password"  />
+			<result column="PHONE_NUMBER" property="phone_number"  />
+			<result column="ACCOUNT_TYPE" property="account_type"  />
+			<result column="COUNTRY" property="country"  />
+			<result column="CLIENT_ID" property="client_id"  />
+			<result column="SECRET" property="secret"  />
+			<result column="EBAY_ID" property="ebay_id"  />
+			<result column="CREATE_BY" property="create_by"  />
+			<result column="CREATE_DATE" property="create_date"  />
+			<result column="UPDATE_BY" property="update_by"  />
+			<result column="UPDATE_DATE" property="update_date"  />
+			<result column="ENABLED_FLAG" property="enabled_flag"  />
+			<result column="SIGNATURE" property="signature"  />
+			<result column="EMAIL_ID" property="email_id"  />
+		</resultMap>
+</mapper>

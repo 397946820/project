@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitSkuFeeDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID,
+			   COUNTRY,
+			   SKU,
+			   FEE,
+			   MONTH_OF_YEAR MONTHOFYEAR,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+    	FROM SYS_OPERATING_PROFIT_SKU_FEE
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+				<if test="param.sku != null and param.sku != ''">
+					and SKU = #{param.sku}
+				</if>
+				<if test="param.country != null and param.country != ''">
+					and COUNTRY = #{param.country}
+				</if>
+			</where>
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitSkuFeeModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.sys.dao.IOperatingProfitSkuDao.order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.sys.model.OperatingProfitSkuFeeModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+	</select>
+	
+	<select id="getSkuBySku" resultType="java.lang.String">
+		SELECT K.SKU FROM SYS_SKU_LINK K WHERE K.P_SKU = #{sku}
+	</select>
+	
+	<select id="noParticipationPnOperation" resultType="java.util.Map">
+		SELECT COUNTRY, SKU, FEE
+		  FROM (SELECT T.*, R.SKU SKU_
+		          FROM (SELECT E.COUNTRY, E.SKU, E.FEE
+		                  FROM SYS_OPERATING_PROFIT_SKU_FEE E
+		                 WHERE E.MONTH_OF_YEAR = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'), 'yyyy-mm')) T,
+		               (SELECT V.SITE, V.SKU
+		                  FROM SYS_OPERATING_PROFIT_VIEW V
+		                 WHERE V.PLATFORM = 'amazon'
+		                   AND V.MONTH_OF_YEAR = TO_CHAR(TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM'), 'yyyy-mm')) R
+		         WHERE T.COUNTRY = R.SITE(+)
+		           AND T.SKU = R.SKU(+))
+		 WHERE SKU_ IS NULL
+	</select>
+	
+	<insert id="add">
+	    insert into SYS_OPERATING_PROFIT_SKU_FEE
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	    
+	        ENTITY_ID,
+	    
+	      <if test="sku != null" >
+	        SKU,
+	      </if>
+	      <if test="country != null" >
+	        COUNTRY,
+	      </if>
+	      <if test="fee != null" >
+	        FEE,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_PROFIT_SKU_FEE_SEQ.NEXTVAL,
+	      
+	      <if test="sku != null" >
+	        #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="country != null" >
+	        #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="fee != null" >
+	        #{fee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>	
+	
+	<update id="update">
+		update SYS_OPERATING_PROFIT_SKU_FEE
+	    <set >
+	      <if test="sku != null" >
+	        SKU = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="country != null" >
+	        COUNTRY = #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="fee != null" >
+	        FEE = #{fee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

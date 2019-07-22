@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IMLightOrderItemDao">
+	<resultMap type="com.it.ocs.task.model.LightOrderItemModel" id="lightOrderItemResult">
+		<result column="entity_id" property="entity_id"  />
+		<result column="parent_id" property="parent_id"  />
+		<result column="weight" property="weight"  />
+		<result column="sku" property="sku"  />
+		<result column="name" property="name"  />
+		<result column="free_shipping" property="free_shipping"  />
+		<result column="is_qty_decimal" property="is_qty_decimal"  />
+		<result column="no_discount" property="no_discount"  />
+		<result column="qty_canceled" property="qty_canceled"  />
+		<result column="qty_invoiced" property="qty_invoiced"  />
+		<result column="qty_ordered" property="qty_ordered"  />
+		<result column="qty_refunded" property="qty_refunded"  />
+		<result column="qty_shipped" property="qty_shipped"  />
+		<result column="price" property="price"  />
+		<result column="base_price" property="base_price"  />
+		<result column="original_price" property="original_price"  />
+		<result column="tax_percent" property="tax_percent"  />
+		<result column="tax_amount" property="tax_amount"  />
+		<result column="tax_invoiced" property="tax_invoiced"  />
+		<result column="discount_percent" property="discount_percent"  />
+		<result column="discount_amount" property="discount_amount"  />
+		<result column="amount_refunded" property="amount_refunded"  />
+		<result column="row_total" property="row_total"  />
+		<result column="gift_message_id" property="gift_message_id"  />
+		<result column="postcode" property="postcode"  />
+		<result column="region" property="region"  />
+		<result column="city" property="city"  />
+		<result column="street" property="street"  />
+		<result column="gift_message" property="gift_message"  />
+		<result column="light_created_at" property="light_created_at"  />
+		<result column="light_updated_at" property="light_updated_at"  />
+		<result column="ship_at" property="ship_at"  />
+		<result column="push_status" property="push_status"  />
+		<result column="created_at" property="created_at"  />
+		<result column="updated_at" property="updated_at"  />
+	</resultMap>
+	<select id="selectLightOrderItemByStartTAndEndT" resultMap="lightOrderItemResult">
+		select loi.* from light_order_item loi inner join (select eo.entity_id from light_order eo where created_at>STR_TO_DATE('${startT}', '%Y-%m-%d %H:%i:%s') and created_at<![CDATA[<=]]>STR_TO_DATE('${endT}', '%Y-%m-%d %H:%i:%s')) eof where loi.parent_id=eof.entity_id
+	</select>
+</mapper>

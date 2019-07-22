@@ -1,0 +1,38 @@
+#pp{
+   border:1px solid #ccc; 
+   clear: both;
+   bottom: 0;
+  }
+  
+  .image-box{
+   border:1px solid #ccc; 
+   width:150px; 
+   height:200px; 
+   float:left; 
+   margin: 5px; 
+   text-align: center;
+   font-size: 12px;
+  }
+  
+  .image-box span{
+   margin: 0 10px;
+   cursor: pointer;
+  }
+  
+  .image-box img{
+   width: 135px;
+   height:135px;
+   margin-top: 5px;
+  }
+  
+  .image-box .image-title{
+   line-height: 18px;
+   max-width: 200px;
+   max-height: 18px;
+   padding: 0;
+   margin: 0;
+   overflow: hidden;
+  }
+  .easyui-pagination{
+   width: 100%;
+  }

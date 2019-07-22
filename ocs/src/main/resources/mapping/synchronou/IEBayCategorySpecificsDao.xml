@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayCategorySpecificsDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBayCategorySpecificsModel" id="CategorySpecificsResult">
+		<id column="ID" property="id"  />
+		<result column="NAME" property="name"  />
+		<result column="CATEGORY_ID" property="category_id"  />
+		<result column="MARKETPLACE_ID" property="marketplace_id"  />
+		<result column="VALIDATION_RULES" property="validation_rules"  />
+		<result column="HELPTEXT" property="helptext"  />
+		<result column="HELPURL" property="helpurl"  />
+	</resultMap>
+	<sql id="select_base">
+		ID,
+		NAME,
+		CATEGORY_ID,
+		MARKETPLACE_ID
+	</sql>
+	<select id="internalFindSpecificsByNameAanCIDAanMID" resultMap="CategorySpecificsResult">
+		select VALIDATION_RULES from EBAY_CATEGORY_RECOMMENDATION 
+		where 
+		CATEGORY_ID=${category_id} and MARKETPLACE_ID=${marketplace_id} and NAME='${name}'
+	</select>
+	<insert id="insertCategorySpecificsList" parameterType="java.util.List">
+	INSERT INTO ebay_Category_Recommendation (
+			ID,
+			NAME,
+			CATEGORY_ID,
+			MARKETPLACE_ID,
+			VALIDATION_RULES,
+			CREATION_DATE,
+			ENABLED_FLAG)   
+		select ebay_Category_R_SEQ.Nextval,c.*,sysdate,'Y' from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+			 #{item.name,jdbcType=VARCHAR},
+             #{item.category_id,jdbcType=DOUBLE},
+             #{item.marketplace_id,jdbcType=DOUBLE},
+             #{item.validation_rules,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+    </insert>
+	<select id="findCategorySpecificsByCIDAndMID" resultMap="CategorySpecificsResult">
+		select <include refid="select_base" /> from ebay_Category_Recommendation where CATEGORY_ID=${category_Id} and MARKETPLACE_ID=${marketplace_id}
+	</select>
+	<select id="internalFindCategorySpecificsList" resultMap="CategorySpecificsResult">
+				select <include refid="select_base" /> from ebay_Category_Recommendation  
+				where  MARKETPLACE_ID=#{marketplace_id} and CATEGORY_ID=#{category_id}
+	</select>
+	<select id="findCategorySpecificsByMID" resultMap="CategorySpecificsResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from ebay_Category_Recommendation  
+				where  1=1
+				<if test="marketplace_id != null">
+					and MARKETPLACE_ID=${marketplace_id}
+				</if>
+				<if test="category_Id != null">
+			    	and CATEGORY_ID=${category_Id}
+				</if>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(*) from ebay_Category_Recommendation 
+		where 1=1
+		<if test="marketplace_id != null">
+			and MARKETPLACE_ID=${marketplace_id}
+		</if>
+		<if test="category_Id != null">
+		    and CATEGORY_ID=${category_Id}
+		</if>
+	</select>
+</mapper>

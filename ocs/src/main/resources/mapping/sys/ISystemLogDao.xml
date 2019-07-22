@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.ISystemLogDao">
+	<insert id="addLog">
+		insert into SYS_OPT_LOG
+		  (ID, SERVICE, METHOD, DESCRIPTION, ACCOUNT,PARAM)
+		values
+		  (SYS_OPT_LOG_SEQ.NEXTVAL,#{targetName,jdbcType=VARCHAR},#{methodName,jdbcType=VARCHAR},#{desc,jdbcType=VARCHAR},#{createBy,jdbcType=BIGINT},#{param,jdbcType=VARCHAR})
+	</insert>
+</mapper>

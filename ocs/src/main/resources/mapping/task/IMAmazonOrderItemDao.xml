@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IMAmazonOrderItemDao">
+	<resultMap type="com.it.ocs.task.model.AmazonOrderItemModel" id="amazonOrderItemResult">
+		<id column="id" property="id"  />
+		<result column="parent_id" property="parent_id"  />
+		<result column="amazon_item_id" property="amazon_item_id"  />
+		<result column="title" property="title"  />
+		<result column="ASIN" property="asin"  />
+		<result column="sku" property="sku"  />
+		<result column="price" property="price"  />
+		<result column="qty" property="qty"  />
+		<result column="shipping_amount" property="shipping_amount"  />
+		<result column="shipping_discount" property="shipping_discount"  />
+		<result column="tax" property="tax"  />
+		<result column="gift_price" property="gift_price"  />
+		<result column="promotion_id" property="promotion_id"  />
+		<result column="promotion_discount" property="promotion_discount"  />
+		<result column="shipping_tax" property="shipping_tax"  />
+		<result column="condition_id" property="condition_id"  />
+		<result column="created_at" property="created_at"  />
+		<result column="updated_at" property="updated_at"  />
+		<result column="push_status" property="push_status"  />
+	</resultMap>
+	<select id="selectAmazonOrderItemByStartTAndEndT" resultMap="amazonOrderItemResult">
+		select aoi.* from amazon_order_item aoi inner join (select id from amazon_order where  created_at>STR_TO_DATE('${startT}', '%Y-%m-%d %H:%i:%s') and created_at<![CDATA[<=]]>STR_TO_DATE('${endT}', '%Y-%m-%d %H:%i:%s')) ao where aoi.parent_id=ao.id
+	</select>
+</mapper>

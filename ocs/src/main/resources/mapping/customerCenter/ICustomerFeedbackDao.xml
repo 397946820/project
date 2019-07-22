@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.customerCenter.dao.ICustomerFeedbackDao">
+	
+	<resultMap type="com.it.ocs.customerCenter.model.CustomerFeedbackModel" id="customerFeedbackResult">
+		<id column="FEEDBACKS_ID" property="feedbacks_id"  />
+		<result column="SITE" property="site"  />
+		<result column="ORDERS" property="orders"  />
+		<result column="SKU" property="sku"  />
+		<result column="ORDER_DATE" property="order_date"  />
+		<result column="COMMENTS" property="comments"  />
+		<result column="TRANSLATES" property="translates"  />
+		<result column="REASON" property="reason"  />
+		<result column="IS_DELETE" property="is_delete"  />
+		<result column="REMARKS" property="remarks"  />
+		<result column="CATAGORIES" property="catagories"/>
+		<result column="PROBLEM_TIME" property="problem_time"  />
+		<result column="LIFTING_POINT" property="lifting_point"  />
+		<result column="PARENT_CATEGORY" property="parent_category" />
+	
+	</resultMap>
+	<sql id="base_conditions">
+	<choose>
+		<when test="order!=null and order!=''">
+		order by 'cf.'||${sort} ${order}
+		</when>
+		<otherwise>
+		 order by cf.create_date desc
+		</otherwise>
+	</choose>
+		
+	</sql>
+	<sql id="select_base">
+		cf.FEEDBACKS_ID,
+		cf.SITE,
+		cf.ORDERS,
+		cf.SKU,
+		to_char(cf.ORDER_DATE,'yyyy-mm-dd') order_date,
+		cf.COMMENTS,
+		cf.TRANSLATES,
+		cf.REASON,
+		cf.IS_DELETE,
+		cf.REMARKS,
+		cf.CATAGORIES,
+		cf.PARENT_CATEGORY,
+		to_char(cf.PROBLEM_TIME,'yyyy-mm-dd') problem_time,
+		cf.LIFTING_POINT
+	</sql>
+	<sql id="base_map_conditions">
+		<if test="feedback.sku !=null and feedback.sku !=''"> 
+			and cf.SKU like '%'||#{feedback.sku}||'%'
+		</if>
+		<if test="feedback.site !=null and feedback.site !=''"> 
+			and cf.SITE=#{feedback.site}
+		</if>
+		<if test="feedback.orders !=null and feedback.orders !=''"> 
+			and cf.ORDERS like '%'||#{feedback.orders}||'%'
+		</if>
+		<if test="feedback.startDate !=null and feedback.startDate !=''"> 
+			and cf.PROBLEM_TIME >= to_date('${feedback.startDate}','YYYY-MM-DD')
+		</if>
+		<if test="feedback.endDate !=null and feedback.endDate !=''"> 
+			and cf.PROBLEM_TIME <![CDATA[<=]]> to_date('${feedback.endDate}','YYYY-MM-DD')
+		</if>
+	</sql>
+	
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from CUSTOMER_FEEDBACK cf where ENABLED_FLAG='Y' <include refid="base_map_conditions" />
+	</select>
+	<select id="selectCustomerFeecBacks" resultMap="customerFeedbackResult">
+			select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  <include refid="select_base"/>  from CUSTOMER_FEEDBACK cf where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+					  <include refid="base_conditions"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	<update id="remove">
+		update CUSTOMER_FEEDBACK cf set cf.ENABLED_FLAG='N' where cf.FEEDBACKS_ID=#{feedbacks_id,jdbcType=BIGINT}
+	</update>
+	<insert id="insertFeedback" parameterType="java.util.List">
+		INSERT INTO CUSTOMER_FEEDBACK(
+			FEEDBACKS_ID,
+			SITE,
+			ORDERS,
+			SKU,
+			ORDER_DATE,
+			COMMENTS,
+			TRANSLATES,
+			REASON,
+			IS_DELETE,
+			REMARKS,
+			PROBLEM_TIME,
+			LIFTING_POINT,
+			CATAGORIES,
+			PARENT_CATEGORY,
+			CREATE_DATE,
+			UPDATE_DATE)  
+		select CUSTOMER_FEEDBACK_SEQ.NEXTVAL,c.*,sysdate,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.site,jdbcType=VARCHAR},
+				#{item.orders,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				to_date(#{item.order_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.comments,jdbcType=VARCHAR},
+				#{item.translates,jdbcType=VARCHAR},
+				#{item.reason,jdbcType=VARCHAR},
+				#{item.is_delete,jdbcType=VARCHAR},
+				#{item.remarks,jdbcType=VARCHAR},
+				to_date(#{item.problem_time,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.lifting_point,jdbcType=VARCHAR},
+				#{item.catagories,jdbcType=VARCHAR},
+				#{item.parent_category,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateFeedbacks" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			update CUSTOMER_FEEDBACK baoi
+			set 
+			SITE = #{item.site,jdbcType=VARCHAR},
+			ORDERS = #{item.orders,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			ORDER_DATE = to_date(#{item.order_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			COMMENTS = #{item.comments,jdbcType=VARCHAR},
+			TRANSLATES = #{item.translates,jdbcType=VARCHAR},
+			REASON = #{item.reason,jdbcType=VARCHAR},
+			IS_DELETE = #{item.is_delete,jdbcType=VARCHAR},
+			REMARKS = #{item.remarks,jdbcType=VARCHAR},
+			PROBLEM_TIME = to_date(#{item.problem_time,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			LIFTING_POINT = #{item.lifting_point,jdbcType=VARCHAR},
+			CATAGORIES=#{item.catagories,jdbcType=VARCHAR},
+			PARENT_CATEGORY=#{item.parent_category,jdbcType=VARCHAR},
+			UPDATE_DATE = sysdate
+			where baoi.FEEDBACKS_ID = #{item.feedbacks_id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+	<select id="selectCustomerF" resultType="java.util.HashMap">
+		select <include refid="select_base"/> from CUSTOMER_FEEDBACK cf where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+	</select>
+
+</mapper>

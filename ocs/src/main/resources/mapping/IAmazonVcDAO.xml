@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.vc.dao.IAmazonVcDAO">
+	<resultMap type="com.it.ocs.vc.model.AmazonVcModel" id="vcResult">
+		<id property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="shippingDate" column="SHIPPING_DATE" />
+		<result property="deliveryFrom" column="DELIVERY_FROM" />
+		<result property="po" column="PO" />
+		<result property="vendor" column="VENDOR" />
+		<result property="addressCode" column="ADDRESS_CODE" />
+		<result property="shipToName" column="SHIP_TO_NAME" />
+		<result property="shipToAddr1" column="SHIP_TO_ADDR1" />
+		<result property="shipToAddr2" column="SHIP_TO_ADDR2" />
+		<result property="shipToAddr3" column="SHIP_TO_ADDR3" />
+		<result property="shipToCountry" column="SHIP_TO_COUNTRY" />
+		<result property="shipPC" column="SHIP_PC" />
+		<result property="modelNumber" column="MODEL_NUMBER" />
+		<result property="asin" column="ASIN" />
+		<result property="sku" column="SKU" />
+		<result property="title" column="TITLE" />
+		<result property="deliverFrom" column="DELIVER_FROM" />
+		<result property="deliverTo" column="DELIVER_TO" />
+		<result property="submittedQuantity" column="SUBMITTED_QUANTITY" />
+		<result property="acceptedQuantity" column="ACCEPTED_QUANTITY" />
+		<result property="unitCost" column="UNIT_COST" />
+		<result property="totalCost" column="TOTAL_COST" />
+		<result property="shipMethod" column="SHIP_METHOD" />
+		<result property="serviceType" column="SERVICE_TYPE" />
+		<result property="trackingNO" column="TRACKING_NO" />
+		<result property="actualQuantityReceived" column="ACTUAL_QUANTITY_RECEIVED" />
+		<result property="receiveDate" column="RECEIVE_DATE" />
+		<result property="deliveryTo" column="DELIVERY_TO" />
+		<result property="carton" column="CARTON" />
+		<result property="ocsOrderId" column="ORDER_OCS_ID" />
+		<result property="netWeight" column="NET_WEIGHT" />
+		<result property="grossWeight" column="GROSS_WEIGHT" />
+		<result property="enabledFlag" column="ENABLED_FLAG" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="creationDate" column="CREATION_DATE" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" />
+		<result property="platform" column="PLATFORM" />
+	</resultMap>
+	<sql id="base_sql">
+		select ID,
+		to_char(SHIPPING_DATE,'yyyy-MM-dd') SHIPPING_DATE,
+		DELIVERY_FROM,
+		PO,
+		VENDOR,
+		ADDRESS_CODE,
+		SHIP_TO_NAME,
+		SHIP_TO_ADDR1,
+		SHIP_TO_ADDR2,
+		SHIP_TO_ADDR3,
+		SHIP_TO_COUNTRY,
+		SHIP_PC,
+		MODEL_NUMBER,
+		ASIN,
+		SKU,
+		TITLE,
+		to_char(DELIVER_FROM,'yyyy-MM-dd') DELIVER_FROM,
+		to_char(DELIVER_TO,'yyyy-MM-dd') DELIVER_TO,
+		SUBMITTED_QUANTITY,
+		ACCEPTED_QUANTITY,
+		UNIT_COST,
+		TOTAL_COST,
+		SHIP_METHOD,
+		SERVICE_TYPE,
+		TRACKING_NO,
+		ACTUAL_DELIVERY_QUANTITY,
+		ACTUAL_QUANTITY_RECEIVED,
+		to_char(RECEIVE_DATE,'yyyy-MM-dd') RECEIVE_DATE,
+		DELIVERY_TO,
+		CARTON,
+		NET_WEIGHT,
+		GROSS_WEIGHT,
+		ORDER_OCS_ID,
+		ENABLED_FLAG,
+		CREATE_BY,
+		CREATION_DATE,
+		LAST_UPDATE_BY,
+		LAST_UPDATE_DATE,
+		platform
+		from AMAZON_SALE_VC
+	</sql>
+	<sql id="base_where">
+		<where>
+			1=1 
+			<if test="param.po != null and param.po != ''">
+				and po like '%${param.po}%'
+			</if>
+			<if test="param.modelNumber != null and param.modelNumber != ''">
+				and model_number like '%${param.modelNumber}%'
+			</if>
+			<if test="param.startDate != null and param.startDate != ''">
+				<![CDATA[
+					and SHIPPING_DATE >= to_date(#{param.startDate},'yyyy-MM-dd')
+				]]>
+			</if>
+			<if test="param.endDate != null and param.endDate != ''">
+				<![CDATA[
+					and SHIPPING_DATE <= to_date(#{param.endDate},'yyyy-MM-dd')
+				]]>
+			</if>
+			
+		</where>
+	</sql>
+	<insert id="add">
+		insert into AMAZON_SALE_VC(
+		ID,
+		SHIPPING_DATE,
+		DELIVERY_FROM,
+		PO,
+		VENDOR,
+		ADDRESS_CODE,
+		SHIP_TO_NAME,
+		SHIP_TO_ADDR1,
+		SHIP_TO_ADDR2,
+		SHIP_TO_ADDR3,
+		SHIP_TO_COUNTRY,
+		SHIP_PC,
+		MODEL_NUMBER,
+		ASIN,
+		SKU,
+		TITLE,
+		<if test="data.deliverFrom != null and data.deliverFrom != ''">
+			DELIVER_FROM,
+		</if>
+		<if test="data.deliverTo != null and data.deliverTo != ''">
+			DELIVER_TO,
+		</if>
+		SUBMITTED_QUANTITY,
+		ACCEPTED_QUANTITY,
+		UNIT_COST,
+		TOTAL_COST,
+		SHIP_METHOD,
+		SERVICE_TYPE,
+		TRACKING_NO,
+		ACTUAL_DELIVERY_QUANTITY,
+		ACTUAL_QUANTITY_RECEIVED,
+		<if test="data.receiveDate != null and data.receiveDate != ''">
+			RECEIVE_DATE,
+		</if>
+		DELIVERY_TO,
+		CARTON,
+		NET_WEIGHT,
+		GROSS_WEIGHT,
+		ORDER_OCS_ID,
+		ENABLED_FLAG,
+		CREATE_BY,
+		CREATION_DATE,
+		LAST_UPDATE_BY,
+		LAST_UPDATE_DATE,
+		platform
+		)
+		select AMAZON_SALE_VC_S.NEXTVAL,
+			to_date(#{data.shippingDate},'yyyy-MM-dd'),
+			#{data.deliveryFrom},
+			#{data.po},
+			#{data.vendor},
+			#{data.addressCode},
+			#{data.shipToName},
+			#{data.shipToAddr1},
+			#{data.shipToAddr2},
+			#{data.shipToAddr3},
+			#{data.shipToCountry},
+			#{data.shipPC},
+			#{data.modelNumber},
+			#{data.asin},
+			#{data.sku},
+			#{data.title},
+			<if test="data.deliverFrom != null and data.deliverFrom != ''">
+				to_date(#{data.deliverFrom},'yyyy-MM-dd'),
+			</if>
+			<if test="data.deliverTo != null and data.deliverTo != ''">
+				to_date(#{data.deliverTo},'yyyy-MM-dd'),
+			</if>
+			#{data.submittedQuantity},
+			#{data.acceptedQuantity},
+			#{data.unitCost},
+			#{data.totalCost},
+			#{data.shipMethod},
+			#{data.serviceType},
+			#{data.trackingNO},
+			#{data.actualDeliveryQuantity},
+			#{data.actualQuantityReceived},
+			<if test="data.receiveDate != null and data.receiveDate != ''">
+				to_date(#{data.receiveDate},'yyyy-MM-dd'),
+			</if>
+			#{data.deliveryTo},
+			#{data.carton},
+			#{data.netWeight},
+			#{data.grossWeight},
+			#{data.ocsOrderId},
+			'Y',
+			#{data.createBy},
+			sysdate,
+			#{data.lastUpdateBy},
+			sysdate,
+			#{data.platform}
+		from dual
+	</insert>
+	<select id="queryByFormParam" resultMap="vcResult">
+		<include refid="base_sql" />
+		<include refid="base_where" />
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from AMAZON_SALE_VC
+	</select>
+	<select id="queryByPage" resultMap="vcResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="base_sql" />
+				<include refid="base_where" />
+				order by SHIPPING_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="queryByParam" resultMap="vcResult">
+		<include refid="base_sql" /> a where a.ENABLED_FLAG='Y' and a.po=#{param.po}
+	</select>
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(1) from AMAZON_SALE_VC a where a.po=#{param.po} and a.MODEL_NUMBER=#{param.modelNumber} and a.ENABLED_FLAG='Y'
+	</select>
+	<select id="getOcsOrderId" resultType="java.lang.Long">
+		select AMAZON_SALE_VC_S.NEXTVAL from dual
+	</select>
+
+</mapper>

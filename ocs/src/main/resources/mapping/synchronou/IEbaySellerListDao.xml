@@ -1,0 +1,868 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEbaySellerListDao">
+	<select id="isExist" resultType="int">
+		select count(1) from ebay_order_item 
+	     where  SALES_RECORD_NUMBER = #{SellingManagerSalesRecordNumber,jdbcType=VARCHAR}
+	       and parent_id = #{parentId}
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select total_order_seq.nextval from dual
+	</select>
+	<insert id="addSaleInfo">
+		insert into ebay_sale_info
+		  (id,
+		   orderid,
+		   shippingaddress_name,
+		   shippingtype,
+		   totalamount,
+		   totalquantity,
+		   actualshippingcost,
+		   checkoutstatus,
+		   paidstatus,
+		   shippedstatus,
+		   paymentmethodused,
+		   feedbacksent,
+		   totalemailssent,
+		   shippedtime,
+		   paidtime,
+		   saleprice,
+		   dayssincesale,
+		   buyerid,
+		   buyeremail,
+		   salerecordid,
+		   creationtime,
+		   xml,
+		   shippingaddress_postalcode,
+		   create_date,
+		   currencyID)
+		values
+		  (#{id},
+		   #{OrderID,jdbcType=VARCHAR},
+		   #{ShippingAddress_Name,jdbcType=VARCHAR},
+		   #{ShippingType,jdbcType=VARCHAR},
+		   #{TotalAmount,jdbcType=VARCHAR},
+		   #{TotalQuantity,jdbcType=VARCHAR},
+		   #{ActualShippingCost,jdbcType=VARCHAR},
+		   #{CheckoutStatus,jdbcType=VARCHAR},
+		   #{PaidStatus,jdbcType=VARCHAR},
+		   #{ShippedStatus,jdbcType=VARCHAR},
+		   #{PaymentMethodUsed,jdbcType=VARCHAR},
+		   #{FeedbackSent,jdbcType=VARCHAR},
+		   #{TotalEmailsSent,jdbcType=VARCHAR},
+		   #{ShippedTime,jdbcType=VARCHAR},
+		   #{PaidTime,jdbcType=VARCHAR},
+		   #{SalePrice,jdbcType=VARCHAR},
+		   #{DaysSinceSale,jdbcType=VARCHAR},
+		   #{BuyerID,jdbcType=VARCHAR},
+		   #{BuyerEmail,jdbcType=VARCHAR},
+		   #{SaleRecord_SaleRecordID,jdbcType=VARCHAR},
+		   #{CreationTime,jdbcType=VARCHAR},
+		   #{xml,jdbcType=VARCHAR},
+		   #{ShippingAddress_PostalCode,jdbcType=VARCHAR},
+		   sysdate,
+		   #{currency,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<insert id="addSaleSkuInfo">
+		<foreach collection="list" item="item" index="index" open="begin" close="end;">
+			insert into ebay_sale_sku_info
+			  (orderlineitemid,
+			   transactionid,
+			   sale_info_id,
+			   salerecordid,
+			   itemid,
+			   itemtitle,
+			   paidstatus,
+			   shippedstatus,
+			   creationtime,
+			   quantitysold,
+			   listingtype,
+			   relisted,
+			   secondchanceoffersent,
+			   customlabel,
+			   soldon,
+			   listedon,
+			   charitylisting)
+			values
+			  (#{item.OrderLineItemID,jdbcType=VARCHAR},
+			   #{item.TransactionID,jdbcType=VARCHAR},
+			   #{id},
+			   #{item.SaleRecordID,jdbcType=VARCHAR},
+			   #{item.ItemID,jdbcType=VARCHAR},
+			   #{item.ItemTitle,jdbcType=VARCHAR},
+			   #{item.PaidStatus,jdbcType=VARCHAR},
+			   #{item.ShippedStatus,jdbcType=VARCHAR},
+			   #{item.CreationTime,jdbcType=VARCHAR},
+			   #{item.QuantitySold,jdbcType=VARCHAR},
+			   #{item.ListingType,jdbcType=VARCHAR},
+			   #{item.Relisted,jdbcType=VARCHAR},
+			   #{item.SecondChanceOfferSent,jdbcType=VARCHAR},
+			   #{item.CustomLabel,jdbcType=VARCHAR},
+			   #{item.SoldOn,jdbcType=VARCHAR},
+			   #{item.ListedOn,jdbcType=VARCHAR},
+			   #{item.CharityListing,jdbcType=VARCHAR}
+			  );			
+		</foreach>
+	</insert>
+	<select id="getIdByOrderId" resultType="java.lang.Long">
+		select id from ebay_order where order_id = #{orderId,jdbcType=VARCHAR}
+	</select>
+	<insert id="addOrderInfo">
+		begin
+			insert into ebay_order
+				  (id,
+				   account,
+				   order_id,
+				   order_status,
+				   adjustment_amount,
+				   amount_paid,
+				   amount_saved,
+				   created_time,
+				   payment_methods,
+				   seller_email,
+				   sub_total,
+				   total,
+				   buyer_user_id,
+				   paid_time,
+				   shipped_time,
+				   credit_card_available,
+				   eias_token,
+				   payment_hold_status,
+				   is_multi_leg_shipping,
+				   seller_user_id,
+				   seller_eias_token,
+				   cancel_status,
+				   extended_order_id,
+				   contains_ebay_plus_transaction,
+				   last_modified_time,
+				   last_fetch_time,
+				   has_pushed,
+				   SALES_RECORD_NUMBER,
+				   PAY_STATUS,
+				   SHIPPING_SERVICE,
+				   PAYPAL_TRANSACTION_CODE,
+				   BUYER_EMAIL
+				   )
+				values
+				  (#{id},
+				  #{account,jdbcType=VARCHAR},
+				  #{OrderID,jdbcType=VARCHAR},
+				  #{OrderStatus,jdbcType=VARCHAR},
+				  #{AdjustmentAmount,jdbcType=VARCHAR},
+				  #{AmountPaid,jdbcType=VARCHAR},
+				  #{AmountSaved,jdbcType=VARCHAR},
+				  to_timestamp(#{CreatedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+				  #{PaymentMethods,jdbcType=VARCHAR},
+				  #{SellerEmail,jdbcType=VARCHAR},
+				  #{Subtotal,jdbcType=VARCHAR},
+				  #{Total,jdbcType=VARCHAR},
+				  #{BuyerUserID,jdbcType=VARCHAR},
+				  to_timestamp(#{PaidTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+				  to_timestamp(#{ShippedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+				  #{IntegratedMerchantCreditCardEnabled,jdbcType=VARCHAR},
+				  #{EIASToken,jdbcType=VARCHAR},
+				  #{PaymentHoldStatus,jdbcType=VARCHAR},
+				  #{IsMultiLegShipping,jdbcType=VARCHAR},
+				  #{SellerUserID,jdbcType=VARCHAR},
+				  #{SellerEIASToken,jdbcType=VARCHAR},
+				  #{CancelStatus,jdbcType=VARCHAR},
+				  #{ExtendedOrderID,jdbcType=VARCHAR},
+				  #{ContainseBayPlusTransaction,jdbcType=VARCHAR},
+				  to_timestamp(#{CheckoutStatus_LastModifiedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+				  sysdate-8/24,
+				  0,
+				  #{Order_ShippingDetails_SellingManagerSalesRecordNumber,jdbcType=VARCHAR},
+				  #{CheckoutStatus_Status,jdbcType=VARCHAR},
+				  #{ShippingServiceSelected_ShippingService,jdbcType=VARCHAR},
+				  #{ExternalTransaction_ExternalTransactionID,jdbcType=VARCHAR},
+				  #{TransactionArray_Transaction_Buyer_Email,jdbcType=VARCHAR}
+				  );
+			  insert into ebay_order_sub
+			    (id,
+			     parent_id,
+			     checkout_status,
+			     shipping_details,
+			     shipping_address,
+			     shipping_service_selected,
+			     external_transaction,
+			     transaction_array,
+			     monetary_details,
+			     order_id)
+			  values
+			    (total_order_sub_seq.nextval,
+			    #{id},
+			    #{CheckoutStatus,jdbcType=VARCHAR},
+			    #{ShippingDetails,jdbcType=VARCHAR},
+			    #{ShippingAddress,jdbcType=VARCHAR},
+			    #{ShippingServiceSelected,jdbcType=VARCHAR},
+			    #{ExternalTransaction,jdbcType=VARCHAR},
+			    #{TransactionArray,jdbcType=VARCHAR},
+			    #{MonetaryDetails,jdbcType=VARCHAR},
+			    #{OrderID,jdbcType=VARCHAR}
+			    );
+		end;
+	</insert>
+	<update id="updateOrderInfo">
+		begin
+			update ebay_order set
+			  account = #{account,jdbcType=VARCHAR},
+			  order_status = #{OrderStatus,jdbcType=VARCHAR},
+			  adjustment_amount = #{AdjustmentAmount,jdbcType=VARCHAR},
+			  amount_paid = #{AmountPaid,jdbcType=VARCHAR},
+			  amount_saved = #{AmountSaved,jdbcType=VARCHAR},
+			  created_time = to_timestamp(#{CreatedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			  payment_methods = #{PaymentMethods,jdbcType=VARCHAR},
+			  seller_email = #{SellerEmail,jdbcType=VARCHAR},
+			  sub_total = #{Subtotal,jdbcType=VARCHAR},
+			  total = #{Total,jdbcType=VARCHAR},
+			  buyer_user_id = #{BuyerUserID,jdbcType=VARCHAR},
+			  paid_time = to_timestamp(#{PaidTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			  shipped_time = to_timestamp(#{ShippedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			  credit_card_available = #{IntegratedMerchantCreditCardEnabled,jdbcType=VARCHAR},
+			  eias_token = #{EIASToken,jdbcType=VARCHAR},
+			  payment_hold_status = #{PaymentHoldStatus,jdbcType=VARCHAR},
+			  is_multi_leg_shipping = #{IsMultiLegShipping,jdbcType=VARCHAR},
+			  seller_user_id = #{SellerUserID,jdbcType=VARCHAR},
+			  seller_eias_token = #{SellerEIASToken,jdbcType=VARCHAR},
+			  cancel_status = #{CancelStatus,jdbcType=VARCHAR},
+			  extended_order_id = #{ExtendedOrderID,jdbcType=VARCHAR},
+			  contains_ebay_plus_transaction = #{ContainseBayPlusTransaction,jdbcType=VARCHAR},
+			  last_modified_time = to_timestamp(#{CheckoutStatus_LastModifiedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			  last_fetch_time = sysdate -8/24,
+			  PAY_STATUS =  #{CheckoutStatus_Status,jdbcType=VARCHAR},
+			  SHIPPING_SERVICE = #{ShippingServiceSelected_ShippingService,jdbcType=VARCHAR},
+			  BUYER_EMAIL =  #{TransactionArray_Transaction_Buyer_Email,jdbcType=VARCHAR},
+			  PAYPAL_TRANSACTION_CODE = #{ExternalTransaction_ExternalTransactionID,jdbcType=VARCHAR}
+		    where id = #{id}
+		    and order_id = #{OrderID,jdbcType=VARCHAR};
+		    
+          update ebay_order_sub set 
+			    checkout_status = #{CheckoutStatus,jdbcType=VARCHAR},
+			    shipping_details = #{ShippingDetails,jdbcType=VARCHAR},
+			    shipping_address = #{ShippingAddress,jdbcType=VARCHAR},
+			    shipping_service_selected = #{ShippingServiceSelected,jdbcType=VARCHAR},
+			    external_transaction = #{ExternalTransaction,jdbcType=VARCHAR},
+			    transaction_array = #{TransactionArray,jdbcType=VARCHAR},
+			    monetary_details = #{MonetaryDetails,jdbcType=VARCHAR}
+          where parent_id = #{id}
+          and order_id = #{OrderID,jdbcType=VARCHAR};
+		end;
+	</update>
+	<insert id="addOrderSkuInfo">
+		<foreach collection="list" item="item" index="index" open="begin" close="end;">
+			  insert into ebay_order_item
+			    (id,
+			     order_id,
+			     transaction_id,
+			     transaction_site_id,
+			     item_id,
+			     item_sku,
+			     item_title,
+			     quantity_purchased,
+			     currencycode,
+			     price,
+			     source_id,
+			     parent_id,
+			     SHIPPING_CARRIER_USED,
+			     SHIPMENT_TRACKING_NUMBER,
+			     SALES_RECORD_NUMBER)
+			  values
+			    (total_order_item_seq.nextval,
+			     #{item.OrderID,jdbcType=VARCHAR},
+			     #{item.TransactionID,jdbcType=VARCHAR},
+			     #{item.Item_Site,jdbcType=VARCHAR},
+			     #{item.Item_ItemID,jdbcType=VARCHAR},
+			     #{item.Item_SKU,jdbcType=VARCHAR},
+			     #{item.Item_Title,jdbcType=VARCHAR},
+			     #{item.QuantityPurchased,jdbcType=VARCHAR},
+			     #{item.currencycode,jdbcType=VARCHAR},
+			     #{item.TransactionPrice,jdbcType=VARCHAR},
+			     0,
+			     #{id},
+			     #{item.ShippingCarrierUsed,jdbcType=VARCHAR},
+			     #{item.ShipmentTrackingNumber,jdbcType=VARCHAR},
+			     #{item.SellingManagerSalesRecordNumber,jdbcType=VARCHAR}
+			    );			
+		</foreach>
+	</insert>
+	<update id="updateOrderSkuInfo">
+		<foreach collection="list" item="item" index="index" open="begin" close="end;">
+			  update ebay_order_item set
+			  SHIPPING_CARRIER_USED = #{item.ShippingCarrierUsed,jdbcType=VARCHAR},
+			  SHIPMENT_TRACKING_NUMBER = #{item.ShipmentTrackingNumber,jdbcType=VARCHAR}
+			  where  SALES_RECORD_NUMBER = #{item.SellingManagerSalesRecordNumber,jdbcType=VARCHAR}
+			  and parent_id = #{id};
+		</foreach>
+	</update>
+	<sql id="select_base">
+		select eo.id id,
+			   eo.account         account,
+		       eo.order_id        orderId,
+		       eo.order_status    orderStatus,
+		       eo.has_pushed	  hasPushed,
+		       eo.amount_paid amountPaid,
+		       eo.payment_methods paymentMethods,
+		       eo.sales_record_number saleRecordId,
+		       eo.total total,
+		       eo.buyer_user_id buyerUserId,
+		       to_char(eo.created_time,'yyyy-MM-dd HH24:MI:ss')    createdTime,
+		       to_char(eo.paid_time,'yyyy-MM-dd HH24:MI:ss')       paidTime,
+		       to_char(eo.shipped_time,'yyyy-MM-dd HH24:MI:ss') shippedTime,
+		       to_char(eo.last_modified_time,'yyyy-MM-dd HH24:MI:ss') lastModifiedTime,
+		       to_char(eo.last_fetch_time,'yyyy-MM-dd HH24:MI:ss') lastFetchTime,
+		       eo.remark remark
+		  from ebay_order eo
+		  where 1=1
+	</sql>
+	<sql id="select_base_condition">
+		<if test="saleInfoVO.ocsId != null and saleInfoVO.ocsId != ''">
+			 and #{saleInfoVO.ocsId} like '%'||eo.id||'%' 
+		</if>
+		<if test="saleInfoVO.account != null and saleInfoVO.account !=''">
+			and eo.account = #{saleInfoVO.account}
+		</if>
+		<if test="saleInfoVO.site != null and saleInfoVO.site !=''">
+			and eo.order_id in (select distinct m.order_id from ebay_order_item m where m.transaction_site_id = #{saleInfoVO.site})
+		</if>
+		<if test="saleInfoVO.orderId != null and saleInfoVO.orderId !=''">
+			and eo.order_id like '%'||#{saleInfoVO.orderId}||'%'
+		</if>
+		<if test="saleInfoVO.saleRecordNumber != null and saleInfoVO.saleRecordNumber != ''">
+			and  eo.sales_record_number like '%'||#{saleInfoVO.saleRecordNumber}||'%'
+		</if>
+		<if test="saleInfoVO.buyerId != null and saleInfoVO.buyerId != ''">
+			 and eo.buyer_user_id like '%'||#{saleInfoVO.buyerId}||'%'
+		</if>
+		<if test="saleInfoVO.payTimeStart != null and saleInfoVO.payTimeStart != ''">
+			  and eo.paid_time between to_timestamp(#{saleInfoVO.payTimeStart},'yyyy-MM-dd hh24:mi:ss') and to_timestamp(#{saleInfoVO.payTimeEnd},'yyyy-MM-dd hh24:mi:ss')
+		</if>
+		<if test="saleInfoVO.shipTimeStart != null and saleInfoVO.shipTimeStart != ''">
+			and eo.shipped_time between to_timestamp(#{saleInfoVO.shipTimeStart},'yyyy-MM-dd hh24:mi:ss') and to_timestamp(#{saleInfoVO.shipTimeEnd},'yyyy-MM-dd hh24:mi:ss')
+		</if>
+		<if test="saleInfoVO.orderTimeStart != null and saleInfoVO.orderTimeStart != ''">
+			and eo.created_time between to_timestamp(#{saleInfoVO.orderTimeStart},'yyyy-MM-dd hh24:mi:ss') and to_timestamp(#{saleInfoVO.orderTimeEnd},'yyyy-MM-dd hh24:mi:ss')
+		</if>
+		<if test="saleInfoVO.orderStatus != null and saleInfoVO.orderStatus != ''">
+			and eo.order_status = #{saleInfoVO.orderStatus} 
+		</if>
+		<if test="saleInfoVO.paypalCode != null and saleInfoVO.paypalCode != ''">
+			and eo.PAYPAL_TRANSACTION_CODE = #{saleInfoVO.paypalCode} 
+		</if>
+		<if test="saleInfoVO.email != null and saleInfoVO.email != ''">
+			and eo.BUYER_EMAIL = #{saleInfoVO.email} 
+		</if>
+		<if test="saleInfoVO.remark != null and saleInfoVO.remark != ''">
+			and eo.REMARK like '%'||#{saleInfoVO.remark}||'%' 
+		</if>
+		<if test="saleInfoVO.label != null and saleInfoVO.label != ''">
+			and eo.label = #{saleInfoVO.label}
+		</if>
+		<if test="saleInfoVO.hasItemParam != null and saleInfoVO.hasItemParam != ''">
+			and eo.id in (
+				select distinct ei.parent_id
+				  from ebay_order_item ei
+				 where 1=1
+				 	<if test="saleInfoVO.itemId != null and saleInfoVO.itemId != ''">
+						 and #{saleInfoVO.itemId} like '%'||ei.item_id||'%' 
+					</if>
+					<if test="saleInfoVO.sku != null and saleInfoVO.sku != ''">
+						 and ( #{saleInfoVO.sku} like '%'||ei.item_sku||'%' or
+						  ei.item_sku  like '%'||#{saleInfoVO.sku}||'%')
+					</if>
+					<if test="saleInfoVO.title != null and saleInfoVO.title != ''">
+						 and ei.item_title like '%'||#{saleInfoVO.title}||'%'
+					</if>
+					<if test="saleInfoVO.shipNumber != null and saleInfoVO.shipNumber != ''">
+						 and ei.shipment_tracking_number = #{saleInfoVO.shipNumber}
+					</if>
+					<if test="saleInfoVO.transactionId != null and saleInfoVO.transactionId != ''">
+						 and ei.transaction_id = #{saleInfoVO.transactionId}
+					</if>
+			)
+		</if>
+		<if test="saleInfoVO.hasSubParam != null and saleInfoVO.hasSubParam != ''">
+			and eo.id in (
+				select es.parent_id 
+				from ebay_order_sub es 
+				where 1 = 1
+				<if test="saleInfoVO.buyerName != null and saleInfoVO.buyerName != ''">
+					 and es.shipping_address like '%'||#{saleInfoVO.buyerName}||'%'
+				</if>
+				<if test="saleInfoVO.postCode != null and saleInfoVO.postCode != ''">
+					 and es.shipping_address like '%'||#{saleInfoVO.postCode}||'%'
+				</if>
+				<if test="saleInfoVO.street != null and saleInfoVO.street != ''">
+					 and es.shipping_address like '%'||#{saleInfoVO.street}||'%'
+				</if>
+				
+			)
+		</if>
+		<choose>  
+            <when test="saleInfoVO.orderAllStatus == 1">  
+                 and eo.pay_status in ('Incomplete')
+				 and eo.order_status = 'Active'
+				 and eo.shipped_time is null
+				 <![CDATA[and to_number(substr(eo.adjustment_amount,5))>=0]]>
+            </when>  
+            <when test="saleInfoVO.orderAllStatus == 2">  
+                 and eo.pay_status = 'Complete'
+            </when>  
+            <when test="saleInfoVO.orderAllStatus == 3">  
+                  and eo.shipped_time is null
+				 and eo.paid_time is not null
+				 and eo.order_status = 'Completed'
+				 and eo.pay_status = 'Complete'
+				 and eo.sales_record_number is not null
+				 and eo.tag = 0
+				 and eo.created_time > to_date('2018-01-26 00:00:00','yyyy-MM-dd hh24:mi:ss')
+            </when>  
+            <when test="saleInfoVO.orderAllStatus == 4">  
+                and eo.shipped_time is not null
+				and eo.order_status = 'Completed'
+				and eo.sales_record_number is not null
+            </when>
+            <when test="saleInfoVO.orderAllStatus == 5">  
+                and eo.tag = 1
+            </when>  
+            <otherwise>  
+               
+            </otherwise>  
+        </choose>
+	</sql>
+	<select id="queryByPage" resultType="com.it.ocs.synchronou.model.SaleInfoModel">
+		select m.*,i.item_sku sku,i.item_id itemId,i.transaction_site_id siteId
+		from (
+			select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					<include refid="select_base" />
+					<include refid="select_base_condition" />
+					order by eo.created_time desc
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+			) m,ebay_order_item i
+		where m.id = i.parent_id
+		order by m.createdTime desc
+	</select>
+	<select id="count" resultType="int">
+		select count(1) from (
+			<include refid="select_base" />
+			<include refid="select_base_condition" />
+		)
+	</select>
+	<select id="countOrderNoPaid" resultType="int">
+			select count(1) from (
+				<include refid="select_base" />
+				 and eo.pay_status in ('Incomplete')
+				 and eo.order_status = 'Active'
+				 and eo.shipped_time is null
+				 <![CDATA[and to_number(substr(eo.adjustment_amount,5))>=0]]>
+			)
+	</select>
+	<select id="countOrderPaid" resultType="int">
+			select count(1) from (
+				<include refid="select_base" />
+				and eo.pay_status = 'Complete'
+			)
+	</select>
+	<select id="countOrderNoShipped" resultType="int">
+			select count(1) from (
+				<include refid="select_base" />
+				 and eo.shipped_time is null
+				 and eo.paid_time is not null
+				 and eo.order_status = 'Completed'
+				 and eo.pay_status = 'Complete'
+				 and eo.sales_record_number is not null
+				 and eo.created_time > to_date('2018-01-26 00:00:00','yyyy-MM-dd hh24:mi:ss')
+			)
+	</select>
+	<select id="countOrderShipped" resultType="int">
+			select count(1) from (
+				<include refid="select_base" />
+				and eo.shipped_time is not null
+				and eo.order_status = 'Completed'
+				and eo.sales_record_number is not null
+			)
+	</select>
+	<select id="getNoShipData" resultType="java.util.HashMap">
+		select *
+		from (
+				select o.account account,
+					   o.order_id orderId,
+		       		   to_char(o.created_time,'yyyy-MM-dd HH24:MI:ss.ff') createTime,
+				       e.item_sku sku,
+				       e.quantity_purchased quantity,
+				       e.item_id itemId,
+				       e.sales_record_number saleRecordNumber,
+				       e.price soldPrice,
+				       e.currencycode currency,
+				       e.transaction_id transactionId,
+				       o.shipping_service shipService,
+				       to_char(o.paid_time,'yyyy-MM-dd HH24:MI:ss.ff') payTime,
+				       to_char(s.shipping_address) shippingAddress
+				from ebay_order o,ebay_order_sub s,ebay_order_item e
+				where o.id = s.parent_id
+				and o.id = e.parent_id
+				and o.shipped_time is null
+				and o.paid_time is not null
+				AND o.PAY_STATUS = 'Complete'
+				)
+				order by account asc
+	</select>
+	<update id="updateOrderTrackingNumber">
+		update ebay_order_item eoi set eoi.ship_time = to_timestamp(#{shipTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+                               eoi.shipping_carrier_used = #{carrier,jdbcType=VARCHAR},
+                               eoi.shipment_tracking_number = #{trackingNumber,jdbcType=VARCHAR},
+                               eoi.shipping_carrier_used2 = #{carrier2,jdbcType=VARCHAR},
+                               eoi.shipment_tracking_number2 = #{trackingNumber2,jdbcType=VARCHAR},
+                               eoi.shipping_carrier_used3 = #{carrier3,jdbcType=VARCHAR},
+                               eoi.shipment_tracking_number3 = #{trackingNumber3,jdbcType=VARCHAR},
+                               eoi.shipping_menthod_used = #{method,jdbcType=VARCHAR},
+                               eoi.shipping_menthod_used2 = #{method2,jdbcType=VARCHAR},
+                               eoi.shipping_menthod_used3 = #{method3,jdbcType=VARCHAR}
+		where eoi.order_id = #{orderId,jdbcType=VARCHAR}
+		and eoi.item_id = #{itemId,jdbcType=VARCHAR}
+		and eoi.transaction_id =#{transactionId,jdbcType=VARCHAR}
+	</update>
+	<select id="getSubItemById" resultType="com.it.ocs.synchronou.model.SaleSubItemModel">
+		select eoi.id id,
+			   eoi.order_id orderId,
+			   eo.account ebayAccount,
+			   eoi.transaction_id      transactionId,
+		       eoi.item_id             itemId,
+		       eoi.item_title          title,
+		       eoi.item_sku            sku,
+		       eoi.quantity_purchased  quantity,
+		       eoi.sales_record_number saleRecordNumber,
+		       eoi.shipment_tracking_number trackingNumber,
+		       eoi.shipping_carrier_used carrier,
+		       eoi.shipping_menthod_used method,
+		       eoi.shipment_tracking_number2 trackingNumber2,
+		       eoi.shipping_carrier_used2 carrier2,
+		       eoi.shipping_menthod_used2 method2,
+		       eoi.shipment_tracking_number3 trackingNumber3,
+		       eoi.shipping_carrier_used3 carrier3,
+		       eoi.shipping_menthod_used3 method3
+          from ebay_order_item eoi,ebay_order eo
+		 where eoi.parent_id = eo.id
+   		   and eoi.parent_id = #{parentId}
+	</select>
+	<select id="getSendBillCount" resultType="int">
+		select count from ebay_send_bill_record where order_id = #{orderId}
+	</select>
+	<select id="getOrderByOrderId" resultType="com.it.ocs.synchronou.model.SaleInfoModel">
+		select eo.account account, eos.shipping_details shippingDetails
+		  from ebay_order eo, ebay_order_sub eos
+		 where eo.id = eos.parent_id
+		   and eos.order_id = #{orderId}
+		   and eo.account = #{account}
+	</select>
+	<select id="hasSend" resultType="int">
+		select count(1) from ebay_send_bill_record where order_id = #{orderId} and account = #{account}
+	</select>
+	<update id="updateSendRecord">
+		update ebay_send_bill_record set count = count+1,last_send_date = sysdate - 8/24 where order_id = #{orderId} and account = #{account}
+	</update>
+	<insert id="addSendRecord">
+		insert into ebay_send_bill_record(order_id,count,last_send_date,account)values(#{orderId},1,sysdate-8/24,#{account})
+	</insert>
+	<select id="getOrderById" resultType="com.it.ocs.synchronou.model.SaleInfoModel">
+		  select distinct a.order_id orderId,
+       			a.account account,
+       			b.transaction_site_id siteId
+	      from ebay_order a, ebay_order_item b
+	     where a.id = b.parent_id
+	       and a.id = #{id}
+	</select>
+	<select id="getStartTime" resultType="java.lang.String">
+		select to_char(max(eo.to_time),'yyyy-mm-dd hh24:mi:ss.ff') from SYS_ORDER_SYNCTIME eo where eo.platform = 'ebay' and eo.type = 1
+	</select>
+	<select id="getTimeSetId" resultType="int">
+		select SYS_ORDER_SYNCTIME_SEQ.Nextval from dual
+	</select>
+	<insert id="insertTimeSet">
+		insert into SYS_ORDER_SYNCTIME(id,from_time,platform,type)values(#{id},to_timestamp(#{timeFrom},'yyyy-MM-dd HH24:MI:ss.ff'),'ebay',1)
+	</insert>
+	<update id="udpateTimeSet">
+		update SYS_ORDER_SYNCTIME set to_time = to_timestamp(#{timeTo},'yyyy-MM-dd HH24:MI:ss.ff') where id = #{id}
+	</update>
+	<select id="getOrderTranInfo" resultType="java.util.HashMap">
+		select to_char(s.shipping_address) shipAddress,
+			json_ext.get_string(json(s.external_transaction),'ExternalTransactionID') paypalTranNum ,
+			json_ext.get_string(json(s.transaction_array),'Transaction.Buyer.Email') email
+		 from ebay_order_sub s where s.parent_id = #{parentId}
+	</select>
+	<select id="getOrderItemById" resultType="java.util.HashMap">
+		select t.id,
+			   t.item_title title,
+		       t.item_id itemId,
+		       t.item_sku sku,
+		       t.price price,
+		       t.quantity_purchased qty,
+		       t.shipping_carrier_used carrier,
+		       t.shipment_tracking_number trackNumber,
+		       to_char(t.ship_time,'yyyy-MM-dd hh24:mi:ss') shipTime
+		  from ebay_order_item t
+		  where t.parent_id = #{parentId}
+	</select>
+	<select id="getItemInfo" resultType="java.util.HashMap">
+		select a.publication_type,a.site_id,a.ebay_product_url,a.ebay_images from ebay_publication_line a where a.item_id = #{itemId} 
+	</select>
+	<select id="getItemEbayImage" resultType="java.lang.String">
+		select  a.ebay_images from ebay_publication_line a where a.item_id = #{itemId} and a.enabled_flag = 'Y'
+	</select>
+	<select id="getSaleOrderRefundByParentId" resultType="com.it.ocs.salesStatistics.vo.SaleOrderRefundVo">
+		SELECT NVL(K.SKU, T.ITEM_SKU) SKU,
+			   T.ITEM_SKU MSKU,
+		       T.QUANTITY_PURCHASED * NVL(K.QTY, 1) QTYORDERED,
+		       T.PRICE * T.QUANTITY_PURCHASED * NVL(K.PRICE_COEFFICIENT, 1) ROWTOTAL,
+		       T.TRANSACTION_SITE_ID TRANSACTIONSITEID
+		  FROM EBAY_ORDER_ITEM T, SYS_SKU_LINK K
+		 WHERE T.ITEM_SKU = K.P_SKU(+)
+		   AND T.PARENT_ID = #{parentId}
+	</select>
+	<select id="getItemIdById" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select distinct eoi.item_id value,eoi.item_id displayName from ebay_order_item eoi where eoi.parent_id = #{parentId}
+	</select>
+	
+	<insert id="addTrackNumberUploadRecord">
+		insert into ebay_upload_tranknumber(
+		   id,
+		   account,
+		   order_id,
+		   transaction_Id,
+		   item_Id,
+		   trackingNumber,
+		   carrier,
+		   upload_by,
+		   to_line,
+		   type
+		)values(
+		   ebay_upload_tranknumber_SEQ.Nextval,
+		   #{account,jdbcType=VARCHAR},
+		   #{orderId,jdbcType=VARCHAR},
+		   #{transactionId,jdbcType=VARCHAR},
+		   #{itemId,jdbcType=VARCHAR},
+		   #{trackingNo,jdbcType=VARCHAR},
+		   #{carrier,jdbcType=VARCHAR},
+		   #{uploadBy,jdbcType=BIGINT},
+		   0,
+		   #{type,jdbcType=VARCHAR}
+		)
+	</insert>
+	<select id="getItemInfoByOrderSEQId" resultType="java.util.HashMap">
+		select distinct i.item_id itemId, l.sku itemSku,l.ebay_images itemImg
+         from ebay_order_item i, ebay_publication_line l
+        where i.item_id = l.item_id(+)
+          and i.parent_id in 
+          <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+	<select id="itemExistOrder" resultType="int">
+		select count(*) from ebay_order_item i where i.parent_id = #{id} and i.item_id = #{itemId}
+	</select>
+	<update id="updateOrderShipTime">
+		update ebay_order_item eoi set eoi.ship_time = to_timestamp(#{shipTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')
+		where eoi.order_id = #{orderId,jdbcType=VARCHAR}
+		and eoi.item_id = #{itemId,jdbcType=VARCHAR}
+		and eoi.transaction_id =#{transactionId,jdbcType=VARCHAR}
+	</update>
+	<update id="remarkNoItem">
+		update ebay_order e set e.tag = 1 where e.id in 
+			 <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            	#{item}
+        	</foreach>
+			  and e.shipped_time is null
+			 and e.paid_time is not null
+			 and e.order_status = 'Completed'
+			 and e.pay_status = 'Complete'
+			 and e.sales_record_number is not null
+			 and e.tag = 0
+			 and e.created_time > to_date('2018-01-26 00:00:00','yyyy-MM-dd hh24:mi:ss')
+	</update>
+	<update id="unRemarkNoItem">
+		update ebay_order e set e.tag = 0 where e.id in 
+			 <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            	#{item}
+        	</foreach>
+	</update>
+	<update id="remarkContent">
+		update ebay_order e set e.remark = #{remark,jdbcType=VARCHAR} where e.id = #{id,jdbcType=BIGINT}
+	</update>
+	<select id="getSiteIdBySiteName" resultType="java.lang.String">
+		select t.site_id from EBAY_SITE_DETAILS_INFO t where upper(t.site) = upper(#{siteName})
+	</select>
+	<insert id="addCancelRecord">
+		insert into ebay_order_cancel_t(
+			account,
+			order_id,
+			cancel_reason,
+			user_id,
+			cancel_date,
+			CANCEL_ID
+			)values(
+			#{account,jdbcType=VARCHAR},
+			#{orderId,jdbcType=VARCHAR},
+			#{cancelReason,jdbcType=VARCHAR},
+			#{userId,jdbcType=VARCHAR},
+			sysdate,
+			#{cancelId,jdbcType=VARCHAR}
+			)
+	</insert>
+	<select id="getUploadsByAccount" resultType="com.it.ocs.synchronou.model.EbayShipUploadModel">
+		select id, account, itemId, orderId, transactionId, trackingNumber, carrier
+		  from (select m.*, rownum rn
+		          from (select t.id,
+		                       t.account,
+		                       t.item_id        itemId,
+		                       t.order_id       orderId,
+		                       t.transaction_id transactionId,
+		                       t.trackingnumber trackingNumber,
+		                       t.carrier
+		                  from EBAY_UPLOAD_TRANKNUMBER t
+		                 where t.account = #{account}
+		                   and t.to_line = 0
+		                 order by t.upload_date asc) m)
+		<![CDATA[where rn < 101]]>
+	</select>
+	<update id="updateOrderShipNumberByOCS">
+		update ebay_order_item m
+		   set m.shipment_tracking_number = #{trackingNumber,jdbcType=VARCHAR},
+		       m.shipping_carrier_used    = #{carrier},
+		       m.ship_time                = to_timestamp(#{shippedTime,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0
+		 where m.id in (select eoi.id
+		                  from ebay_order eo, ebay_order_item eoi
+		                 where eo.id = eoi.parent_id
+		                   and eo.account = #{account}
+		                   and eo.order_id = #{orderId}
+		                   and eoi.transaction_id = #{transactionId})
+	</update>
+	<update id="updateOrderShipMarkByOCS">
+		update ebay_order_item m
+		   set m.shipping_carrier_used    = #{carrier,jdbcType=VARCHAR},
+		       m.ship_time                = to_timestamp(#{shippedTime,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0
+		 where m.id in (select eoi.id
+		                  from ebay_order eo, ebay_order_item eoi
+		                 where eo.id = eoi.parent_id
+		                   and eo.account = #{account,jdbcType=VARCHAR}
+		                   and eo.order_id = #{orderId,jdbcType=VARCHAR}
+		                   and eoi.transaction_id = #{transactionId,jdbcType=VARCHAR})
+	</update>
+	<update id="updateUploadData">
+		update EBAY_UPLOAD_TRANKNUMBER t set t.to_line = 1,t.shipped_time = to_timestamp(#{shippedTime,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0 where t.id = #{id}
+	</update>
+	<update id="updateUploadDataByFail">
+		update EBAY_UPLOAD_TRANKNUMBER t set t.cause = #{cause,jdbcType=VARCHAR},t.to_line = 2 where t.id = #{id}
+	</update>
+	
+	<sql id="ship_record_select_base">
+		select t.id,
+		       t.account,
+		       t.order_id       orderId,
+		       t.transaction_id transactionId,
+		       t.item_id        itemId,
+		       t.carrier,
+		       t.trackingnumber trackingNumber,
+		       t.to_line        toLine,
+		       t.cause,
+		       t.type,
+		       to_char(t.upload_date,'yyyy-MM-dd hh24:mi:ss')    uploadDate
+		  from EBAY_UPLOAD_TRANKNUMBER t
+		 where 1 = 1
+	</sql>
+	<sql id="ship_record_select_base_condition">
+	
+	</sql>
+	<select id="shipUploadRecord" resultType="com.it.ocs.synchronou.model.EbayShipUploadModel">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					<include refid="ship_record_select_base" />
+					<include refid="ship_record_select_base_condition" />
+					order by t.upload_date desc,t.id desc
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	
+	<select id="shipUploadRecordCount" resultType="int">
+		select count(*) from (
+			<include refid="ship_record_select_base" />
+			<include refid="ship_record_select_base_condition" />
+		)
+	</select>
+	<update id="cancelUpload">
+		update EBAY_UPLOAD_TRANKNUMBER t set t.to_line = 2 where t.id = #{id}
+	</update>
+	<update id="updateReplaceOrder">
+		begin
+		update sys_return_order_final f set f.tarcking_num =#{trackingNo,jdbcType=VARCHAR} ,f.tarcking_service = #{carrier,jdbcType=VARCHAR},f.update_date = sysdate
+		where f.platform = #{platform}
+		and f.account = #{account}
+		and f.order_id = #{orderId}
+		and f.times = #{times};
+		update ebay_order o set o.remark = o.remark ||' '||to_char(sysdate,'yyyy-MM-dd')||'已补发('||#{carrier,jdbcType=VARCHAR}||' '||#{trackingNo,jdbcType=VARCHAR}||').' where o.account =#{account} and o.order_id = #{orderId};
+		end;
+	</update>
+	<select id="getOrderInfoToSendMessage" resultType="java.util.HashMap">
+		select a.buyer_user_id buyerId,b.transaction_site_id siteId
+		from ebay_order a,ebay_order_item b
+		where a.id = b.parent_id
+		and a.account = #{account}
+		and a.order_id = #{orderId}
+		and b.item_id = #{itemId}
+	</select>
+	<select id="getPaypalAccessTokenByPaypalAccount" resultType="java.lang.String">
+		<![CDATA[select max(t.access_token) from ebay_paypal_token t where t.paypal_account = #{account} and t.expires_in > sysdate]]>
+	</select>
+	<select id="getPaypalAccountInfo" resultType="java.util.HashMap">
+		select pi.client_id client,pi.secret from paypal_info pi where pi.paypal_account = #{account}
+	</select>
+	<insert id="addCurToken">
+		insert into ebay_paypal_token
+		  (id, paypal_account, access_token, expires_in, create_date)
+		values
+		  (ebay_paypal_token_seq.nextval, #{account}, #{token}, sysdate + 6 / 24, sysdate)
+	</insert>
+	<select id="getNoEmailOrders" resultType="com.it.ocs.synchronou.model.SaleInfoModel">
+		   select e.id, e.seller_email paypalAccount, e.paypal_transaction_code paypalTrantionCode
+		     from ebay_order e
+		    where (e.buyer_email is null or e.buyer_email = 'Invalid Request')
+		      and e.paypal_transaction_code is not null
+	</select>
+	<update id="updateOrderUserEmail">
+		update ebay_order e set e.buyer_paypal_email = #{buyerEmail} where e.id = #{id}
+	</update>
+	<select id="getMoveMenuList" resultType="com.it.ocs.synchronou.model.EbayLabelModel">
+		select id,name,to_char(update_date,'yyyy-MM-dd hh24:mi:ss')updateDate from ebay_order_label
+	</select>
+	<update id="labelOrder">
+		  update ebay_order o set o.label = #{label} where o.account = #{account} and o.order_id = #{orderId}
+	</update>
+	<insert id="addLabel">
+		insert into ebay_order_label(id,name)values(ebay_order_label_SEQ.Nextval,#{name})
+	</insert>
+	<update id="updateLabel">
+		update ebay_order_label set name = #{name},update_date = sysdate where id = #{id}
+	</update>
+	<delete id="deleteLabel">
+		delete ebay_order_label where id = #{id}
+	</delete>
+	<update id="updateOCSOrderInfo">
+		update sys_return_order_final f set f.tarcking_num =#{trackingNo,jdbcType=VARCHAR} ,f.tarcking_service = #{carrier,jdbcType=VARCHAR},f.update_date = sysdate
+		where f.platform = #{platform}
+		and f.account = #{account}
+		and f.order_id = #{orderId}
+		and f.sku = #{sku}
+	</update>
+</mapper> 

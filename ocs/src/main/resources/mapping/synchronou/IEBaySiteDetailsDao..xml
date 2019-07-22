@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBaySiteDetailsDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBaySiteDetailsModel" id="siteDetailsResult">
+		<id column="ID" property="id"  />
+		<result column="SITE" property="site"  />
+		<result column="SITE_ID" property="site_id"  />
+		<result column="DETAIL_VERSION" property="detail_version"  />
+		<result column="UPDATE_TIME" property="update_time"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="URL" property="url"  />
+		<result column="ABBREVIATION" property="abbreviation"  />
+		<result column="CURRENCY" property="currency"  />
+	</resultMap>
+	<sql id="select_base">
+			ID ,
+			SITE,
+			SITE_ID,
+			DETAIL_VERSION,
+			UPDATE_TIME,
+			ENABLED_FLAG,
+			URL,
+			ABBREVIATION,
+			CURRENCY
+	</sql>
+	<select id="findSiteDetailsList" resultMap="siteDetailsResult">
+		select  <include refid="select_base" /> from EBAY_SITE_DETAILS_INFO
+		where ENABLED_FLAG='Y'
+	</select>
+	<insert id="insertSiteDetails" parameterType="java.util.List">
+	INSERT INTO EBAY_SITE_DETAILS_INFO (
+			ID,
+			SITE,
+			SITE_ID,
+			DETAIL_VERSION,
+			UPDATE_TIME,
+			CREATION_DATE,
+			ENABLED_FLAG)   
+		select EBAY_SITE_DETAILS_INFO_SEQ.Nextval,c.*,sysdate,'Y' from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+			 #{item.site,jdbcType=VARCHAR},
+             #{item.site_id,jdbcType=DOUBLE},
+             #{item.detail_version,jdbcType=DOUBLE},
+             #{item.update_time,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+    </insert>
+    <select id="internalSelectSiteDetails" resultMap="siteDetailsResult">
+    	select SITE_ID,SITE from EBAY_SITE_DETAILS_INFO
+    </select>
+
+	<update id="updateSiteDetails" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update EBAY_SITE_DETAILS_INFO bao 
+	   	set
+	  		DETAIL_VERSION=#{item.detail_version,jdbcType=DOUBLE},
+	        UPDATE_TIME=#{item.update_time,jdbcType=VARCHAR}
+	   where bao.SITE_ID = #{item.site_id,jdbcType=DOUBLE}
+	   </foreach>
+	</update>
+</mapper>

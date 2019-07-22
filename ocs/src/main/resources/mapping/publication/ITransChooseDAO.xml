@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.ITransChooseDAO">
+	<resultMap type="com.it.ocs.publication.model.TransChooseModel" id="transResult">
+		<id property="id" column="TRANS_CHOOSE_ID" jdbcType="DECIMAL" />
+		<result property="transClauseExisPub" column="TRANS_CLAUSE_EXISPUB" jdbcType="VARCHAR" />
+		<result property="calCulateInfo" column="CACULATE_INFO" jdbcType="DECIMAL" />
+		<result property="domesticInfo" column="DOMESTIC_INFO" jdbcType="VARCHAR" />
+		<result property="internationalInfo" column="INTERNATIONAL_INFO" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_TRANS_CHOOSE where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<select id="getById" resultMap="transResult">
+		<include refid="select_base" /> where TRANS_CHOOSE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="transResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			TRANS_CHOOSE_ID id,
+			TRANS_CLAUSE_EXISPUB  transClauseExisPub,
+			CACULATE_INFO calCulateInfo,
+			DOMESTIC_INFO domesticInfo,
+			INTERNATIONAL_INFO internationalInfo,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_TRANS_CHOOSE
+	</sql>
+	<select id="query" resultMap="transResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.TransChooseModel">
+		insert into EBAY_TRANS_CHOOSE
+		(
+			TRANS_CHOOSE_ID,
+			TRANS_CLAUSE_EXISPUB,
+			CACULATE_INFO,
+			DOMESTIC_INFO,
+			INTERNATIONAL_INFO,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{transClauseExisPub},
+			#{calCulateInfo},
+			#{domesticInfo},
+			#{internationalInfo},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.TransChooseModel">
+		update EBAY_TRANS_CHOOSE set 
+			TRANS_CLAUSE_EXISPUB=#{transClauseExisPub},
+			CACULATE_INFO=#{calCulateInfo},
+			DOMESTIC_INFO=#{domesticInfo},
+			INTERNATIONAL_INFO=#{internationalInfo},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where TRANS_CHOOSE_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_TRANS_CHOOSE set ENABLED_FLAG='N' where TRANS_CHOOSE_ID=#{id}
+	</update>
+</mapper>

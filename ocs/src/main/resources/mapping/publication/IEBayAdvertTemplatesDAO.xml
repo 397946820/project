@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.it.ocs.publication.dao.IEBayAdvertTemplatesDAO">
+	<resultMap type="com.it.ocs.publication.model.EBayAdvertTemplatesModel" id="AdvertTemplatesResult">
+		<id column="ID" property="id"  />
+		<result column="NAME" property="name"  />
+		<result column="SITE_ID" property="site_id"  />
+		<result column="EBAY_ACCOUNT" property="ebay_account"  />
+		<result column="LINE_PRODUCT" property="line_product"  />
+		<result column="EBAY_PRODUCT_URL" property="product_url"  />
+		<result column="CREATE_BY" property="create_by"  />
+		<result column="CREATE_DATE" property="create_date"  />
+		<result column="UPDATE_BY" property="update_by"  />
+		<result column="UPDATE_DATE" property="update_date"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="PID_ID" property="pid_id"  />
+		<result column="URL" property="url"  />
+		<result column="PRODUCT_TITLE" property="product_name"  />
+		<result column="IMG_NAME" property="img_name"  />
+	</resultMap>
+	<select id="selectAdvertList" resultMap="AdvertTemplatesResult">
+		select ID,NAME from EBAY_ADVERT_TEMPLATES where ENABLED_FLAG='Y'
+	</select>
+	<insert id="insertAdvert">
+		INSERT INTO EBAY_ADVERT_TEMPLATES(
+			ID,
+			NAME,
+			SITE_ID,
+			EBAY_ACCOUNT,
+			PRODUCT_URL,
+			CREATE_DATE,
+			PID_ID,
+			URL,
+			IMG_NAME
+		) values(
+			EBAY_advert_Templates_SEQ.Nextval,
+			#{name,jdbcType=VARCHAR},
+			#{site_id,jdbcType=BIGINT},
+			#{ebay_account,jdbcType=VARCHAR},
+			#{product_url,jdbcType=VARCHAR},
+			sysdate,
+			#{pid_id,jdbcType=BIGINT},
+			#{url,jdbcType=VARCHAR},
+			#{img_name,jdbcType=VARCHAR}
+		)
+	</insert>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from EBAY_ADVERT_TEMPLATES
+	</select>
+	<select id="selectAdvertById" resultMap="AdvertTemplatesResult">
+	 select PID_ID,ID,LINE_PRODUCT,PRODUCT_URL from EBAY_ADVERT_TEMPLATES where ID=#{id,jdbcType=BIGINT}
+	</select>
+	<update id="updateAdvert">
+	 update EBAY_ADVERT_TEMPLATES eat set
+	     <include refid="update_dase"/>
+	  where eat.ID=#{id}
+	</update>
+	<update id="updateById">
+		update EBAY_ADVERT_TEMPLATES eat set eat.ENABLED_FLAG='N' where eat.ID=#{id}
+	</update>
+	<sql id="update_dase">
+		NAME = #{name,jdbcType=VARCHAR},
+		SITE_ID = #{site_id,jdbcType=BIGINT},
+		EBAY_ACCOUNT = #{ebay_account,jdbcType=VARCHAR},
+		PRODUCT_URL  = #{product_url,jdbcType=VARCHAR},
+		UPDATE_DATE = sysdate,
+		PID_ID = #{pid_id,jdbcType=BIGINT}
+		<if test="url!=null and url!=''">
+		 ,URL = #{url,jdbcType=VARCHAR}
+		</if>
+		<if test="img_name!=null and img_name!=''">
+		  ,IMG_NAME = #{img_name,jdbcType=VARCHAR}
+		</if>
+	</sql>
+	<sql id="select_dase">
+		eat.ID,
+		eat.NAME,
+		eat.SITE_ID,
+		eat.EBAY_ACCOUNT,
+		eat.LINE_PRODUCT,
+		eat.PID_ID,
+		eat.URL,
+		eat.IMG_NAME,
+		eat.product_url
+		
+	</sql>
+	<sql id="conditions_base">
+		<if test="advertModel.ebay_account!=null and advertModel.ebay_account!=''">
+		 and EBAY_ACCOUNT=#{advertModel.ebay_account}
+		</if>
+		<if test="advertModel.site_id!=null and advertModel.site_id!=''">
+		 and SITE_ID=#{advertModel.site_id}
+		</if>
+		
+	</sql>
+	<select id="selectAdvertTemplates" resultMap="AdvertTemplatesResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_dase" /> from  EBAY_ADVERT_TEMPLATES  eat where ENABLED_FLAG='Y' <include refid="conditions_base" />   order by eat.CREATE_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+</mapper>

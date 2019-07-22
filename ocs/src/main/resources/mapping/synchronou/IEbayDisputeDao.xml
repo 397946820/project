@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEbayDisputeDao">
+	<select id="isExistForDispute" resultType="int">
+		select count(1) from ebay_disputes where DisputeID = #{disputeID}
+	</select>
+	<select id="getDisputeId" resultType="int">
+		select ebay_disputes_SEQ.Nextval from dual
+	</select>
+	<insert id="insertDispute" >
+		insert into ebay_disputes
+		  (id,
+		   disputeid,
+		   disputerecordtype,
+		   disputestate,
+		   disputestatus,
+		   otherpartyrole,
+		   otherpartyname,
+		   userrole,
+		   transactionid,
+		   itemid,
+		   disputereason,
+		   disputeexplanation,
+		   disputecreatedtime,
+		   disputemodifiedtime,
+		   orderlineitemid,
+		   account)
+		values
+		  (#{id},
+		   #{DisputeID,jdbcType=VARCHAR},
+		   #{DisputeRecordType,jdbcType=VARCHAR},
+		   #{DisputeState,jdbcType=VARCHAR},
+		   #{DisputeStatus,jdbcType=VARCHAR},
+		   #{OtherPartyRole,jdbcType=VARCHAR},
+		   #{OtherPartyName,jdbcType=VARCHAR},
+		   #{UserRole,jdbcType=VARCHAR},
+		   #{TransactionID,jdbcType=VARCHAR},
+		   #{ItemID,jdbcType=VARCHAR},
+		   #{DisputeReason,jdbcType=VARCHAR},
+		   #{DisputeExplanation,jdbcType=VARCHAR},
+		   to_timestamp(#{DisputeCreatedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   to_timestamp(#{DisputeModifiedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   #{OrderLineItemID,jdbcType=VARCHAR},
+		   #{account,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<select id="isExistForDisputeInfo" resultType="int">
+		select count(1) from ebay_dispute_info where DisputeID = #{disputeID}
+	</select>
+	<insert id="insertDisputeInfo">
+		insert into ebay_dispute_info
+		  (id,
+		   parent_id,
+		   disputeid,
+		   buyeruserid,
+		   selleruserid,
+		   itemid,
+		   quantity,
+		   convertedcurrentprice,
+		   currentprice,
+		   site,
+		   title,
+		   disputecrediteligibility)
+		values
+		  (ebay_dispute_info_SEQ.Nextval,
+		   #{parentId},
+		   #{DisputeID,jdbcType=VARCHAR},
+		   #{BuyerUserID,jdbcType=VARCHAR},
+		   #{SellerUserID,jdbcType=VARCHAR},
+		   #{ItemID,jdbcType=VARCHAR},
+		   #{Quantity},
+		   #{ConvertedCurrentPrice,jdbcType=VARCHAR},
+		   #{CurrentPrice,jdbcType=VARCHAR},
+		   #{Site,jdbcType=VARCHAR},
+		   #{Title,jdbcType=VARCHAR},
+		   #{DisputeCreditEligibility,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<update id="updateDisputeInfo">
+			update ebay_disputes set
+		       DisputeState = #{DisputeState,jdbcType=VARCHAR},
+		       DisputeStatus = #{DisputeStatus,jdbcType=VARCHAR},
+		       DisputeModifiedTime = to_timestamp(#{DisputeModifiedTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')
+		       where id = #{parentId}
+
+	</update>
+	<select id="getDisputeUnClose" resultType="com.it.ocs.synchronou.model.EbayDisputeModel">
+		select ed.id dId,ed.disputeid disputeID from ebay_disputes ed where ed.account = #{account} and ed.disputestate != 'Closed'
+	</select>
+	
+	<sql id="select_base">
+		select eu.id id,
+           eu.case_id  caseId,
+           eu.case_type caseType,
+           eu.status status,
+           eu.buyer_id buyerId,
+           eu.account account,
+           eu.item_id itemId,
+           eu.item_title itemTitle,
+           eu.transaction_id transactionId,
+           eu.case_amount amount,
+           eu.case_quantity quantity,
+           eu.item_globalid globalid,
+           to_char(eu.item_transactiondate,'yyyy-MM-dd HH24:MI:ss')transactionDate,
+           eu.item_transactionprice transactionPrice,
+           to_char(eu.respond_by_date,'yyyy-MM-dd HH24:MI:ss') respondByDate,
+           to_char(eu.creation_date,'yyyy-MM-dd HH24:MI:ss') creationDateStr,
+           to_char(eu.last_modified_date,'yyyy-MM-dd HH24:MI:ss') lastModifiedDateStr,
+           remark remark
+    from ebay_user_case eu
+    where 1 = 1
+	</sql>
+	<sql id="select_base_condition">
+		<if test="param.account != null and param.account != ''">
+			and eu.account = #{param.account}
+		</if>
+		<if test="param.itemID != null and param.itemID != ''">
+			and eu.item_id = #{param.itemID}
+		</if>
+		<if test="param.transactionID != null and param.transactionID != ''">
+			and eu.transaction_id = #{param.transactionID}
+		</if>
+		<if test="param.buyerUserID != null and param.buyerUserID != ''">
+			and eu.buyer_id like '%'||#{param.buyerUserID}||'%'
+		</if>
+	</sql>
+	<select id="queryByPage" resultType="com.it.ocs.synchronou.model.EbayUserCaseModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+				<include refid="select_base_condition" />
+				order by eu.creation_date desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]>
+	</select>
+	<select id="count" resultType="int">
+		select count(1) from (
+			<include refid="select_base" />
+			<include refid="select_base_condition" />
+		)
+	</select>
+	<update id="remark" >
+		update ebay_user_case set remark = #{remark,jdbcType=VARCHAR} where id = #{id}
+	</update>
+	<select id="disputeMessageIsExist" resultType="int">
+		select count(*) from ebay_dispute_message where  MessageID = #{messageId}
+	</select>
+	<insert id="insetDisputeMessage">
+		insert into ebay_dispute_message
+		  (id,
+		   parent_id,
+		   disputeid,
+		   messageid,
+		   messagesource,
+		   messagecreationtime,
+		   messagetext)
+		values
+		  (ebay_dispute_message_SEQ.Nextval,
+		  #{parentId},
+		  #{disputeID,jdbcType=VARCHAR},
+		  #{MessageID,jdbcType=VARCHAR},
+		  #{MessageSource,jdbcType=VARCHAR},
+		  to_timestamp(#{MessageCreationTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		  #{MessageText,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<select id="getOrderTransInfo" resultType="com.it.ocs.synchronou.model.SaleSubItemModel">
+		select eoi.shipment_tracking_number trackingNumber,
+		       eoi.shipping_carrier_used    carrier,
+		       to_char(eoi.ship_time,'yyyy-MM-dd HH24:MI:ss')  shipTime
+		  from ebay_order_item eoi
+		 where eoi.item_id||'-'||eoi.transaction_id = #{orderLineItemId}
+	</select>
+	<select id="getOldDisputeMessage" resultType="com.it.ocs.synchronou.model.EbayDisputeModel">
+		select dm.messagetext disputeMessage,
+		       to_char(dm.messagecreationtime,'yyyy-MM-dd hh24:mm:ss') disputeCreatedTime,
+		       case
+		         when dm.messagesource = 'Buyer' then
+		          di.buyeruserid
+		         else
+		          di.selleruserid
+		       end account
+		  from ebay_dispute_info di, ebay_dispute_message dm
+		 where di.parent_id = dm.parent_id
+		   and di.parent_id = #{id}
+		   order by dm.messagecreationtime asc
+	</select>
+	<select id="countUserCase" resultType="int">
+		select count(*) from ebay_user_case ec where ec.case_id = #{caseId_id} and ec.account = #{user_userId}
+	</select>
+	<insert id="addUserCase">
+		insert into ebay_user_case(
+			id,
+			case_id,
+			case_type,
+			account,
+			buyer_id,
+			status,
+			item_id,
+			item_title,
+			transaction_id,
+			case_quantity,
+			case_amount,
+			respond_by_date,
+			creation_date,
+			last_modified_date,
+			item_globalId,
+			item_transactionDate,
+			item_transactionPrice
+			)values(
+			#{id,jdbcType=BIGINT},
+			#{caseId_id,jdbcType=VARCHAR},
+			#{caseId_type,jdbcType=VARCHAR},
+			#{user_userId,jdbcType=VARCHAR},
+			#{otherParty_userId,jdbcType=VARCHAR},
+			#{status,jdbcType=VARCHAR},
+			#{item_itemId,jdbcType=VARCHAR},
+			#{item_itemTitle,jdbcType=VARCHAR},
+			#{item_transactionId,jdbcType=VARCHAR},
+			#{caseQuantity,jdbcType=BIGINT},
+			#{caseAmount,jdbcType=VARCHAR},
+			to_timestamp(#{respondByDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			to_timestamp(#{creationDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			to_timestamp(#{lastModifiedDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			#{item_globalId,jdbcType=VARCHAR},
+			to_timestamp(#{item_transactionDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			#{item_transactionPrice,jdbcType=VARCHAR}
+			)
+	</insert>
+	<update id="updateUserCase">
+		update ebay_user_case set
+			case_type = #{caseId_type,jdbcType=VARCHAR},
+			status = #{status,jdbcType=VARCHAR},
+			item_id = #{item_itemId,jdbcType=VARCHAR},
+			item_title = #{item_itemTitle,jdbcType=VARCHAR},
+			transaction_id = #{item_transactionId,jdbcType=VARCHAR},
+			case_quantity = #{caseQuantity,jdbcType=VARCHAR},
+			case_amount = #{caseAmount,jdbcType=VARCHAR},
+			last_modified_date = to_timestamp(#{lastModifiedDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			item_globalId = #{item_globalId,jdbcType=VARCHAR},
+			item_transactionDate = to_timestamp(#{item_transactionDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			item_transactionPrice = #{item_transactionPrice,jdbcType=VARCHAR},
+			sync_update_date = sysdate
+		where case_id = #{caseId_id} and account = #{user_userId}
+	</update>
+	<select id="getUseCaseId" resultType="int">
+		select ebay_user_case_SEQ.Nextval from dual
+	</select>
+	<select id="getUseCaseIdByAccountAndCaseId" resultType="int">
+		select ec.id from ebay_user_case ec where ec.case_id = #{caseId} and ec.account = #{account}
+	</select>
+	<select id="userCaseEBPExist" resultType="int">
+		select count(*) from ebay_user_case_EBP_info euc where euc.parent_id = #{id,jdbcType=BIGINT}
+	</select>
+	<insert id="addUserCaseEBP">
+		insert into ebay_user_case_EBP_info(
+		       Parent_Id,
+		       Case_Id,
+		       Agreedrefundamount,
+		       Brs_Carrierused,
+		       Brs_Deliverydate,
+		       Brs_Deliverystatus,
+		       Brs_Shippingaddress,
+		       Brs_Shippingcost,
+		       Brs_Trackingnumber,
+		       Decision,
+		       Decisiondate,
+		       Decisionreason,
+		       Drd_Code,
+		       Drd_Content,
+		       Drd_Description,
+		       Detailstatus,Dsi_Code,Dsi_Content,Dsi_Description,Fvfcredited,Globalid,Initialbuyerexpectation,Ibed_Code,Ibed_Content,Ibed_Description,Notcountedinbuyerprocases,
+		       Openreason,Paymentdetail_Balancedue,Returnmerchandiseauthorization,Ss_Carrierused,Ss_Deliverydate,Ss_Deliverystatus,Ss_Shippingaddress,Ss_Shippingcost,Ss_Trackingnumber)
+		values(
+		      #{parent_id,jdbcType=BIGINT},
+		      #{case_id,jdbcType=VARCHAR},
+		      #{agreedRefundAmount,jdbcType=VARCHAR},
+		      #{buyerReturnShipment_carrierUsed,jdbcType=VARCHAR},
+		      to_timestamp(#{buyerReturnShipment_deliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+		      #{buyerReturnShipment_deliveryStatus,jdbcType=VARCHAR},
+		      #{buyerReturnShipment_shippingAddress,jdbcType=VARCHAR},
+		      #{buyerReturnShipment_shippingCost,jdbcType=VARCHAR},
+		      #{buyerReturnShipment_trackingNumber,jdbcType=VARCHAR},
+		      #{decision,jdbcType=VARCHAR},
+		      to_timestamp(#{decisionDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+		      #{decisionReason,jdbcType=VARCHAR},
+		      #{decisionReasonDetail_code,jdbcType=VARCHAR},
+		      #{decisionReasonDetail_content,jdbcType=VARCHAR},
+		      #{decisionReasonDetail_description,jdbcType=VARCHAR},
+		      #{detailStatus,jdbcType=VARCHAR},
+		      #{detailStatusInfo_code,jdbcType=VARCHAR},
+		      #{detailStatusInfo_content,jdbcType=VARCHAR},
+		      #{detailStatusInfo_description,jdbcType=VARCHAR},
+		      #{FVFCredited,jdbcType=VARCHAR},
+		      #{globalId,jdbcType=VARCHAR},
+		      #{initialBuyerExpectation,jdbcType=VARCHAR},
+		      #{initialBuyerExpectationDetail_code,jdbcType=VARCHAR},
+		      #{initialBuyerExpectationDetail_content,jdbcType=VARCHAR},
+		      #{initialBuyerExpectationDetail_description,jdbcType=VARCHAR},
+		      #{notCountedInBuyerProtectionCases,jdbcType=VARCHAR},
+		      #{openReason,jdbcType=VARCHAR},
+		      #{paymentDetail_balanceDue,jdbcType=VARCHAR},
+		      #{returnMerchandiseAuthorization,jdbcType=VARCHAR},
+		      #{sellerShipment_carrierUsed,jdbcType=VARCHAR},
+		      to_timestamp(#{sellerShipment_deliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+		      #{sellerShipment_deliveryStatus,jdbcType=VARCHAR},
+		      #{sellerShipment_shippingAddress  ,jdbcType=VARCHAR},
+		      #{sellerShipment_shippingCost,jdbcType=VARCHAR},
+		      #{sellerShipment_trackingNumber,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="updateUserCaseEBP">
+		update ebay_user_case_EBP_info set
+			     Agreedrefundamount = #{agreedRefundAmount,jdbcType=VARCHAR},
+			     Brs_Carrierused = #{buyerReturnShipment_carrierUsed,jdbcType=VARCHAR},
+			     Brs_Deliverydate = to_timestamp(#{buyerReturnShipment_deliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			     Brs_Deliverystatus =  #{buyerReturnShipment_deliveryStatus,jdbcType=VARCHAR},
+			     Brs_Shippingaddress = #{buyerReturnShipment_shippingAddress,jdbcType=VARCHAR},
+			     Brs_Shippingcost =  #{buyerReturnShipment_shippingCost,jdbcType=VARCHAR},
+			     Brs_Trackingnumber = #{buyerReturnShipment_trackingNumber,jdbcType=VARCHAR},
+			     Decision =#{decision,jdbcType=VARCHAR},
+			     Decisiondate =  to_timestamp(#{decisionDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			     Decisionreason = #{decisionReason,jdbcType=VARCHAR},
+			     Drd_Code =  #{decisionReasonDetail_code,jdbcType=VARCHAR},
+			     Drd_Content =  #{decisionReasonDetail_content,jdbcType=VARCHAR},
+			     Drd_Description =  #{decisionReasonDetail_description,jdbcType=VARCHAR},
+			     Detailstatus = #{detailStatus,jdbcType=VARCHAR},
+			     Dsi_Code = #{detailStatusInfo_code,jdbcType=VARCHAR},
+			     Dsi_Content = #{detailStatusInfo_content,jdbcType=VARCHAR},
+			     Dsi_Description = #{detailStatusInfo_description,jdbcType=VARCHAR},
+			     Fvfcredited = #{FVFCredited,jdbcType=VARCHAR},
+			     Globalid = #{globalId,jdbcType=VARCHAR},
+			     Initialbuyerexpectation =  #{initialBuyerExpectation,jdbcType=VARCHAR},
+			     Ibed_Code =  #{initialBuyerExpectationDetail_code,jdbcType=VARCHAR},
+			     Ibed_Content = #{initialBuyerExpectationDetail_content,jdbcType=VARCHAR},
+			     Ibed_Description = #{initialBuyerExpectationDetail_description,jdbcType=VARCHAR},
+			     Notcountedinbuyerprocases = #{notCountedInBuyerProtectionCases,jdbcType=VARCHAR},
+			     Openreason = #{openReason,jdbcType=VARCHAR},
+			     Paymentdetail_Balancedue = #{paymentDetail_balanceDue,jdbcType=VARCHAR},
+			     Returnmerchandiseauthorization = #{returnMerchandiseAuthorization,jdbcType=VARCHAR},
+			     Ss_Carrierused = #{sellerShipment_carrierUsed,jdbcType=VARCHAR},
+			     Ss_Deliverydate = to_timestamp(#{sellerShipment_deliveryDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+			     Ss_Deliverystatus =  #{sellerShipment_deliveryStatus,jdbcType=VARCHAR},
+			     Ss_Shippingaddress = #{sellerShipment_shippingAddress  ,jdbcType=VARCHAR},
+			     Ss_Shippingcost = #{sellerShipment_shippingCost,jdbcType=VARCHAR},
+			     Ss_Trackingnumber = #{sellerShipment_trackingNumber,jdbcType=VARCHAR}
+	   where parent_id = #{parent_id,jdbcType=BIGINT}
+	   and  case_id = #{case_id,jdbcType=VARCHAR}
+	</update>
+	<insert id="addAppeal">
+		insert into ebay_EBP_appeal
+		  (Parent_Id,
+		   Case_Id,
+		   Id,
+		   Decision,
+		   Reasondetail_Code,
+		   Reasondetail_Content,
+		   Reasondetail_Description)
+		values
+		  (
+		  #{parent_id,jdbcType=BIGINT},
+		  #{case_id,jdbcType=VARCHAR},
+		  #{id,jdbcType=VARCHAR},
+		  #{decision,jdbcType=VARCHAR},
+		  #{decisionReasonDetail_code,jdbcType=VARCHAR},
+		  #{decisionReasonDetail_content,jdbcType=VARCHAR},
+		  #{decisionReasonDetail_description,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<insert id="addCaseDocumentInfo" >
+	insert into ebay_EBP_caseDocumentInfo
+	  (Parent_Id, Case_Id, Name, Type, Uploaddate)
+	values
+	  ( #{parent_id,jdbcType=BIGINT},
+	    #{case_id,jdbcType=VARCHAR},
+	    #{name,jdbcType=VARCHAR},
+	    #{type,jdbcType=VARCHAR},
+	    to_timestamp(#{uploadDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0
+	   )
+	</insert>
+	<insert id="addMoneyMovement" >
+		insert into ebay_EBP_moneyMovement
+		  (Parent_Id,
+		   Case_Id,
+		   Id,
+		   Parentid,
+		   Amount,
+		   Fromparty_Role,
+		   Fromparty_Userid,
+		   Paymentmethod,
+		   Paypaltransactionid,
+		   Status,
+		   Toparty_Role,
+		   Toparty_Userid,
+		   Transactiondate,
+		   Type)
+		values
+		  (
+		   #{parent_id,jdbcType=BIGINT},
+		   #{case_id,jdbcType=VARCHAR},
+		   #{id,jdbcType=VARCHAR},
+		   #{parentId,jdbcType=VARCHAR},
+		   #{amount,jdbcType=VARCHAR},
+		   #{fromParty_role,jdbcType=VARCHAR},
+		   #{fromParty_userId,jdbcType=VARCHAR},
+		   #{paymentMethod,jdbcType=VARCHAR},
+		   #{paypalTransactionId,jdbcType=VARCHAR},
+		   #{status,jdbcType=VARCHAR},
+		   #{toParty_role,jdbcType=VARCHAR},
+		   #{toParty_userId,jdbcType=VARCHAR},
+		   to_timestamp(#{transactionDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+		   #{type,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<insert id="addResponseHistory">
+		insert into ebay_EBP_responseHistory
+		  (Parent_Id,
+		   Case_Id,
+		   Activity,
+		   Activitydetail_Code,
+		   Activitydetail_Content,
+		   Activitydetail_Description,
+		   Attr_Appealref,
+		   Attr_Moneymovementref,
+		   Attr_Onholdreason,
+		   Attr_Onholdreasondetail_Code,
+		   Attr_Onholdreasondetail_Con,
+		   Attr_Onholdreasondetail_Des,
+		   Author_Role,
+		   Author_Userid,
+		   Creationdate,
+		   Note)
+		values
+		  (
+		  #{parent_id,jdbcType=BIGINT},
+		  #{case_id,jdbcType=VARCHAR},
+		  #{activity,jdbcType=VARCHAR},
+		  #{activityDetail_code,jdbcType=VARCHAR},
+		  #{activityDetail_content,jdbcType=VARCHAR},
+		  #{activityDetail_description,jdbcType=VARCHAR},
+		  #{attributes_appealRef,jdbcType=VARCHAR},
+		  #{attributes_moneyMovementRef,jdbcType=VARCHAR},
+		  #{attributes_onholdReason,jdbcType=VARCHAR},
+		  #{attributes_onholdReasonDetail_code,jdbcType=VARCHAR},
+		  #{attributes_onholdReasonDetail_content,jdbcType=VARCHAR},
+		  #{attributes_onholdReasonDetail_description,jdbcType=VARCHAR},
+		  #{author_role,jdbcType=VARCHAR},
+		  #{author_userId,jdbcType=VARCHAR},
+		  to_timestamp(#{creationDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+		  #{note,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<select id="countAppeal" resultType="int">
+		select count(*) from ebay_EBP_appeal a where a.parent_id = #{parent_id,jdbcType=BIGINT} and a.id = #{id,jdbcType=VARCHAR}
+	</select>
+	<update id="updateAppeal">
+		update  ebay_EBP_appeal set
+		   Decision =  #{decision,jdbcType=VARCHAR},
+		   Reasondetail_Code = #{decisionReasonDetail_code,jdbcType=VARCHAR},
+		   Reasondetail_Content =  #{decisionReasonDetail_content,jdbcType=VARCHAR},
+		   Reasondetail_Description = #{decisionReasonDetail_description,jdbcType=VARCHAR}
+		where parent_id = #{parent_id,jdbcType=BIGINT} and id = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="countMoneyMovement" resultType="int">
+		select count(*) from ebay_EBP_moneyMovement m where m.parent_id = #{parent_id,jdbcType=BIGINT} and m.id = #{id,jdbcType=VARCHAR}
+	</select>
+	<update id="updateMoneyMovement">
+		update ebay_EBP_moneyMovement set 
+		   Amount = #{amount,jdbcType=VARCHAR},
+		   Fromparty_Role = #{fromParty_role,jdbcType=VARCHAR},
+		   Fromparty_Userid = #{fromParty_userId,jdbcType=VARCHAR},
+		   Paymentmethod = #{paymentMethod,jdbcType=VARCHAR},
+		   Paypaltransactionid = #{paypalTransactionId,jdbcType=VARCHAR},
+		   Status = #{status,jdbcType=VARCHAR},
+		   Toparty_Role = #{toParty_role,jdbcType=VARCHAR},
+		   Toparty_Userid = #{toParty_userId,jdbcType=VARCHAR},
+		   Transactiondate = to_timestamp(#{transactionDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0,
+		   Type = #{type,jdbcType=VARCHAR}
+		where parent_id = #{parent_id,jdbcType=BIGINT}
+		   and  id =  #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="countCaseDocumentInfo" resultType="int">
+		select count(*) from ebay_EBP_caseDocumentInfo d 
+		where d.parent_id = #{parent_id,jdbcType=BIGINT} 
+		and d.case_id = #{case_id,jdbcType=VARCHAR}
+		and d.name = #{name,jdbcType=VARCHAR} 
+		and d.type = #{type,jdbcType=VARCHAR} 
+		and d.uploaddate = to_timestamp(#{uploadDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0
+	</select>
+	<select id="countResponseHistory" resultType="int">
+		select count(*) from ebay_ebp_responsehistory h 
+		where h.parent_id = #{parent_id,jdbcType=BIGINT} 
+		and h.author_role = #{author_role,jdbcType=VARCHAR} 
+		and h.creationdate = to_timestamp(#{creationDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss.ff')+0
+		and h.note = #{note,jdbcType=VARCHAR}
+	</select>
+	<select id="getUseCaseById" resultType="com.it.ocs.synchronou.model.EbayUserCaseModel">
+		select c.case_id caseId,c.account account,c.buyer_id buyerId,c.item_id itemId from ebay_user_case c where c.id = #{id}
+	</select>
+	<select id="getAppealListByParentId" resultType="java.util.HashMap">
+		select A.ID,
+               A.DECISION,
+               A.REASONDETAIL_CODE,
+               A.REASONDETAIL_CONTENT,
+               A.REASONDETAIL_DESCRIPTION
+          from ebay_ebp_appeal A
+         where a.parent_id = #{parentId}
+	</select>
+	<select id="getMoneyMovementListByParentId" resultType="java.util.HashMap">
+		 select M.ID,
+                M.FROMPARTY_ROLE,
+                M.TOPARTY_ROLE,
+                M.AMOUNT,
+                M.PAYMENTMETHOD,
+                M.PAYPALTRANSACTIONID,
+                M.STATUS,
+                M.TYPE,
+                to_char(M.TRANSACTIONDATE,'yyyy-MM-dd hh24:mi:ss') TRANSACTIONDATE
+         from ebay_ebp_moneymovement M
+         where m.parent_id = #{parentId}
+         order by m.transactiondate asc
+	</select>
+	<select id="getResponseHistoryListByParentId" resultType="java.util.HashMap">
+		 select ACTIVITYDETAIL_DESCRIPTION,
+                AUTHOR_ROLE,
+                NOTE,
+                to_char(CREATIONDATE, 'yyyy-MM-dd hh24:mi:ss') CREATIONDATE
+           from (select distinct H.ACTIVITYDETAIL_DESCRIPTION,
+                                 H.AUTHOR_ROLE,
+                                 H.NOTE,
+                                 H.CREATIONDATE
+                   from ebay_ebp_responsehistory H
+                  where h.parent_id = #{parentId}
+                  order by h.creationdate asc)
+	</select>
+</mapper> 

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayProductListingDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBayProductListingModel" id="ProductListingResult">
+		<id column="ID" property="id"  />
+		<result column="CATEGORY_ID" property="category_id"  />
+		<result column="MARKETPLACE_ID" property="marketplace_id"  />
+		<result column="EAN" property="ean"  />
+		<result column="ISBN" property="isbn"  />
+		<result column="UPC" property="upc"  />
+		<result column="ENABLED_FLAG" property="enabledFlag"  />
+		<result column="CONDITIONS" property="conditions"  />
+		<result column="CONDITION_HELP_URL" property="condition_help_url"  />
+	</resultMap>
+	<sql id="select_base">
+			ID ,
+			CATEGORY_ID,
+			MARKETPLACE_ID,
+			EAN,
+			ISBN,
+			UPC,
+			CONDITIONS,
+			CONDITION_HELP_URL
+
+	</sql>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(*) from EBAY_PRODUCT_LISTING 
+		where 1=1
+		<if test="marketplace_id != null">
+					and MARKETPLACE_ID=${marketplace_id}
+		</if>
+		<if test="category_id != null">
+			   and CATEGORY_ID=${category_id}
+		</if>
+	</select>
+	<select id="internalSelectProductListingByMIDOrCID" resultMap="ProductListingResult">
+		select ID ,EAN,ISBN,UPC,CONDITIONS from EBAY_PRODUCT_LISTING 
+		where 
+		MARKETPLACE_ID=#{marketplace_id} 
+		and CATEGORY_ID=#{category_id}
+	</select>
+	<insert id="insertProductListing" parameterType="com.it.ocs.synchronou.model.EBayProductListingModel">
+		INSERT INTO EBAY_PRODUCT_LISTING (
+			ID,
+			CATEGORY_ID,
+			MARKETPLACE_ID,
+			EAN,
+			ISBN,
+			UPC,
+			CONDITIONS,
+			CONDITION_HELP_URL,
+			CREATION_DATE,
+			ENABLED_FLAG)   
+		values(
+			ebay_product_listing_seq.Nextval,
+			#{category_id,jdbcType=BIGINT},
+			#{marketplace_id,jdbcType=BIGINT},
+			#{ean,jdbcType=VARCHAR},
+			#{isbn,jdbcType=VARCHAR},
+			#{upc,jdbcType=VARCHAR},
+			#{conditions,jdbcType=VARCHAR},
+			#{condition_help_url,jdbcType=VARCHAR},
+			sysdate,
+			'Y'
+		)
+    </insert>
+
+    <select id="selectProductListingsByMIDOrCID" resultMap="ProductListingResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from EBAY_PRODUCT_LISTING  
+				where 1=1
+				<if test="marketplace_id != null">
+					and MARKETPLACE_ID=${marketplace_id}
+				</if>
+				<if test="category_id != null">
+			    	and CATEGORY_ID=${category_id}
+				</if>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="internalSelectProductListingsByMIDAndCID"  resultMap="ProductListingResult">
+	
+	select <include refid="select_base" /> from EBAY_PRODUCT_LISTING  
+	where MARKETPLACE_ID=#{marketplace_id} and CATEGORY_ID=#{category_id}
+		
+	</select>
+	<update id="updateProductListing"  parameterType="com.it.ocs.synchronou.model.EBayProductListingModel">
+		update EBAY_PRODUCT_LISTING 
+		set 
+		EAN=#{ean,jdbcType=VARCHAR},
+		ISBN=#{isbn,jdbcType=VARCHAR},
+		UPC=#{upc,jdbcType=VARCHAR},
+		CONDITIONS=#{conditions,jdbcType=VARCHAR},
+		CONDITION_HELP_URL=#{condition_help_url,jdbcType=VARCHAR},
+		LAST_UPDATE_DATE=sysdate
+		where ID=#{id,jdbcType=DOUBLE}
+	</update>
+</mapper>

@@ -1,0 +1,26 @@
+[
+	{
+		"carrierTypeName": "custom",
+		"carrierType": "custom"
+	},
+	{
+		"carrierTypeName": "dhl",
+		"carrierType": "dhl"
+	},
+	{
+		"carrierTypeName": "fedex",
+		"carrierType": "fedex"
+	},
+	{
+		"carrierTypeName": "ups",
+		"carrierType": "ups"
+	},
+	{
+		"carrierTypeName": "usps",
+		"carrierType": "usps"
+	},
+	{
+		"carrierTypeName": "dhlint",
+		"carrierType": "dhlint"
+	}
+]

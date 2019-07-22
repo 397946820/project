@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ILightEbayTaxDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.LightEbayTaxModel">
+		<id column="ENTITY_ID" jdbcType="DECIMAL" property="entityId" />
+	    <result column="COUNTRY" jdbcType="VARCHAR" property="country" />
+	    <result column="SKU" jdbcType="VARCHAR" property="sku" />
+	    <result column="INVENTORY_QUANTITY" jdbcType="DECIMAL" property="inventoryQuantity" />
+	    <result column="SALE_TOTAL" jdbcType="DECIMAL" property="saleTotal" />
+	    <result column="UNAVAILABILITY" jdbcType="DECIMAL" property="unavailability" />
+	    <result column="REPLACEMENT_RATE" jdbcType="DECIMAL" property="replacementRate" />
+	    <result column="STORAGE_DAYS" jdbcType="DECIMAL" property="storageDays" />
+	    <result column="COST_THAN" jdbcType="DECIMAL" property="costThan" />
+	    <result column="VOLATILITY_FACTOR" jdbcType="DECIMAL" property="volatilityFactor" />
+	    <result column="CREATED_AT" jdbcType="TIMESTAMP" property="createdAt" />
+	    <result column="UPDATED_AT" jdbcType="TIMESTAMP" property="updatedAt" />
+	</resultMap>
+	
+	<sql id="sql_base">
+		SELECT ENTITY_ID as entityId, 
+			   COUNTRY, 
+			   SKU, 
+			   INVENTORY_QUANTITY as inventoryQuantity, 
+			   SALE_TOTAL as saleTotal, 
+			   UNAVAILABILITY, 
+			   REPLACEMENT_RATE as replacementRate, 
+			   STORAGE_DAYS as storageDays, 
+			   COST_THAN as costThan, 
+			   VOLATILITY_FACTOR as volatilityFactor, 
+			   CREATED_AT as createdAt,
+			   UPDATED_AT as updatedAt
+		FROM LIGHT_EBAY_TAX
+	</sql>
+	
+	<!-- 条件查询 -->
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.country != null and param.country != ''">
+					AND COUNTRY = #{param.country}
+				</if>
+				<if test="param.sku != null and param.sku != ''">
+					AND SKU LIKE '${param.sku}%'
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<!-- 排序 -->
+	<sql id="sql_order">
+		<if test="sort!= null and order!=null">
+			order by ${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			order by UPDATED_AT desc
+		</if>
+	</sql>
+	
+	<select id="query" resultMap="BaseResultMap">
+		<include refid="sql_base"/>
+		<include refid="sql_where"/>
+		<include refid="sql_order"/>
+	</select>
+	
+	<select id="queryByObject" resultType="java.util.HashMap">
+		<include refid="sql_base"/> 
+		<include refid="sql_where"/>
+		ORDER BY UPDATED_AT DESC
+	</select>
+	
+	<select id="findByUserId" resultType="java.util.HashMap">
+		select distinct t.sku,e.user_id userid
+		  from light_ebay_tax t, cal_product_entity e
+		 where t.sku = e.sku
+		   and e.length > 0
+		   and e.width > 0
+		   and e.height > 0
+		   and e.packing_qty > 0
+		   and e.status != '0'
+		   and e.is_active = 1
+	</select>
+	
+	<select id="queryByCountryAndSku" resultType="com.it.ocs.cal.model.LightEbayTaxModel">
+		<include refid="sql_base"/>
+		where country = #{country} and sku = #{sku}
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.LightEbayTaxModel">
+		insert into LIGHT_EBAY_TAX
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	      
+	        ENTITY_ID,
+	      
+	      <if test="country != null">
+	        COUNTRY,
+	      </if>
+	      <if test="sku != null">
+	        SKU,
+	      </if>
+	      <if test="inventoryQuantity != null">
+	        INVENTORY_QUANTITY,
+	      </if>
+	      <if test="saleTotal != null">
+	        SALE_TOTAL,
+	      </if>
+	      <if test="unavailability != null">
+	        UNAVAILABILITY,
+	      </if>
+	      <if test="replacementRate != null">
+	        REPLACEMENT_RATE,
+	      </if>
+	      <if test="storageDays != null">
+	        STORAGE_DAYS,
+	      </if>
+	      <if test="costThan != null">
+	        COST_THAN,
+	      </if>
+	      <if test="volatilityFactor != null">
+	        VOLATILITY_FACTOR,
+	      </if>
+	      <if test="createdAt != null">
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null">
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides=",">
+	      
+	        LIGHT_EBAY_TAX_SEQ.NEXTVAL,
+	    
+	      <if test="country != null">
+	        #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sku != null">
+	        #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="inventoryQuantity != null">
+	        #{inventoryQuantity,jdbcType=DECIMAL},
+	      </if>
+	      <if test="saleTotal != null">
+	        #{saleTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="unavailability != null">
+	        #{unavailability,jdbcType=DECIMAL},
+	      </if>
+	      <if test="replacementRate != null">
+	        #{replacementRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="storageDays != null">
+	        #{storageDays,jdbcType=DECIMAL},
+	      </if>
+	      <if test="costThan != null">
+	        #{costThan,jdbcType=DECIMAL},
+	      </if>
+	      <if test="volatilityFactor != null">
+	        #{volatilityFactor,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null">
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null">
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>
+	
+	<update id="update" parameterType="com.it.ocs.cal.model.LightEbayTaxModel">
+		update LIGHT_EBAY_TAX
+	    <set>
+	      <if test="country != null">
+	        COUNTRY = #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sku != null">
+	        SKU = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="inventoryQuantity != null">
+	        INVENTORY_QUANTITY = #{inventoryQuantity,jdbcType=DECIMAL},
+	      </if>
+	      <if test="saleTotal != null">
+	        SALE_TOTAL = #{saleTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="unavailability != null">
+	        UNAVAILABILITY = #{unavailability,jdbcType=DECIMAL},
+	      </if>
+	      <if test="replacementRate != null">
+	        REPLACEMENT_RATE = #{replacementRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="storageDays != null">
+	        STORAGE_DAYS = #{storageDays,jdbcType=DECIMAL},
+	      </if>
+	      <if test="costThan != null">
+	        COST_THAN = #{costThan,jdbcType=DECIMAL},
+	      </if>
+	      <if test="volatilityFactor != null">
+	        VOLATILITY_FACTOR = #{volatilityFactor,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null">
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null">
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+	
+</mapper>

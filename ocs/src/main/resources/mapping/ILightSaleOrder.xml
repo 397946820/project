@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.ILightSaleOrderDao">
+	<sql id="sql_order_base">
+		SELECT ENTITY_ID ENTITYID, 
+			   PLATFORM, 
+			   ORDER_ID ORDERID, 
+			   STATE, 
+			   STATUS, 
+			   DISCOUNT_AMOUNT DISCOUNTAMOUNT, 
+			   SUBTOTAL, 
+			   GRAND_TOTAL GRANDTOTAL, 
+			   SHIPPING_AMOUNT SHIPPINGAMOUNT, 
+			   TAX_AMOUNT TAXAMOUNT, 
+			   TOTAL_CANCELED TOTALCANCELED, 
+			   TOTAL_INVOICED TOTALINVOICED, 
+			   TOTAL_PAID TOTALPAID, 
+			   TOTAL_QTY_ORDERED TOTALQTYORDERED, 
+			   TOTAL_REFUNDED TOTALREFUNDED, 
+			   GIFT_MESSAGE GIFTMESSAGE, 
+			   WEIGHT, 
+			   CUSTOMER_EMAIL CUSTOMEREMAIL, 
+			   CUSTOMER_FIRSTNAME CUSTOMERFIRSTNAME,  
+			   CUSTOMER_LASTNAME CUSTOMERLASTNAME, 
+			   CUSTOMER_MIDDLENAME CUSTOMERMIDDLENAME, 
+			   GLOBAL_CURRENCY_CODE GLOBALCURRENCYCODE, 
+			   ORDER_CURRENCY_CODE ORDERCURRENCYCODE, 
+			   REMOTE_IP REMOTEIP, 
+			   SHIPPING_METHOD SHIPPINGMETHOD, 
+			   LIGHT_CREATED_AT LIGHTCREATEDAT, 
+			   LIGHT_UPDATED_AT LIGHTUPDATEDAT, 
+			   CREATED_AT CREATEDAT, 
+			   UPDATED_AT UPDATEDAT, 
+			   AVS, 
+			   METHOD, 
+			   SHIPPING_DESCRIPTION SHIPPINGDESCRIPTION
+		FROM LIGHT_ORDER
+	</sql>
+	
+	<sql id="sql_order_item_base">
+		select * from (
+			SELECT ENTITY_ID ENTITYID, 
+			   PARENT_ID PARENTID, 
+			   WEIGHT, 
+			   SKU, 
+			   NAME, 
+			   FREE_SHIPPING FREESHIPPING, 
+			   IS_QTY_DECIMAL ISQTYDECIMAL, 
+			   NO_DISCOUNT NODISCOUNT, 
+		       QTY_CANCELED QTYCANCELED, 
+		       QTY_INVOICED QTYINVOICED, 
+		       QTY_ORDERED QTYORDERED, 
+		       QTY_REFUNDED QTYREFUNDED, 
+		       QTY_SHIPPED QTYSHIPPED, 
+		       PRICE, 
+		       BASE_PRICE BASEPRICE, 
+		       ORIGINAL_PRICE ORIGINALPRICE, 
+		       TAX_PERCENT TAXPERCENT, 
+		       TAX_AMOUNT TAXAMOUNT, 
+		       TAX_INVOICED TAXINVOICED, 
+		       DISCOUNT_PERCENT DISCOUNTPERCENT, 
+		       DISCOUNT_AMOUNT DISCOUNTAMOUNT, 
+		       AMOUNT_REFUNDED AMOUNTREFUNDED, 
+		       ROW_TOTAL ROWTOTAL, 
+		       GIFT_MESSAGE_ID GIFT_MESSAGEID, 
+		       POSTCODE, 
+		       REGION, 
+		       CITY, 
+		       STREET, 
+		       GIFT_MESSAGE GIFTMESSAGE, 
+		       LIGHT_CREATED_AT LIGHTCREATEDAT, 
+		       LIGHT_UPDATED_AT LIGHTUPDATEDAT, 
+		       PUSH_STATUS PUSHSTATUS, 
+		       CREATED_AT CREATEDAT, 
+		       UPDATED_AT UPDATEDAT, 
+		       SOURCE_ID SOURCEID, 
+		       LIGHT_ITEM_ID LIGHTITEMID, 
+		       SHIPPING_FIRSTNAME SHIPPINGFIRSTNAME, 
+		       SHIPPING_MIDDLENAME SHIPPINGMIDDLENAME, 
+		       SHIPPING_LASTNAME SHIPPINGLASTNAME, 
+		       TELEPHONE
+		FROM LIGHT_ORDER_ITEM
+		union all
+		SELECT ENTITY_ID ENTITYID, 
+			   PARENT_ID PARENTID, 
+			   WEIGHT, 
+			   SKU, 
+			   NAME, 
+			   FREE_SHIPPING FREESHIPPING, 
+			   IS_QTY_DECIMAL ISQTYDECIMAL, 
+			   NO_DISCOUNT NODISCOUNT, 
+		       QTY_CANCELED QTYCANCELED, 
+		       QTY_INVOICED QTYINVOICED, 
+		       QTY_ORDERED QTYORDERED, 
+		       QTY_REFUNDED QTYREFUNDED, 
+		       QTY_SHIPPED QTYSHIPPED, 
+		       PRICE, 
+		       BASE_PRICE BASEPRICE, 
+		       ORIGINAL_PRICE ORIGINALPRICE, 
+		       TAX_PERCENT TAXPERCENT, 
+		       TAX_AMOUNT TAXAMOUNT, 
+		       TAX_INVOICED TAXINVOICED, 
+		       DISCOUNT_PERCENT DISCOUNTPERCENT, 
+		       DISCOUNT_AMOUNT DISCOUNTAMOUNT, 
+		       AMOUNT_REFUNDED AMOUNTREFUNDED, 
+		       ROW_TOTAL ROWTOTAL, 
+		       GIFT_MESSAGE_ID GIFT_MESSAGEID, 
+		       POSTCODE, 
+		       REGION, 
+		       CITY, 
+		       STREET, 
+		       GIFT_MESSAGE GIFTMESSAGE, 
+		       LIGHT_CREATED_AT LIGHTCREATEDAT, 
+		       LIGHT_UPDATED_AT LIGHTUPDATEDAT, 
+		       PUSH_STATUS PUSHSTATUS, 
+		       CREATED_AT CREATEDAT, 
+		       UPDATED_AT UPDATEDAT, 
+		       SOURCE_ID SOURCEID, 
+		       LIGHT_ITEM_ID LIGHTITEMID, 
+		       SHIPPING_FIRSTNAME SHIPPINGFIRSTNAME, 
+		       SHIPPING_MIDDLENAME SHIPPINGMIDDLENAME, 
+		       SHIPPING_LASTNAME SHIPPINGLASTNAME, 
+		       TELEPHONE
+		FROM LIGHT_ORDER_ITEM_B
+		) tbl
+	</sql>
+	
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.orderId != null and param.orderId != ''">
+					AND ORDER_ID LIKE '${param.orderId}%'
+				</if>
+				<if test="param.shippingDescription != null and param.shippingDescription != ''">
+					AND SHIPPING_DESCRIPTION LIKE '${param.shippingDescription}%'
+				</if>
+				<if test="param.name != null and param.name != ''">
+					AND CUSTOMER_FIRSTNAME || CUSTOMER_LASTNAME  LIKE '${param.name}%'
+				</if>
+				<if test="param.platform != null and param.platform != ''">
+					AND PLATFORM LIKE '${param.platform}%'
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<sql id="sql_order">
+		<choose>
+			<when test="sort == null and order == null">
+				ORDER BY LIGHT_CREATED_AT DESC
+			</when>
+			<otherwise>
+				ORDER BY ${sort} ${order}
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="queryList" resultType="com.it.ocs.salesStatistics.model.LightOrderModel">
+		<include refid="sql_order_base"/>
+		<include refid="sql_where"/>
+		<include refid="sql_order"/>
+	</select>
+	
+	<select id="getLightOrderById" resultType="com.it.ocs.salesStatistics.model.LightOrderModel">
+		<include refid="sql_order_base"/>
+		WHERE ENTITY_ID = #{entityId}
+	</select>
+	
+	<select id="getLightOrderItemById" resultType="com.it.ocs.salesStatistics.model.LightOrderItemModel">
+		<include refid="sql_order_item_base"/>
+		WHERE tbl.PARENTID = #{parentId} AND tbl.SKU NOT LIKE 'B%'
+	</select>
+	
+	<select id="getSaleOrderRefundByParentId" resultType="com.it.ocs.salesStatistics.vo.SaleOrderRefundVo">
+		SELECT NVL(K.SKU, M.SKU) SKU,
+			   M.SKU MSKU,
+		       M.QTY_ORDERED * NVL(K.QTY, 1) QTYORDERED,
+		       M.ROW_TOTAL ROWTOTAL,
+		       M.LIGHT_ITEM_ID ORDERITEMID
+		  FROM (select SKU,QTY_ORDERED,ROW_TOTAL,LIGHT_ITEM_ID,PARENT_ID from light_order_item 
+		  		union all select SKU,QTY_ORDERED,ROW_TOTAL,LIGHT_ITEM_ID,PARENT_ID from light_order_item_b) M, SYS_SKU_LINK K
+		 WHERE M.SKU = K.P_SKU(+)
+		   AND M.PARENT_ID = #{parentId}
+		   AND M.SKU NOT LIKE 'B%'
+	</select>
+	
+	<select id="getDays" resultType="java.lang.Integer">
+		SELECT TRUNC(TO_DATE(TO_CHAR((SYSDATE - 8 / 24), 'YYYY-MM-DD HH24:MI:SS'),
+                     'YYYY-MM-DD HH24:MI:SS') -
+             TO_DATE(TO_CHAR(R.LIGHT_CREATED_AT, 'YYYY-MM-DD HH24:MI:SS'),
+                     'YYYY-MM-DD HH24:MI:SS'))
+		  FROM LIGHT_ORDER R
+		 WHERE R.ORDER_ID = #{orderId}
+	</select>
+	
+	<select id="getLightOrderByOrderId" resultType="com.it.ocs.salesStatistics.model.LightOrderModel">
+		<include refid="sql_order_base"/>
+		WHERE ORDER_ID = #{orderId}
+	</select>
+	
+	<select id="getOrderItemIdAndQtyByOrderId" resultType="hashMap">
+		SELECT LI.LIGHT_ITEM_ID ORDER_ITEM_ID,
+		       (LI.QTY_ORDERED - LI.QTY_CANCELED - LI.QTY_SHIPPED - LI.QTY_REFUNDED) QTY
+		  FROM LIGHT_ORDER LO, LIGHT_ORDER_ITEM LI
+		 WHERE LO.ENTITY_ID = LI.PARENT_ID
+		   AND (LI.SKU NOT LIKE 'OS%' OR
+		       (LI.SKU LIKE 'OS%' AND LI.SKU IN (SELECT MSKU FROM EDA_OS_SKU)))
+		   AND LI.LIGHT_ITEM_ID IS NOT NULL
+		   AND LO.ORDER_ID = #{orderId}
+	</select>
+	
+	
+	<select id="getSaleOrderInformationByParentId" resultType="com.it.ocs.salesStatistics.vo.ReturnGoodsOrderVo">
+			select A.ENTITY_ID as entityId,
+               A.ORDER_ID as orderId,
+               A.PLATFORM as platform,
+               A.STATUS as status,
+               A.CUSTOMER_FIRSTNAME ||' '|| A.CUSTOMER_LASTNAME as name,
+               B.SKU  as sku,
+               B.TELEPHONE as telephone,
+               B.QTY_ORDERED as totalQtyOrdered,
+               b.ROW_TOTAL ROWTOTAL,
+               b.LIGHT_ITEM_ID ORDERITEMID,
+               B.REGION||' '|| B.CITY||' '||B.STREET as address
+          from LIGHT_ORDER A, LIGHT_ORDER_ITEM B
+         WHERE A.ENTITY_ID = B.PARENT_ID 
+	 	 AND  B.PARENT_ID = #{parentId} AND SKU NOT LIKE 'B%'
+	</select>
+	<select id="findReturnInformationByParentId" resultType="com.it.ocs.salesStatistics.vo.ReturnGoodsOrderVo">
+			   select o.ENTITY_ID as entityId,
+                A.ORDER_ID as orderId,
+                o.PLATFORM as platform,
+                A.STATUS as status,
+                a.SKU as sku,
+                A.QTY_ORDERED as totalQtyOrdered,
+                o.CUSTOMER_FIRSTNAME || ' ' || o.CUSTOMER_LASTNAME as name,
+                A.TRACKING_NUM as trackingNum,
+                A.RMA as rmaSeq,
+                A.CAUSE as cause,
+                A.CREATED_AT as createdAt
+           FROM LIGHT_ORDER_RETURN A, LIGHT_ORDER O, LIGHT_ORDER_ITEM B
+          WHERE A.ORDER_ID = O.ORDER_ID
+            AND O.ENTITY_ID = B.PARENT_ID
+            AND A.SKU = B.SKU
+	 		AND B.PARENT_ID = #{parentId} 
+	 		AND B.SKU NOT LIKE 'B%'
+	</select>
+	
+	<update id="handleReissueTranNumber" parameterType="java.util.HashMap">
+		update sys_return_order_final f 
+		set f.tarcking_num=#{param.tarckingNum,jdbcType=VARCHAR},
+			f.tarcking_service=#{param.tarckingService,jdbcType=VARCHAR},
+			f.update_date=sysdate
+		where f.platform = #{param.platform,jdbcType=VARCHAR} and f.account = #{param.account,jdbcType=VARCHAR}
+			and f.order_id = #{param.orderId,jdbcType=VARCHAR} and f.times = #{param.times}
+	</update>
+	
+	<select id="getOCSAccount" parameterType="java.util.HashMap" resultType="java.lang.String">
+		select f.account from sys_return_order_final f 
+		where f.platform = #{param.platform,jdbcType=VARCHAR} and f.order_id = #{param.orderId,jdbcType=VARCHAR} and f.times = #{param.times} 
+			  and f.order_id like 'OCS%' and rownum=1
+	</select>
+</mapper>

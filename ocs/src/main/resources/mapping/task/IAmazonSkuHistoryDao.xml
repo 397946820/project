@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.task.dao.IAmazonSkuHistoryDao">
+	<resultMap type="com.it.ocs.task.model.AmazonSkuHistoryModel" id="amazonSkuHistoryResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="SKU" property="sku"  />
+		<result column="ASIN" property="asin"  />
+		<result column="EXEC_DATE" property="exec_date"  />
+		<result column="PRICE" property="price"  />
+		<result column="SPECIAL_PRICE" property="special_price"  />
+		<result column="OFFER_TOTAL" property="offer_total"  />
+		<result column="AVG_RATE" property="avg_rate"  />
+		<result column="RANK" property="rank"  />
+		<result column="CAT_RANK" property="cat_rank"  />
+		<result column="IF_OUTSTOCK" property="if_outstock"  />
+		<result column="RANK_DETAIL" property="rank_detail"  />
+		<result column="REVIEWS_TOTAL" property="reviews_total"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="SOURCE_ID" property="source_id"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(CREATED_AT) ,'yyyy-mm-dd HH24:mi:ss') from amazon_sku_history
+	</select>
+	<select id="selectMySqlDate" resultMap="amazonSkuHistoryResult">
+		select * from amazon_sku_history aba where aba.CREATED_AT>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectAmazonSkuHistoryModels" resultMap="amazonSkuHistoryResult" parameterType="java.util.List">
+		select SOURCE_ID from amazon_sku_history 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id}  
+        </foreach> 
+	</select>
+	<update id="updateAmazonSkuHistorys" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_sku_history baoi 
+	   	set
+			PLATFORM = #{item.platform,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			EXEC_DATE = #{item.exec_date,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=VARCHAR},
+			SPECIAL_PRICE = #{item.special_price,jdbcType=VARCHAR},
+			OFFER_TOTAL = #{item.offer_total,jdbcType=BIGINT},
+			AVG_RATE = #{item.avg_rate,jdbcType=VARCHAR},
+			RANK = #{item.rank,jdbcType=BIGINT},
+			CAT_RANK = #{item.cat_rank,jdbcType=BIGINT},
+			IF_OUTSTOCK = #{item.if_outstock,jdbcType=BIGINT},
+			RANK_DETAIL = #{item.rank_detail,jdbcType=VARCHAR},
+			REVIEWS_TOTAL = #{item.reviews_total,jdbcType=VARCHAR},
+			LAST_UPDATE_DATE = #{item.last_update_date,jdbcType=TIMESTAMP}	
+	   	where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+	<insert id="insertAmazonSkuHistorys" parameterType="java.util.List">
+		INSERT INTO amazon_sku_history (
+			ENTITY_ID,
+			PLATFORM,
+			SKU,
+			ASIN,
+			EXEC_DATE,
+			PRICE,
+			SPECIAL_PRICE,
+			OFFER_TOTAL,
+			AVG_RATE,
+			RANK,
+			CAT_RANK,
+			IF_OUTSTOCK,
+			RANK_DETAIL,
+			REVIEWS_TOTAL,
+			CREATED_AT,
+			SOURCE_ID,
+			CREATION_DATE)   
+		select amazon_sku_history_seq.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.platform,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.exec_date,jdbcType=VARCHAR},
+				#{item.price,jdbcType=VARCHAR},
+				#{item.special_price,jdbcType=VARCHAR},
+				#{item.offer_total,jdbcType=BIGINT},
+				#{item.avg_rate,jdbcType=VARCHAR},
+				#{item.rank,jdbcType=BIGINT},
+				#{item.cat_rank,jdbcType=BIGINT},
+				#{item.if_outstock,jdbcType=BIGINT},
+				#{item.rank_detail,jdbcType=VARCHAR},
+				#{item.reviews_total,jdbcType=VARCHAR},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.entity_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateInsertData" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update amazon_sku_history baoi 
+	   	 set
+			BRAND_DISTRIBUTION = #{item.brand_distribution,jdbcType=VARCHAR}
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+</mapper>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.templateSetting.dao.ITemplateSettingDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.templateSetting.model.TemplateSettingModel">
+		<id column="TEMPLATE_SETTING_ID" property="id" jdbcType="DECIMAL" />
+	    <result column="SETTING_NAME" property="name" jdbcType="VARCHAR" />
+	    <result column="EBAY_ACCOUNT" property="ebayAccount" jdbcType="VARCHAR" />
+	    <result column="CARRY_TEMPLATE_URL" property="carryTemplateUrl" jdbcType="VARCHAR" />
+	    <result column="TOP_PROMOTION_TYPE" property="topPromotionType" jdbcType="VARCHAR" />
+	    <result column="FOOTER_PROMOTION_TYPE" property="footerPromotionType" jdbcType="VARCHAR" />
+	    <result column="SCALER" property="scaler" jdbcType="VARCHAR" />
+	    <result column="ENABLE_PAGE_PROTECTION" property="enablePageProtection" jdbcType="VARCHAR" />
+	    <result column="ENABLED_FLAG" property="enabledFlag" jdbcType="CHAR" />
+	    <result column="CREATION_DATE" property="creationDate" jdbcType="TIMESTAMP" />
+	    <result column="CREATE_BY" property="createBy" jdbcType="DECIMAL" />
+	    <result column="LAST_UPDATE_DATE" property="lastUpdationDate" jdbcType="TIMESTAMP" />
+	    <result column="LAST_UPDATE_BY" property="lastUpdateBy" jdbcType="DECIMAL" />
+	</resultMap>
+	
+	<sql id="sqlBase">
+		SELECT
+			TEMPLATE_SETTING_ID as id, 
+			SETTING_NAME as name, 
+			EBAY_ACCOUNT as ebayAccount, 
+			CARRY_TEMPLATE_URL as carryTemplateUrl, 
+			TOP_PROMOTION_TYPE as topPromotionType, 
+	        FOOTER_PROMOTION_TYPE as footerPromotionType, 
+	        SCALER as scaler, 
+	        ENABLE_PAGE_PROTECTION as enablePageProtection, 
+	        ENABLED_FLAG as enabledFlag, 
+	        CREATION_DATE as creationDate, 
+	        CREATE_BY as createBy, 
+	        LAST_UPDATE_DATE as lastUpdationDate, 
+	        LAST_UPDATE_BY as lastUpdateBy
+		FROM
+		    EBAY_TEMPLATE_SETTING
+	</sql>
+	
+	<sql id="seachWhere">
+		<choose>
+			<when test="param!=null">
+				<where>
+					1=1 
+					<if test="param.name!=null">
+						AND NAME=#{param.name}
+					</if>
+					<if test="param.enabledFlag!=null">
+						AND ENABLED_FLAG=#{param.enabledFlag}
+					</if>
+				</where>
+			</when>
+			<otherwise>
+				<where>
+					ENABLED_FLAG='Y'
+				</where>
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="queryByPage" resultMap="BaseResultMap">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="sqlBase" />
+				<include refid="seachWhere" />
+				order by LAST_UPDATE_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	
+	<select id="count" resultType="java.lang.Integer">
+		select count(TEMPLATE_SETTING_ID) from EBAY_TEMPLATE_SETTING
+		<include refid="seachWhere"/>
+	</select>
+
+	<insert id="add" parameterType="com.it.ocs.templateSetting.vo.TemplateSettingVo">
+		insert into EBAY_TEMPLATE_SETTING
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        TEMPLATE_SETTING_ID,
+	     
+	      <if test="name != null" >
+	        SETTING_NAME,
+	      </if>
+	      <if test="ebayAccount != null" >
+	        EBAY_ACCOUNT,
+	      </if>
+	      <if test="carryTemplateUrl != null" >
+	        CARRY_TEMPLATE_URL,
+	      </if>
+	      <if test="topPromotionType != null" >
+	        TOP_PROMOTION_TYPE,
+	      </if>
+	      <if test="footerPromotionType != null" >
+	        FOOTER_PROMOTION_TYPE,
+	      </if>
+	      <if test="scaler != null" >
+	        SCALER,
+	      </if>
+	      <if test="enablePageProtection != null" >
+	        ENABLE_PAGE_PROTECTION,
+	      </if>
+	      <if test="enabledFlag != null" >
+	        ENABLED_FLAG,
+	      </if>
+	      <if test="creationDate != null" >
+	        CREATION_DATE,
+	      </if>
+	      <if test="createBy != null" >
+	        CREATE_BY,
+	      </if>
+	      <if test="lastUpdationDate != null" >
+	        LAST_UPDATE_DATE,
+	      </if>
+	      <if test="lastUpdateBy != null" >
+	        LAST_UPDATE_BY,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	     
+	      EBAY_TEMPLATE_SETTING_SEQ.NEXTVAL,
+	    
+	      <if test="name != null" >
+	        #{name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="ebayAccount != null" >
+	        #{ebayAccount,jdbcType=VARCHAR},
+	      </if>
+	      <if test="carryTemplateUrl != null" >
+	        #{carryTemplateUrl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="topPromotionType != null" >
+	        #{topPromotionType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="footerPromotionType != null" >
+	        #{footerPromotionType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="scaler != null" >
+	        #{scaler,jdbcType=VARCHAR},
+	      </if>
+	      <if test="enablePageProtection != null" >
+	        #{enablePageProtection,jdbcType=VARCHAR},
+	      </if>
+	      <if test="enabledFlag != null" >
+	        #{enabledFlag,jdbcType=CHAR},
+	      </if>
+	      <if test="creationDate != null" >
+	        #{creationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="createBy != null" >
+	        #{createBy,jdbcType=DECIMAL},
+	      </if>
+	      <if test="lastUpdationDate != null" >
+	        #{lastUpdationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="lastUpdateBy != null" >
+	        #{lastUpdateBy,jdbcType=DECIMAL},
+	      </if>
+	    </trim>
+	</insert>
+
+	<select id="getById" parameterType="java.lang.Long"
+		resultType="com.it.ocs.templateSetting.vo.TemplateSettingVo">
+		<include refid="sqlBase"/>
+		WHERE TEMPLATE_SETTING_ID = #{id}
+	</select>
+
+	<update id="update" parameterType="com.it.ocs.templateSetting.vo.TemplateSettingVo">
+		update EBAY_TEMPLATE_SETTING
+	    <set >
+	      <if test="name != null" >
+	        SETTING_NAME = #{name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="ebayAccount != null" >
+	        EBAY_ACCOUNT = #{ebayAccount,jdbcType=VARCHAR},
+	      </if>
+	      <if test="carryTemplateUrl != null" >
+	        CARRY_TEMPLATE_URL = #{carryTemplateUrl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="topPromotionType != null" >
+	        TOP_PROMOTION_TYPE = #{topPromotionType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="footerPromotionType != null" >
+	        FOOTER_PROMOTION_TYPE = #{footerPromotionType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="scaler != null" >
+	        SCALER = #{scaler,jdbcType=VARCHAR},
+	      </if>
+	      <if test="enablePageProtection != null" >
+	        ENABLE_PAGE_PROTECTION = #{enablePageProtection,jdbcType=VARCHAR},
+	      </if>
+	      <if test="enabledFlag != null" >
+	        ENABLED_FLAG = #{enabledFlag,jdbcType=CHAR},
+	      </if>
+	      <if test="creationDate != null" >
+	        CREATION_DATE = #{creationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="createBy != null" >
+	        CREATE_BY = #{createBy,jdbcType=DECIMAL},
+	      </if>
+	      <if test="lastUpdationDate != null" >
+	        LAST_UPDATE_DATE = #{lastUpdationDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="lastUpdateBy != null" >
+	        LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=DECIMAL},
+	      </if>
+	    </set>
+		where TEMPLATE_SETTING_ID = #{id,jdbcType=DECIMAL}
+	</update>
+	
+</mapper>

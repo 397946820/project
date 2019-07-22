@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IPermissionDAO">
+	<resultMap type="com.it.ocs.sys.model.PermissionModel" id="permissionResult">
+		<id property="id" column="PERMISSION_ID" jdbcType="DECIMAL" />
+		<result property="projectId" column="PROJECT_ID" jdbcType="DECIMAL" />
+		<result property="parentId" column="PID" jdbcType="DECIMAL" />
+		<result property="name" column="NAME" jdbcType="VARCHAR" />
+		<result property="code" column="CODE" jdbcType="VARCHAR" />
+		<result property="url" column="URL" jdbcType="VARCHAR" />
+		<result property="permissionType" column="TYPE" jdbcType="VARCHAR" />
+		<result property="orderNum" column="ORDERNUM" jdbcType="DECIMAL" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="queryWhere">
+		where ENABLED_FLAG='Y'
+		<if test="param != null">
+			<if test="param.name != null">
+				and NAME=#{param.name,jdbcType=VARCHAR}
+			</if>
+			<if test="param.code != null">
+				and CODE=#{param.code,jdbcType=VARCHAR}
+			</if>
+			<if test="param.parentId != null">
+				and PID=#{param.parentId,jdbcType=DECIMAL}
+			</if>
+			<if test="param.projectId != null">
+				and PROJECT_ID=#{param.projectId,jdbcType=DECIMAL}
+			</if>
+		</if>
+	</sql>
+	<select id="queryFilterByParam" resultMap="permissionResult">
+		<include refid="select_base" /> where ENABLED_FLAG='Y' 
+		<if test="param != null">
+			<if test="param.name != null">
+				and NAME=#{param.name,jdbcType=VARCHAR}
+			</if>
+			<if test="param.code != null">
+				and CODE=#{param.code,jdbcType=VARCHAR}
+			</if>
+			<if test="param.parentId != null">
+				and PID=#{param.parentId,jdbcType=DECIMAL}
+			</if>
+			<if test="param.projectId != null">
+				and PROJECT_ID=#{param.projectId,jdbcType=DECIMAL}
+			</if>
+			<if test="param.parentId == null">
+				<if test="param.name != null">
+					and PID is null
+				</if>
+			</if>
+		</if>
+	</select>
+	<select id="batchModifyProjectId" resultMap="permissionResult">
+		update SYS_PERMISSION set PROJECT_ID=#{projectId} where PERMISSION_ID in 
+		<foreach collection="permissions" item="item" index="index" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+	</select>
+	<select id="queryMenuByProjectId" resultMap="permissionResult">
+		<include refid="select_base" /> 
+		where ENABLED_FLAG='Y' and PROJECT_ID=#{projectId}
+	</select>
+	<select id="getById" resultMap="permissionResult">
+		<include refid="select_base" /> where PERMISSION_ID=#{id}
+	</select>
+	<select id="queryByIds" resultMap="permissionResult">
+		 <include refid="select_base" /> where PERMISSION_ID in 
+		 <foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+	<sql id="select_base">
+		select 
+			PERMISSION_ID id,
+			PROJECT_ID projectId,
+			PID parentId,
+			NAME name,
+			CODE code,
+			TYPE permissionType,
+			URL url,
+			ORDERNUM orderNum,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from SYS_PERMISSION
+	</sql>
+
+	<select id="query" resultMap="permissionResult">
+		 <include refid="select_base" />
+		 <include refid="queryWhere" />
+	</select>
+	<delete id="refresh">
+		drop table SYS_PERMISSION
+	</delete>
+	<insert id="add" parameterType="com.it.ocs.sys.model.PermissionModel">
+		insert into SYS_PERMISSION
+		(
+			PROJECT_ID,
+			PID,
+			NAME,
+			CODE,
+			TYPE,
+			URL,
+			ORDERNUM,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{projectId,jdbcType=DECIMAL},
+			#{parentId,jdbcType=DECIMAL},
+			#{name,jdbcType=VARCHAR},
+			#{code,jdbcType=VARCHAR},
+			#{permissionType,jdbcType=VARCHAR},
+			#{url,jdbcType=VARCHAR},
+			#{orderNum,jdbcType=DECIMAL},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.sys.model.PermissionModel">
+		update SYS_PERMISSION set 
+			PROJECT_ID=#{projectId},
+			NAME=#{name},
+			CODE=#{code},
+			TYPE=#{permissionType},
+			URL=#{url},
+			<if test="orderNum!=null">
+				ORDERNUM=#{orderNum,jdbcType=DECIMAL},
+			</if>
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where PERMISSION_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update SYS_PERMISSION set ENABLED_FLAG='N' where PERMISSION_ID=#{id}
+	</update>
+	<update id="batchDel">
+		update SYS_PERMISSION set ENABLED_FLAG='N' where PERMISSION_ID in 
+		<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+</mapper>

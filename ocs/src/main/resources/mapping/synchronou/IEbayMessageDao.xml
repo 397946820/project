@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEbayMessageDao">
+	<select id="isExist" resultType="int">
+		select count(1) from ebay_message where message_id = #{messageId}
+	</select>
+	<insert id="insertData">
+		insert into ebay_message
+		  (id,
+		   sender,
+		   recipient_user_id,
+		   send_to_name,
+		   subject,
+		   message_id,
+		   external_message_id,
+		   flagged,
+		   read,
+		   receive_date,
+		   expiration_date,
+		   item_id,
+		   response_enabled,
+		   response_url,
+		   folder_id,
+		   message_type,
+		   replied,
+		   item_end_time,
+		   item_title,
+		   user_response_date,
+		   question_type,
+		   text,
+		   content
+		   )
+		values
+		  (ebay_message_SEQ.Nextval,
+		   #{Sender,jdbcType=VARCHAR},
+		   #{RecipientUserID,jdbcType=VARCHAR},
+		   #{SendToName,jdbcType=VARCHAR},
+		   #{Subject,jdbcType=VARCHAR},
+		   #{MessageID,jdbcType=VARCHAR},
+		   #{ExternalMessageID,jdbcType=VARCHAR},
+		   #{Flagged,jdbcType=VARCHAR},
+		   #{Read,jdbcType=VARCHAR},
+		   to_timestamp(#{ReceiveDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   to_timestamp(#{ExpirationDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   #{ItemID,jdbcType=VARCHAR},
+		   #{ResponseEnabled,jdbcType=VARCHAR},
+		   #{ResponseURL,jdbcType=VARCHAR},
+		   #{FolderID,jdbcType=VARCHAR},
+		   #{MessageType,jdbcType=VARCHAR},
+		   #{Replied,jdbcType=VARCHAR},
+		   to_timestamp(#{ItemEndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   #{ItemTitle,jdbcType=VARCHAR},
+		   to_timestamp(#{UserResponseDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   #{QuestionType,jdbcType=VARCHAR},
+		   #{Text,jdbcType=VARCHAR},
+		   #{Content,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<update id="updateData">
+		update ebay_message set
+		   sender = #{Sender,jdbcType=VARCHAR},
+		   recipient_user_id = #{RecipientUserID,jdbcType=VARCHAR},
+		   send_to_name = #{SendToName,jdbcType=VARCHAR},
+		   subject = #{Subject,jdbcType=VARCHAR},
+		   external_message_id = #{ExternalMessageID,jdbcType=VARCHAR},
+		   flagged = #{Flagged,jdbcType=VARCHAR},
+		   read= #{Read,jdbcType=VARCHAR},
+		   receive_date= to_timestamp(#{ReceiveDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   expiration_date=to_timestamp(#{ExpirationDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   item_id=#{ItemID,jdbcType=VARCHAR},
+		   response_enabled= #{ResponseEnabled,jdbcType=VARCHAR},
+		   response_url=#{ResponseURL,jdbcType=VARCHAR},
+		   folder_id=#{FolderID,jdbcType=VARCHAR},
+		   message_type= #{MessageType,jdbcType=VARCHAR},
+		   replied=#{Replied,jdbcType=VARCHAR},
+		   item_end_time=to_timestamp(#{ItemEndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   item_title=#{ItemTitle,jdbcType=VARCHAR},
+		   user_response_date= to_timestamp(#{UserResponseDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   question_type=#{QuestionType,jdbcType=VARCHAR}
+		where message_id = #{MessageID,jdbcType=VARCHAR}
+	</update>
+	<update id="updateMessageText">
+		update ebay_message set
+		text = #{Text,jdbcType=VARCHAR},
+		content =  #{Content,jdbcType=VARCHAR}
+		where message_id = #{MessageID,jdbcType=VARCHAR}
+	</update>
+	
+	<sql id="select_base">
+		  select em.id                id,
+		         em.sender            sender,
+		         em.recipient_user_id recipientUserId,
+		         em.subject           subject,
+		         em.message_id        messageId,
+		         em.flagged           flagged,
+		         em.ocs_read          read,
+		         to_char(em.receive_date,'yyyy-MM-dd HH24:MI:ss') receiveDate,
+		         to_char(em.expiration_date,'yyyy-MM-dd HH24:MI:ss') expirationDate,
+		         em.item_id           itemId,
+		         em.message_type      messageType,
+		         em.replied           replied,
+		         em.content           context,
+		         em.text              text,
+		         em.remark            remark
+		    from ebay_message em
+			where 1=1
+	</sql>
+	<sql id="select_base_condition">
+		<choose>
+			<when test="param.sender != null and param.sender != ''">
+				<choose>
+				   <when test="param.sender=='非eBay'">
+				   and em.sender != 'eBay'
+				   </when>
+				   <when test="param.sender=='eBay'">
+				      and em.sender='eBay'
+				   </when>
+				   <otherwise>
+				      and em.sender like '%'||#{param.sender}||'%'
+				   </otherwise>
+			    </choose>
+			</when>
+			<otherwise>
+				 
+		    </otherwise>
+		</choose>
+		<if test="param.dateType != null and param.dateType != ''">
+			   <if test="param.startDate !=null and param.startDate !=''"> 
+					and em.${param.dateType} >= to_date('${param.startDate}','YYYY-MM-DD HH24:MI:SS')
+				</if>
+				<if test="param.endDate !=null and param.endDate !=''"> 
+					and em.${param.dateType}  <![CDATA[<=]]> to_date('${param.endDate}','YYYY-MM-DD HH24:MI:SS')
+				</if>
+		</if>
+		<if test="param.read != null and param.read != ''">
+			and em.read = #{param.read}
+		</if>
+		<if test="param.replied != null and param.replied !=''">
+		    and em.replied = #{param.replied}
+		</if>
+		<if test="param.messageType != null and param.messageType !=''">
+		    and em.message_type = #{param.messageType}
+		</if>
+		<if test="param.account != null and param.account != ''">
+			and em.recipient_user_id = #{param.account}
+		</if>
+	</sql>
+	<select id="queryByPage" resultType="com.it.ocs.synchronou.model.MessageInfoModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+				<include refid="select_base_condition" />
+				order by em.receive_date desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]>
+	</select>
+	<select id="count" resultType="int">
+		select count(1) from (
+			<include refid="select_base" />
+			<include refid="select_base_condition" />
+		)
+	</select>
+	<update id="remark">
+		update ebay_message set remark = #{remark,jdbcType=VARCHAR} where id = #{id}
+	</update>
+	
+	<update id="updateOcsReadStatus">
+		update ebay_message set ocs_read = #{ocsRead}
+		<where>
+			<foreach collection="ids" item="id" separator="," open="AND ID IN (" close=")">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	
+	<select id="isExistForMember" resultType="int">
+		select count(1) from ebay_message_member where MessageID = #{messageId}
+	</select>
+	<insert id="insertMemberData">
+		insert into ebay_message_member
+		  (id,
+		   itemid,
+		   starttime,
+		   endtime,
+		   viewitemurl,
+		   userid,
+		   currentprice,
+		   title,
+		   messagetype,
+		   questiontype,
+		   displaytopublic,
+		   senderid,
+		   senderemail,
+		   recipientid,
+		   subject,
+		   body,
+		   messageid,
+		   messagestatus,
+		   creationdate,
+		   lastmodifieddate,
+		   MessageMedia)
+		values
+		  (
+		   ebay_message_member_SEQ.Nextval,
+		   #{ItemID,jdbcType=VARCHAR},
+		   to_timestamp(#{StartTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   to_timestamp(#{EndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   #{ViewItemURL,jdbcType=VARCHAR},
+		   #{UserID,jdbcType=VARCHAR},
+		   #{CurrentPrice,jdbcType=VARCHAR},
+		   #{Title,jdbcType=VARCHAR},
+		   #{MessageType,jdbcType=VARCHAR},
+		   #{QuestionType,jdbcType=VARCHAR},
+		   #{DisplayToPublic,jdbcType=VARCHAR},
+		   #{SenderID,jdbcType=VARCHAR},
+		   #{SenderEmail,jdbcType=VARCHAR},
+		   #{RecipientID,jdbcType=VARCHAR},
+		   #{Subject,jdbcType=VARCHAR},
+		   #{Body,jdbcType=VARCHAR},
+		   #{MessageID,jdbcType=VARCHAR},
+		   #{MessageStatus,jdbcType=VARCHAR},
+		   to_timestamp(#{CreationDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   to_timestamp(#{LastModifiedDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   #{MessageMedia,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<update id="updateMemberData">
+		update ebay_message_member set 
+		   ItemID = #{ItemID,jdbcType=VARCHAR},
+		   StartTime = to_timestamp(#{StartTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   EndTime = to_timestamp(#{EndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   ViewItemURL = #{ViewItemURL,jdbcType=VARCHAR},
+		   UserID = #{UserID,jdbcType=VARCHAR},
+		   CurrentPrice = #{CurrentPrice,jdbcType=VARCHAR},
+		   Title = #{Title,jdbcType=VARCHAR},
+		   MessageType = #{MessageType,jdbcType=VARCHAR},
+		   QuestionType = #{QuestionType,jdbcType=VARCHAR},
+		   DisplayToPublic = #{DisplayToPublic,jdbcType=VARCHAR},
+		   SenderID = #{SenderID,jdbcType=VARCHAR},
+		   SenderEmail = #{SenderEmail,jdbcType=VARCHAR},
+		   RecipientID = #{RecipientID,jdbcType=VARCHAR},
+		   Subject = #{Subject,jdbcType=VARCHAR},
+		   Body = #{Body,jdbcType=VARCHAR},
+		   MessageStatus = #{MessageStatus,jdbcType=VARCHAR},
+		   CreationDate = to_timestamp(#{CreationDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   LastModifiedDate = to_timestamp(#{LastModifiedDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+		   MessageMedia = #{MessageMedia,jdbcType=VARCHAR}
+		where MessageID = #{MessageID,jdbcType=VARCHAR}
+	</update>
+	<sql id="member_select_base">
+		select *
+		  from (select emm.id id,
+		               emm.itemid itemID,
+		               to_char(emm.starttime, 'yyyy-MM-dd HH24:MI:ss') startTime,
+		               to_char(emm.endtime, 'yyyy-MM-dd HH24:MI:ss') endTime,
+		               e.url viewItemURL,
+		               emm.userid userID,
+		               emm.currentprice currentPrice,
+		               emm.title title,
+		               emm.messagetype messageType,
+		               emm.questiontype questionType,
+		               emm.displaytopublic displayToPublic,
+		               emm.senderid senderID,
+		               emm.senderemail senderEmail,
+		               emm.recipientid recipientID,
+		               emm.subject subject,
+		               emm.body body,
+		               emm.read read,
+		               emm.messageid messageID,
+		               case when nvl(m.replied,-1) = -1 then emm.messagestatus
+			                when nvl(m.replied,-1) = 0 then 'Unanswered'
+			                when nvl(m.replied,-1) = 1 then 'Answered' 
+			           end messageStatus,
+		               emm.creationdate,
+		               to_char(emm.creationdate, 'yyyy-MM-dd HH24:MI:ss') creationDateStr,
+		               to_char(emm.lastmodifieddate, 'yyyy-MM-dd HH24:MI:ss') lastModifiedDateStr,
+		               emm.remark remark,
+		               e.sku,
+		               e.image,
+		               e.price,
+		               e.siteid
+		          from ebay_message_member emm
+		          left join (select distinct epl.sku         sku,
+		                                    epl.ebay_images image,
+		                                    epl.price       price,
+		                                    epl.site_id     siteId,
+		                                    epl.item_id,
+                                        	epl.ebay_product_url url
+		                      from ebay_publication_line epl
+		                     where epl.enabled_flag = 'Y') e
+		            on emm.itemid = e.item_id
+		          left join (select * from ebay_message where external_message_id is not null ) m
+				    on emm.recipientid = m.recipient_user_id
+				   and emm.messageid = m.external_message_id) em
+	</sql>
+	<sql id="member_select_base_condition">
+		<where>
+			<if test="param.messageStatus != null and param.messageStatus != ''">
+				<choose>
+					<when test="param.messageStatus == 1">
+						not exists (select p.buyer_user_id
+				          from ebay_order p
+				         where p.buyer_user_id = em.senderid)
+						and (em.read = 0 or em.read is null) and em.messageStatus = 'Unanswered'
+					</when>
+					<when test="param.messageStatus == 2">
+						not exists (select p.buyer_user_id
+				          from ebay_order p
+				         where p.buyer_user_id = em.senderid)
+						and em.messageStatus = 'Answered'
+					</when>
+					<when test="param.messageStatus == 3">
+						not exists (select p.buyer_user_id
+				          from ebay_order p
+				         where p.buyer_user_id = em.senderid)
+						and em.messageStatus = 'Unanswered' and em.read = 1
+					</when>
+					<when test="param.messageStatus == 4">
+						exists (select p.buyer_user_id
+				          from ebay_order p
+				         where p.buyer_user_id = em.senderid)
+						and (em.read = 0 or em.read is null) and em.messageStatus = 'Unanswered'
+					</when>
+					<when test="param.messageStatus == 5">
+						exists (select p.buyer_user_id
+				          from ebay_order p
+				         where p.buyer_user_id = em.senderid)
+						and em.messageStatus = 'Answered'
+					</when>
+					<when test="param.messageStatus == 6">
+						exists (select p.buyer_user_id
+				          from ebay_order p
+				         where p.buyer_user_id = em.senderid)
+						and em.messageStatus = 'Unanswered' and em.read = 1
+					</when>
+				</choose>
+			</if>
+			<if test="param.itemId != null and param.itemId != ''">
+				and em.itemId = #{param.itemId}
+			</if>
+			<if test="param.account != null and param.account != ''">
+				and em.recipientid = #{param.account}
+			</if>
+			<if test="param.recipientID != null and param.recipientID != ''">
+				and em.recipientID = #{param.recipientID}
+			</if>
+			<if test="param.senderID != null and param.senderID != ''">
+				and em.senderID = #{param.senderID}
+			</if>
+			 <if test="param.startDate !=null and param.startDate !=''"> 
+						and em.creationdate >= to_date('${param.startDate}','YYYY-MM-DD HH24:MI:SS')
+			</if>
+			<if test="param.endDate !=null and param.endDate !=''"> 
+						and em.creationdate  <![CDATA[<=]]> to_date('${param.endDate}','YYYY-MM-DD HH24:MI:SS')
+			</if>
+			<if test="param.title !=null and param.title !=''"> 
+						and em.title like '%'||#{param.title}||'%'
+			</if>
+			<if test="param.subject !=null and param.subject !=''"> 
+						and em.subject like '%'||#{param.subject}||'%'
+			</if>
+			<if test="param.body !=null and param.body !=''"> 
+						and em.body like '%'||#{param.body}||'%'
+			</if>
+			<if test="param.sku !=null and param.sku !=''"> 
+						and em.sku like '%'||#{param.sku}||'%'
+			</if>
+		</where>
+	</sql>
+	<select id="memberMessageById" resultType="com.it.ocs.synchronou.model.MemberMessageInfoModel">
+		<include refid="member_select_base" /> where em.id=#{id,jdbcType=BIGINT}
+	</select>
+	<select id="memberMessageQueryByPage" resultType="com.it.ocs.synchronou.model.MemberMessageInfoModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="member_select_base" />
+				<include refid="member_select_base_condition" />
+				order by em.creationdate desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]>
+	</select>
+	<select id="memberMessageCount" resultType="int">
+		select count(1) from (
+			<include refid="member_select_base" />
+			<include refid="member_select_base_condition" />
+		)
+	</select>
+	
+	<update id="memberRemark">
+		update ebay_message_member set remark = #{remark,jdbcType=VARCHAR} where id = #{id}
+	</update>
+	<select id="getOldQuestion" resultType="com.it.ocs.synchronou.model.MemberMessageInfoModel">
+		 select messageID,
+		 		body,
+		       to_char(createDate, 'yyyy-MM-dd HH24:MI:ss') creationDateStr,
+		       senderID,
+		       messagemedia
+		  from (select t2.messageid   messageID,
+		  			   t2.body         body,
+		               t2.creationdate+8/24 createDate,
+		               t2.senderid     senderID,
+		               t2.messagemedia
+		          from (select emm.senderid, nvl(emm.itemid, '0') itemid
+		                  from ebay_message_member emm
+		                 where emm.id = #{id}) t1,
+		               ebay_message_member t2
+		         where t1.senderid = t2.senderid
+		           and t1.itemid = nvl(t2.itemid, '0')
+		        union all
+		        select t4.message_id messageID,
+		        	   t4.answer body,
+		               t4.answer_date+8/24 createDate,
+		               'Me' senderID,
+		               t4.media messagemedia
+		          from (select emm.senderid, nvl(emm.itemid, '0') itemid
+		                  from ebay_message_member emm
+		                 where emm.id = #{id}) t3,
+		               ebay_message_answer t4
+		         where t3.senderid = t4.recipient_id
+		           and t3.itemid = nvl(t4.item_id, '0'))
+		 order by createDate asc
+	</select>
+	<insert id="addAnswer">
+		begin
+			update ebay_message_member t set t.displaytopublic = #{isView},t.messagestatus ='Answered' where t.recipientid = #{recipientID} and t.senderid = #{senderID} 
+			<choose>  
+	            <when test="itemID != null and itemID !='' ">  
+	                and t.itemid = #{itemID}
+	            </when>  
+	            <otherwise>  
+	                and t.itemid is null
+	            </otherwise>  
+	        </choose>  
+			; 
+			update ebay_message e set e.replied = 1 
+			where e.external_message_id = #{messageId,jdbcType=VARCHAR} 
+			and e.recipient_user_id = #{recipientID,jdbcType=VARCHAR}
+			and e.sender != 'eBay';
+			insert into ebay_message_answer
+			  (menber_id,
+			   message_id,
+			   answer,
+			   answer_date,
+			   id,
+			   ebay_account,
+			   item_id,
+			   sender_id,
+			   recipient_id,
+			   message_type,
+			   subject,
+			   MEDIA)
+			values
+			  (#{id},
+			   #{messageId,jdbcType=VARCHAR},
+			   #{answer},
+			   to_timestamp(#{answerDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff'),
+			   ebay_message_member_seq.nextval,
+			   #{recipientID,jdbcType=VARCHAR},
+			   #{itemID,jdbcType=VARCHAR},
+			   #{recipientID,jdbcType=VARCHAR},
+			   #{senderID,jdbcType=VARCHAR},
+			   'answer',
+			   #{subject,jdbcType=VARCHAR},
+			   #{media,jdbcType=VARCHAR}
+			   );
+		end;
+	
+	</insert>
+	
+	<update id="updateRead" >
+		update ebay_message_member set read=#{read,jdbcType=BIGINT} where id in (${id})
+	</update>
+	<insert id="addAskInfo">
+		insert into ebay_message_answer
+			  (
+			   answer,
+			   answer_date,
+			   id,
+			   ebay_account,
+			   item_id,
+			   sender_id,
+			   recipient_id,
+			   message_type,
+			   question_type,
+			   subject,
+			   media)
+			values
+			  (#{messageTxt},
+			   sysdate-8/24,
+			   ebay_message_member_seq.nextval,
+			   #{account,jdbcType=VARCHAR},
+			   #{itemId,jdbcType=VARCHAR},
+			   #{account,jdbcType=VARCHAR},
+			   #{buyerId,jdbcType=VARCHAR},
+			   'ask',
+			   #{QuestionTypeCodeType,jdbcType=VARCHAR},
+			   #{subject,jdbcType=VARCHAR},
+			   #{media,jdbcType=VARCHAR}
+			   )
+	</insert>
+	<select id="getMessageBody" resultType="java.lang.String">
+		select e.content from ebay_message e where e.external_message_id = #{messageId}
+	</select>
+	<select id="getImgById" resultType="com.it.ocs.upload.vo.FileVO">
+		select p.pic_id id,
+		       p.real_name name,
+		       p.save_path savePath,
+		       p.server_url serverUrl,
+		       p.is_upload isUpload,
+		       p.real_url ebayUrl
+		from EBAY_PIC_INFO p
+		where p.pic_id = #{imgId}
+	</select>
+</mapper> 

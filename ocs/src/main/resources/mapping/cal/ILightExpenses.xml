@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ILightExpensesDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.LightExpensesModel">
+		<id column="ENTITY_ID" jdbcType="DECIMAL" property="entityId" />
+	    <result column="SKU" jdbcType="VARCHAR" property="sku" />
+	    <result column="RENTAL_FEE_TOTAL" jdbcType="DECIMAL" property="rentalFeeTotal" />
+	    <result column="SUNDRY_CHARGES_TOTAL" jdbcType="DECIMAL" property="sundryChargesTotal" />
+	    <result column="COST_TOTAL" jdbcType="DECIMAL" property="costTotal" />
+	    <result column="LABOUR_COST_TOTAL" jdbcType="DECIMAL" property="labourCostTotal" />
+	    <result column="FEE_TOTAL" jdbcType="DECIMAL" property="feeTotal" />
+	    <result column="CREATED_AT" jdbcType="TIMESTAMP" property="createdAt" />
+	    <result column="UPDATED_AT" jdbcType="TIMESTAMP" property="updatedAt" />
+	</resultMap>
+	
+	<sql id="sql_base">
+		SELECT ENTITY_ID as entityId, 
+			   COUNTRY, 
+			   RENTAL_FEE_TOTAL as rentalFeeTotal,
+			   SUNDRY_CHARGES_TOTAL as sundryChargesTotal,
+			   COST_TOTAL as costTotal,
+			   LABOUR_COST_TOTAL as labourCostTotal, 
+			   FEE_TOTAL as feeTotal, 
+			   CREATED_AT as createdAt,
+			   UPDATED_AT as updatedAt
+		FROM LIGHT_EXPENSES
+	</sql>
+	
+	<!-- 条件查询 -->
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.country != null and param.country != ''">
+					AND COUNTRY = #{param.country}
+				</if>
+			</where>
+		</if>
+	</sql>
+	
+	<select id="query" resultMap="BaseResultMap">
+		<include refid="sql_base"/>
+		<include refid="sql_where"/>
+		<include refid="com.it.ocs.cal.dao.ILightEbayTaxDao.sql_order" />
+	</select>
+	
+	<select id="queryByObject" resultType="java.util.HashMap">
+		<include refid="sql_base"/> 
+		<include refid="sql_where"/>
+		ORDER BY UPDATED_AT DESC
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.cal.model.LightExpensesModel">
+		<include refid="sql_base"/> 
+		<include refid="sql_where"/>
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.LightExpensesModel">
+		insert into LIGHT_EXPENSES
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	      
+	        ENTITY_ID,
+	      
+	      <if test="country != null">
+	        COUNTRY,
+	      </if>
+	      <if test="rentalFeeTotal != null">
+	        RENTAL_FEE_TOTAL,
+	      </if>
+	      <if test="sundryChargesTotal != null">
+	        SUNDRY_CHARGES_TOTAL,
+	      </if>
+	      <if test="costTotal != null">
+	        COST_TOTAL,
+	      </if>
+	      <if test="labourCostTotal != null">
+	        LABOUR_COST_TOTAL,
+	      </if>
+	      <if test="feeTotal != null">
+	        FEE_TOTAL,
+	      </if>
+	      <if test="createdAt != null">
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null">
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides=",">
+	      
+	        LIGHT_EXPENSES_SEQ.NEXTVAL,
+	    
+	      <if test="country != null">
+	        #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="rentalFeeTotal != null">
+	        #{rentalFeeTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sundryChargesTotal != null">
+	        #{sundryChargesTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="costTotal != null">
+	        #{costTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="labourCostTotal != null">
+	        #{labourCostTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="feeTotal != null">
+	        #{feeTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null">
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null">
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>
+	
+	<update id="update" parameterType="com.it.ocs.cal.model.LightExpensesModel">
+		update LIGHT_EXPENSES
+	    <set>
+	      <if test="country != null">
+	        COUNTRY = #{country,jdbcType=VARCHAR},
+	      </if>
+	      <if test="rentalFeeTotal != null">
+	        RENTAL_FEE_TOTAL = #{rentalFeeTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sundryChargesTotal != null">
+	        SUNDRY_CHARGES_TOTAL = #{sundryChargesTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="costTotal != null">
+	        COST_TOTAL = #{costTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="labourCostTotal != null">
+	        LABOUR_COST_TOTAL = #{labourCostTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="feeTotal != null">
+	        FEE_TOTAL = #{feeTotal,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null">
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null">
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+	
+</mapper>

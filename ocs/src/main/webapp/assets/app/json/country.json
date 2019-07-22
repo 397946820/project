@@ -1,0 +1,38 @@
+[
+	{
+		"countryname": "United States",
+		"country": "US"
+	},
+	{
+		"countryname": "United Kingdom",
+		"country": "GB"
+	},
+	{
+		"countryname": "German",
+		"country": "DE"
+	},
+	{
+		"countryname": "France",
+		"country": "FR"
+	},
+	{
+		"countryname": "Italy",
+		"country": "IT"
+	},
+	{
+		"countryname": "Spain",
+		"country": "ES"
+	},
+	{
+		"countryname": "Japan",
+		"country": "JP"
+	},
+	{
+		"countryname": "Australia",
+		"country": "AU"
+	},
+	{
+		"countryname": "Canada",
+		"country": "CA"
+	}
+]

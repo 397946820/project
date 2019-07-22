@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ISmallTaximeterDao">
+
+	<sql id="base_sql">
+		SELECT T.PLATFORM,
+			   T.ENTITY_ID ENTITYID,
+			   T.TYPE_NAME TYPENAME,
+			   T.SHIPPING_TYPE SHIPPINGTYPE,
+			   T.SKU,
+			   T.QTY,
+			   T.TRADING_MODE TRADINGMODE,
+			   <choose>
+			   		<when test="param != null and param.currencyCode != '' and param.currencyCode != null">
+			   			ROUND(T.FINAL_COST / C.CURRENCY_RATE,4)
+			   		</when>
+			   		<otherwise>
+			   			T.FINAL_COST
+			   		</otherwise>
+			   </choose> FINALCOST,
+			   T.REFERRAL_RATE REFERRALRATE,
+			   T.PAYPAL_FEE PAYPALFEE,
+			   T.VAT VAT,
+			   T.ADVERTISING_RATE ADVERTISINGRATE,
+			   T.PROFIT_RATE PROFITRATE,
+			   T.PROFIT_RATE_ACTION PROFITRATEACTION,
+			   <choose>
+			   		<when test="param != null and param.currencyCode != '' and param.currencyCode != null">
+			   			ROUND(T.FINAL_PRICE / C.CURRENCY_RATE,4)
+			   		</when>
+			   		<otherwise>
+			   			T.FINAL_PRICE
+			   		</otherwise>
+			   </choose> FINALPRICE,
+			   T.CREATED_AT CREATEDAT,
+			   T.UPDATED_AT UPDATEDAT
+	    FROM CAL_SMALL_TAXIMETER T 
+	    <if test="param != null and param.currencyCode != '' and param.currencyCode != null">
+			, CAL_CURRENCY_RATE C
+		</if>
+		WHERE 1 = 1
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<if test="param.entityId != '' and param.entityId != null">
+				AND T.ENTITY_ID = #{param.entityId}
+			</if>
+			<if test="param.platform != '' and param.platform != null">
+				AND T.PLATFORM = #{param.platform}
+			</if>
+			<if test="param.typeName != '' and param.typeName != null">
+				AND T.TYPE_NAME = #{param.typeName}
+			</if>
+			<if test="param.shippingType != '' and param.shippingType != null">
+				AND T.SHIPPING_TYPE = #{param.shippingType}
+			</if>
+			<if test="param.sku != '' and param.sku != null">
+				AND UPPER(T.SKU) LIKE '%' || UPPER(#{param.sku}) || '%'
+			</if>
+			<if test="param.tradingMode != '' and param.tradingMode != null">
+				AND T.TRADING_MODE = #{param.tradingMode}
+			</if>
+			<if test="param.currencyCode != '' and param.currencyCode != null">
+				AND C.COUNTRY_ID = #{param.currencyCode}
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="order_sql">
+		<if test="sort!= null and order!=null">
+			ORDER BY T.${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			ORDER BY T.ENTITY_ID DESC
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.cal.model.SmallTaximeterModel">
+		<include refid="base_sql" />
+		<include refid="where_sql"/>
+		<include refid="order_sql" />
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.cal.model.SmallTaximeterModel">
+		<include refid="base_sql" />
+		<include refid="where_sql"/>
+	</select>
+	
+	<update id="update">
+		UPDATE CAL_SMALL_TAXIMETER SET QTY = #{qty} , 
+									   PROFIT_RATE_ACTION = #{profitRateAction},
+									   FINAL_PRICE = #{finalPrice},
+									   FINAL_COST = #{finalCost},
+									   UPDATED_AT = SYSDATE 
+		WHERE ENTITY_ID = #{entityId}
+	</update>
+	
+	<select id="calculation" statementType="CALLABLE" useCache="false">
+	    {call SELECT_SMALL_TAXIMETER_BY_QTY(
+	        #{qty, mode=IN, jdbcType=DECIMAL}, 
+	        #{platform, mode=IN, jdbcType=VARCHAR},
+	        #{typeName, mode=IN, jdbcType=VARCHAR},
+	        #{shippingType, mode=IN, jdbcType=VARCHAR},
+	        #{sku, mode=IN, jdbcType=VARCHAR},
+	        #{profitRateAction, mode=IN, jdbcType=DECIMAL},
+	        #{finalCost, mode=OUT, jdbcType=DECIMAL},
+	        #{finalPrice, mode=OUT, jdbcType=DECIMAL},
+	        #{finalPrice_, mode=OUT, jdbcType=DECIMAL}
+	    )}
+	</select>
+	
+	<update id="refreshAll" statementType="CALLABLE">
+		{call SMALL_TAXIMETER_REFRESH()}
+	</update>
+	
+	<update id="refresh" statementType="CALLABLE">
+		{call SKU_STATIC_PRICE.REFRESH_SMALL_TAXIMETER(
+			#{sku, mode=IN, jdbcType=VARCHAR}
+		)}
+	</update>
+
+</mapper>

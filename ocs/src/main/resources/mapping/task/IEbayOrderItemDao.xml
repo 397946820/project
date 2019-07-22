@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IEbayOrderItemDao">
+	<resultMap type="com.it.ocs.task.model.EbayOrderItemModel" id="ebayOrderItemResult">
+		<id column="ID" property="id"  />
+		<result column="ID" property="id"  />
+		<result column="ORDER_ID" property="order_id"  />
+		<result column="TRANSACTION_ID" property="transaction_id"  />
+		<result column="TRANSACTION_SITE_ID" property="transaction_site_id"  />
+		<result column="ITEM_ID" property="item_id"  />
+		<result column="ITEM_SKU" property="item_sku"  />
+		<result column="ITEM_TITLE" property="item_title"  />
+		<result column="QUANTITY_PURCHASED" property="quantity_purchased"  />
+		<result column="CURRENCYCODE" property="currencycode"  />
+		<result column="PRICE" property="price"  />
+		<result column="SOURCE_ID" property="source_id"  />
+		<result column="PARENT_ID" property="parent_id"  />
+	</resultMap>
+	<insert id="insertEbayOrderItems" parameterType="java.util.List">
+		INSERT INTO EBAY_ORDER_ITEM(
+			ID,
+			ORDER_ID,
+			TRANSACTION_ID,
+			TRANSACTION_SITE_ID,
+			ITEM_ID,
+			ITEM_SKU,
+			ITEM_TITLE,
+			QUANTITY_PURCHASED,
+			CURRENCYCODE,
+			PRICE,
+			SOURCE_ID,
+			PARENT_ID)  
+		select TOTAL_ORDER_ITEM_SEQ.Nextval,c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.order_id,jdbcType=VARCHAR},
+				#{item.transaction_id,jdbcType=VARCHAR},
+				#{item.transaction_site_id,jdbcType=VARCHAR},
+				#{item.item_id,jdbcType=VARCHAR},
+				#{item.item_sku,jdbcType=VARCHAR},
+				#{item.item_title,jdbcType=VARCHAR},
+				#{item.quantity_purchased,jdbcType=VARCHAR},
+				#{item.currencycode,jdbcType=VARCHAR},
+				#{item.price,jdbcType=DOUBLE},
+				#{item.id,jdbcType=BIGINT},
+				#{item.parent_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="findEbayOrderItems" resultMap="ebayOrderItemResult">
+		select SOURCE_ID from EBAY_ORDER_ITEM
+	</select>
+	<update id="updateEbayOrderItems" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update EBAY_ORDER_ITEM bao 
+	   	set
+			
+			TRANSACTION_ID = #{item.transaction_id,jdbcType=VARCHAR},
+			TRANSACTION_SITE_ID = #{item.transaction_site_id,jdbcType=VARCHAR},
+			ITEM_ID = #{item.item_id,jdbcType=VARCHAR},
+			ITEM_SKU = #{item.item_sku,jdbcType=VARCHAR},
+			ITEM_TITLE = #{item.item_title,jdbcType=VARCHAR},
+			QUANTITY_PURCHASED = #{item.quantity_purchased,jdbcType=VARCHAR},
+			CURRENCYCODE = #{item.currencycode,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=BIGINT}
+	   where bao.SOURCE_ID = #{item.id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.site.dao.ISiteDAO">
+	<resultMap type="com.it.ocs.site.model.SiteModel" id="siteResult">
+		<id property="id" column="SITE_ID" jdbcType="DECIMAL" />
+		<result property="name" column="NAME" jdbcType="VARCHAR" />
+		<result property="ebaySiteRelation" column="EBAY_SITE_RELATION" jdbcType="VARCHAR" />
+		<result property="ico" column="ICO" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_SITE_INFO where ENABLED_FLAG='Y'
+	</select>
+	<select id="getById" resultMap="siteResult">
+		<include refid="select_base" /> where SITE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="siteResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+				<include refid="where" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			SITE_ID id,
+			NAME  name,
+			EBAY_SITE_RELATION ebaySiteRelation,
+			ICO ico,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_SITE_INFO
+	</sql>
+	<sql id="where">
+		<choose>
+			<when test="param!=null">
+				<where>
+					1=1 
+					<if test="param.name!=null">
+						AND NAME=#{param.name}
+					</if>
+					<if test="param.ebaySiteRelation!=null">
+						AND EBAY_SITE_RELATION=#{param.ebaySiteRelation}
+					</if>
+					<if test="param.ico!=null">
+						AND ICO=#{param.ico}
+					</if>
+					<if test="param.enabledFlag!=null">
+						AND ENABLED_FLAG=#{param.enabledFlag}
+					</if>
+				</where>
+			</when>
+			<otherwise>
+				<where>
+					ENABLED_FLAG='Y'
+				</where>
+			</otherwise>
+		</choose>
+	</sql>
+	<select id="query" resultMap="siteResult" parameterType="com.it.ocs.site.model.SiteModel">
+		 <include refid="select_base" />
+		 <include refid="where" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.site.model.SiteModel">
+		insert into EBAY_SITE_INFO
+		(
+			SITE_ID,
+			NAME,
+			EBAY_SITE_RELATION,
+			ICO,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			EBAY_SITE_INFO_S.Nextval,
+			#{name},
+			#{ebaySiteRelation},
+			#{ico},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.site.model.SiteModel">
+		update EBAY_SITE_INFO set 
+			NAME=#{name},
+			EBAY_SITE_RELATION=#{ebaySiteRelation},
+			ICO=#{ico},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where SITE_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_SITE_INFO set ENABLED_FLAG='N' where SITE_ID=#{id}
+	</update>
+</mapper>

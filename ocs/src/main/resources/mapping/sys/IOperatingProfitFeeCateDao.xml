@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitFeeCateDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID,
+			   PLATFORM,
+			   CATEGORY,
+			   PROMOTION_FEE PROMOTIONFEE,
+			   MONTH_OF_YEAR MONTHOFYEAR,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+    	FROM SYS_OPERATING_PROFIT_FEE_CATE
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.platform != null and param.platform != ''">
+					and PLATFORM = #{param.platform}
+				</if>
+				<if test="param.category != null and param.category != ''">
+					and CATEGORY = #{param.category}
+				</if>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitFeeCateModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.sys.dao.IOperatingProfitSkuDao.order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.sys.model.OperatingProfitFeeCateModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+	</select>
+	
+	<insert id="add">
+	    insert into SYS_OPERATING_PROFIT_FEE_CATE
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="platform != null" >
+	        PLATFORM,
+	      </if>
+	      <if test="category != null" >
+	        CATEGORY,
+	      </if>
+	      <if test="promotionFee != null" >
+	        PROMOTION_FEE,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_PROFIT_FEE_CATE_SEQ.NEXTVAL,
+	      
+	      <if test="platform != null" >
+	        #{platform,jdbcType=VARCHAR},
+	      </if>
+	      <if test="category != null" >
+	        #{category,jdbcType=VARCHAR},
+	      </if>
+	      <if test="promotionFee != null" >
+	        #{promotionFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>	
+	
+	<update id="update">
+		update SYS_OPERATING_PROFIT_FEE_CATE
+	    <set >
+	      <if test="platform != null" >
+	        PLATFORM = #{platform,jdbcType=VARCHAR},
+	      </if>
+	      <if test="category != null" >
+	        CATEGORY = #{category,jdbcType=VARCHAR},
+	      </if>
+	      <if test="promotionFee != null" >
+	        PROMOTION_FEE = #{promotionFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR = #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

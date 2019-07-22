@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.compare.dao.ILightOrderCompareDAO">
+	<resultMap type="com.it.ocs.compare.model.LightDBModel" id="lightCampareResult">
+		<result property="orderId" column="ORDER_ID" jdbcType="VARCHAR" />
+		<result property="subTotal" column="SUBTOTAL" jdbcType="DECIMAL" />
+		<result property="grandTotal" column="GRAND_TOTAL" jdbcType="DECIMAL" />
+		<result property="totalPaid" column="TOTAL_PAID" jdbcType="DECIMAL" />
+		<result property="totalRefunded" column="TOTAL_REFUNDED" jdbcType="DECIMAL" />
+		<result property="state" column="STATE" jdbcType="VARCHAR" />
+		<result property="status" column="STATUS" jdbcType="VARCHAR" />
+		<result property="shippingAmount" column="SHIPPING_AMOUNT" jdbcType="DECIMAL" />
+		<result property="taxAmount" column="TAX_AMOUNT" jdbcType="DECIMAL" />
+		<result property="discountAmount" column="DISCOUNT_AMOUNT" jdbcType="DECIMAL" />
+		<result property="orderCurrencyCode" column="ORDER_CURRENCY_CODE" jdbcType="VARCHAR" />
+		<result property="lightCreateAt" column="LIGHT_CREATED_AT" jdbcType="TIMESTAMP" />
+		<result property="shippingMethod" column="SHIPPING_METHOD" jdbcType="VARCHAR" />
+		<result property="shippingDescription" column="SHIPPING_DESCRIPTION" jdbcType="VARCHAR" />
+		<result property="shipAt" column="SHIP_AT" jdbcType="TIMESTAMP" />
+		<result property="sku" column="SKU" jdbcType="VARCHAR" />
+		<result property="productName" column="NAME" jdbcType="VARCHAR" />
+		<result property="qtyOrdered" column="QTY_ORDERED" jdbcType="DECIMAL" />
+		<result property="price" column="PRICE" jdbcType="DECIMAL" />
+		<result property="rowTotal" column="ROW_TOTAL" jdbcType="DECIMAL" />
+	</resultMap>
+	<select id="queryByParam" resultMap="lightCampareResult"
+		parameterType="java.util.Map">
+		select a.ORDER_ID,
+		a.SUBTOTAL,
+		a.GRAND_TOTAL,
+		a.TOTAL_PAID,
+		a.TOTAL_REFUNDED,
+		a.STATE,
+		a.STATUS,
+		a.SHIPPING_AMOUNT,
+		a.TAX_AMOUNT,
+		a.DISCOUNT_AMOUNT,
+		a.Order_Currency_Code,
+		a.Light_Created_At,
+		a.Shipping_Method,
+		a.SHIPPING_DESCRIPTION,
+		b.SKU,
+		b.Name,
+		b.Qty_Ordered,
+		b.price,
+		b.Row_Total,
+		b.SHIP_AT
+		from light_order_test a,light_order_item_test b where a.entity_id=b.parent_id 
+		and <![CDATA[b.SHIP_AT>=to_date(#{param.startTime}, 'yyyy-mm-dd hh24:mi:ss')
+		and b.SHIP_AT<=to_date(#{param.endTime},'yyyy-mm-dd hh24:mi:ss')]]>
+		and a.platform=#{param.account}
+	</select>
+</mapper>

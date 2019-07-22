@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayCategoryDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBayCategoryModel" id="CategoryResult">
+		<id column="ID" property="id"  />
+		<result column="CATEGORY_NAME" property="name"  />
+		<result column="CATEGORY_ID" property="category_id"  />
+		<result column="MARKETPLACE_ID" property="marketplace_id"  />
+		<result column="PARENT_CATEGORY_ID" property="parent_category_id"  />
+		<result column="LEAF_CATEGORY_TREE_NODE" property="leaf_category_tree_node"  />
+		<result column="CATEGORY_TREE_NODE_LEVEL" property="category_tree_node_level"  />
+		<result column="PARENT_CATEGORY_TREE_NODE_HREF" property="parent_category_tree_node_href"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="CATEGORYTREEVERSION" property="categorytreeversion"  />
+		<result column="CHILD_CATEGORY_TREE_NODES" property="child_category_tree_nodes"  />
+	</resultMap>
+	<sql id="select_base">
+			ID ,
+			CATEGORY_NAME,
+			CATEGORY_ID,
+			MARKETPLACE_ID,
+			PARENT_CATEGORY_ID,
+			LEAF_CATEGORY_TREE_NODE,
+			CATEGORY_TREE_NODE_LEVEL,
+			PARENT_CATEGORY_TREE_NODE_HREF,
+			CATEGORYTREEVERSION,
+			CHILD_CATEGORY_TREE_NODES
+
+	</sql>
+	
+	<!-- <select id="count" resultType="java.lang.Integer" parameterType="java.lang.Long" >
+		select count(1) from EBAY_CATEGORY_INFO where MARKETPLACE_ID=#{marketplaceId,jdbcType=DOUBLE} and ENABLED_FLAG='Y'
+	</select> -->
+	<select id="selectCategoryByPIDAndMIDAndName" resultMap="CategoryResult">
+		select <include refid="select_base" /> from EBAY_CATEGORY_INFO 
+		where MARKETPLACE_ID=#{marketplaceId,jdbcType=DOUBLE} and PARENT_CATEGORY_ID=#{parentCategoryId,jdbcType=DOUBLE} and CATEGORY_NAME=#{categoryName,jdbcType=VARCHAR}
+		and enabled_flag = 'Y'
+	</select>
+	
+	<select id="selectCategoryByCIDAndMID" resultMap="CategoryResult">
+		select <include refid="select_base" /> from EBAY_CATEGORY_INFO 
+		where MARKETPLACE_ID=#{marketplaceId,jdbcType=DOUBLE} and CATEGORY_ID=#{categoryId,jdbcType=DOUBLE} and enabled_flag = 'Y'
+	</select>
+	<select id="getById" resultMap="CategoryResult">
+		select <include refid="select_base" /> from EBAY_CATEGORY_INFO 
+		where ID=#{id,jdbcType=DOUBLE}
+	</select>
+	<select id="selectChildCategorysByCIDAndMID" resultMap="CategoryResult">
+		select <include refid="select_base" /> from EBAY_CATEGORY_INFO 
+		where MARKETPLACE_ID=#{marketplaceId,jdbcType=DOUBLE} and PARENT_CATEGORY_ID=#{categoryId,jdbcType=DOUBLE}
+		and enabled_flag = 'Y'
+	</select>
+	<select id="selectCategorysByMarketplaceId" parameterType="java.lang.Long" resultMap="CategoryResult">
+		select CATEGORY_ID,CATEGORY_NAME from EBAY_CATEGORY_INFO where MARKETPLACE_ID=#{marketplaceId} and ENABLED_FLAG='Y' ORDER BY CATEGORY_ID
+	</select>
+	<select id="selectCategorysByMIDAndGCID"  resultMap="CategoryResult">
+		select CATEGORY_ID,CATEGORY_NAME from EBAY_CATEGORY_INFO where MARKETPLACE_ID=#{marketplaceId}  and ENABLED_FLAG='Y' and CATEGORY_ID>#{category_Id} ORDER BY CATEGORY_ID
+	</select>
+	<select id="selectCategoryIDByMID" resultMap="CategoryResult">
+		select CATEGORY_ID from EBAY_CATEGORY_INFO where MARKETPLACE_ID=#{marketplaceId} and enabled_flag = 'Y'
+	</select>
+	<select id="selectCategoryIDByMIDAndCIDMIN" resultMap="CategoryResult">
+		select category_id
+		  from (select eci.category_id as category_id, rownum rn
+		          from ebay_category_info eci
+		         where eci.category_id > ${categoryId}
+		           and eci.marketplace_id = ${marketplaceId}
+		         order by eci.category_id) k
+		 where rownum <![CDATA[<=]]> 100
+	</select>
+	<insert id="insertCategoryList" parameterType="java.util.List">
+	INSERT INTO EBAY_CATEGORY_INFO (
+			ID,
+			CATEGORY_NAME,
+			CATEGORY_ID,
+			MARKETPLACE_ID,
+			PARENT_CATEGORY_ID,
+			LEAF_CATEGORY_TREE_NODE,
+			CATEGORY_TREE_NODE_LEVEL,
+			PARENT_CATEGORY_TREE_NODE_HREF,
+			CATEGORYTREEVERSION,
+			CHILD_CATEGORY_TREE_NODES,
+			CREATION_DATE,
+			ENABLED_FLAG)   
+		select ebay_category_info_SEQ.Nextval,c.*,sysdate,'Y' from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+			 #{item.name,jdbcType=VARCHAR},
+             #{item.category_id,jdbcType=DOUBLE},
+             #{item.marketplace_id,jdbcType=DOUBLE},
+             #{item.parent_category_id,jdbcType=DOUBLE},
+             #{item.leaf_category_tree_node,jdbcType=VARCHAR},
+             #{item.category_tree_node_level,jdbcType=DOUBLE},
+             #{item.parent_category_tree_node_href,jdbcType=VARCHAR},
+             #{item.categorytreeversion,jdbcType=DOUBLE},
+             #{item.child_category_tree_nodes,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+    </insert>
+    
+    <update id="updateCategoryList"  parameterType="java.util.List">  
+           begin  
+	            <foreach collection="list" item="item" index="index" separator=";" > 
+	            update EBAY_CATEGORY_INFO 
+	            <set>  
+	                  CATEGORY_NAME=${item.name,jdbcType=VARCHAR},
+	                  PARENT_CATEGORY_ID=${item.parent_category_id,jdbcType=DOUBLE},
+	                  LEAF_CATEGORY_TREE_NODE=${item.leaf_category_tree_node,jdbcType=VARCHAR},
+	                  CATEGORY_TREE_NODE_LEVEL=${item.category_tree_node_level,jdbcType=DOUBLE},
+	                  PARENT_CATEGORY_TREE_NODE_HREF=${item.parent_category_tree_node_href,jdbcType=VARCHAR},
+	                  CATEGORYTREEVERSION=${item.categorytreeversion,jdbcType=DOUBLE},
+	                  CHILD_CATEGORY_TREE_NODES=${item.child_category_tree_nodes,jdbcType=VARCHAR}
+	                  LAST_UPDATE_DATE=to_date('${item.last_update_date}','yyyy-mm-dd hh24:mi:ss')
+	             </set>  
+	                where CATEGORY_ID=${item.category_id}  and MARKETPLACE_ID=${item.marketplace_id}
+	            </foreach>
+            ;end;   
+    </update>  
+</mapper>

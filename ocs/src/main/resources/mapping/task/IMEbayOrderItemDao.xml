@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IMEbayOrderItemDao">
+	<resultMap type="com.it.ocs.task.model.EbayOrderItemModel" id="ebayOrderItemResult">
+		<id column="id" property="id"  />
+		<result column="order_id" property="order_id"  />
+		<result column="transaction_id" property="transaction_id"  />
+		<result column="transaction_site_id" property="transaction_site_id"  />
+		<result column="item_id" property="item_id"  />
+		<result column="item_sku" property="item_sku"  />
+		<result column="item_title" property="item_title"  />
+		<result column="quantity_purchased" property="quantity_purchased"  />
+		<result column="transaction_price" property="transaction_price"  />
+	</resultMap>
+	<select id="selectEbayOrderItemByStartTAndEndT" resultMap="ebayOrderItemResult">
+		select eofi.* from EBAY_ORDER_FULL_ITEM eofi inner join (select eo.order_id from ebay_order_full eo where  last_fetch_time>STR_TO_DATE('${startT}', '%Y-%m-%d %H:%i:%s') and last_fetch_time<![CDATA[<=]]>STR_TO_DATE('${endT}', '%Y-%m-%d %H:%i:%s')) eof where eofi.order_id=eof.order_id 
+	</select>
+
+	
+</mapper>

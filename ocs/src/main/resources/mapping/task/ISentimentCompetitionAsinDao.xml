@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.task.dao.ISentimentCompetitionAsinDao">
+	<resultMap type="com.it.ocs.task.model.SentimentCompetitionAsinModel" id="sentimentCompetitionAsinResult" >
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PRODUCT_ID" property="product_id"  />
+		<result column="ASIN" property="asin"  />
+		<result column="PRICE" property="price"  />
+		<result column="BRAND" property="brand"  />
+		<result column="REVIEWS" property="reviews"  />
+		<result column="RATE" property="rate"  />
+		<result column="IMAGES" property="images"  />
+		<result column="TITLE" property="title"  />
+		<result column="CATEGORY_NAME" property="category_name"  />
+		<result column="CAT_RANK" property="cat_rank"  />
+		<result column="MIN_CAT_RANK" property="min_cat_rank"  />
+		<result column="LISTING" property="listing"  />
+		<result column="DEAL_TYPE" property="deal_type"  />
+		<result column="DEAL_PRICE" property="deal_price"  />
+		<result column="PICI" property="pici"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="SOURCE_ID" property="source_id"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+	</resultMap>
+	<select id="selectMaxDate" resultType="java.lang.String">
+		select to_char(max(CREATED_AT) ,'yyyy-mm-dd HH24:mi:ss') from sentiment_competition_asin
+	</select>
+	<select id="selectMySqlDate" resultMap="sentimentCompetitionAsinResult">
+		select * from sentiment_competition_asin aba where aba.CREATED_AT>=STR_TO_DATE('${date}', '%Y-%m-%d %H:%i:%s')
+	</select>
+	<select id="selectSentimentCompetitionAsinModels" resultMap="sentimentCompetitionAsinResult" parameterType="java.util.List">
+		select SOURCE_ID from sentiment_competition_asin 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id}  
+        </foreach> 
+	</select>
+	<update id="updateSentimentCompetitionAsins" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update sentiment_competition_asin baoi 
+	   	 set
+			PRODUCT_ID = #{item.product_id,jdbcType=BIGINT},
+			ASIN = #{item.asin,jdbcType=VARCHAR},
+			PRICE = #{item.price,jdbcType=VARCHAR},
+			BRAND = #{item.brand,jdbcType=VARCHAR},
+			REVIEWS = #{item.reviews,jdbcType=BIGINT},
+			RATE = #{item.rate,jdbcType=VARCHAR},
+			IMAGES = #{item.images,jdbcType=VARCHAR},
+			TITLE = #{item.title,jdbcType=VARCHAR},
+			CATEGORY_NAME = #{item.category_name,jdbcType=VARCHAR},
+			CAT_RANK = #{item.cat_rank,jdbcType=VARCHAR},
+			MIN_CAT_RANK = #{item.min_cat_rank,jdbcType=VARCHAR},
+			LISTING = #{item.listing,jdbcType=VARCHAR},
+			DEAL_TYPE = #{item.deal_type,jdbcType=VARCHAR},
+			DEAL_PRICE = #{item.deal_price,jdbcType=VARCHAR},
+			PICI = #{item.pici,jdbcType=VARCHAR},
+			LAST_UPDATE_DATE = #{item.last_update_date,jdbcType=TIMESTAMP}
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+
+	<insert id="insertSentimentCompetitionAsins" parameterType="java.util.List">
+		INSERT INTO sentiment_competition_asin (
+			ENTITY_ID,
+			PRODUCT_ID,
+			ASIN,
+			PRICE,
+			BRAND,
+			REVIEWS,
+			RATE,
+			TITLE,
+			CATEGORY_NAME,
+			CAT_RANK,
+			MIN_CAT_RANK,
+			DEAL_TYPE,
+			DEAL_PRICE,
+			PICI,
+			CREATED_AT,
+			SOURCE_ID,
+			CREATION_DATE)   
+		select sentiment_competition_asin_seq.NEXTVAL,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.product_id,jdbcType=BIGINT},
+				#{item.asin,jdbcType=VARCHAR},
+				#{item.price,jdbcType=VARCHAR},
+				#{item.brand,jdbcType=VARCHAR},
+				#{item.reviews,jdbcType=BIGINT},
+				#{item.rate,jdbcType=VARCHAR},
+				#{item.title,jdbcType=VARCHAR},
+				#{item.category_name,jdbcType=VARCHAR},
+				#{item.cat_rank,jdbcType=VARCHAR},
+				#{item.min_cat_rank,jdbcType=VARCHAR},
+				#{item.deal_type,jdbcType=VARCHAR},
+				#{item.deal_price,jdbcType=VARCHAR},
+				#{item.pici,jdbcType=VARCHAR},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.entity_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+    <update id="updateInsertData" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	    update sentiment_competition_asin baoi 
+	   	 set
+			
+			IMAGES = #{item.images,jdbcType=VARCHAR},
+			LISTING = #{item.listing,jdbcType=VARCHAR}
+	   		where baoi.SOURCE_ID = #{item.entity_id,jdbcType=BIGINT}
+	   </foreach>
+	</update>
+</mapper>

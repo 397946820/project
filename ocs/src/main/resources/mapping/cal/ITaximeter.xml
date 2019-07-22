@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ITaximeterDao">
+
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.TaximeterModel">
+		<result column="SKU" property="sku" jdbcType="VARCHAR"/>
+		<result column="DESCRIPTION" property="description" jdbcType="VARCHAR"/>
+		<result column="BATCH" property="batch" jdbcType="VARCHAR"/>
+		<result column="SHIPPINGTYPE" property="shippingtype" jdbcType="VARCHAR"/>
+		<result column="QTY" property="qty" jdbcType="DECIMAL"/>
+		<result column="BALANCE" property="balance" jdbcType="DECIMAL"/>
+		<result column="ONPASSAGE" property="onpassage" jdbcType="DECIMAL"/>
+		<result column="DELIVERYTIME" property="deliveryTime" jdbcType="VARCHAR"/>
+		<result column="ARRIVALTIME" property="arrivalTime" jdbcType="VARCHAR"/>
+		<result column="COUNTRY" property="country" jdbcType="VARCHAR"/>
+		<result column="CURRENCYCODE" property="currencyCode" jdbcType="VARCHAR"/>
+		<result column="UNITPRICE" property="unitPrice" jdbcType="DECIMAL"/>
+		<result column="REPERTORY" property="repertory" jdbcType="DECIMAL"/>
+		<result column="USERID" property="userId" jdbcType="DECIMAL"/>
+	</resultMap>
+	
+	<sql id="baseSql">
+		SELECT t.SKU,
+		       t.DESCRIPTION,
+		       t.BATCH,
+		       t.SHIPPINGTYPE,
+		       t.QTY,
+		       t.BALANCE,
+		       t.ONPASSAGE,
+		       t.DELIVERYTIME,
+		       t.ARRIVALTIME,
+		       t.COUNTRY,
+		       t.CURRENCYCODE,
+		       t.UNITPRICE,
+		       t.REPERTORY,
+		       t.USERID
+		 FROM CAL_TAXIMETER t
+	</sql>
+	<sql id="base_where">
+		<where>
+			<if test="param != null">
+				<if test="param.userId != '' and param.userId != null">
+					and t.USERID = #{param.userId}
+				</if>
+				<if test="param.sku != '' and param.sku != null">
+					and t.SKU like '${param.sku}%'
+				</if>
+				<if test="param.country != '' and param.country != null">
+					and t.COUNTRY = #{param.country}
+				</if>
+				<if test="param.description != '' and param.description != null">
+					and t.DESCRIPTION like '${param.description}%'
+				</if>
+				<if test="param.batch != '' and param.batch != null">
+					and t.BATCH like '${param.batch}%'
+				</if>
+				<if test="param.shippingtype != '' and param.shippingtype != null">
+					and t.SHIPPINGTYPE = #{param.shippingtype}
+				</if>
+				<if test="param.qty != '' and param.qty != null or param.qty == 0">
+					and t.QTY = #{param.qty}
+				</if>
+				<if test="param.unitPrice != '' and param.unitPrice != null or param.unitPrice == 0">
+					and t.UNITPRICE = #{param.unitPrice}
+				</if>
+				<if test="param.balance != '' and param.balance != null or param.balance == 0">
+					and t.BALANCE = #{param.balance}
+				</if>
+				<include refid="sql_time"/>
+			</if>
+		</where>
+	</sql>
+	<sql id="sql_time">
+		<if test="param.cstarttime != null or param.cendtime != null">
+			<if test="param.cstarttime != null and param.cendtime != null">
+				and DELIVERYTIME between #{param.cstarttime} and #{param.cendtime}
+			</if>
+			<if test="param.cstarttime == null and param.cendtime != null">
+				and DELIVERYTIME <![CDATA[  <= ]]>#{param.cendtime}
+			</if>
+			<if test="param.cstarttime != null and param.cendtime == null">
+				and DELIVERYTIME = #{param.cstarttime}
+			</if>
+		</if>
+		<if test="param.ustarttime != null or param.uendtime != null">
+			<if test="param.ustarttime != null and param.uendtime != null">
+				and ARRIVALTIME between #{param.ustarttime} and #{param.uendtime}
+			</if>
+			<if test="param.ustarttime == null and param.uendtime != null">
+				and ARRIVALTIME <![CDATA[  <= ]]>#{param.uendtime}
+			</if>
+			<if test="param.ustarttime != null and param.uendtime == null">
+				and ARRIVALTIME = #{param.ustarttime}
+			</if>
+		</if>
+	</sql>
+	<sql id="order_where">
+		<if test="sort!= null and order!=null">
+			order by ${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			order by DELIVERYTIME desc
+		</if>
+	</sql>
+	
+	<select id="query" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<include refid="base_where"/>
+		<include refid="order_where"/>
+	</select>
+	
+	<select id="queryBySku" resultMap="BaseResultMap">
+		<include refid="baseSql" /> where DELIVERYTIME between #{start} and #{end} and SKU = #{sku} and COUNTRY = #{country}
+	</select>
+</mapper>

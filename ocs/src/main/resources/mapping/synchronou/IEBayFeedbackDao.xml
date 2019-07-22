@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayFeedbackDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBayFeedbackModel" id="eBayFeedbackResult">
+		<id column="ID" property="id"  />
+		<result column="LEFT_COMMENT_TEXT" property="left_comment_text"  />
+		<result column="LEFT_COMMENT_TIME" property="left_comment_time"  />
+		<result column="LEFT_COMMENT_TYPE" property="left_comment_type"  />
+		<result column="LEFT_FEEDBACK_ID" property="left_feedback_id"  />
+		<result column="RECEIVED_COMMENT_TEXT" property="received_comment_text"  />
+		<result column="RECEIVED_COMMENT_TIME" property="received_comment_time"  />
+		<result column="RECEIVEDT_COMMENT_TYPE" property="receivedt_comment_type"  />
+		<result column="RECEIVED_FEEDBACK_ID" property="received_feedback_id"  />
+		<result column="FOLLOW_UP_TEXT" property="follow_up_text"  />
+		<result column="REPLY_TEXT" property="reply_text"  />
+		<result column="SELLER_ID" property="seller_id"  />
+		<result column="BUYER_ID" property="buyer_id"  />
+		<result column="ITEM_ID" property="item_id"  />
+		<result column="USER_URL" property="user_url"  />
+		<result column="TRANSACTION_ID" property="transaction_id"  />
+		<result column="ORDER_LINE_ITEM_ID" property="order_line_item_id"  />
+		<result column="ITEM_TITLE" property="item_title"  />
+		<result column="ITEM_PRICE" property="item_price"  />
+		<result column="CURRENCY_ID" property="currency_id"  />
+		<result column="SELLER_FOLLOW_UP_TEXT" property="seller_follow_up_text"  />
+		<result column="REMARK" property="remark"  />
+		<result column="COMMENTING_USER_SCORE" property="commenting_user_score"  />
+		<result column="LEFT_FEED_BACK_RESPONSE" property="left_feed_back_response"  />
+		<result column="RECEIVED_FEED_BACK_RESPONSE" property="received_feed_back_response"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+		<result column="CREATE_BY" property="create_by"  />
+		<result column="LAST_UPDATE_BY" property="last_update_by"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="EBAY_IMAGES" property="imagesUrl"  />
+		<result column="RESPONSE_TYPE" property="response_type"  />
+		
+	</resultMap>
+	
+	<sql id="base_map_conditions">
+	 		<if test="feedback.itemTitle !=null and feedback.itemTitle !=''"> and ef.ITEM_TITLE like '%'||#{feedback.itemTitle}||'%'</if>
+	 		<if test="feedback.buyer_id !=null and feedback.buyer_id !=''"> and ef.BUYER_ID like '%'||#{feedback.buyer_id}||'%'</if>
+	 		<if test="feedback.itemId !=null and feedback.itemId !=''"> and ef.ITEM_ID like '%'||#{feedback.itemId}||'%'</if>
+			<if test="feedback.seller_id !=null and feedback.seller_id !=''"> and ef.SELLER_ID like '%'||#{feedback.seller_id}||'%'</if>
+			<if test="feedback.receivedt_comment_type !=null and feedback.receivedt_comment_type !=''"> and ef.RECEIVEDT_COMMENT_TYPE like '%'||#{feedback.receivedt_comment_type}||'%'</if>
+			<if test="feedback.left_feedback_id !=null and feedback.left_feedback_id !=''"> and ef.LEFT_FEEDBACK_ID like '%'||#{feedback.left_feedback_id}||'%'</if>
+			<if test="feedback.received_feedback_id !=null and feedback.received_feedback_id !=''"> and ef.RECEIVED_FEEDBACK_ID like '%'||#{feedback.received_feedback_id}||'%'</if>
+	</sql>
+	<update id="updateFeedbackById" parameterType="com.it.ocs.synchronou.model.EBayFeedbackModel">
+	    update ebay_feedback <include refid="base_update" /> where ID=#{id}
+	</update>
+	
+	<sql id="base_conditions">
+		    <if test="id!=null"> and ID = #{id,jdbcType=BIGINT}</if>
+			<if test="left_comment_text!=null and left_comment_text!=''"> and LEFT_COMMENT_TEXT = #{left_comment_text,jdbcType=VARCHAR}</if>
+			<if test="left_comment_time!=null"> and LEFT_COMMENT_TIME = #{left_comment_time,jdbcType=TIMESTAMP}</if>
+			<if test="left_comment_type!=null and left_comment_type!=''"> and LEFT_COMMENT_TYPE = #{left_comment_type,jdbcType=VARCHAR}</if>
+			<if test="left_feedback_id!=null and left_feedback_id!=''"> and LEFT_FEEDBACK_ID = #{left_feedback_id,jdbcType=VARCHAR}</if>
+			<if test="received_comment_text!=null and received_comment_text!=''"> and RECEIVED_COMMENT_TEXT = #{received_comment_text,jdbcType=VARCHAR}</if>
+			<if test="received_comment_time!=null "> and RECEIVED_COMMENT_TIME = #{received_comment_time,jdbcType=TIMESTAMP}</if>
+			<if test="receivedt_comment_type!=null and receivedt_comment_type!=''"> and RECEIVEDT_COMMENT_TYPE = #{receivedt_comment_type,jdbcType=VARCHAR}</if>
+			<if test="received_feedback_id!=null and receivedt_comment_type!=''"> and RECEIVED_FEEDBACK_ID = #{received_feedback_id,jdbcType=VARCHAR}</if>
+			<if test="follow_up_text!=null and follow_up_text!=''"> and FOLLOW_UP_TEXT = #{follow_up_text,jdbcType=VARCHAR}</if>
+			<if test="reply_text!=null and reply_text!=''"> and REPLY_TEXT = #{reply_text,jdbcType=VARCHAR}</if>
+			<if test="seller_id!=null and seller_id!=''"> and SELLER_ID = #{seller_id,jdbcType=VARCHAR}</if>
+			<if test="buyer_id!=null and buyer_id!=''"> and BUYER_ID = #{buyer_id,jdbcType=VARCHAR}</if>
+			<if test="item_id!=null and item_id!=''"> and ITEM_ID = #{item_id,jdbcType=VARCHAR}</if>
+			<if test="transaction_id!=null and transaction_id!=''"> and TRANSACTION_ID = #{transaction_id,jdbcType=VARCHAR}</if>
+			<if test="order_line_item_id!=null and order_line_item_id!=''"> and ORDER_LINE_ITEM_ID = #{order_line_item_id,jdbcType=VARCHAR}</if>
+			<if test="item_title!=null and item_title!=''"> and ITEM_TITLE = #{item_title,jdbcType=VARCHAR}</if>
+			<if test="item_price!=null "> and ITEM_PRICE = #{item_price,jdbcType=BIGINT}</if>
+			<if test="currency_id!=null and currency_id!=''"> and CURRENCY_ID = #{currency_id,jdbcType=VARCHAR}</if>
+			<if test="seller_follow_up_text!=null and seller_follow_up_text!=''"> and SELLER_FOLLOW_UP_TEXT = #{seller_follow_up_text,jdbcType=VARCHAR}</if>
+			<if test="remark!=null and remark!=''"> and REMARK = #{remark,jdbcType=VARCHAR}</if>
+			<if test="left_feed_back_response!=null and left_feed_back_response!=''"> and LEFT_FEED_BACK_RESPONSE = #{left_feed_back_response,jdbcType=VARCHAR}</if>
+			<if test="received_feed_back_response!=null and received_feed_back_response!=''"> and RECEIVED_FEED_BACK_RESPONSE = #{received_feed_back_response,jdbcType=VARCHAR}</if>
+			<if test="commenting_user_score!=null "> and COMMENTING_USER_SCORE = #{commenting_user_score,jdbcType=BIGINT}</if>
+			<if test="creation_date!=null "> and CREATION_DATE = #{creation_date,jdbcType=TIMESTAMP}</if>
+			<if test="create_by!=null "> and CREATE_BY = #{create_by,jdbcType=BIGINT}</if>
+			<if test="last_update_by!=null "> and LAST_UPDATE_BY = #{last_update_by,jdbcType=BIGINT}</if>
+			<if test="last_update_date!=null "> and LAST_UPDATE_DATE = #{last_update_date,jdbcType=TIMESTAMP}</if>
+			
+	</sql>
+	<sql id="base_updates">
+		<trim prefix="set" suffixOverrides=",">
+			<if test="item.left_comment_text!=null and item.left_comment_text!=''">LEFT_COMMENT_TEXT = #{item.left_comment_text,jdbcType=VARCHAR},</if>
+			<if test="item.left_comment_time!=null">LEFT_COMMENT_TIME = #{item.left_comment_time,jdbcType=TIMESTAMP},</if>
+			<if test="item.left_comment_type!=null and item.left_comment_type!=''">LEFT_COMMENT_TYPE = #{item.left_comment_type,jdbcType=VARCHAR},</if>
+			<if test="item.left_feedback_id!=null and item.left_feedback_id!=''">LEFT_FEEDBACK_ID = #{item.left_feedback_id,jdbcType=VARCHAR},</if>
+			<if test="item.received_comment_text!=null and item.received_comment_text!=''">RECEIVED_COMMENT_TEXT = #{item.received_comment_text,jdbcType=VARCHAR},</if>
+			<if test="item.received_comment_time!=null ">RECEIVED_COMMENT_TIME = #{item.received_comment_time,jdbcType=TIMESTAMP},</if>
+			<if test="item.receivedt_comment_type!=null and item.receivedt_comment_type!=''">RECEIVEDT_COMMENT_TYPE = #{item.receivedt_comment_type,jdbcType=VARCHAR},</if>
+			<if test="item.received_feedback_id!=null and item.received_feedback_id!=''">RECEIVED_FEEDBACK_ID = #{item.received_feedback_id,jdbcType=VARCHAR},</if>
+			<if test="item.follow_up_text!=null and item.follow_up_text!=''">FOLLOW_UP_TEXT = #{item.follow_up_text,jdbcType=VARCHAR},</if>
+			<if test="item.reply_text!=null and item.reply_text!=''">REPLY_TEXT = #{item.reply_text,jdbcType=VARCHAR},</if>
+			<if test="item.seller_id!=null and item.seller_id!=''">SELLER_ID = #{item.seller_id,jdbcType=VARCHAR},</if>
+			<if test="item.buyer_id!=null and item.buyer_id!=''">BUYER_ID = #{item.buyer_id,jdbcType=VARCHAR},</if>
+			<if test="item.item_id!=null and item.item_id!=''">ITEM_ID = #{item.item_id,jdbcType=VARCHAR},</if>
+			<if test="item.transaction_id!=null and item.transaction_id!=''">TRANSACTION_ID = #{item.transaction_id,jdbcType=VARCHAR},</if>
+			<if test="item.order_line_item_id!=null and item.order_line_item_id!=''">ORDER_LINE_ITEM_ID = #{item.order_line_item_id,jdbcType=VARCHAR},</if>
+			<if test="item.item_title!=null and item.item_title!=''">ITEM_TITLE = #{item.item_title,jdbcType=VARCHAR},</if>
+			<if test="item.item_price!=null ">ITEM_PRICE = #{item.item_price,jdbcType=BIGINT},</if>
+			<if test="item.currency_id!=null and item.currency_id!=''">CURRENCY_ID = #{item.currency_id,jdbcType=VARCHAR},</if>
+			<if test="item.seller_follow_up_text!=null and item.seller_follow_up_text!=''">SELLER_FOLLOW_UP_TEXT = #{item.seller_follow_up_text,jdbcType=VARCHAR},</if>
+			<if test="item.remark!=null and item.remark!=''">REMARK = #{item.remark,jdbcType=VARCHAR},</if>
+			<if test="item.commenting_user_score!=null ">COMMENTING_USER_SCORE = #{item.commenting_user_score,jdbcType=BIGINT},</if>
+			<if test="item.sysdate!=null ">LAST_UPDATE_DATE = #{item.sysdate},</if>
+        	<if test="item.left_feed_back_response!=null and item.left_feed_back_response!=''">LEFT_FEED_BACK_RESPONSE = #{item.left_feed_back_response,jdbcType=VARCHAR},</if>
+			<if test="item.received_feed_back_response!=null and item.received_feed_back_response!=''"> RECEIVED_FEED_BACK_RESPONSE = #{item.received_feed_back_response,jdbcType=VARCHAR},</if>
+			
+        </trim>
+	</sql>
+	<sql id="base_update">
+		<trim prefix="set" suffixOverrides=",">
+			<if test="left_comment_text!=null and left_comment_text!=''">LEFT_COMMENT_TEXT = #{left_comment_text,jdbcType=VARCHAR},</if>
+			<if test="left_comment_time!=null">LEFT_COMMENT_TIME = #{left_comment_time,jdbcType=TIMESTAMP},</if>
+			<if test="left_comment_type!=null and left_comment_type!=''">LEFT_COMMENT_TYPE = #{left_comment_type,jdbcType=VARCHAR},</if>
+			<if test="left_feedback_id!=null and left_feedback_id!=''">LEFT_FEEDBACK_ID = #{left_feedback_id,jdbcType=VARCHAR},</if>
+			<if test="received_comment_text!=null and received_comment_text!=''">RECEIVED_COMMENT_TEXT = #{received_comment_text,jdbcType=VARCHAR},</if>
+			<if test="received_comment_time!=null ">RECEIVED_COMMENT_TIME = #{received_comment_time,jdbcType=TIMESTAMP},</if>
+			<if test="receivedt_comment_type!=null and receivedt_comment_type!=''">RECEIVEDT_COMMENT_TYPE = #{receivedt_comment_type,jdbcType=VARCHAR},</if>
+			<if test="received_feedback_id!=null and received_feedback_id!=''">RECEIVED_FEEDBACK_ID = #{received_feedback_id,jdbcType=VARCHAR},</if>
+			<if test="follow_up_text!=null and follow_up_text!=''">FOLLOW_UP_TEXT = #{follow_up_text,jdbcType=VARCHAR},</if>
+			<if test="reply_text!=null and reply_text!=''">REPLY_TEXT = #{reply_text,jdbcType=VARCHAR},</if>
+			<if test="seller_id!=null and seller_id!=''">SELLER_ID = #{seller_id,jdbcType=VARCHAR},</if>
+			<if test="buyer_id!=null and buyer_id!=''">BUYER_ID = #{buyer_id,jdbcType=VARCHAR},</if>
+			<if test="item_id!=null and item_id!=''">ITEM_ID = #{item_id,jdbcType=VARCHAR},</if>
+			<if test="transaction_id!=null and transaction_id!=''">TRANSACTION_ID = #{transaction_id,jdbcType=VARCHAR},</if>
+			<if test="order_line_item_id!=null and order_line_item_id!=''">ORDER_LINE_ITEM_ID = #{order_line_item_id,jdbcType=VARCHAR},</if>
+			<if test="item_title!=null and item_title!=''">ITEM_TITLE = #{item_title,jdbcType=VARCHAR},</if>
+			<if test="item_price!=null ">ITEM_PRICE = #{item_price,jdbcType=BIGINT},</if>
+			<if test="currency_id!=null and currency_id!=''">CURRENCY_ID = #{currency_id,jdbcType=VARCHAR},</if>
+			<if test="seller_follow_up_text!=null and seller_follow_up_text!=''">SELLER_FOLLOW_UP_TEXT = #{seller_follow_up_text,jdbcType=VARCHAR},</if>
+			<if test="remark!=null and remark!=''">REMARK = #{remark,jdbcType=VARCHAR},</if>
+			<if test="commenting_user_score!=null ">COMMENTING_USER_SCORE = #{commenting_user_score,jdbcType=BIGINT},</if>
+			<if test="creation_date!=null ">CREATION_DATE = #{creation_date,jdbcType=TIMESTAMP},</if>
+			<if test="create_by!=null ">CREATE_BY = #{create_by,jdbcType=BIGINT},</if>
+			<if test="last_update_by!=null ">LAST_UPDATE_BY = #{last_update_by,jdbcType=BIGINT},</if>
+			<if test="sysdate!=null ">LAST_UPDATE_DATE = #{sysdate},</if>
+			<if test="last_update_date!=null ">LAST_UPDATE_DATE = #{last_update_date,jdbcType=TIMESTAMP},</if>
+			<if test="left_feed_back_response!=null and left_feed_back_response!=''">  LEFT_FEED_BACK_RESPONSE = #{left_feed_back_response,jdbcType=VARCHAR},</if>
+			<if test="received_feed_back_response!=null and received_feed_back_response!=''">  RECEIVED_FEED_BACK_RESPONSE = #{received_feed_back_response,jdbcType=VARCHAR},</if>
+			<if test="response_type!=null and response_type!=''">  RESPONSE_TYPE = #{response_type,jdbcType=VARCHAR},</if>
+			
+			
+        </trim>
+		
+	</sql>
+	<sql id="base_select">
+		ef.ID,
+		ef.LEFT_COMMENT_TEXT,
+		ef.LEFT_COMMENT_TIME,
+		ef.LEFT_COMMENT_TYPE,
+		ef.LEFT_FEEDBACK_ID,
+		ef.RECEIVED_COMMENT_TEXT,
+		ef.RECEIVED_COMMENT_TIME,
+		ef.RECEIVEDT_COMMENT_TYPE,
+		ef.RECEIVED_FEEDBACK_ID,
+		ef.FOLLOW_UP_TEXT,
+		ef.REPLY_TEXT,
+		ef.SELLER_ID,
+		ef.BUYER_ID,
+		ef.ITEM_ID,
+		ef.TRANSACTION_ID,
+		ef.ORDER_LINE_ITEM_ID,
+		ef.ITEM_TITLE,
+		ef.ITEM_PRICE,
+		ef.CURRENCY_ID,
+		ef.SELLER_FOLLOW_UP_TEXT,
+		ef.REMARK,
+		ef.USER_URL,
+		ef.COMMENTING_USER_SCORE,
+		ef.LEFT_FEED_BACK_RESPONSE,
+		ef.RECEIVED_FEED_BACK_RESPONSE
+		
+	</sql>
+	
+	<select id="selectEBayFeedbackModel" resultMap="eBayFeedbackResult">
+		select <include refid="base_select"/> from ebay_feedback ef where 1=1 <include refid="base_conditions"/>
+	</select>
+	<select id="selectMaxLeftCommentTime" resultType="java.util.Date">
+		select max(LEFT_COMMENT_TIME) from ebay_feedback where SELLER_ID=#{sellerId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectMaxReceivedCommentTime" resultType="java.util.Date">
+		select max(RECEIVED_COMMENT_TIME) from ebay_feedback where SELLER_ID=#{sellerId,jdbcType=VARCHAR}
+	</select>
+	<update id="updateEBayFeedbackModels" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update ebay_feedback baoi  
+	   	<include refid="base_updates"/> where baoi.ORDER_LINE_ITEM_ID = #{item.order_line_item_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+	<sql id="base_page_select">
+		ef.ID,
+		ef.LEFT_COMMENT_TEXT,
+		ef.LEFT_COMMENT_TIME,
+		ef.LEFT_COMMENT_TYPE,
+		ef.LEFT_FEEDBACK_ID,
+		ef.RECEIVED_COMMENT_TEXT,
+		ef.RECEIVED_COMMENT_TIME,
+		ef.RECEIVEDT_COMMENT_TYPE,
+		ef.RECEIVED_FEEDBACK_ID,
+		ef.FOLLOW_UP_TEXT,
+		ef.REPLY_TEXT,
+		ef.SELLER_ID,
+		ef.BUYER_ID,
+		ef.ITEM_ID,
+		ef.USER_URL,
+		ef.TRANSACTION_ID,
+		ef.ORDER_LINE_ITEM_ID,
+		ef.ITEM_TITLE,
+		ef.ITEM_PRICE,
+		ef.CURRENCY_ID,
+		ef.SELLER_FOLLOW_UP_TEXT,
+		ef.REMARK,
+		ef.COMMENTING_USER_SCORE,
+		ef.LEFT_FEED_BACK_RESPONSE,
+		ef.RECEIVED_FEED_BACK_RESPONSE,
+		epi.SKU as sku,
+		epi.EBAY_IMAGES as EBAY_IMAGES,
+		epi.EBAY_PRODUCT_URL as product_url
+	</sql>
+	<select id="selectFeedbackModelsByPage" resultMap="eBayFeedbackResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select * from (select <include refid="base_page_select"/> from ebay_feedback ef left join ebay_publication_line epi on ef.ITEM_ID=epi.ITEM_ID and ef.ENABLED_FLAG='Y'   and epi.ENABLED_FLAG = 'Y' order by ef.RECEIVED_COMMENT_TIME desc nulls last) ef where 1=1 
+				<include refid="base_map_conditions"/>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]>
+		
+	</select>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from  ebay_feedback ef where ENABLED_FLAG='Y'
+		<include refid="base_map_conditions"/>
+	</select>
+	<insert id="insertFeedbacks" parameterType="java.util.List">
+			INSERT INTO ebay_feedback(
+				ID,
+				LEFT_COMMENT_TEXT,
+				LEFT_COMMENT_TIME,
+				LEFT_COMMENT_TYPE,
+				LEFT_FEEDBACK_ID,
+				RECEIVED_COMMENT_TEXT,
+				RECEIVED_COMMENT_TIME,
+				RECEIVEDT_COMMENT_TYPE,
+				RECEIVED_FEEDBACK_ID,
+				FOLLOW_UP_TEXT,
+				REPLY_TEXT,
+				SELLER_ID,
+				BUYER_ID,
+				ITEM_ID,
+				TRANSACTION_ID,
+				ORDER_LINE_ITEM_ID,
+				ITEM_TITLE,
+				ITEM_PRICE,
+				CURRENCY_ID,
+				SELLER_FOLLOW_UP_TEXT,
+				REMARK,
+				COMMENTING_USER_SCORE,
+				LEFT_FEED_BACK_RESPONSE,
+				RECEIVED_FEED_BACK_RESPONSE,
+				CREATION_DATE)  
+			select EBay_Feedback_SEQ.Nextval,c.*,sysdate from(
+			<foreach collection="list" index="index" item="item"
+				separator="union all">
+				select
+					#{item.left_comment_text,jdbcType=VARCHAR},
+					#{item.left_comment_time,jdbcType=TIMESTAMP},
+					#{item.left_comment_type,jdbcType=VARCHAR},
+					#{item.left_feedback_id,jdbcType=VARCHAR},
+					#{item.received_comment_text,jdbcType=VARCHAR},
+					#{item.received_comment_time,jdbcType=TIMESTAMP},
+					#{item.receivedt_comment_type,jdbcType=VARCHAR},
+					#{item.received_feedback_id,jdbcType=BIGINT},
+					#{item.follow_up_text,jdbcType=VARCHAR},
+					#{item.reply_text,jdbcType=VARCHAR},
+					#{item.seller_id,jdbcType=VARCHAR},
+					#{item.buyer_id,jdbcType=VARCHAR},
+					#{item.item_id,jdbcType=VARCHAR},
+					#{item.transaction_id,jdbcType=VARCHAR},
+					#{item.order_line_item_id,jdbcType=VARCHAR},
+					#{item.item_title,jdbcType=VARCHAR},
+					#{item.item_price,jdbcType=BIGINT},
+					#{item.currency_id,jdbcType=VARCHAR},
+					#{item.seller_follow_up_text,jdbcType=VARCHAR},
+					#{item.remark,jdbcType=VARCHAR},
+					#{item.commenting_user_score,jdbcType=BIGINT},
+					#{item.left_feed_back_response,jdbcType=VARCHAR},
+					#{item.received_feed_back_response,jdbcType=VARCHAR}
+				from dual
+			</foreach>
+			) c
+		</insert>
+</mapper>

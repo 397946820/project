@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IScheduleJobDao">
+	<select id="getScheduleJobById" resultType="com.it.ocs.task.model.ScheduleJob">
+		select sj.job_id jobId,
+		       sj.job_name jobName,
+		       sj.job_group jobGroup,
+		       sj.job_status jobStatus,
+		       sj.cron_expression cronExpression,
+		       sj.decription decription,
+		       sj.beanclass beanClass,
+		       sj.is_concurrent isConcurrent,
+		       sj.bean_name springId,
+		       sj.method_name methodName
+		  from sys_schedule_job sj
+		  where sj.job_id = #{jobId,jdbcType=BIGINT}
+	</select>
+	<select id="getScheduleJobByStatus" resultType="com.it.ocs.task.model.ScheduleJob">
+		select sj.job_id jobId,
+		       sj.job_name jobName,
+		       sj.job_group jobGroup,
+		       sj.job_status jobStatus,
+		       sj.cron_expression cronExpression,
+		       sj.decription decription,
+		       sj.beanclass beanClass,
+		       sj.is_concurrent isConcurrent,
+		       sj.bean_name springId,
+		       sj.method_name methodName
+		  from sys_schedule_job sj
+		  where sj.job_status = #{status,jdbcType=VARCHAR}
+	</select>
+	<sql id="select_base">
+		select sj.job_id jobId,
+		       sj.job_name jobName,
+		       sj.job_group jobGroup,
+		       sj.job_status jobStatus,
+		       sj.cron_expression cronExpression,
+		       sj.decription decription,
+		       sj.beanclass beanClass,
+		       sj.is_concurrent isConcurrent,
+		       sj.bean_name springId,
+		       sj.method_name methodName
+		  from sys_schedule_job sj
+		  where 1 = 1
+	</sql>
+	<sql id="select_base_condition">
+		<if test="param.jobName != null and param.jobName != ''">
+			and ed.account = #{param.account}
+		</if>
+	</sql>
+	<select id="queryByPage" resultType="com.it.ocs.task.model.ScheduleJob">
+		<include refid="select_base" />
+		<include refid="select_base_condition" /> limit #{startRow},#{endRow}
+	</select>
+	<select id="count" resultType="int">
+		select count(1) from (
+			<include refid="select_base" />
+			<include refid="select_base_condition" />
+		) a
+	</select>
+	<update id="updateScheduleJobStatus">
+		update sys_schedule_job set job_status = #{jobStatus},update_date = sysdate where job_id = #{jobId}
+	</update>
+</mapper> 

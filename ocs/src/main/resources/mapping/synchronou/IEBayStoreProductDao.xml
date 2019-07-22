@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayStoreProductDao">
+	<resultMap type="com.it.ocs.synchronou.model.EBayStoreProductModel" id="ebayStoreProductResult">
+		<result column="ID" property="id"  />
+		<result column="ITEM_ID" property="item_id"  />
+		<result column="GLOBAL_ID" property="global_id"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="CREATE_BY" property="create_by"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+		<result column="LAST_UPDATE_BY" property="last_update_by"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="ITEM_SEARCH_URL" property="item_search_url"  />
+		<result column="STORE_NAME" property="store_name"  />
+	</resultMap>
+	<sql id="select_base">
+			ID,
+			ITEM_ID,
+			GLOBAL_ID,
+			ITEM_SEARCH_URL,
+			STORE_NAME
+
+	</sql>
+	<insert id="insertStoreProducts" parameterType="java.util.List">
+		INSERT INTO EBAY_STORE_PRODUCT_INFO (
+			ID,
+			ITEM_ID,
+			GLOBAL_ID,
+			ITEM_SEARCH_URL,
+			STORE_NAME,
+			CREATION_DATE
+			)   
+		select ebay_store_Product_info_SEQ.Nextval,c.*,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.item_id,jdbcType=VARCHAR},
+				#{item.global_id,jdbcType=VARCHAR},
+				#{item.item_search_url,jdbcType=VARCHAR},
+				#{item.store_name,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="interiorSelectStoreProductsByGlobalId" resultMap="ebayStoreProductResult">
+		select ITEM_ID from EBAY_STORE_PRODUCT_INFO 
+		where GLOBAL_ID=#{globalID,jdbcType=VARCHAR}
+	</select>
+	<update id="updateStoreProducts" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update EBAY_STORE_PRODUCT_INFO bao 
+	   	set
+	  		ITEM_SEARCH_URL=#{item.item_search_url,jdbcType=DOUBLE},
+	        STORE_NAME=#{item.store_name,jdbcType=VARCHAR},
+	        LAST_UPDATE_DATE=#{item.last_update_date}
+	   where bao.GLOBAL_ID = #{item.global_id,jdbcType=VARCHAR} 
+	   and bao.item_id=#{item.item_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(*) from EBAY_STORE_PRODUCT_INFO 
+		where 1=1
+		<if test="globalID != null">
+					and GLOBAL_ID=#{globalID}
+		</if>
+		<if test="storeName != null">
+			   and STORE_NAME=#{storeName}
+		</if>
+	</select>
+	 <select id="selectStoreProductsByGlobalIdAndStoreName" resultMap="ebayStoreProductResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from EBAY_STORE_PRODUCT_INFO  
+				where 1=1
+				<if test="globalID != null">
+					and GLOBAL_ID=#{globalID}
+				</if>
+				<if test="storeName != null">
+					   and STORE_NAME=#{storeName}
+				</if>
+			) S 
+		<![CDATA[
+			WHERE ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+
+</mapper> 

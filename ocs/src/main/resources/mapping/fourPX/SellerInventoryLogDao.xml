@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.fourPX.dao.SellerInventoryLogDao">
+	<select id="generatePrimaryKey" resultType="java.lang.Long">
+		select fpx_sil_seq.nextval from dual
+	</select>
+	
+	<insert id="insert">
+		insert into fpx_sellerinventorylog
+		(id,createdat,updatedat,swlId,warehouseCode,sku,skuId,skuName,skuBarCode,skuBarno,refCode,codeType,inQuantity,
+		 actualQuantity,availableQuantity,shippingQuantity,warehouseQuantity,createDate,unqualifiedGross,busarea)
+		values
+		(#{item.id},#{item.createdat},#{item.updatedat},#{item.swlId},#{item.warehouseCode},#{item.sku},#{item.skuId},#{item.skuName},#{item.skuBarCode},#{item.skuBarno},#{item.refCode},
+		 #{item.codeType},#{item.inQuantity},#{item.actualQuantity},#{item.availableQuantity},#{item.shippingQuantity},#{item.warehouseQuantity},#{item.createDate},#{item.unqualifiedGross}
+		 ,#{item.busarea})
+	</insert>
+	
+	<update id="update">
+		update fpx_sellerinventorylog l
+		set l.updatedat=#{item.updatedat},
+			l.skuName=#{item.skuName},
+			l.skuBarCode=#{item.skuBarCode},
+			l.skuBarno=#{item.skuBarno},
+			l.refCode=#{item.refCode},
+			l.codeType=#{item.codeType},
+			l.inQuantity=#{item.inQuantity},
+			l.actualQuantity=#{item.actualQuantity},
+			l.availableQuantity=#{item.availableQuantity},
+			l.shippingQuantity=#{item.shippingQuantity},
+			l.warehouseQuantity=#{item.warehouseQuantity},
+			l.createDate=#{item.createDate},
+			l.unqualifiedGross=#{item.unqualifiedGross}
+		where l.id=#{item.id} and l.swlId=#{item.swlId} and l.warehouseCode=#{item.warehouseCode} and l.sku=#{item.sku} and l.skuId=#{item.skuId}
+	</update>
+	
+	<select id="selectBySwlId" resultType="java.util.HashMap">
+		select * from fpx_sellerinventorylog l where l.swlId=#{swlId}
+	</select>
+	
+	<sql id="u_merge_sql">
+		select u.parentId
+			   , '[' || wm_concat('{"unqualifiedCode":"' || u.unqualifiedCode || '","unqualifiedQuantity":' || u.unqualifiedQuantity || '}') || ']' json_unqualified
+		from fpx_sil_unqualified u group by u.parentId
+	</sql>
+	
+	<sql id="base_sil_sql">
+		select a.*, b.json_unqualified from fpx_sellerinventorylog a, (<include refid="u_merge_sql" />) b where a.id=b.parentId(+)
+		<if test="item.warehouseCode != null and item.warehouseCode != ''">
+			and (a.warehouseCode like '%' || #{item.warehouseCode} || '%' or #{item.warehouseCode} like '%' || a.warehouseCode || '%')
+		</if>
+		<if test="item.sku != null and item.sku != ''">
+			and (a.sku like '%' || #{item.sku} || '%' or #{item.sku} like '%' || a.sku || '%')
+		</if>
+		<if test="item.refCode != null and item.refCode != ''">
+			and (a.refCode like '%' || #{item.refCode} || '%' or #{item.refCode} like '%' || a.refCode || '%')
+		</if>
+		<if test="item.skuName != null and item.skuName != ''">
+			and (a.skuName like '%' || #{item.skuName} || '%' or #{item.skuName} like '%' || a.skuName || '%')
+		</if>
+		<if test="item.busarea != null and item.busarea != ''">
+			and a.busarea=#{item.busarea}
+		</if>
+		<if test="item.startDate != null and item.startDate != ''">
+		<![CDATA[and a.createDate >= to_date(CONCAT(#{item.startDate}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="item.endDate != null and item.endDate != ''">
+		<![CDATA[and a.createDate <= to_date(CONCAT(#{item.endDate}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+	</sql>
+	
+	<sql id="base_orderby_sql">
+		<include refid="base_sil_sql" /> order by a.createDate desc, a.warehouseCode desc, a.sku desc, a.swlId desc
+	</sql>
+	
+	<select id="count" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_orderby_sql" />) t 
+	</select>
+	
+	<select id="selectByPage" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select * 
+		from (select t.*, rownum rn from (<include refid="base_orderby_sql" />) t 
+		<![CDATA[ 
+		where rownum<=#{end}) t2 where t2.rn>=#{start}
+		]]>
+	</select>
+	<select id="countQtyByInventoryType" resultType="java.util.HashMap">
+		select t.codeType,sum( t.warehousequantity) warehouseQuantity
+		from (<include refid="base_orderby_sql" />) t
+		group by t.codeType
+	</select>
+	<select id="select" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		<include refid="base_orderby_sql" />
+	</select>
+	
+	<select id="selectMaxCreateDate" parameterType="java.lang.String" resultType="java.lang.String">
+		select to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') createdate 
+		from (select l.createdate from fpx_sellerinventorylog l where l.busarea=#{busarea} order by l.createdate desc) t where rownum=1
+	</select>
+	
+	<delete id="deleteUnqualifieds" parameterType="java.lang.Long">
+		delete from fpx_sil_unqualified u where u.parentid=#{parentId}
+	</delete>
+	
+	<insert id="insertUnqualified">
+		insert into fpx_sil_unqualified(id,parentId,unqualifiedCode,unqualifiedQuantity) values(#{item.id},#{item.parentId},#{item.unqualifiedCode},#{item.unqualifiedQuantity})
+	</insert>
+	
+	<select id="getAllSkus" resultType="java.lang.String">
+		select distinct y.sku from cal_product_entity y where y.status = 1
+	</select>
+	<insert id="add4pxInventory">
+		insert into fpx_sku_stock_info
+	     (ID,
+	      SKU,
+	      WAREHOUSE_ID,
+	      WAREHOUSE_NAME,
+	      QTY,
+	      TOTAL_INVENTORY,
+	      FOR_OUTBOUND_INVENTORY,
+	      busarea)
+	   values
+	     (fpx_sku_stock_info_SEQ.NEXTVAL,
+	     #{sku,jdbcType=VARCHAR},
+	     #{warehouseCode,jdbcType=VARCHAR},
+	     #{warehouseCode,jdbcType=VARCHAR},
+	     nvl(#{availableQuantity,jdbcType=BIGINT},0),
+	     nvl(#{actualQuantity,jdbcType=BIGINT},0),
+	     nvl(#{shippingQuantity,jdbcType=BIGINT},0),
+	     #{busarea}
+	     )
+	</insert>
+	<sql id="stockHis_query_base">
+		     SELECT T.ID id,
+		     		t.busarea busarea,
+		            T.SKU sku,
+		            T.WAREHOUSE_ID warehouseId,
+		            T.WAREHOUSE_NAME warehouseName,
+		            T.QTY qty,
+		            T.TOTAL_INVENTORY totalInventory,
+		            T.FOR_OUTBOUND_INVENTORY forOutboundInventory,
+		            TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') createDate,
+		            TO_CHAR(T.UPDATE_DATE,'yyyy-MM-dd hh24:mi:ss') updateDate
+		       FROM fpx_sku_stock_info T
+		       where 1=1
+	</sql>
+	<sql id="stockHis_condition">
+		<if test="param.busarea !=null and param.busarea !=''">
+			 and T.busarea = #{param.busarea}
+		</if>
+		<if test="param.sku !=null and param.sku !=''">
+			 and T.SKU = #{param.sku}
+		</if>
+		<if test="param.warehouseName != null and param.warehouseName != ''">
+			AND T.WAREHOUSE_NAME LIKE '%' || #{param.warehouseName} || '%'
+		</if>
+		<if test="param.dayTime !=null and param.dayTime !=''">
+			 and  TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd') = #{param.dayTime}
+		</if>
+	</sql>
+	<select id="queryFpxStockInfoHisByPage" resultType="com.it.ocs.fourPX.vo.FPXStockVO">
+		select * from
+		  ( 
+		  select S.*,ROWNUM RN from (
+				<include refid="stockHis_query_base"></include>
+				<include refid="stockHis_condition"></include>
+				ORDER BY T.CREATE_DATE DESC
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]>
+	</select>
+	<select id="countFpxStockInfoHis" resultType="int">
+		select count(*) from (
+			<include refid="stockHis_query_base"></include>
+			<include refid="stockHis_condition"></include>
+		)
+	</select>
+	<update id="updateCodeTypeDetail">
+		update fpx_sellerinventorylog set CODETYPEDETAIL=#{param.codeTypeDetail,jdbcType=VARCHAR},
+		UPDATEBY=#{param.lastUpdateBy,jdbcType=BIGINT} where ID=#{param.id,jdbcType=BIGINT}
+	</update>
+	<update id="batchUpdate">
+		update fpx_sellerinventorylog set CODETYPEDETAIL=#{param.codeType,jdbcType=VARCHAR}
+		,UPDATEBY=#{param.lastUpdateBy,jdbcType=BIGINT} where REFCODE=#{param.uniqueCode,jdbcType=BIGINT} 
+	</update>
+</mapper>

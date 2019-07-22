@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.IShippingDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.ShippingModel" >
+	    <id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+	    <result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+	    <result column="AF_SHIPPING_FEE" property="afShippingFee" jdbcType="CLOB" />
+	    <result column="SF_SHIPPING_FEE" property="sfShippingFee" jdbcType="CLOB" />
+	    <result column="CO_SHIPPING_FEE" property="coShippingFee" jdbcType="CLOB" />
+	    <result column="STORAGE_COST" property="storageCost" jdbcType="CLOB" />
+	    <result column="OPERATING_FEE" property="operatingFee" jdbcType="DECIMAL" />
+	    <result column="UNEXPECTED_LOSS" property="unexpectedLoss" jdbcType="CLOB" />
+	    <result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+	    <result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="baseSql">
+		select ENTITY_ID as entityId,
+			   COUNTRY_ID as countryId,
+			   AF_SHIPPING_FEE as afShippingFee,
+			   SF_SHIPPING_FEE as sfShippingFee,
+			   CO_SHIPPING_FEE as coShippingFee,
+			   STORAGE_COST as storageCost,
+			   OPERATING_FEE as operatingFee,
+			   UNEXPECTED_LOSS as unexpectedLoss,
+			   CREATED_AT as createdAt,
+			   UPDATED_AT as updatedAt
+		from CAL_SHIPPING
+	</sql>
+	
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.countryId != '' and param.countryId != null">
+					and COUNTRY_ID = #{param.countryId}
+				</if>
+				<if test="param.operatingFee != '' and param.operatingFee != null or param.operatingFee == 0">
+					and OPERATING_FEE = #{param.operatingFee}
+				</if>
+				<include refid="com.it.ocs.cal.dao.IFbaRuleDao.sql_time"/>
+			</where>
+		</if>
+	</sql>
+	
+	<!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<include refid="sql_where" />
+		<include refid="com.it.ocs.cal.dao.ICurrencyRateDao.order_sql"/>
+	</select>
+	
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from CAL_SHIPPING
+		<include refid="sql_where" />
+	</select>
+	
+	<!-- 导出查询 -->
+	<select id="findByTemplate"  resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		order by entity_id desc
+	</select>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.it.ocs.cal.model.ShippingModel">
+	 	 update CAL_SHIPPING
+	    <set >
+	      <if test="countryId != null" >
+	        COUNTRY_ID = #{countryId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="operatingFee != null" >
+	        OPERATING_FEE = #{operatingFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt},
+	      </if>
+	      <if test="afShippingFee != null" >
+	        AF_SHIPPING_FEE = #{afShippingFee},
+	      </if>
+	      <if test="sfShippingFee != null" >
+	        SF_SHIPPING_FEE = #{sfShippingFee},
+	      </if>
+	      <if test="coShippingFee != null" >
+	        CO_SHIPPING_FEE = #{coShippingFee},
+	      </if>
+	      <if test="storageCost != null" >
+	        STORAGE_COST = #{storageCost},
+	      </if>
+	      <if test="unexpectedLoss != null" >
+	        UNEXPECTED_LOSS = #{unexpectedLoss},
+	      </if>
+	    </set>
+	    where entity_id = #{entityId}
+	 </update>
+	 
+	 <!-- 保存 -->
+	 <insert id="add" parameterType="com.it.ocs.cal.model.ShippingModel">
+	 	insert into CAL_SHIPPING
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	        ENTITY_ID,
+	        
+	      <if test="countryId != null" >
+	        COUNTRY_ID,
+	      </if>
+	      <if test="operatingFee != null" >
+	        OPERATING_FEE,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	      <if test="afShippingFee != null" >
+	        AF_SHIPPING_FEE,
+	      </if>
+	      <if test="sfShippingFee != null" >
+	        SF_SHIPPING_FEE,
+	      </if>
+	      <if test="coShippingFee != null" >
+	        CO_SHIPPING_FEE,
+	      </if>
+	      <if test="storageCost != null" >
+	        STORAGE_COST,
+	      </if>
+	      <if test="unexpectedLoss != null" >
+	        UNEXPECTED_LOSS,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    
+	    	CAL_SHIPPING_SEQ.NEXTVAL,
+	    	
+	      <if test="countryId != null" >
+	        #{countryId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="operatingFee != null" >
+	        #{operatingFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt},
+	      </if>
+	      <if test="afShippingFee != null" >
+	        #{afShippingFee},
+	      </if>
+	      <if test="sfShippingFee != null" >
+	        #{sfShippingFee},
+	      </if>
+	      <if test="coShippingFee != null" >
+	        #{coShippingFee},
+	      </if>
+	      <if test="storageCost != null" >
+	        #{storageCost},
+	      </if>
+	      <if test="unexpectedLoss != null" >
+	        #{unexpectedLoss},
+	      </if>
+	    </trim>
+	 </insert>
+</mapper>

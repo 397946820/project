@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IOperatingProfitLinkDao">
+	
+	<sql id="base_sql">
+		SELECT PLATFORM,
+		       CATEGORY,
+		       MONTH_OF_YEAR MONTHOFYEAR,
+		       COUNTRY,
+		       NICK,
+		       CREATED_AT CREATEDAT,
+		       UPDATED_AT UPDATEDAT
+		  FROM (SELECT K.PLATFORM,
+		               K.CATEGORY,
+		               K.MONTH_OF_YEAR,
+		               Y.COUNTRY,
+		               U.NICK,
+		               Y.CREATED_AT,
+		               Y.UPDATED_AT
+		          FROM SYS_OPERATING_PROFIT_LINK    K,
+		               SYS_OPERATING_PROFIT_COUNTRY Y,
+		               SYS_USER                     U
+		         WHERE K.ENTITY_ID = Y.PARENT_ID
+		           AND Y.USER_ID = U.USER_ID
+		         ORDER BY PLATFORM, CATEGORY, COUNTRY)
+	</sql>
+	
+	<sql id="where_sql">
+		<if test="param != null">
+			<where>
+				<if test="param.platform != null and param.platform != ''">
+					and PLATFORM = #{param.platform}
+				</if>
+				<if test="param.category != null and param.category != ''">
+					and CATEGORY = #{param.category}
+				</if>
+				<if test="param.monthOfYear != null and param.monthOfYear != ''">
+					and MONTH_OF_YEAR = #{param.monthOfYear}
+				</if>
+			</where>
+		</if>
+	</sql>
+
+	<select id="query" resultType="com.it.ocs.sys.model.OperatingProfitLinkModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.sys.dao.IOperatingProfitSkuDao.order_sql"/>
+	</select>
+	
+	<select id="queryByParam" resultType="com.it.ocs.sys.model.OperatingProfitLinkModel">
+		SELECT ENTITY_ID ENTITYID,
+		       PLATFORM,
+		       CATEGORY,
+		       MONTH_OF_YEAR MONTHOFYEAR,
+		       CREATED_AT CREATEDAT,
+		       UPDATED_AT UPDATEDAT
+		  FROM SYS_OPERATING_PROFIT_LINK
+		<include refid="where_sql"/>
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM SYS_OPERATING_PROFIT_COUNTRY C
+		 WHERE C.PARENT_ID = #{parentId}
+		   AND C.COUNTRY = #{country}
+	</select>
+	
+	<select id="getUserIdByNick" resultType="java.lang.Long">
+		SELECT R.USER_ID
+		  FROM SYS_USER R, SYS_DEPARTMENT D
+		 WHERE R.DEPARTMENT_ID = D.DEPARTMENT_ID
+		   AND D.NAME LIKE '%运营部'
+		   AND D.ENABLED_FLAG = 'Y'
+		   AND R.ENABLED_FLAG = 'Y'
+		   AND R.NICK = #{nick}
+	</select>
+	
+	<insert id="addCountry">
+		insert into SYS_OPERATING_PROFIT_COUNTRY (ENTITY_ID,PARENT_ID,COUNTRY,USER_ID) values
+		(SYS_PROFIT_COUNTRY_SEQ.NEXTVAL,#{parentId},#{country},#{userId})
+	</insert>
+	
+	<update id="updateCountry">
+		update SYS_OPERATING_PROFIT_COUNTRY set USER_ID = #{userId} ,  UPDATED_AT = #{updatedAt}
+		where PARENT_ID = #{parentId} and COUNTRY = #{country}
+	</update>
+	
+	<insert id="add">
+		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="entityId">
+			SELECT SYS_OPERATING_PROFIT_LINK_SEQ.CURRVAL FROM DUAL
+		</selectKey>
+		insert into SYS_OPERATING_PROFIT_LINK
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="platform != null" >
+	        PLATFORM,
+	      </if>
+	      <if test="category != null" >
+	        CATEGORY,
+	      </if>
+	      <if test="monthOfYear != null" >
+	        MONTH_OF_YEAR,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        SYS_OPERATING_PROFIT_LINK_SEQ.NEXTVAL,
+	     
+	      <if test="platform != null" >
+	        #{platform,jdbcType=VARCHAR},
+	      </if>
+	      <if test="category != null" >
+	        #{category,jdbcType=VARCHAR},
+	      </if>
+	      <if test="monthOfYear != null" >
+	        #{monthOfYear,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>	
+</mapper>

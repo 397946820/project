@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.ILightOrderItemDao">
+	<resultMap type="com.it.ocs.task.model.LightOrderItemModel" id="lightOrderItemResult">
+		<id column="ENTITY_ID" property="entity_id"  />
+		<result column="PARENT_ID" property="parent_id"  />
+		<result column="WEIGHT" property="weight"  />
+		<result column="SKU" property="sku"  />
+		<result column="NAME" property="name"  />
+		<result column="FREE_SHIPPING" property="free_shipping"  />
+		<result column="IS_QTY_DECIMAL" property="is_qty_decimal"  />
+		<result column="NO_DISCOUNT" property="no_discount"  />
+		<result column="QTY_CANCELED" property="qty_canceled"  />
+		<result column="QTY_INVOICED" property="qty_invoiced"  />
+		<result column="QTY_ORDERED" property="qty_ordered"  />
+		<result column="QTY_REFUNDED" property="qty_refunded"  />
+		<result column="QTY_SHIPPED" property="qty_shipped"  />
+		<result column="PRICE" property="price"  />
+		<result column="BASE_PRICE" property="base_price"  />
+		<result column="ORIGINAL_PRICE" property="original_price"  />
+		<result column="TAX_PERCENT" property="tax_percent"  />
+		<result column="TAX_AMOUNT" property="tax_amount"  />
+		<result column="TAX_INVOICED" property="tax_invoiced"  />
+		<result column="DISCOUNT_PERCENT" property="discount_percent"  />
+		<result column="DISCOUNT_AMOUNT" property="discount_amount"  />
+		<result column="AMOUNT_REFUNDED" property="amount_refunded"  />
+		<result column="ROW_TOTAL" property="row_total"  />
+		<result column="GIFT_MESSAGE_ID" property="gift_message_id"  />
+		<result column="POSTCODE" property="postcode"  />
+		<result column="REGION" property="region"  />
+		<result column="CITY" property="city"  />
+		<result column="STREET" property="street"  />
+		<result column="GIFT_MESSAGE" property="gift_message"  />
+		<result column="LIGHT_CREATED_AT" property="light_created_at"  />
+		<result column="LIGHT_UPDATED_AT" property="light_updated_at"  />
+		<result column="PUSH_STATUS" property="push_status"  />
+		<result column="CREATED_AT" property="created_at"  />
+		<result column="UPDATED_AT" property="updated_at"  />
+		<result column="SOURCE_ID" property="source_id"/>
+	</resultMap>
+
+	<select id="findLightOrderItems" resultMap="lightOrderItemResult" parameterType="java.util.List">
+		select SOURCE_ID from LIGHT_ORDER_ITEM 
+		where SOURCE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.entity_id,jdbcType=BIGINT} 
+        </foreach> 
+	</select>
+	<insert id="insertLightOrderItems" parameterType="java.util.List">
+		INSERT INTO LIGHT_ORDER_ITEM(
+				ENTITY_ID,
+				PARENT_ID,
+				WEIGHT,
+				SKU,
+				NAME,
+				FREE_SHIPPING,
+				IS_QTY_DECIMAL,
+				NO_DISCOUNT,
+				QTY_CANCELED,
+				QTY_INVOICED,
+				QTY_ORDERED,
+				QTY_REFUNDED,
+				QTY_SHIPPED,
+				PRICE,
+				BASE_PRICE,
+				ORIGINAL_PRICE,
+				TAX_PERCENT,
+				TAX_AMOUNT,
+				TAX_INVOICED,
+				DISCOUNT_PERCENT,
+				DISCOUNT_AMOUNT,
+				AMOUNT_REFUNDED,
+				ROW_TOTAL,
+				GIFT_MESSAGE_ID,
+				POSTCODE,
+				REGION,
+				CITY,
+				STREET,
+				GIFT_MESSAGE,
+				LIGHT_CREATED_AT,
+				LIGHT_UPDATED_AT,
+				PUSH_STATUS,
+				CREATED_AT,
+				UPDATED_AT,
+				SOURCE_ID
+			)  
+		select TOTAL_ORDER_ITEM_SEQ.Nextval,c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.parent_id,jdbcType=BIGINT},
+				#{item.weight,jdbcType=BIGINT},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.name,jdbcType=VARCHAR},
+				#{item.free_shipping,jdbcType=BIGINT},
+				#{item.is_qty_decimal,jdbcType=BIGINT},
+				#{item.no_discount,jdbcType=BIGINT},
+				#{item.qty_canceled,jdbcType=BIGINT},
+				#{item.qty_invoiced,jdbcType=BIGINT},
+				#{item.qty_ordered,jdbcType=BIGINT},
+				#{item.qty_refunded,jdbcType=BIGINT},
+				#{item.qty_shipped,jdbcType=BIGINT},
+				#{item.price,jdbcType=BIGINT},
+				#{item.base_price,jdbcType=BIGINT},
+				#{item.original_price,jdbcType=BIGINT},
+				#{item.tax_percent,jdbcType=BIGINT},
+				#{item.tax_amount,jdbcType=BIGINT},
+				#{item.tax_invoiced,jdbcType=BIGINT},
+				#{item.discount_percent,jdbcType=BIGINT},
+				#{item.discount_amount,jdbcType=BIGINT},
+				#{item.amount_refunded,jdbcType=BIGINT},
+				#{item.row_total,jdbcType=BIGINT},
+				#{item.gift_message_id,jdbcType=BIGINT},
+				#{item.postcode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.city,jdbcType=VARCHAR},
+				#{item.street,jdbcType=VARCHAR},
+				#{item.gift_message,jdbcType=BIGINT},
+				#{item.light_created_at,jdbcType=TIMESTAMP},
+				#{item.light_updated_at,jdbcType=TIMESTAMP},
+				#{item.push_status,jdbcType=BIGINT},
+				#{item.created_at,jdbcType=TIMESTAMP},
+				#{item.updated_at,jdbcType=TIMESTAMP},
+				#{item.entity_id,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateLightOrderItems" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update LIGHT_ORDER_ITEM bao 
+	   	set
+			WEIGHT = #{item.weight,jdbcType=BIGINT},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			NAME = #{item.name,jdbcType=VARCHAR},
+			FREE_SHIPPING = #{item.free_shipping,jdbcType=BIGINT},
+			IS_QTY_DECIMAL = #{item.is_qty_decimal,jdbcType=BIGINT},
+			NO_DISCOUNT = #{item.no_discount,jdbcType=BIGINT},
+			QTY_CANCELED = #{item.qty_canceled,jdbcType=BIGINT},
+			QTY_INVOICED = #{item.qty_invoiced,jdbcType=BIGINT},
+			QTY_ORDERED = #{item.qty_ordered,jdbcType=BIGINT},
+			QTY_REFUNDED = #{item.qty_refunded,jdbcType=BIGINT},
+			QTY_SHIPPED = #{item.qty_shipped,jdbcType=BIGINT},
+			PRICE = #{item.price,jdbcType=BIGINT},
+			BASE_PRICE = #{item.base_price,jdbcType=BIGINT},
+			ORIGINAL_PRICE = #{item.original_price,jdbcType=BIGINT},
+			TAX_PERCENT = #{item.tax_percent,jdbcType=BIGINT},
+			TAX_AMOUNT = #{item.tax_amount,jdbcType=BIGINT},
+			TAX_INVOICED = #{item.tax_invoiced,jdbcType=BIGINT},
+			DISCOUNT_PERCENT = #{item.discount_percent,jdbcType=BIGINT},
+			DISCOUNT_AMOUNT = #{item.discount_amount,jdbcType=BIGINT},
+			AMOUNT_REFUNDED = #{item.amount_refunded,jdbcType=BIGINT},
+			ROW_TOTAL = #{item.row_total,jdbcType=BIGINT},
+			GIFT_MESSAGE_ID = #{item.gift_message_id,jdbcType=BIGINT},
+			POSTCODE = #{item.postcode,jdbcType=VARCHAR},
+			REGION = #{item.region,jdbcType=VARCHAR},
+			CITY = #{item.city,jdbcType=VARCHAR},
+			STREET = #{item.street,jdbcType=VARCHAR},
+			GIFT_MESSAGE = #{item.gift_message,jdbcType=BIGINT},
+			LIGHT_CREATED_AT = #{item.light_created_at,jdbcType=TIMESTAMP},
+			LIGHT_UPDATED_AT = #{item.light_updated_at,jdbcType=TIMESTAMP},
+			PUSH_STATUS = #{item.push_status,jdbcType=BIGINT},
+			CREATED_AT = #{item.created_at,jdbcType=TIMESTAMP},
+			UPDATED_AT = #{item.updated_at,jdbcType=TIMESTAMP}
+	   where bao.SOURCE_ID = #{item.entity_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

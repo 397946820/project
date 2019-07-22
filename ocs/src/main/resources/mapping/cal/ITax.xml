@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ITaxDao">
+	
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.TaxModel" >
+	    <id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+	    <result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+	    <result column="TYPE" property="type" jdbcType="VARCHAR" />
+	    <result column="VAT" property="vat" jdbcType="DECIMAL" />
+	    <result column="AF_FLUCTUATION" property="afFluctuation" jdbcType="DECIMAL" />
+	    <result column="SF_FLUCTUATION" property="sfFluctuation" jdbcType="DECIMAL" />
+	    <result column="CO_FLUCTUATION" property="coFluctuation" jdbcType="DECIMAL" />
+	    <result column="CLEAR_COEFFICIENT" property="clearCoefficient" jdbcType="DECIMAL" />
+	    <result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+	    <result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+   </resultMap>
+   
+   <sql id="baseSql">
+   		select ENTITY_ID as entityId,
+   			   COUNTRY_ID as countryId,
+   			   TYPE,
+   			   VAT,
+   			   AF_FLUCTUATION as afFluctuation,
+   			   SF_FLUCTUATION as sfFluctuation,
+   			   CO_FLUCTUATION as coFluctuation,
+   			   CLEAR_COEFFICIENT as clearCoefficient,
+   			   CREATED_AT as createdAt,
+   			   UPDATED_AT as updatedAt
+   		from CAL_TAX
+   </sql>
+   
+   <sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.countryId != '' and param.countryId != null">
+					and COUNTRY_ID = #{param.countryId}
+				</if>
+				<if test="param.type != '' and param.type != null">
+					and TYPE = #{param.type}
+				</if>
+				<if test="param.vat != '' and param.vat != null or param.vat == 0"> <!-- -->
+					and VAT = #{param.vat}
+				</if>
+				<if test="param.afFluctuation != '' and param.afFluctuation != null or param.afFluctuation == 0">
+					and AF_FLUCTUATION = #{param.afFluctuation}
+				</if>
+				<if test="param.sfFluctuation != '' and param.sfFluctuation != null or param.sfFluctuation == 0">
+					and SF_FLUCTUATION = #{param.sfFluctuation}
+				</if>
+				<if test="param.coFluctuation != '' and param.coFluctuation != null or param.coFluctuation == 0">
+					and CO_FLUCTUATION = #{param.coFluctuation}
+				</if>
+				<if test="param.clearCoefficient != '' and param.clearCoefficient != null or param.clearCoefficient == 0">
+					and CLEAR_COEFFICIENT = #{param.clearCoefficient}
+				</if>
+				<include refid="com.it.ocs.cal.dao.IFbaRuleDao.sql_time"/>
+			</where>
+		</if>
+	</sql>
+   
+   <!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<include refid="sql_where" />
+		<include refid="com.it.ocs.cal.dao.ICurrencyRateDao.order_sql"/>
+	</select>
+	
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from CAL_TAX
+		<include refid="sql_where" />
+	</select>
+	
+	<select id="queryClearCoefficient" parameterType="java.lang.String" resultType="java.lang.Double">
+		select CLEAR_COEFFICIENT from CAL_TAX where COUNTRY_ID = #{country}
+	</select>
+	
+	<!-- 导出查询 -->
+	<select id="findByTemplate"  resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		order by entity_id desc
+	</select>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.it.ocs.cal.model.TaxModel">
+	    update CAL_TAX
+	    <set >
+	      <if test="entityId != null" >
+	        ENTITY_ID = #{entityId,jdbcType=DECIMAL},
+	      </if>
+	      <if test="countryId != null" >
+	        COUNTRY_ID = #{countryId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="type != null" >
+	        TYPE = #{type,jdbcType=VARCHAR},
+	      </if>
+	      <if test="vat != null" >
+	        VAT = #{vat,jdbcType=DECIMAL},
+	      </if>
+	      <if test="afFluctuation != null" >
+	        AF_FLUCTUATION = #{afFluctuation,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sfFluctuation != null" >
+	        SF_FLUCTUATION = #{sfFluctuation,jdbcType=DECIMAL},
+	      </if>
+	      <if test="coFluctuation != null" >
+	        CO_FLUCTUATION = #{coFluctuation,jdbcType=DECIMAL},
+	      </if>
+	      <if test="clearCoefficient != null" >
+	        CLEAR_COEFFICIENT = #{clearCoefficient,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt}
+	      </if>
+	    </set>
+	    where entity_id = #{entityId}
+	 </update>
+	 
+	 <!-- 添加 -->
+	 <insert id="add" parameterType="com.it.ocs.cal.model.TaxModel">
+	 	insert into CAL_TAX
+		    <trim prefix="(" suffix=")" suffixOverrides="," >
+		        ENTITY_ID,
+		      <if test="countryId != null" >
+		        COUNTRY_ID,
+		      </if>
+		      <if test="type != null" >
+		        TYPE,
+		      </if>
+		      <if test="vat != null" >
+		        VAT,
+		      </if>
+		      <if test="afFluctuation != null" >
+		        AF_FLUCTUATION,
+		      </if>
+		      <if test="sfFluctuation != null" >
+		        SF_FLUCTUATION,
+		      </if>
+		      <if test="coFluctuation != null" >
+		        CO_FLUCTUATION,
+		      </if>
+		      <if test="clearCoefficient != null" >
+		        CLEAR_COEFFICIENT,
+		      </if>
+		      <if test="createdAt != null" >
+		        CREATED_AT,
+		      </if>
+		      <if test="updatedAt != null" >
+		        UPDATED_AT,
+		      </if>
+		    </trim>
+		    <trim prefix="values (" suffix=")" suffixOverrides="," >
+		    
+		      CAL_TAX_SEQ.NEXTVAL,
+		      
+		      <if test="countryId != null" >
+		        #{countryId,jdbcType=VARCHAR},
+		      </if>
+		      <if test="type != null" >
+		        #{type,jdbcType=VARCHAR},
+		      </if>
+		      <if test="vat != null" >
+		        #{vat,jdbcType=DECIMAL},
+		      </if>
+		      <if test="afFluctuation != null" >
+		        #{afFluctuation,jdbcType=DECIMAL},
+		      </if>
+		      <if test="sfFluctuation != null" >
+		        #{sfFluctuation,jdbcType=DECIMAL},
+		      </if>
+		      <if test="coFluctuation != null" >
+		        #{coFluctuation,jdbcType=DECIMAL},
+		      </if>
+		      <if test="clearCoefficient != null" >
+		        #{clearCoefficient,jdbcType=DECIMAL},
+		      </if>
+		      <if test="createdAt != null">
+				#{createdAt},
+			  </if>
+		   	  <if test="updatedAt != null">
+				#{updatedAt},
+			  </if>
+		    </trim>
+	 </insert>
+</mapper>

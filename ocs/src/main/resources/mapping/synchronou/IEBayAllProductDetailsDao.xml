@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayAllProductDetailsDao">
+	<resultMap type="com.it.ocs.synchronou.model.EBayAllProductDetailsModel" id="ebayAllProductDetailsResult">
+		<result column="ID" property="id"  />
+		<result column="COUNTRY" property="country"  />
+		<result column="CURRENCY" property="currency"  />
+		<result column="ITEM_ID" property="item_id"  />
+		<result column="START_PRICE" property="start_price"  />
+		<result column="START_TIME" property="start_time"  />
+		<result column="END_TIME" property="end_time"  />
+		<result column="VIEW_ITEM_URL" property="view_item_url"  />
+		<result column="LISTING_DURATION" property="listing_duration"  />
+		<result column="LISTING_TYPE" property="listing_type"  />
+		<result column="LOCATION" property="location"  />
+		<result column="TITLE" property="title"  />
+		<result column="SHIPPINGTYPE" property="shippingtype"  />
+		<result column="SITE" property="site"  />
+		<result column="PICTURE_URL" property="picture_url"  />
+		<result column="CREATION_DATE" property="creation_date"  />
+		<result column="CREATE_BY" property="create_by"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+		<result column="LAST_UPDATE_DATE" property="last_update_date"  />
+		<result column="LAST_UPDATE_BY" property="last_update_by"  />
+	</resultMap>
+	<sql id="select_base">
+			ID ,
+			START_TIME,
+			END_TIME,
+			VIEW_ITEM_URL,
+			LISTING_TYPE,
+			TITLE,
+			SITE,
+			SHIPPINGTYPE,
+			PICTURE_URL,
+			START_PRICE
+			
+	</sql>
+	<insert id="insertAllProductDetail" parameterType="com.it.ocs.synchronou.model.EBayAllProductDetailsModel">
+		INSERT INTO EBAY_ALL_PRODUCT_DETAILS(
+			ID,
+			COUNTRY,
+			CURRENCY,
+			ITEM_ID,
+			START_PRICE,
+			START_TIME,
+			END_TIME,
+			VIEW_ITEM_URL,
+			LISTING_DURATION,
+			LISTING_TYPE,
+			LOCATION,
+			TITLE,
+			SHIPPINGTYPE,
+			SITE,
+			PICTURE_URL,
+			CREATION_DATE
+		)
+		values(
+			ebay_All_product_Details_SEQ.Nextval,
+			#{country,jdbcType=VARCHAR},
+			#{currency,jdbcType=VARCHAR},
+			#{item_id,jdbcType=VARCHAR},
+			#{start_price,jdbcType=VARCHAR},
+			#{start_time,jdbcType=VARCHAR},
+			#{end_time,jdbcType=VARCHAR},
+			#{view_item_url,jdbcType=VARCHAR},
+			#{listing_duration,jdbcType=VARCHAR},
+			#{listing_type,jdbcType=VARCHAR},
+			#{location,jdbcType=VARCHAR},
+			#{title,jdbcType=VARCHAR},
+			#{shippingtype,jdbcType=VARCHAR},
+			#{site,jdbcType=VARCHAR},
+			#{picture_url,jdbcType=VARCHAR},
+			sysdate
+		)
+	</insert>
+	<select id="internalSelectAllProductDetails" resultMap="ebayAllProductDetailsResult">
+		select ITEM_ID from EBAY_ALL_PRODUCT_DETAILS
+	</select>
+	<update id="updateAllProductDetail" parameterType="com.it.ocs.synchronou.model.EBayAllProductDetailsModel">
+		update EBAY_ALL_PRODUCT_DETAILS
+		set 
+			COUNTRY = #{country,jdbcType=VARCHAR},
+			CURRENCY = #{currency,jdbcType=VARCHAR},
+			START_PRICE = #{start_price,jdbcType=VARCHAR},
+			START_TIME = #{start_time,jdbcType=VARCHAR},
+			END_TIME = #{end_time,jdbcType=VARCHAR},
+			VIEW_ITEM_URL = #{view_item_url,jdbcType=VARCHAR},
+			LISTING_DURATION = #{listing_duration,jdbcType=VARCHAR},
+			LISTING_TYPE = #{listing_type,jdbcType=VARCHAR},
+			LOCATION = #{location,jdbcType=VARCHAR},
+			TITLE = #{title,jdbcType=VARCHAR},
+			SHIPPINGTYPE = #{shippingtype,jdbcType=VARCHAR},
+			SITE = #{site,jdbcType=VARCHAR},
+			PICTURE_URL = #{picture_url,jdbcType=VARCHAR},
+			LAST_UPDATE_DATE = sysdate
+		where ITEM_ID=#{item_id,jdbcType=VARCHAR}
+	</update>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(*) from EBAY_ALL_PRODUCT_DETAILS
+	</select>
+	<select id="selectAllProductDetails" resultMap="ebayAllProductDetailsResult">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select <include refid="select_base" /> from EBAY_ALL_PRODUCT_DETAILS  
+					
+				) S 
+			<![CDATA[
+				WHERE ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{starRow}
+			]]>
+	</select> 
+</mapper>

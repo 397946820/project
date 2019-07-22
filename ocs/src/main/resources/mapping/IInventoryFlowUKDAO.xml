@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.ukinventory.dao.IInventoryFlowUKDAO">
+	<resultMap type="com.it.ocs.ukinventory.model.InventoryFlowUKModel"
+		id="inventoryResult">
+		<id property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="wmcode" column="PLATFORM" jdbcType="VARCHAR" />
+		<result property="sku" column="SKU" jdbcType="VARCHAR" />
+		<result property="bType" column="B_TYPE" jdbcType="VARCHAR" />
+		<result property="flowCreateAt" column="FLOW_CREAT_AT"
+			jdbcType="TIMESTAMP" />
+		<result property="buOrder" column="B_ORDER_ID" jdbcType="VARCHAR" />	
+		<result property="qty" column="QTY" jdbcType="DECIMAL" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATE_AT" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="UPDATE_AT"
+			jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="where">
+		where 1=1
+		<if test="param != null">
+			<if test="param.sku!=null and param.sku!=''">
+				and SKU=#{param.sku,jdbcType=VARCHAR}
+			</if>
+			<if test="param.buOrder!=null and param.buOrder!=''">
+				and B_ORDER_ID=#{param.buOrder,jdbcType=VARCHAR}
+			</if>
+			<if test="param.bType!=null and param.bType!=''">
+				and B_TYPE=#{param.bType,jdbcType=VARCHAR}
+			</if>
+			<if test="param.flowStarTime!=null and param.flowStarTime!=''">
+				<![CDATA[ and FLOW_CREAT_AT >= to_date(#{param.flowStarTime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')]]>
+			</if>
+			<if test="param.flowEndTime!=null and param.flowEndTime!=''">
+				<![CDATA[ and FLOW_CREAT_AT <= to_date(#{param.flowEndTime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')]]>
+			</if>
+			<if test="param.uploadStarTime!=null and param.uploadStarTime!=''">
+				<![CDATA[ and CREATE_AT >= to_date(#{param.uploadStarTime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')]]>
+			</if>
+			<if test="param.uploadEndTime!=null and param.uploadEndTime!=''">
+				<![CDATA[ and CREATE_AT <= to_date(#{param.uploadEndTime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+	</sql>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from UK_INVENTORY_FLOW
+		<include refid="where" />
+	</select>
+	
+	<select id="query" resultMap="inventoryResult">
+		<include refid="select_base" />
+		<include refid="where" />
+	</select>
+	<select id="queryForSummary" resultType="java.util.HashMap">
+		select B_TYPE,sum(qty) qty from UK_INVENTORY_FLOW group by B_TYPE
+	</select>
+	<select id="queryByPage" resultMap="inventoryResult">
+		select * from
+		(
+		select S.*,ROWNUM RN from (
+		<include refid="select_base" />
+		<include refid="where" />
+		) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+
+	</select>
+	<sql id="select_base">
+		select * from UK_INVENTORY_FLOW
+	</sql>
+	<insert id="batchInsert">
+		insert into UK_INVENTORY_FLOW(ID,CREATE_AT,UPDATE_AT,CREATE_BY,UPDATE_BY,PLATFORM,B_TYPE,
+		FLOW_CREAT_AT,QTY,B_ORDER_ID,SKU)
+		select UK_INVENTORY_FLOW_SEQ.Nextval,sysdate,sysdate,c.* from (
+		<foreach collection="list" item="row" index="index" open="(" close=")" separator="union">
+			select #{row.createBy},#{row.lastUpdateBy},'UK02',#{row.bType},
+			to_date(#{row.flowCreateAt},'yyyy-mm-dd hh24:mi:ss'),#{row.qty},#{row.buOrder},#{row.sku}
+			 from dual
+		</foreach>
+		) c
+		
+	</insert>
+	
+	<insert id="add">
+		insert into UK_INVENTORY_FLOW(ID,CREATE_AT,UPDATE_AT,CREATE_BY,UPDATE_BY,PLATFORM,B_TYPE,
+		FLOW_CREAT_AT,QTY,B_ORDER_ID,SKU)
+		select UK_INVENTORY_FLOW_SEQ.Nextval,sysdate,sysdate,
+		#{param.createBy},#{param.lastUpdateBy},'UK02','C',#{param.CREATE_DATE},
+		#{param.TOTAL},#{param.BUORDER},#{param.SKU} from dual
+	</insert>
+
+	<select id="getUnSyncRefound" resultType="java.util.HashMap">
+		select max(a.create_date) CREATE_DATE,a.sku
+		SKU,sum(a.defective_quantity) TOTAL,max(a.order_number) BUORDER from
+		CUSTOMER_TICKETS a where a.problem_type_lvl2 like '%退货%' and
+		a.country='UK'
+		and a.defective_quantity>0 and a.is_sync=0 group by a.sku,trunc(a.create_date)
+	</select>
+	<select id="valicount" resultType="java.lang.Integer">
+		select count(1) from UK_INVENTORY_FLOW
+		 where SKU=#{param.SKU} and 
+		 <![CDATA[trunc(FLOW_CREAT_AT)=to_date(to_char(#{param.CREATE_DATE},'yyyy-mm-dd'),'yyyy-mm-dd')]]> and B_TYPE='C'
+	</select>
+	<update id="updateUKRefound">
+		update CUSTOMER_TICKETS set is_sync=1
+	</update>
+	
+</mapper>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.IAmazonSaleOrderDao">
+	<sql id="sql_order_base">
+		SELECT ID,
+			   PLATFORM,
+			   CHANNEL,
+			   ORDER_ID ORDERID,
+			   STATUS,
+			   PAYMENT_METHOD PAYMENT_METHOD,
+			   PURCHASE_AT PURCHASEAT,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT,
+			   AMAZON_UPDATED_AT AMAZONUPDATEDAT,
+			   LASTEST_SHIP_DATE LASTESTSHIPDATE,
+			   LASTEST_DELIVERY_DATE LASTESTDELIVERYDATE,
+			   CUSTOMER_NAME CUSTOMERNAME,
+			   EMAIL,
+			   AMOUNT,
+			   CURRENCY_CODE CURRENCYCODE,
+			   COUNTRY_CODE COUNTRYCODE,
+			   NAME,
+			   STATE_OR_REGION STATEORREGION,
+			   POSTAL_CODE POSTALCODE,
+			   PHONE,
+			   CITY,
+			   STREET
+		FROM AMAZON_ORDER
+	</sql>
+	
+	<sql id="sql_order_item_base">
+		SELECT ID,
+			   PARENT_ID PARENTID,
+			   AMAZON_ITEM_ID AMAZONITEMID,
+			   TITLE,
+			   ASIN,
+			   SKU,
+			   PRICE,
+			   QTY,
+			   SHIPPING_AMOUNT SHIPPINGAMOUNT,
+			   SHIPPING_DISCOUNT SHIPPINGDISCOUNT,
+			   TAX,
+			   GIFT_PRICE,
+			   PROMOTION_ID PROMOTIONID,
+			   PROMOTION_DISCOUNT PROMOTIONDISCOUNT,
+			   SHIPPING_TAX SHIPPINGTAX,
+			   CONDITION_ID CONDITIONID,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT,
+			   PUSH_STATUS PUSHSTATUS
+	    FROM AMAZON_ORDER_ITEM
+	</sql>
+	
+	<sql id="sql_where">
+		<where>
+			AND CHANNEL NOT IN ('NON-AMAZON')
+			AND PLATFORM NOT IN ('GB','FR','IT','ES')
+			<if test="param != null">
+				<if test="param.orderId != null and param.orderId != ''">
+					AND ORDER_ID LIKE '${param.orderId}%'
+				</if>
+				<if test="param.platform != null and param.platform != ''">
+					AND PLATFORM = #{param.platform}
+				</if>
+				<if test="param.channel != null and param.channel != ''">
+					AND CHANNEL = #{param.channel}
+				</if>
+				<if test="param.status != null and param.status != ''">
+					AND STATUS = #{param.status}
+				</if>
+				<if test="param.customerName != null and param.customerName != ''">
+					AND customer_Name = #{param.customerName}
+				</if>
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="sql_order">
+		<choose>
+			<when test="sort == null and order == null">
+				ORDER BY PURCHASE_AT DESC
+			</when>
+			<otherwise>
+				ORDER BY ${sort} ${order}
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="queryList" resultType="com.it.ocs.salesStatistics.model.AmazonOrderModel">
+		<include refid="sql_order_base"/>
+		<include refid="sql_where"/>
+		<include refid="sql_order"/>
+	</select>
+	
+	<select id="getAmazonOrderItemById" resultType="com.it.ocs.salesStatistics.model.AmazonOrderItemModel">
+		SELECT T.*,P.PRODUCT_URL AS URL FROM (<include refid="sql_order_item_base"/> WHERE PARENT_ID = #{parentId}) T LEFT JOIN AMAZON_PRODUCT P
+		ON P.ASIN = T.ASIN AND P.COUNTRY = #{platform}
+	</select>
+	
+	<select id="getChannelByPlatform" resultType="java.util.Map">
+		SELECT DISTINCT CHANNEL VALUE,CHANNEL TEXT FROM AMAZON_ORDER  WHERE PLATFORM = #{platform}
+	</select>
+	
+	<select id="getSaleOrderRefundByParentId" resultType="com.it.ocs.salesStatistics.vo.SaleOrderRefundVo">
+		SELECT T.*, P.PRODUCT_URL AS URL
+		  FROM (SELECT NVL(K.SKU, I.SKU) SKU,
+		  			   I.SKU MSKU,
+		               I.ASIN,
+		               I.QTY * NVL(K.QTY, 1) AS QTYORDERED,
+		               I.PRICE AS ROWTOTAL
+		          FROM AMAZON_ORDER_ITEM I, SYS_SKU_LINK K
+		         WHERE I.SKU = K.P_SKU(+)
+		           AND I.PARENT_ID = #{parentId}) T
+		  LEFT JOIN AMAZON_PRODUCT P
+		    ON P.ASIN = T.ASIN
+		   AND P.COUNTRY = #{platform}
+	</select>
+	
+	<select id="customerNameLike" resultType="java.lang.String" parameterType="java.lang.String">
+		select distinct customer_name from amazon_order where customer_name like #{keyword} || '%'
+	</select>
+</mapper>

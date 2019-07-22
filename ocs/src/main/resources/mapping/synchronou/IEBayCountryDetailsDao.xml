@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayCountryDetailsDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBayCountryDetailsModel" id="countryDetailsResult">
+		<result column="ID" property="id"  />
+		<result column="COUNTRY" property="country"  />
+		<result column="DESCRIPTION" property="description"  />
+		<result column="DETAIL_VERSION" property="detail_version"  />
+		<result column="UPDATE_TIME" property="update_time"  />
+		<result column="ENABLED_FLAG" property="enabled_flag"  />
+	</resultMap>
+	<sql id="select_base">
+			ID ,
+			COUNTRY,
+			DESCRIPTION,
+			DETAIL_VERSION,
+			UPDATE_TIME
+	</sql>
+	<select id="query" resultMap="countryDetailsResult">
+		select ID,COUNTRY,DESCRIPTION from EBAY_COUNTRY_DETAILS_INFO where ENABLED_FLAG='Y'
+	</select>
+	<select id="getById" resultMap="countryDetailsResult">
+		select ID,COUNTRY,DESCRIPTION from EBAY_COUNTRY_DETAILS_INFO where ENABLED_FLAG='Y' and ID=#{id,jdbcType=DOUBLE}
+	</select>
+	<select id="queryByPage" resultMap="countryDetailsResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				select <include refid="select_base" /> from EBAY_COUNTRY_DETAILS_INFO  
+				where ENABLED_FLAG='Y' order by CREATION_DATE desc 
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_COUNTRY_DETAILS_INFO where ENABLED_FLAG='Y'
+	</select>
+	<insert id="insertCountryDetails" parameterType="java.util.List">
+	INSERT INTO EBAY_COUNTRY_DETAILS_INFO (
+			ID,
+			COUNTRY,
+			DESCRIPTION,
+			DETAIL_VERSION,
+			UPDATE_TIME,
+			CREATION_DATE,
+			ENABLED_FLAG)   
+		select EBAY_COUNTRY_DETAILS_INFO_SEQ.Nextval,c.*,sysdate,'Y' from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+			 #{item.country,jdbcType=VARCHAR},
+             #{item.description,jdbcType=VARCHAR},
+             #{item.detail_version,jdbcType=DOUBLE},
+             #{item.update_time,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+    </insert>
+ 	<select id="internalSelectCountryDetailsList" resultMap="countryDetailsResult">
+ 		select COUNTRY,DESCRIPTION from EBAY_COUNTRY_DETAILS_INFO
+ 	</select>
+    <update id="updateCountryDetails" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update EBAY_COUNTRY_DETAILS_INFO bao 
+	   	set
+	  		DETAIL_VERSION=#{item.detail_version,jdbcType=DOUBLE},
+	        UPDATE_TIME=#{item.update_time,jdbcType=VARCHAR}
+	   where bao.COUNTRY = #{item.country,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IRoleUserDAO">
+	<resultMap type="com.it.ocs.sys.model.RoleUserModel" id="roleUserResult">
+		<id property="id" column="ROLE_USER_ID" jdbcType="DECIMAL" />
+		<result property="roleId" column="ROLE_ID" jdbcType="DECIMAL" />
+		<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+	</resultMap>
+	<select id="queryByUserIds" resultMap="roleUserResult">
+		select 
+			ROLE_USER_ID id,
+			ROLE_ID  roleId,
+			USER_ID userId
+			from SYS_ROLE_USER
+			<if test="userIds != null">
+				where USER_ID in 
+				<foreach collection="userIds" item="userId" index="index" open="(" separator="," close=")">
+					#{userId}
+				</foreach>
+			</if>
+	</select>
+	<select id="queryByUserId" resultMap="roleUserResult">
+		select 
+			ROLE_USER_ID id,
+			ROLE_ID  roleId,
+			USER_ID userId
+			from SYS_ROLE_USER where USER_ID=#{userId}
+	</select>
+
+	<delete id="removeByUserId">
+		delete from SYS_ROLE_USER where USER_ID=#{userId}
+	</delete>
+	<insert id="batchAdd" parameterType="com.it.ocs.sys.model.RoleUserModel">
+		insert into SYS_ROLE_USER
+		(
+			ROLE_ID,
+			USER_ID
+		) 
+		select  ru.* from (
+		<foreach collection="list" item="item" index="index" separator="union all" > 
+	      select #{item.roleId}, #{item.userId} from dual
+	    </foreach>
+	    ) ru
+	</insert>
+</mapper>

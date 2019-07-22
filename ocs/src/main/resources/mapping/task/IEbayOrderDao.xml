@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.task.dao.IEbayOrderDao">
+	<resultMap type="com.it.ocs.task.model.EbayOrderModel" id="ebayOrderResult">
+		<id column="ID" property="id"  />
+		<result column="ACCOUNT" property="account"  />
+		<result column="ORDER_ID" property="order_id"  />
+		<result column="ORDER_STATUS" property="order_status"  />
+		<result column="ADJUSTMENT_AMOUNT" property="adjustment_amount"  />
+		<result column="AMOUNT_PAID" property="amount_paid"  />
+		<result column="AMOUNT_SAVED" property="amount_saved"  />
+		<result column="CREATED_TIME" property="created_time"  />
+		<result column="PAYMENT_METHODS" property="payment_methods"  />
+		<result column="SELLER_EMAIL" property="seller_email"  />
+		<result column="SUB_TOTAL" property="sub_total"  />
+		<result column="TOTAL" property="total"  />
+		<result column="BUYER_USER_ID" property="buyer_user_id"  />
+		<result column="PAID_TIME" property="paid_time"  />
+		<result column="SHIPPED_TIME" property="shipped_time"  />
+		<result column="CREDIT_CARD_AVAILABLE" property="credit_card_available"  />
+		<result column="EIAS_TOKEN" property="eias_token"  />
+		<result column="PAYMENT_HOLD_STATUS" property="payment_hold_status"  />
+		<result column="IS_MULTI_LEG_SHIPPING" property="is_multi_leg_shipping"  />
+		<result column="SELLER_USER_ID" property="seller_user_id"  />
+		<result column="SELLER_EIAS_TOKEN" property="seller_eias_token"  />
+		<result column="CANCEL_STATUS" property="cancel_status"  />
+		<result column="EXTENDED_ORDER_ID" property="extended_order_id"  />
+		<result column="CONTAINS_EBAY_PLUS_TRANSACTION" property="contains_ebay_plus_transaction"  />
+		<result column="LAST_MODIFIED_TIME" property="last_modified_time"  />
+		<result column="LAST_FETCH_TIME" property="last_fetch_time"  />
+		<result column="HAS_PUSHED" property="has_pushed"  />
+	</resultMap>
+	<insert id="insertEbayOrders" parameterType="java.util.List">
+		INSERT INTO EBAY_ORDER(
+			ID,
+			ACCOUNT,
+			ORDER_ID,
+			ORDER_STATUS,
+			ADJUSTMENT_AMOUNT,
+			AMOUNT_PAID,
+			AMOUNT_SAVED,
+			CREATED_TIME,
+			PAYMENT_METHODS,
+			SELLER_EMAIL,
+			SUB_TOTAL,
+			TOTAL,
+			BUYER_USER_ID,
+			PAID_TIME,
+			SHIPPED_TIME,
+			CREDIT_CARD_AVAILABLE,
+			EIAS_TOKEN,
+			PAYMENT_HOLD_STATUS,
+			IS_MULTI_LEG_SHIPPING,
+			SELLER_USER_ID,
+			SELLER_EIAS_TOKEN,
+			CANCEL_STATUS,
+			EXTENDED_ORDER_ID,
+			CONTAINS_EBAY_PLUS_TRANSACTION,
+			LAST_MODIFIED_TIME,
+			LAST_FETCH_TIME,
+			HAS_PUSHED)  
+		select c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.id,jdbcType=BIGINT},
+				#{item.account,jdbcType=VARCHAR},
+				#{item.order_id,jdbcType=VARCHAR},
+				#{item.order_status,jdbcType=VARCHAR},
+				#{item.adjustment_amount,jdbcType=VARCHAR},
+				#{item.amount_paid,jdbcType=VARCHAR},
+				#{item.amount_saved,jdbcType=VARCHAR},
+				#{item.created_time,jdbcType=TIMESTAMP},
+				#{item.payment_methods,jdbcType=VARCHAR},
+				#{item.seller_email,jdbcType=VARCHAR},
+				#{item.sub_total,jdbcType=VARCHAR},
+				#{item.total,jdbcType=VARCHAR},
+				#{item.buyer_user_id,jdbcType=VARCHAR},
+				#{item.paid_time,jdbcType=TIMESTAMP},
+				#{item.shipped_time,jdbcType=TIMESTAMP},
+				#{item.integrated_merchant_credit_card_enabled,jdbcType=BIGINT},
+				#{item.eias_token,jdbcType=VARCHAR},
+				#{item.payment_hold_status,jdbcType=VARCHAR},
+				#{item.is_multi_leg_shipping,jdbcType=BIGINT},
+				#{item.seller_user_id,jdbcType=VARCHAR},
+				#{item.seller_eias_token,jdbcType=VARCHAR},
+				#{item.cancel_status,jdbcType=VARCHAR},
+				#{item.extended_order_id,jdbcType=VARCHAR},
+				#{item.contains_ebay_plus_transaction,jdbcType=BIGINT},
+				#{item.last_modified_time,jdbcType=TIMESTAMP},
+				#{item.last_fetch_time,jdbcType=TIMESTAMP},
+				#{item.has_pushed,jdbcType=BIGINT}
+			from dual
+		</foreach>
+		) c
+	</insert>
+
+	<select id="findEbayOrders" resultMap="ebayOrderResult">
+		select ORDER_ID,ID from EBAY_ORDER
+	</select>
+	<select id="selectMaxLastFetchTime" resultType="java.lang.String">
+		select to_char(max(last_modified_time) ,'yyyy-mm-dd HH24:mi:ss') from EBAY_ORDER
+	</select>
+	<update id="updateEbayOrders" parameterType="java.util.List">
+	 <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+	   update EBAY_ORDER bao 
+	   	set
+			ACCOUNT = #{item.account,jdbcType=VARCHAR},
+			ORDER_STATUS = #{item.order_status,jdbcType=VARCHAR},
+			ADJUSTMENT_AMOUNT = #{item.adjustment_amount,jdbcType=VARCHAR},
+			AMOUNT_PAID = #{item.amount_paid,jdbcType=VARCHAR},
+			AMOUNT_SAVED = #{item.amount_saved,jdbcType=VARCHAR},
+			CREATED_TIME = #{item.created_time,jdbcType=TIMESTAMP},
+			PAYMENT_METHODS = #{item.payment_methods,jdbcType=VARCHAR},
+			SELLER_EMAIL = #{item.seller_email,jdbcType=VARCHAR},
+			SUB_TOTAL = #{item.sub_total,jdbcType=VARCHAR},
+			TOTAL = #{item.total,jdbcType=VARCHAR},
+			BUYER_USER_ID = #{item.buyer_user_id,jdbcType=VARCHAR},
+			PAID_TIME = #{item.paid_time,jdbcType=TIMESTAMP},
+			SHIPPED_TIME = #{item.shipped_time,jdbcType=TIMESTAMP},
+			CREDIT_CARD_AVAILABLE = #{item.integrated_merchant_credit_card_enabled,jdbcType=BIGINT},
+			EIAS_TOKEN = #{item.eias_token,jdbcType=VARCHAR},
+			PAYMENT_HOLD_STATUS = #{item.payment_hold_status,jdbcType=VARCHAR},
+			IS_MULTI_LEG_SHIPPING = #{item.is_multi_leg_shipping,jdbcType=BIGINT},
+			SELLER_USER_ID = #{item.seller_user_id,jdbcType=VARCHAR},
+			SELLER_EIAS_TOKEN = #{item.seller_eias_token,jdbcType=VARCHAR},
+			CANCEL_STATUS = #{item.cancel_status,jdbcType=VARCHAR},
+			EXTENDED_ORDER_ID = #{item.extended_order_id,jdbcType=VARCHAR},
+			CONTAINS_EBAY_PLUS_TRANSACTION = #{item.contains_ebay_plus_transaction,jdbcType=BIGINT},
+			LAST_MODIFIED_TIME = #{item.last_modified_time,jdbcType=TIMESTAMP},
+			LAST_FETCH_TIME = #{item.last_fetch_time,jdbcType=TIMESTAMP},
+			HAS_PUSHED = #{item.has_pushed,jdbcType=BIGINT}
+
+	   where bao.ORDER_ID = #{item.order_id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+</mapper>

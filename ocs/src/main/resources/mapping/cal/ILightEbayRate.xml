@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.ILightEbayRateDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.LightEbayRateModel">
+		<id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="PLATFORM" property="platform" jdbcType="VARCHAR" />
+		<result column="COUNTRY" property="country" jdbcType="VARCHAR" />
+		<result column="SHIPPING_TYPE" property="shippingType" jdbcType="VARCHAR" />
+		<result column="REFERRAL_RATE" property="referralRate" jdbcType="DECIMAL" />
+		<result column="GROSS_PROFIT_RATE" property="grossProfitRate" jdbcType="DECIMAL" />
+		<result column="PAYPAL_FEE" property="paypalFee" jdbcType="DECIMAL" />
+		<result column="VAT" property="vat" jdbcType="DECIMAL" />
+		<result column="ADVERTISING_RATE" property="advertisingRate" jdbcType="DECIMAL" />
+		<result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="sql_base">
+		SELECT ENTITY_ID as entityId,
+		PLATFORM,
+		COUNTRY,
+		SHIPPING_TYPE as shippingType,
+		REFERRAL_RATE as referralRate,
+		GROSS_PROFIT_RATE as grossProfitRate,
+		PAYPAL_FEE as paypalFee,
+		VAT,
+		ADVERTISING_RATE as advertisingRate,
+		CREATED_AT as createdAt,
+		UPDATED_AT as updatedAt
+		FROM LIGHT_EBAY_RATE
+	</sql>
+
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.platform != null and param.platform != ''">
+					AND PLATFORM = #{param.platform}
+				</if>
+				<if test="param.country != null and param.country != ''">
+					AND COUNTRY = #{param.country}
+				</if>
+				<if test="param.shippingType != null and param.shippingType != ''">
+					AND SHIPPING_TYPE = #{param.shippingType}
+				</if>
+			</where>
+		</if>
+	</sql>
+
+	<!-- 分页以及条件查询 -->
+	<select id="query" resultMap="BaseResultMap">
+		<include refid="sql_base" />
+		<include refid="sql_where" />
+		<include refid="com.it.ocs.cal.dao.ILightEbayTaxDao.sql_order" />
+	</select>
+	
+	<!-- 查找所有 -->
+	<select id="findByTemplate" resultMap="BaseResultMap">
+		<include refid="sql_base" />
+	</select>
+	
+	<select id="queryByObject" resultType="java.util.HashMap">
+		<include refid="sql_base"/> 
+		<include refid="sql_where"/>
+		order by entity_id desc
+	</select>
+
+	<!-- 根据条件查询单个对象 -->
+	<select id="queryByParam" resultType="com.it.ocs.cal.model.LightEbayRateModel">
+		<include refid="sql_base" />
+		<include refid="sql_where" />
+	</select>
+	
+	<insert id="add" parameterType="com.it.ocs.cal.model.LightEbayRateModel">
+		insert into LIGHT_EBAY_RATE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			ENTITY_ID,
+
+			<if test="platform != null">
+				PLATFORM,
+			</if>
+			<if test="country != null">
+				COUNTRY,
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE,
+			</if>
+			<if test="referralRate != null">
+				REFERRAL_RATE,
+			</if>
+			<if test="grossProfitRate != null">
+				GROSS_PROFIT_RATE,
+			</if>
+			<if test="paypalFee != null">
+				PAYPAL_FEE,
+			</if>
+			<if test="vat != null">
+				VAT,
+			</if>
+			<if test="advertisingRate != null">
+				ADVERTISING_RATE,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			LIGHT_EBAY_RATE_SEQ.NEXTVAL,
+
+			<if test="platform != null">
+				#{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="country != null">
+				#{country,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				#{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="referralRate != null">
+				#{referralRate,jdbcType=DECIMAL},
+			</if>
+			<if test="grossProfitRate != null">
+				#{grossProfitRate,jdbcType=DECIMAL},
+			</if>
+			<if test="paypalFee != null">
+				#{paypalFee,jdbcType=DECIMAL},
+			</if>
+			<if test="vat != null">
+				#{vat,jdbcType=DECIMAL},
+			</if>
+			<if test="advertisingRate != null">
+				#{advertisingRate,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="com.it.ocs.cal.model.LightEbayRateModel">
+		update LIGHT_EBAY_RATE
+		<set>
+			<if test="platform != null">
+				PLATFORM = #{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="country != null">
+				COUNTRY = #{country,jdbcType=VARCHAR},
+			</if>
+			<if test="shippingType != null">
+				SHIPPING_TYPE = #{shippingType,jdbcType=VARCHAR},
+			</if>
+			<if test="referralRate != null">
+				REFERRAL_RATE = #{referralRate,jdbcType=DECIMAL},
+			</if>
+			<if test="grossProfitRate != null">
+				GROSS_PROFIT_RATE = #{grossProfitRate,jdbcType=DECIMAL},
+			</if>
+			<if test="paypalFee != null">
+				PAYPAL_FEE = #{paypalFee,jdbcType=DECIMAL},
+			</if>
+			<if test="vat != null">
+				VAT = #{vat,jdbcType=DECIMAL},
+			</if>
+			<if test="advertisingRate != null">
+				ADVERTISING_RATE = #{advertisingRate,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

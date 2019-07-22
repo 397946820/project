@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.IFbaRuleDao">
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.FbaRuleModel">
+		<id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="HANDLING_FEE" property="handlingFee" jdbcType="DECIMAL" />
+		<result column="PICKPACK_FEE" property="pickpackFee" jdbcType="DECIMAL" />
+		<result column="LENGTH" property="length" jdbcType="DECIMAL" />
+		<result column="WIDTH" property="width" jdbcType="DECIMAL" />
+		<result column="HEIGHT" property="height" jdbcType="DECIMAL" />
+		<result column="FLAG" property="flag" jdbcType="VARCHAR" />
+		<result column="FROM_WEIGHT" property="fromWeight" jdbcType="DECIMAL" />
+		<result column="TO_WEIGHT" property="toWeight" jdbcType="DECIMAL" />
+		<result column="MAX_WEIGHT" property="maxWeight" jdbcType="DECIMAL" />
+		<result column="PRICE" property="price" jdbcType="VARCHAR" />
+		<result column="EFN_FEE" property="efnFee" jdbcType="DECIMAL" />
+		<result column="EXTRA_FEE" property="extraFee" jdbcType="DECIMAL" />
+		<result column="IS_MONTH" property="isMonth" jdbcType="VARCHAR" />
+		<result column="SORT_ORDER" property="sortOrder" jdbcType="DECIMAL" />
+		<result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="baseSql">
+		select ENTITY_ID as entityId,
+			   COUNTRY_ID as countryId,
+			   TITLE,
+			   HANDLING_FEE as handlingFee,
+			   PICKPACK_FEE as pickpackFee,
+			   LENGTH,
+			   WIDTH,
+			   HEIGHT,
+			   FLAG,
+			   FROM_WEIGHT as fromWeight,
+			   TO_WEIGHT as toWeight,
+			   MAX_WEIGHT as maxWeight,
+			   PRICE,
+			   EFN_FEE as efnFee,
+			   EXTRA_FEE as extraFee,
+			   SUBSTR(IS_MONTH, 0, INSTR(IS_MONTH, ',', '-1', 1) - 1) as isMonth,
+			   SORT_ORDER as sortOrder,
+			   CREATED_AT as createdAt,
+			   UPDATED_AT as updatedAt
+		from CAL_FBA_RULE
+	</sql>
+	
+	<sql id="sql_time">
+		<if test="param.cstarttime != null or param.cendtime != null">
+			<if test="param.cstarttime != null and param.cendtime != null">
+				and to_char(CREATED_AT,'yyyy-mm-dd') between #{param.cstarttime} and #{param.cendtime}
+			</if>
+			<if test="param.cstarttime == null and param.cendtime != null">
+				and to_char(CREATED_AT,'yyyy-mm-dd') <![CDATA[  <= ]]>#{param.cendtime}
+			</if>
+			<if test="param.cstarttime != null and param.cendtime == null">
+				and to_char(CREATED_AT,'yyyy-mm-dd') = #{param.cstarttime}
+			</if>
+		</if>
+		<if test="param.ustarttime != null or param.uendtime != null">
+			<if test="param.ustarttime != null and param.uendtime != null">
+				and to_char(UPDATED_AT,'yyyy-mm-dd') between #{param.ustarttime} and #{param.uendtime}
+			</if>
+			<if test="param.ustarttime == null and param.uendtime != null">
+				and to_char(UPDATED_AT,'yyyy-mm-dd') <![CDATA[  <= ]]>#{param.uendtime}
+			</if>
+			<if test="param.ustarttime != null and param.uendtime == null">
+				and to_char(UPDATED_AT,'yyyy-mm-dd') = #{param.ustarttime}
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="sql_where">
+		<if test="param != null">
+			<where>
+				<if test="param.countryId != '' and param.countryId != null">
+					and COUNTRY_ID = #{param.countryId}
+				</if>
+				<if test="param.title != '' and param.title != null">
+					and TITLE like '%${param.title}%'
+				</if>
+				<if test="param.handlingFee != '' and param.handlingFee != null or param.handlingFee == 0">
+					and HANDLING_FEE = #{param.handlingFee}
+				</if>
+				<if test="param.pickpackFee != '' and param.pickpackFee != null or param.pickpackFee == 0">
+					and PICKPACK_FEE = #{param.pickpackFee}
+				</if>
+				<if test="param.flag != '' and param.flag != null">
+					and FLAG = #{param.flag}
+				</if>
+				<if test="param.price != '' and param.price != null">
+					and PRICE = #{param.price}
+				</if>
+				<if test="param.isMonth != '' and param.isMonth != null">
+					and IS_MONTH like '%${param.isMonth}%'
+				</if>
+				<if test="param.sortOrder != '' and param.sortOrder != null">
+					and SORT_ORDER = #{param.sortOrder}
+				</if>
+				<include refid="sql_time"/>
+			</where>
+		</if>
+	</sql>
+	
+	<!-- 排序 -->
+	<sql id="order_sql">
+		<if test="sort!= null and order!=null">
+			order by ${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			order by SORT_ORDER asc
+		</if>
+	</sql>
+
+	<!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<include refid="sql_where" />
+		<include refid="order_sql"/>
+	</select>
+	
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from CAL_FBA_RULE
+		<include refid="sql_where" />
+	</select>
+	
+	<!-- 导出查询 -->
+	<select id="findByTemplate" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		order by entity_id desc
+	</select>
+	
+	<select id="findRulesByCountry" resultMap="BaseResultMap">
+		<include refid="baseSql" /> where COUNTRY_ID = #{country} order by SORT_ORDER
+	</select>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.it.ocs.cal.model.FbaRuleModel">
+		update CAL_FBA_RULE
+		<set>
+			<if test="countryId != null">
+				COUNTRY_ID = #{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="handlingFee != null">
+				HANDLING_FEE = #{handlingFee,jdbcType=DECIMAL},
+			</if>
+			<if test="pickpackFee != null">
+				PICKPACK_FEE = #{pickpackFee,jdbcType=DECIMAL},
+			</if>
+			<if test="length != null">
+				LENGTH = #{length,jdbcType=DECIMAL},
+			</if>
+			<if test="width != null">
+				WIDTH = #{width,jdbcType=DECIMAL},
+			</if>
+			<if test="height != null">
+				HEIGHT = #{height,jdbcType=DECIMAL},
+			</if>
+			<if test="flag != null">
+				FLAG = #{flag,jdbcType=VARCHAR},
+			</if>
+			<if test="fromWeight != null">
+				FROM_WEIGHT = #{fromWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="toWeight != null">
+				TO_WEIGHT = #{toWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="maxWeight != null">
+				MAX_WEIGHT = #{maxWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="price != null">
+				PRICE = #{price,jdbcType=VARCHAR},
+			</if>
+			<if test="efnFee != null">
+				EFN_FEE = #{efnFee,jdbcType=DECIMAL},
+			</if>
+			<if test="extraFee != null">
+				EXTRA_FEE = #{extraFee,jdbcType=DECIMAL},
+			</if>
+			<if test="isMonth != null">
+				IS_MONTH = #{isMonth,jdbcType=VARCHAR} || ',',
+			</if>
+			<if test="sortOrder != null">
+				SORT_ORDER = #{sortOrder,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt},
+			</if>
+		</set>
+		where entity_id = #{entityId}
+	</update>
+
+	<!-- 保存fba规则-->
+	<insert id="add" parameterType="com.it.ocs.cal.model.FbaRuleModel">
+		insert into CAL_FBA_RULE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			ENTITY_ID,
+
+			<if test="countryId != null">
+				COUNTRY_ID,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="handlingFee != null">
+				HANDLING_FEE,
+			</if>
+			<if test="pickpackFee != null">
+				PICKPACK_FEE,
+			</if>
+			<if test="length != null">
+				LENGTH,
+			</if>
+			<if test="width != null">
+				WIDTH,
+			</if>
+			<if test="height != null">
+				HEIGHT,
+			</if>
+			<if test="flag != null">
+				FLAG,
+			</if>
+			<if test="fromWeight != null">
+				FROM_WEIGHT,
+			</if>
+			<if test="toWeight != null">
+				TO_WEIGHT,
+			</if>
+			<if test="maxWeight != null">
+				MAX_WEIGHT,
+			</if>
+			<if test="price != null">
+				PRICE,
+			</if>
+			<if test="efnFee != null">
+				EFN_FEE,
+			</if>
+			<if test="extraFee != null">
+				EXTRA_FEE,
+			</if>
+			<if test="isMonth != null">
+				IS_MONTH,
+			</if>
+			<if test="sortOrder != null">
+				SORT_ORDER,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			CAL_FBA_RULE_SEQ.NEXTVAL,
+
+			<if test="countryId != null">
+				#{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="handlingFee != null">
+				#{handlingFee,jdbcType=DECIMAL},
+			</if>
+			<if test="pickpackFee != null">
+				#{pickpackFee,jdbcType=DECIMAL},
+			</if>
+			<if test="length != null">
+				#{length,jdbcType=DECIMAL},
+			</if>
+			<if test="width != null">
+				#{width,jdbcType=DECIMAL},
+			</if>
+			<if test="height != null">
+				#{height,jdbcType=DECIMAL},
+			</if>
+			<if test="flag != null">
+				#{flag,jdbcType=VARCHAR},
+			</if>
+			<if test="fromWeight != null">
+				#{fromWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="toWeight != null">
+				#{toWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="maxWeight != null">
+				#{maxWeight,jdbcType=DECIMAL},
+			</if>
+			<if test="price != null">
+				#{price,jdbcType=VARCHAR},
+			</if>
+			<if test="efnFee != null">
+				#{efnFee,jdbcType=DECIMAL},
+			</if>
+			<if test="extraFee != null">
+				#{extraFee,jdbcType=DECIMAL},
+			</if>
+			<if test="isMonth != null">
+				#{isMonth,jdbcType=VARCHAR} || ',',
+			</if>
+			<if test="sortOrder != null">
+				#{sortOrder,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt},
+			</if>
+		</trim>
+	</insert>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.amazon.dao.IRemovalShipmentDAO">
+	<insert id="save">
+		 insert into AMAZON_REMOVAL_SHIPMENT_DETAIL(
+			  ID,
+			  REQUEST_DATE,
+			  ORDER_ID,
+			  SHIPMENT_DATE,
+			  SKU,
+			  FNSKU,
+			  DISPOSITION,
+			  SHIPPED_QUANTITY,
+			  CARRIER,
+			  TRACKING_NUMBER,
+			  REPORT_ID,
+			  SITE
+			  )values(
+			  AMAZON_REMOVAL_SHIPMENT_SEQ.Nextval,
+			  to_date(#{REQUEST_DATE,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+			  #{ORDER_ID,jdbcType=VARCHAR},
+			  to_date(#{SHIPMENT_DATE,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+			  #{SKU,jdbcType=VARCHAR},
+			  #{FNSKU,jdbcType=VARCHAR},
+			  #{DISPOSITION,jdbcType=VARCHAR},
+			  #{SHIPPED_QUANTITY,jdbcType=VARCHAR},
+			  #{CARRIER,jdbcType=VARCHAR},
+			  #{TRACKING_NUMBER,jdbcType=VARCHAR},
+			  #{REPORT_ID,jdbcType=VARCHAR},
+			  #{SITE,jdbcType=VARCHAR}
+			  )
+	</insert>
+	<delete id="delByReportId" parameterType="java.lang.String">
+		delete AMAZON_REMOVAL_SHIPMENT_DETAIL where REPORT_ID=#{id}
+	</delete>
+
+</mapper>

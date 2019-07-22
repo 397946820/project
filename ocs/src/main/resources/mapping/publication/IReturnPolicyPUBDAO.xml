@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IReturnPolicyPUBDAO">
+	<resultMap type="com.it.ocs.publication.model.ReturnPolicyModel" id="policyResult">
+		<id property="id" column="RETURN_POLICY_ID" jdbcType="DECIMAL" />
+		<result property="policyType" column="POLICY_TYPE" jdbcType="VARCHAR" />
+		<result property="returnDays" column="DAYS_ALLOWED" jdbcType="VARCHAR" />
+		<result property="allowDelay" column="ALLOW_EXTENSION" jdbcType="VARCHAR" />
+		<result property="returnType" column="REFUND_METHOD" jdbcType="VARCHAR" />
+		<result property="fareTakeInHander" column="FREIGHT_CARRIER" jdbcType="VARCHAR" />
+		<result property="depreciationRate" column="DEPRECIATION_COST" jdbcType="VARCHAR" />
+		<result property="description" column="POLICY_DETAIL" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_RETURN_POLICY where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<select id="getById" resultMap="policyResult">
+		<include refid="select_base" /> where RETURN_POLICY_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="policyResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+			RETURN_POLICY_ID id,
+			POLICY_TYPE  policyType,
+			DAYS_ALLOWED returnDays,
+			ALLOW_EXTENSION allowDelay,
+			REFUND_METHOD returnType,
+			FREIGHT_CARRIER fareTakeInHander,
+			DEPRECIATION_COST depreciationRate,
+			POLICY_DETAIL description,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_RETURN_POLICY
+	</sql>
+	<select id="query" resultMap="policyResult">
+		 <include refid="select_base" />
+	</select>
+	<insert id="add" parameterType="com.it.ocs.publication.model.ReturnPolicyModel">
+		insert into EBAY_RETURN_POLICY
+		(
+			RETURN_POLICY_ID,
+			POLICY_TYPE,
+			DAYS_ALLOWED,
+			ALLOW_EXTENSION,
+			REFUND_METHOD,
+			FREIGHT_CARRIER,
+			DEPRECIATION_COST,
+			POLICY_DETAIL,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+		) 
+		values
+		(
+			#{id},
+			#{policyType},
+			#{returnDays},
+			#{allowDelay},
+			#{returnType},
+			#{fareTakeInHander},
+			#{depreciationRate},
+			#{description},
+			#{enabledFlag},
+			#{createBy},
+			#{creationDate},
+			#{lastUpdateBy},
+			#{lastUpdationDate}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.publication.model.ReturnPolicyModel">
+		update EBAY_RETURN_POLICY set 
+			POLICY_TYPE=#{policyType},
+			DAYS_ALLOWED=#{returnDays},
+			ALLOW_EXTENSION=#{allowDelay},
+			REFUND_METHOD=#{returnType},
+			FREIGHT_CARRIER=#{fareTakeInHander},
+			DEPRECIATION_COST=#{depreciationRate},
+			POLICY_DETAIL=#{description},
+			LAST_UPDATE_BY=#{lastUpdateBy},
+			LAST_UPDATE_DATE=#{lastUpdationDate} where RETURN_POLICY_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_RETURN_POLICY set ENABLED_FLAG='N' where RETURN_POLICY_ID=#{id}
+	</update>
+</mapper>

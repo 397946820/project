@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.pic.dao.IPicDAO">
+	<resultMap type="com.it.ocs.pic.model.PicModel" id="picResult">
+		<id property="id" column="PIC_ID" jdbcType="DECIMAL" />
+		<result property="name" column="NAME" jdbcType="VARCHAR" />
+		<result property="ebayPicRelation" column="EBAY_PIC_RELATION" jdbcType="VARCHAR" />
+		<result property="url" column="URL" jdbcType="VARCHAR" />
+		<result property="categoryId" column="CATEGORY_ID" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+		<result column="REAL_NAME" property="realName"  />
+		<result column="REAL_URL" property="realUrl"  />
+		<result column="REAL_URL_INFO" property="realUrlInfo"  />
+		<result column="SERVER_URL" property="serverUrl"/>
+	</resultMap>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_PIC_INFO <include refid="where" />
+	</select>
+	<select id="getById" resultMap="picResult">
+		<include refid="select_base" /> where PIC_ID=#{id}
+	</select>
+	<select id="queryByPage" resultMap="picResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+				<include refid="where" />
+				order by CREATION_DATE desc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="select_base">
+		select 
+		
+			PIC_ID id,
+			NAME  name,
+			REAL_NAME realName,
+			file_size fileSize,
+			EBAY_PIC_RELATION ebayPicRelation,
+			URL url,
+			ENABLED_FLAG enabledFlag,
+			CATEGORY_ID categoryId,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			to_char(CREATION_DATE,'yyyy-MM-dd hh24:mi:ss') uploadDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate,
+			REAL_URL realUrl,
+			SERVER_URL　serverUrl
+			from EBAY_PIC_INFO
+	</sql>
+	<sql id="where">
+		where ENABLED_FLAG='Y' 
+		<if test="condition.categoryIds!=null and condition.categoryIds!=''">
+			AND CATEGORY_ID=#{condition.categoryIds}
+		</if>
+		<if test="condition.name!=null and condition.name!=''">
+			AND NAME like '%'||#{condition.name}||'%'
+		</if>
+	</sql>
+	<select id="query" resultMap="picResult" parameterType="com.it.ocs.pic.model.PicModel">
+		 <include refid="select_base" />
+		 <include refid="where" />
+	</select>
+	<select id="queryById" resultMap="picResult">
+		<include refid="select_base"/> where PIC_ID=#{id,jdbcType=BIGINT}
+	</select>
+	<select id="queryByIds" resultMap="picResult">
+		<include refid="select_base"/> where PIC_ID in (${ids})
+	</select>
+	<update id="updateUrlById" parameterType="com.it.ocs.pic.model.PicModel">
+		update EBAY_PIC_INFO set REAL_URL=#{realUrl,jdbcType=VARCHAR},REAL_URL_INFO=#{realUrlInfo,jdbcType=VARCHAR} where PIC_ID=#{id}
+	</update>
+	<select id="getSeq" resultType="long">
+		select EBAY_SITE_INFO_S.Nextval from dual
+	</select>
+	<insert id="add" parameterType="com.it.ocs.pic.model.PicModel">
+		insert into EBAY_PIC_INFO
+		(
+			PIC_ID,
+			NAME,
+			REAL_NAME,
+			EBAY_PIC_RELATION,
+			URL,
+			CATEGORY_ID,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+     		LAST_UPDATE_DATE,
+     		SERVER_URL
+		) 
+		values
+		(
+			#{id},
+			#{name,jdbcType=VARCHAR},
+			#{realName,jdbcType=VARCHAR},
+			#{ebayPicRelation,jdbcType=VARCHAR},
+			#{url,jdbcType=VARCHAR},
+			#{categoryId,jdbcType=VARCHAR},
+			#{enabledFlag,jdbcType=VARCHAR},
+			#{createBy,jdbcType=BIGINT},
+			#{creationDate,jdbcType=TIMESTAMP},
+			#{lastUpdateBy,jdbcType=BIGINT},
+			#{lastUpdationDate,jdbcType=TIMESTAMP},
+			#{serverUrl,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="update" parameterType="com.it.ocs.pic.model.PicModel">
+		update EBAY_PIC_INFO set 
+			NAME=#{name,jdbcType=VARCHAR},
+			EBAY_PIC_RELATION=#{ebayPicRelation,jdbcType=VARCHAR},
+			<if test="url!=null and url!=''">
+				URL=#{url},
+			</if>
+			<if test="serverUrl!=null and serverUrl!=''">
+				SERVER_URL=#{serverUrl,jdbcType=VARCHAR},
+			</if>
+			REAL_NAME=#{realName,jdbcType=VARCHAR},
+			CATEGORY_ID=#{categoryId,jdbcType=VARCHAR},
+			LAST_UPDATE_BY=#{lastUpdateBy,jdbcType=BIGINT},
+			LAST_UPDATE_DATE=#{lastUpdationDate,jdbcType=TIMESTAMP} where PIC_ID=#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_PIC_INFO set ENABLED_FLAG='N' where PIC_ID=#{id}
+	</update>
+</mapper>

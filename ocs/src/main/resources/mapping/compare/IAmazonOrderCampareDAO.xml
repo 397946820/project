@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.compare.dao.IAmazonOrderCompareDAO">
+	<resultMap type="com.it.ocs.compare.model.AmazonExcelModel" id="amazonCampareResult">
+		<id property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="orderId" column="ORDER_ID" jdbcType="VARCHAR" />
+		<result property="channel" column="CHANNEL" jdbcType="VARCHAR" />
+		<result property="quantity" column="QUANTITY" jdbcType="DECIMAL" />
+		<result property="sku" column="SKU" jdbcType="VARCHAR" />
+		<result property="purchaseDate" column="PURCHASEDATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdatedDate" column="LASTUPDATEDDATE" jdbcType="TIMESTAMP" />
+		<result property="itemPrice" column="ITEM_PRICE" jdbcType="DECIMAL" />
+		<result property="orderStatus" column="ORDER_STATUS" jdbcType="VARCHAR" />
+		<result property="currencyCode" column="CURRENCY_CODE" jdbcType="VARCHAR" />
+		<result property="itemTax" column="ITEM_TAX" jdbcType="DECIMAL" />
+		<result property="shippingPrice" column="SHIPPING_PRICE" jdbcType="DECIMAL" />
+		<result property="shippingTax" column="SHIPPING_TAX" jdbcType="DECIMAL" />
+		<result property="giftWrapPrice" column="GIFT_WRAP_PRICE" jdbcType="DECIMAL" />
+		<result property="giftWrapTax" column="GIFT_WRAP_TAX" jdbcType="DECIMAL" />
+		<result property="itemPromotionDiscount" column="ITEM_PROMOTION_DISCOUNT" jdbcType="DECIMAL" />
+		<result property="shipPromotionDiscount" column="SHIP_PROMOTION_DISCOUNT" jdbcType="DECIMAL" />
+		<result property="shipCity" column="SHIP_CITY" jdbcType="VARCHAR" />
+		<result property="shipState" column="SHIP_STATE" jdbcType="VARCHAR" />
+		<result property="shipPostalCode" column="SHIP_POSTAL_CODE" jdbcType="VARCHAR" />
+		<result property="shipCountry" column="SHIP_COUNTRY" jdbcType="VARCHAR" />
+		<result property="promotionIds" column="PROMOTION_IDS" jdbcType="VARCHAR" />
+		<result property="businessOrder" column="BUSINESS_ORDER" jdbcType="VARCHAR" />
+		<result property="purchaseOrderNumber" column="PURCHASE_ORDER_NUMBER" jdbcType="VARCHAR" />
+		<result property="priceDesignation" column="PRICE_DESIGNATION" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<resultMap type="com.it.ocs.compare.model.AmazonDBModel" id="amazonInputResult">
+		<id column="ID" property="id"  />
+		<result column="DATE_TIME" property="dateTime"  />
+		<result column="SETTLEMENT_ID" property="settlementId"  />
+		<result column="TYPE" property="type"  />
+		<result column="ORDER_ID" property="orderId"  />
+		<result column="SKU" property="sku"  />
+		<result column="DESCRIPTION" property="description"  />
+		<result column="QUANTITY" property="quantity"  />
+		<result column="MARKETPLACE" property="marketplace"  />
+		<result column="FULFILLMENT" property="fulfillment"  />
+		<result column="ORDER_CITY" property="orderCity"  />
+		<result column="ORDER_STATE" property="orderState"  />
+		<result column="ORDER_POSTAL" property="orderPostal"  />
+		<result column="PRODUCT_SALES" property="productSales"  />
+		<result column="SHIPPING_CREDITS" property="shippingCredits"  />
+		<result column="GIFT_WRAP_CREDITS" property="giftWrapCredits"  />
+		<result column="PROMOTIONAL_REBATES" property="promotionalRebates"  />
+		<result column="SALES_TAX_COLLECTED" property="salesTaxCollected"  />
+		<result column="SELLING_FEES" property="sellingFees"  />
+		<result column="FBA_FEES" property="fbaFees"  />
+		<result column="OTHER_TRANSACTION_FEES" property="otherTransactionFees"  />
+		<result column="OTHER" property="other"  />
+		<result column="TOTAL" property="total"  />
+		<result column="REPORT_ID" property="report_id"  />
+		<result column="PLATFORM" property="platform"  />
+		<result column="CREATE_DATE" property="createDate"  />
+		<result column="UPDATE_DATE" property="updateDate"  />
+		<result column="SITE" property="site"  />
+	</resultMap>
+	<sql id="base_sql">
+		select ID,
+			ORDER_ID,
+			CHANNEL,
+			QUANTITY,
+			SKU,
+			PURCHASEDATE,
+			LASTUPDATEDDATE,
+			ITEM_PRICE,
+			ORDER_STATUS,
+			CURRENCY_CODE,
+			ITEM_TAX,
+			SHIPPING_PRICE,
+			SHIPPING_TAX,
+			GIFT_WRAP_PRICE,
+			GIFT_WRAP_TAX,
+			ITEM_PROMOTION_DISCOUNT,
+			SHIP_PROMOTION_DISCOUNT,
+			SHIP_CITY,
+			SHIP_STATE,
+			SHIP_POSTAL_CODE,
+			SHIP_COUNTRY,
+			PROMOTION_IDS,
+			BUSINESS_ORDER,
+			PURCHASE_ORDER_NUMBER,
+			PRICE_DESIGNATION,
+			ENABLED_FLAG,
+			CREATE_BY,
+			CREATION_DATE,
+			LAST_UPDATE_BY,
+			LAST_UPDATE_DATE
+			 FROM AMAZON_IMPORT_DATA
+	</sql>
+	<sql id="base_input_sql">
+		arod.ID,
+		to_char(arod.DATE_TIME,'yyyy-mm-dd hh24:mi:ss') DATE_TIME,
+		arod.SETTLEMENT_ID,
+		arod.TYPE,
+		arod.ORDER_ID,
+		arod.SKU,
+		arod.DESCRIPTION,
+		arod.QUANTITY,
+		arod.MARKETPLACE,
+		arod.FULFILLMENT,
+		arod.ORDER_CITY,
+		arod.ORDER_STATE,
+		arod.ORDER_POSTAL,
+		arod.PRODUCT_SALES,
+		arod.SHIPPING_CREDITS,
+		arod.GIFT_WRAP_CREDITS,
+		arod.PROMOTIONAL_REBATES,
+		arod.SALES_TAX_COLLECTED,
+		arod.SELLING_FEES,
+		arod.FBA_FEES,
+		arod.OTHER_TRANSACTION_FEES,
+		arod.OTHER,
+		arod.TOTAL,
+		arod.REPORT_ID,
+		arod.PLATFORM,
+		arod.CREATE_DATE,
+		arod.UPDATE_DATE,
+		arod.SITE,
+		to_char(arod.SELF_DATE,'yyyy-mm-dd hh24:mi:ss')  selfDate
+	</sql>
+	<sql id="where">
+		where ENABLED_FLAG='Y'
+		<if test="param != null">
+			<if test="param.orderId!=null">
+				and ORDER_ID=#{param.orderId,jdbcType=VARCHAR}
+			</if>
+			<if test="param.sku!=null">
+				and SKU=#{param.sku,jdbcType=VARCHAR}
+			</if>
+			<if test="param.purchaseDate!=null">
+				and PURCHASEDATE=#{param.purchaseDate}
+			</if>
+		</if>
+	</sql>
+	<select id="queryByParam" resultMap="amazonCampareResult">
+		<include refid="base_sql" />
+		<include refid="where" />
+	</select>
+    <select id="queryByInuptParam" resultMap="amazonInputResult">
+     select <include refid="base_input_sql" />　from ocs_ebay.AMAZON_REPORT_ORDER_DATA arod 
+     where arod.SITE=#{param.platform,jdbcType=VARCHAR} 
+           and arod.SELF_DATE>=to_date(#{param.startTime}, 'yyyy-mm-dd hh24:mi:ss')
+           and arod.SELF_DATE<![CDATA[<= ]]>to_date(#{param.endTime}, 'yyyy-mm-dd hh24:mi:ss')
+    </select>
+     
+    <select id="queryTypeByPlatform" resultType="String">
+    	select arod.type from ocs_ebay.AMAZON_REPORT_ORDER_DATA arod 
+    	group by arod.type,arod.SITE having arod.SITE=#{param.platform,jdbcType=VARCHAR} 
+    </select>
+</mapper>

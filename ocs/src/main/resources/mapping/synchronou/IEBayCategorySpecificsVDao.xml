@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayCategorySpecificsVDao">
+	
+	<resultMap type="com.it.ocs.synchronou.model.EBayCategorySpecificsVModel" id="CategorySpecificsVResult">
+		<id column="ID" property="id"  />
+		<result column="NAME" property="name"  />
+		<result column="VALUE" property="value"  />
+		<result column="CATEGORY_ID" property="category_id"  />
+		<result column="MARKETPLACE_ID" property="marketplace_id"  />
+
+		
+	</resultMap>
+	<sql id="select_base">
+		ID,
+		VALUE,
+		CATEGORY_ID,
+		MARKETPLACE_ID
+		
+	</sql>
+	<insert id="insertCategorySpecificsVList" parameterType="java.util.List">
+	INSERT INTO EBAY_CATEGORY_RECOMMENDATION_V (
+			ID,
+			NAME,
+			VALUE,
+			CATEGORY_ID,
+			MARKETPLACE_ID,
+			CREATION_DATE,
+			ENABLED_FLAG)   
+		select ebay_Category_R_V_SEQ.Nextval,c.*,sysdate,'Y' from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+			 #{item.name,jdbcType=VARCHAR},
+			 #{item.value,jdbcType=VARCHAR},
+             #{item.category_id,jdbcType=DOUBLE},
+             #{item.marketplace_id,jdbcType=DOUBLE}
+            
+			from dual
+		</foreach>
+		) c
+    </insert>
+	
+	<select id="selectCategorySpecificsMaxCID" resultType="java.lang.Long" parameterType="java.lang.Long">
+		select max(category_id) from EBAY_CATEGORY_RECOMMENDATION_V where MARKETPLACE_ID=#{marketplaceId}
+	</select>
+	<select id="findCategorySpecificsVList" resultMap="CategorySpecificsVResult">
+		select <include refid="select_base" /> from EBAY_CATEGORY_RECOMMENDATION_V 
+		where 
+		CATEGORY_ID=${category_id} and MARKETPLACE_ID=${marketplace_id} and NAME='${name}'
+	</select>
+</mapper>

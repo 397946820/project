@@ -1,0 +1,8 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.paymentManagement.dao.IPayPalDao">
+
+	<select id="getPayPalByPAccount" resultType="com.it.ocs.paymentManagement.model.PayPalModel">
+	   select id,client_id,secret,paypal_account account from PAYPAL_INFO where PAYPAL_ACCOUNT=#{account,jdbcType=VARCHAR}
+	</select>
+</mapper>

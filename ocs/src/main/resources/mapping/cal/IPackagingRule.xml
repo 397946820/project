@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.it.ocs.cal.dao.IPackagingRuleDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID entityId,
+			   TITLE,
+			   WEIGHT,
+			   LENGTH,
+			   WIDTH,
+			   HEIGHT,
+			   PACKAGING_WEIGHT packagingWeight,
+			   SORT_ORDER sortOrder,
+			   CREATED_AT createdAt,
+			   UPDATED_AT updatedAt,
+			   REGULAR, 
+			   DISCOUNT, 
+			   IS_MONTH isMonth, 
+			   TYPE
+    	FROM CAL_PACKAGING_RULE
+	</sql>
+	
+	<sql id="where_sql">
+		<where>
+			<if test="param != null">
+				<if test="param.type != null and param.type != ''">
+					and TYPE = #{param.type}
+				</if>
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultType="com.it.ocs.cal.model.PackagingRuleModel">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		<include refid="com.it.ocs.cal.dao.IFbaRuleDao.order_sql"/>
+	</select>
+	
+	<select id="queryByObject" resultType="java.util.HashMap">
+		<include refid="base_sql"/>
+		<include refid="where_sql"/>
+		ORDER BY SORT_ORDER
+	</select>
+
+	<insert id="add">
+		insert into CAL_PACKAGING_RULE
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      
+	        ENTITY_ID,
+	      
+	      <if test="title != null" >
+	        TITLE,
+	      </if>
+	      <if test="weight != null" >
+	        WEIGHT,
+	      </if>
+	      <if test="length != null" >
+	        LENGTH,
+	      </if>
+	      <if test="width != null" >
+	        WIDTH,
+	      </if>
+	      <if test="height != null" >
+	        HEIGHT,
+	      </if>
+	      <if test="packagingWeight != null" >
+	        PACKAGING_WEIGHT,
+	      </if>
+	      <if test="sortOrder != null" >
+	        SORT_ORDER,
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT,
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT,
+	      </if>
+	      <if test="regular != null" >
+	        REGULAR,
+	      </if>
+	      <if test="discount != null" >
+	        DISCOUNT,
+	      </if>
+	      <if test="isMonth != null" >
+	        IS_MONTH,
+	      </if>
+	      <if test="type != null" >
+	        TYPE,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      
+	        CAL_PACKAGING_RULE_SEQ.NEXTVAL,
+	      
+	      <if test="title != null" >
+	        #{title,jdbcType=VARCHAR},
+	      </if>
+	      <if test="weight != null" >
+	        #{weight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="length != null" >
+	        #{length,jdbcType=DECIMAL},
+	      </if>
+	      <if test="width != null" >
+	        #{width,jdbcType=DECIMAL},
+	      </if>
+	      <if test="height != null" >
+	        #{height,jdbcType=DECIMAL},
+	      </if>
+	      <if test="packagingWeight != null" >
+	        #{packagingWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sortOrder != null" >
+	        #{sortOrder,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="regular != null" >
+	        #{regular,jdbcType=DECIMAL},
+	      </if>
+	      <if test="discount != null" >
+	        #{discount,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isMonth != null" >
+	        #{isMonth,jdbcType=VARCHAR} || ',',
+	      </if>
+	      <if test="type != null" >
+	        #{type,jdbcType=DECIMAL},
+	      </if>
+	    </trim>
+	</insert>
+	
+	<update id="update">
+		update CAL_PACKAGING_RULE
+	    <set>
+	      <if test="title != null" >
+	        TITLE = #{title,jdbcType=VARCHAR},
+	      </if>
+	      <if test="weight != null" >
+	        WEIGHT = #{weight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="length != null" >
+	        LENGTH = #{length,jdbcType=DECIMAL},
+	      </if>
+	      <if test="width != null" >
+	        WIDTH = #{width,jdbcType=DECIMAL},
+	      </if>
+	      <if test="height != null" >
+	        HEIGHT = #{height,jdbcType=DECIMAL},
+	      </if>
+	      <if test="packagingWeight != null" >
+	        PACKAGING_WEIGHT = #{packagingWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="sortOrder != null" >
+	        SORT_ORDER = #{sortOrder,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="regular != null" >
+	        REGULAR = #{regular,jdbcType=DECIMAL},
+	      </if>
+	      <if test="discount != null" >
+	        DISCOUNT = #{discount,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isMonth != null" >
+	        IS_MONTH = #{isMonth,jdbcType=VARCHAR} || ',',
+	      </if>
+	      <if test="type != null" >
+	        TYPE = #{type,jdbcType=DECIMAL},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

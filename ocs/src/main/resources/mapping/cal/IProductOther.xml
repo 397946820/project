@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.IProductOtherDao">
+
+	<resultMap id="BaseResultMap" type="com.it.ocs.cal.model.ProductOtherModel">
+		<id column="ENTITY_ID" property="entityId" jdbcType="DECIMAL" />
+		<result column="PARENT_ID" property="parentId" jdbcType="DECIMAL" />
+		<result column="COUNTRY_ID" property="countryId" jdbcType="VARCHAR" />
+		<result column="CATEGORY" property="category" jdbcType="VARCHAR" />
+		<result column="SKU" property="sku" />
+		<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+		<result column="TURNOVER_RATE" property="turnoverRate"
+			jdbcType="DECIMAL" />
+		<result column="QTY_ORDERED" property="qtyOrdered" jdbcType="DECIMAL" />
+		<result column="AVERAGE_MONTH" property="averageMonth"
+			jdbcType="DECIMAL" />
+		<result column="UNFULLIABLE_RATE" property="unfulliableRate"
+			jdbcType="DECIMAL" />
+		<result column="REPLACEMENT_RATE" property="replacementRate"
+			jdbcType="DECIMAL" />
+		<result column="RETURNRATE" property="returnRate"
+			jdbcType="DECIMAL" />
+		<result column="CLEAR_PRICE" property="clearPrice" jdbcType="DECIMAL" />
+		<result column="AMZ_FBA" property="amzFba" jdbcType="DECIMAL" />
+		<result column="EFN_FEE" property="efnFee" jdbcType="DECIMAL" />
+		<result column="DUTY_RATE" property="dutyRate" jdbcType="DECIMAL" />
+		<result column="USER_ID" property="userId" jdbcType="DECIMAL" />
+		<result column="CREATED_AT" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="UPDATED_AT" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="baseSql">
+		select t.ENTITY_ID as entityId,
+		t.PARENT_ID as parentId,
+		t.COUNTRY_ID as countryId,
+		t.CATEGORY as category,
+		p.SKU as sku,
+		u.username as username,
+		t.TURNOVER_RATE as turnoverRate,
+		t.QTY_ORDERED
+		as qtyOrdered,
+		t.AVERAGE_MONTH as averageMonth,
+		t.UNFULLIABLE_RATE as
+		unfulliableRate,
+		t.REPLACEMENT_RATE as replacementRate,
+		t.CLEAR_PRICE as
+		clearPrice,
+		t.AMZ_FBA as amzFba,
+		t.EFN_FEE as efnFee,
+		t.DUTY_RATE as
+		dutyRate,
+		t.RETURNRATE returnRate,
+		p.USER_ID as userId,
+		t.CREATED_AT as createdAt,
+		t.UPDATED_AT as
+		updatedAt
+		FROM CAL_PRODUCT_ENTITY_OTHER T ,CAL_PRODUCT_ENTITY P ,
+		SYS_USER U
+		where t.PARENT_ID = p.entity_id and p.user_id = u.user_id
+	</sql>
+
+	<sql id="sql_time">
+		<if test="param.cstarttime != null or param.cendtime != null">
+			<if test="param.cstarttime != null and param.cendtime != null">
+				and to_char(t.CREATED_AT,'yyyy-mm-dd') between
+				#{param.cstarttime} and #{param.cendtime}
+			</if>
+			<if test="param.cstarttime == null and param.cendtime != null">
+				and to_char(t.CREATED_AT,'yyyy-mm-dd') <![CDATA[  <= ]]>#{param.cendtime}
+			</if>
+			<if test="param.cstarttime != null and param.cendtime == null">
+				and to_char(t.CREATED_AT,'yyyy-mm-dd') =
+				#{param.cstarttime}
+			</if>
+		</if>
+		<if test="param.ustarttime != null or param.uendtime != null">
+			<if test="param.ustarttime != null and param.uendtime != null">
+				and to_char(t.UPDATED_AT,'yyyy-mm-dd') between
+				#{param.ustarttime} and #{param.uendtime}
+			</if>
+			<if test="param.ustarttime == null and param.uendtime != null">
+				and to_char(t.UPDATED_AT,'yyyy-mm-dd') <![CDATA[  <= ]]>#{param.uendtime}
+			</if>
+			<if test="param.ustarttime != null and param.uendtime == null">
+				and to_char(t.UPDATED_AT,'yyyy-mm-dd') =
+				#{param.ustarttime}
+			</if>
+		</if>
+	</sql>
+
+	<sql id="sql_where">
+		<if test="param != null">
+			<if test="param.userId != '' and param.userId != null">
+				and p.USER_ID = #{param.userId}
+			</if>
+			<if test="param.countryId != '' and param.countryId != null">
+				and t.COUNTRY_ID = #{param.countryId}
+			</if>
+			<if test="param.category != '' and param.category != null">
+				and t.CATEGORY like '%${param.category}%'
+			</if>
+			<if test="param.sku != '' and param.sku != null">
+				and p.SKU like '%${param.sku}%'
+			</if>
+			<if test="param.username != '' and param.username != null">
+				and u.USERNAME like '%${param.username}%'
+			</if>
+			<if
+				test="param.turnoverRate != '' and param.turnoverRate != null or param.turnoverRate == 0">
+				and t.TURNOVER_RATE = #{param.turnoverRate}
+			</if>
+			<if
+				test="param.qtyOrdered != '' and param.qtyOrdered != null or param.qtyOrdered == 0">
+				and t.QTY_ORDERED = #{param.qtyOrdered}
+			</if>
+			<if
+				test="param.averageMonth != '' and param.averageMonth != null or param.averageMonth == 0">
+				and t.AVERAGE_MONTH = #{param.averageMonth}
+			</if>
+			<if
+				test="param.unfulliableRate != '' and param.unfulliableRate != null or param.unfulliableRate == 0">
+				and t.UNFULLIABLE_RATE = #{param.unfulliableRate}
+			</if>
+			<if
+				test="param.replacementRate != '' and param.replacementRate != null or param.replacementRate == 0">
+				and t.REPLACEMENT_RATE = #{param.replacementRate}
+			</if>
+			<if
+				test="param.clearPrice != '' and param.clearPrice != null or param.clearPrice == 0">
+				and t.CLEAR_PRICE = #{param.clearPrice}
+			</if>
+			<if
+				test="param.amzFba != '' and param.amzFba != null or param.amzFba == 0">
+				and t.AMZ_FBA = #{param.amzFba}
+			</if>
+			<if
+				test="param.efnFee != '' and param.efnFee != null or param.efnFee == 0">
+				and t.EFN_FEE = #{param.efnFee}
+			</if>
+			<if
+				test="param.dutyRate != '' and param.dutyRate != null or param.dutyRate == 0">
+				and t.DUTY_RATE = #{param.dutyRate}
+			</if>
+			<include refid="sql_time" />
+		</if>
+	</sql>
+
+	<!-- 排序 -->
+	<sql id="order_sql">
+		<if test="sort!= null and order!=null">
+			<if test="sort == 'sku'">
+				order by p.${sort} ${order}
+			</if>
+			<if test="sort == 'username'">
+				order by u.${sort} ${order}
+			</if>
+			<if test="sort != 'sku' and sort != 'username'">
+				order by t.${sort} ${order}
+			</if>
+		</if>
+		<if test="sort == null and order == null">
+			order by t.entity_id desc
+		</if>
+	</sql>
+
+	<!-- 分页以及条件查询 -->
+	<select id="queryByPage" resultMap="BaseResultMap">
+		select * from
+		(
+		select S.*,ROWNUM RN from (
+		<include refid="baseSql" />
+		<include refid="sql_where" />
+		<include refid="order_sql" />
+		) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+
+	<!-- 数量 -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) FROM CAL_PRODUCT_ENTITY_OTHER T ,CAL_PRODUCT_ENTITY P
+		, SYS_USER U
+		where t.PARENT_ID = p.entity_id and p.user_id = u.user_id
+		<include refid="sql_where" />
+	</select>
+
+	<!-- 根据父id查找 -->
+	<select id="findByParentId" parameterType="java.lang.Long"
+		resultMap="BaseResultMap">
+		SELECT * FROM CAL_PRODUCT_ENTITY_OTHER T WHERE T.PARENT_ID =
+		#{parentId}
+	</select>
+
+	<!-- 导出查询 -->
+	<select id="findByUserId" resultMap="BaseResultMap">
+		<include refid="baseSql" />
+		<if test="userId != -1">
+			and p.user_id = #{userId}
+		</if>
+		order by t.entity_id desc
+	</select>
+
+	<select id="findCountByParent" parameterType="java.lang.Long"
+		resultType="java.lang.Integer">
+		select count(1) from CAL_PRODUCT_ENTITY_OTHER where
+		t.parent_id = #{parentId}
+	</select>
+
+	<insert id="add" parameterType="com.it.ocs.cal.model.ProductOtherModel">
+		insert into CAL_PRODUCT_ENTITY_OTHER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			ENTITY_ID,
+
+			<if test="parentId != null">
+				PARENT_ID,
+			</if>
+			<if test="countryId != null">
+				COUNTRY_ID,
+			</if>
+			<if test="category != null">
+				CATEGORY,
+			</if>
+			<if test="turnoverRate != null">
+				TURNOVER_RATE,
+			</if>
+			<if test="qtyOrdered != null">
+				QTY_ORDERED,
+			</if>
+			<if test="averageMonth != null">
+				AVERAGE_MONTH,
+			</if>
+			<if test="unfulliableRate != null">
+				UNFULLIABLE_RATE,
+			</if>
+			<if test="replacementRate != null">
+				REPLACEMENT_RATE,
+			</if>
+			<if test="clearPrice != null">
+				CLEAR_PRICE,
+			</if>
+			<if test="amzFba != null">
+				AMZ_FBA,
+			</if>
+			<if test="efnFee != null">
+				EFN_FEE,
+			</if>
+			<if test="dutyRate != null">
+				DUTY_RATE,
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT,
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			CAL_PRODUCT_OTHER_SEQ.NEXTVAL,
+
+			<if test="parentId != null">
+				#{parentId,jdbcType=DECIMAL},
+			</if>
+
+			<if test="countryId != null">
+				#{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="category != null">
+				#{category,jdbcType=VARCHAR},
+			</if>
+			<if test="turnoverRate != null">
+				#{turnoverRate,jdbcType=DECIMAL},
+			</if>
+			<if test="qtyOrdered != null">
+				#{qtyOrdered,jdbcType=DECIMAL},
+			</if>
+			<if test="averageMonth != null">
+				#{averageMonth,jdbcType=DECIMAL},
+			</if>
+			<if test="unfulliableRate != null">
+				#{unfulliableRate,jdbcType=DECIMAL},
+			</if>
+			<if test="replacementRate != null">
+				#{replacementRate,jdbcType=DECIMAL},
+			</if>
+			<if test="clearPrice != null">
+				#{clearPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="amzFba != null">
+				#{amzFba,jdbcType=DECIMAL},
+			</if>
+			<if test="efnFee != null">
+				#{efnFee,jdbcType=DECIMAL},
+			</if>
+			<if test="dutyRate != null">
+				#{dutyRate,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				#{createdAt},
+			</if>
+			<if test="updatedAt != null">
+				#{updatedAt},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="com.it.ocs.cal.model.ProductOtherModel">
+		update CAL_PRODUCT_ENTITY_OTHER
+		<set>
+			<if test="parentId != null">
+				PARENT_ID = #{parentId,jdbcType=DECIMAL},
+			</if>
+			<if test="countryId != null">
+				COUNTRY_ID = #{countryId,jdbcType=VARCHAR},
+			</if>
+			<if test="category != null">
+				CATEGORY = #{category,jdbcType=VARCHAR},
+			</if>
+			<if test="turnoverRate != null">
+				TURNOVER_RATE = #{turnoverRate,jdbcType=DECIMAL},
+			</if>
+			<if test="qtyOrdered != null">
+				QTY_ORDERED = #{qtyOrdered,jdbcType=DECIMAL},
+			</if>
+			<if test="averageMonth != null">
+				AVERAGE_MONTH = #{averageMonth,jdbcType=DECIMAL},
+			</if>
+			<if test="unfulliableRate != null">
+				UNFULLIABLE_RATE = #{unfulliableRate,jdbcType=DECIMAL},
+			</if>
+			<if test="replacementRate != null">
+				REPLACEMENT_RATE = #{replacementRate,jdbcType=DECIMAL},
+			</if>
+			<if test="clearPrice != null">
+				CLEAR_PRICE = #{clearPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="amzFba != null">
+				AMZ_FBA = #{amzFba,jdbcType=DECIMAL},
+			</if>
+			<if test="efnFee != null">
+				EFN_FEE = #{efnFee,jdbcType=DECIMAL},
+			</if>
+			<if test="dutyRate != null">
+				DUTY_RATE = #{dutyRate,jdbcType=DECIMAL},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt},
+			</if>
+		</set>
+		where entity_id = #{entityId}
+	</update>
+
+
+	<!-- 批量插入 -->
+	<insert id="addAll" parameterType="java.util.List">
+		insert into CAL_PRODUCT_ENTITY_OTHER
+		(ENTITY_ID,
+		PARENT_ID,
+		COUNTRY_ID,
+		CATEGORY,
+		TURNOVER_RATE,
+		QTY_ORDERED,
+		AVERAGE_MONTH,
+		UNFULLIABLE_RATE,
+		REPLACEMENT_RATE,
+		CLEAR_PRICE,
+		AMZ_FBA,
+		EFN_FEE,
+		DUTY_RATE,
+		CREATED_AT,
+		UPDATED_AT)
+		select
+		CAL_PRODUCT_OTHER_SEQ.NEXTVAL,CAL_PRODUCT_ENTITY_SEQ.CURRVAL,c.* from(
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			select
+			#{item.countryId,jdbcType=VARCHAR},
+			#{item.category,jdbcType=VARCHAR},
+			#{item.turnoverRate,jdbcType=DECIMAL},
+			#{item.qtyOrdered,jdbcType=DECIMAL},
+			#{item.averageMonth,jdbcType=DECIMAL},
+			#{item.unfulliableRate,jdbcType=DECIMAL},
+			#{item.replacementRate,jdbcType=DECIMAL},
+			#{item.clearPrice,jdbcType=DECIMAL},
+			#{item.amzFba,jdbcType=DECIMAL},
+			#{item.efnFee,jdbcType=DECIMAL},
+			#{item.dutyRate,jdbcType=DECIMAL},
+			#{item.createdAt,jdbcType=TIMESTAMP},
+			#{item.updatedAt,jdbcType=TIMESTAMP}
+			from dual
+		</foreach>
+		) c
+	</insert>
+</mapper>

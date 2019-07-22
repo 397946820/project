@@ -1,0 +1,2157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.publication.dao.IPublicationInfoDAO">
+	<resultMap type="com.it.ocs.publication.model.PublicationModel" id="pubResult">
+		<id property="id" column="TEMPLATE_ID" jdbcType="DECIMAL" />
+		<result property="name" column="TEMPLATE_NAME" jdbcType="VARCHAR" />
+		<result property="ebayAccount" column="EBAY_ACCOUNT" jdbcType="VARCHAR" />
+		<result property="siteId" column="SITE_ID" jdbcType="DECIMAL" />
+		<result property="itemId" column="ITEM_ID" jdbcType="DECIMAL" />
+		<result property="publicationType" column="PUBLICATION_TYPE" jdbcType="VARCHAR" />
+		<result property="sku" column="SKU" jdbcType="VARCHAR" />
+		<result property="productAddress" column="PRODUCT_ADDRESS" jdbcType="VARCHAR" />
+		<result property="productTitle" column="PRODUCT_TITLE" jdbcType="VARCHAR" />
+		<result property="productCount" column="PRODUCT_COUNT" />
+		
+		<result property="bundledProduct" column="BUNDLED_PRODUCT" jdbcType="VARCHAR" />
+		<result property="productFirstCategoryId" column="PRODUCT_FIRST_CATEGORY_ID" jdbcType="VARCHAR" />
+		<result property="productSecondCategoryId" column="PRODUCT_SECOND_CATEGORY_ID" jdbcType="VARCHAR" />
+		<result property="storeFirstCategoryId" column="STORE_FIRST_CATEGORY_ID" jdbcType="VARCHAR" />
+		<result property="storeSecondCategoryId" column="STORE_SECOND_CATEGORY_ID" jdbcType="VARCHAR" />
+		<result property="productProperties" column="PRODUCT_PROPERTIES" jdbcType="VARCHAR" />
+		<result property="enabledFlag" column="ENABLED_FLAG" jdbcType="VARCHAR" />
+		<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+		<result property="creationDate" column="CREATION_DATE" jdbcType="TIMESTAMP" />
+		<result property="lastUpdateBy" column="LAST_UPDATE_BY" jdbcType="DECIMAL" />
+		<result property="lastUpdationDate" column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" />
+		<result property="productCount" column="PRODUCT_COUNT" jdbcType="VARCHAR"/>
+		<result column="TIMING_PUBLICATION_DATE" property="timing_publication_date"  />
+		<result column="END_PUBLICATION_DATE" property="end_publication_date"  />
+		<result column="AUTO_PAY" property="autoPay"  />
+		<result column="DAY_NUMBER" property="day_number"  />
+		<result column="OF_NUMBER" property="of_number"  />
+		<result column="IS_PLAN" property="is_plan"  />
+		<result column="ADVERT_ID" property="advert_id"  />
+		<result column="EBAY_PRODUCT_URL" property="ebayProductURL"  />
+		<result column="CORRELATION_ID" property="correlation_id"  />
+		<result column="HIT_COUNT" property="hit_count"/>
+	</resultMap>
+	<resultMap type="com.it.ocs.publication.model.EBayTimingPlanModel" id="ppResult">
+		<result column="ID" property="id"  />
+		<result column="TEMPLATE_ID" property="template_id"  />
+		<result column="TEMPLATE_NAME" property="template_name"  />
+		<result column="SITE_ID" property="site_id"  />
+		<result column="FIRST_DATE" property="first_date"  />
+		<result column="FIRST_SITE_DATE" property="first_site_date"  />
+		<result column="CREATE_BY" property="create_by"  />
+	</resultMap>
+	
+	<select id="selectLineExist" resultMap="pubResult">
+	select pi.TEMPLATE_ID
+	  from EBAY_PUBLICATION_LINE pi
+	 where pi.END_PUBLICATION_DATE > sysdate
+	   and pi.EBAY_ACCOUNT = #{ebayAccount,jdbcType=VARCHAR}
+	   and pi.PRODUCT_TITLE = #{productTitle,jdbcType=VARCHAR}
+	   and pi.SKU = #{sku,jdbcType=VARCHAR}
+	</select>
+	<select id="selectPlanPublicationModes" resultMap="ppResult">
+	   select ID,TEMPLATE_ID,FIRST_DATE from ebay_timing_Plan_info
+	</select>
+	
+	<select id="selectPublicateByPlans" resultMap="pubResult" parameterType="java.util.List">
+		select TEMPLATE_ID,ITEM_ID from EBAY_PUBLICATION_INFO 
+		where TEMPLATE_ID IN
+		 <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">  
+        	#{item.template_id,jdbcType=BIGINT} 
+        </foreach> 
+	</select>
+	<select id="getBestOfferTotal" resultType="java.lang.Integer">
+		select count(1) from EBAY_PUBLICATION_INFO  epi
+				where epi.accept_buyer_counter='true' and epi.item_id is not null  and epi.end_publication_date>sysdate 
+	</select>
+	<select id="selectBestOfferItems" resultMap="pubResult">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+		        select epi.PRODUCT_TITLE,epi.ITEM_ID,epi.SKU,epi.SITE_ID,epi.END_PUBLICATION_DATE,epi.TEMPLATE_ID from EBAY_PUBLICATION_INFO  epi 
+		        where epi.accept_buyer_counter='true' and epi.item_id is not null  and epi.end_publication_date>sysdate
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+	</select>
+	<select id="selectPuiItemIdByCounter" resultMap="pubResult">
+		select epi.ITEM_ID,epi.EBAY_ACCOUNT from ebay_publication_line epi where 
+		epi.accept_buyer_counter='true'  and epi.end_publication_date>sysdate  and epi.ENDING_STATE='N'
+		<if test="sellerId!=null and sellerId!=''">
+		   and EBAY_ACCOUNT=#{sellerId}
+		</if>
+	</select>
+	<select id="selectPubById" resultMap="pubResult">
+		select TEMPLATE_ID id, 
+			   PRODUCT_TITLE productTitle,
+			   EBAY_PRODUCT_URL ebayProductURL,
+			   site_id siteId,
+			   template_name name
+		from ebay_publication_info epi 
+		where epi.TEMPLATE_ID=#{id,jdbcType=BIGINT}
+	</select>
+	<select id="count" resultType="java.lang.Integer">
+		select count(1) from EBAY_PUBLICATION_INFO where ENABLED_FLAG='Y'
+	</select>
+	<select id="getId" resultType="java.lang.Long">
+		select EBAY_PUBLICATION_line_Seq.Nextval from dual
+	</select>
+	<select id="getLineId" resultType="java.lang.Long">
+		select EBAY_PUBLICATION_line_Seq.Nextval from dual
+	</select>
+	<select id="getById" resultType="com.it.ocs.publication.model.PublicationModel">
+		select  <include refid="query_all_column" /> from ebay_publication_info where TEMPLATE_ID=#{id}
+	</select>
+	<select id="selectOnlineDate" resultType="com.it.ocs.publication.model.PublicationModel">
+		 select   
+           oa.itemid       itemId,
+           oa.ebay_xml		comments
+      from ebay_online_data oa
+     where  exists(select item_id from ebay_publication_info_1 p where p.item_id = oa.itemid)
+	</select>
+	<update id="updatePublicationDate">
+		update ebay_publication_info_1 set PUBLICATION_DATE=#{publication_date},
+		TIMING_PUBLICATION_DATE=#{publication_date},
+		END_PUBLICATION_DATE =#{end_publication_date}
+		where item_id=#{itemId}
+	</update>
+	<select id="getLineById" resultType="com.it.ocs.publication.model.PublicationModel">
+	    select <include refid="query_all_line_column"/> from ebay_publication_line where TEMPLATE_ID=#{id}
+	</select>
+	<select id="queryByPage" resultType="com.it.ocs.publication.model.PublicationModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="select_base" />
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{starRow}
+		]]>
+		
+	</select>
+	<sql id="update_is_not_null">
+		<trim suffix=" " suffixOverrides="," >
+		<if test="is_plan!=null">
+		   IS_PLAN = #{is_plan,jdbcType=BIGINT},
+		</if>
+		<if test="is_plan!=null">
+		   DAY_NUMBER = #{day_number,jdbcType=BIGINT},
+		</if>
+		<if test="is_plan!=null">
+		   OF_NUMBER = #{of_number,jdbcType=BIGINT},
+		</if>
+         </trim>
+	</sql>
+	<sql id="select_base">
+		select 
+			TEMPLATE_ID id,
+			TEMPLATE_NAME  name,
+			EBAY_ACCOUNT ebayAccount,
+			SITE_ID siteId,
+			ITEM_ID itemId,
+			PUBLICATION_TYPE publicationType,
+			SKU sku,
+			PRODUCT_TITLE productTitle,
+			BUNDLED_PRODUCT bundledProduct,
+			PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+			PRODUCT_SECOND_CATEGORY_ID productSecondCategoryId,
+			STORE_FIRST_CATEGORY_ID storeFirstCategoryId,
+			STORE_SECOND_CATEGORY_ID storeSecondCategoryId,
+			PRODUCT_PROPERTIES productProperties,
+			PRODUCT_ADDRESS productAddress,
+			ENABLED_FLAG enabledFlag,
+			ADVERT_ID advert_id,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdationDate
+			from EBAY_PUBLICATION_INFO
+	</sql>
+	<sql id="query_all_column">
+		    TEMPLATE_ID id,
+			TEMPLATE_NAME templateName,
+			EBAY_ACCOUNT ebayAccount,
+			SITE_ID siteId,
+			PUBLICATION_TYPE publicationType,
+			SKU sku,
+			PRODUCT_TITLE productTitle,
+			BUNDLED_PRODUCT bundledProduct,
+			PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+			PRODUCT_SECOND_CATEGORY_ID productSecondCategoryId,
+			STORE_FIRST_CATEGORY_ID storeFirstCategoryId,
+			STORE_SECOND_CATEGORY_ID storeSecondCategoryId,
+			PRODUCT_PROPERTIES productProperties,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdateDate,
+			TOP_PROMOTION_TYPE topPromotionType,
+			FOOTER_PROMOTION_TYPE footerPromotionType,
+			IN_PROMOTION_TYPE inPromotionType,
+			COUNTER_TYPE counterType,
+			OPEN_PAGE_PROTECT openPageProtect,
+			TEMPLATE_TITLE templateTitle,
+			EBAY_IMAGES ebayImages,
+			TEMPLATE_IMAGES templateImages,
+			APP_COMMENT appComment,
+			COMMENTS comments,
+			DISCOUNT discount,
+			INDIVIDUAL individual,
+			PUBLICATION_DAYS publicationDays,
+			PRICE price,
+			RESERVER_PRICE reserverPrice,
+			BUYOUT_PRICE buyoutPrice,
+			AUCTION_ITEM auctionItem,
+			SECOND_TRADING secondTrading,
+			SECOND_TRADINFO secondTradinfo,
+			PAYPAI_ACCOUNT paypaiAccount,
+			SUPPORT_PAYPAI_INFO supportPaypaiInfo,
+			PAY_DESCRIPTION payDescription,
+			ALLOW_ALLBUYER allowAllbuyer,
+			OUT_SHIP_COUNTRY outShipCountry,
+			POLICY_TYPE policyType,
+			RETURN_DAYS returnDays,
+			ALLOW_DELAY allowDelay,
+			RETURN_TYPE returnType,
+			ADVERT_ID advert_id,
+			FARETAKEINHANDER faretakeinhander,
+			DEPRECIATION_RATE depreciationRate,
+			RETURN_DESCRIPTION returnDescription,
+			TRANS_CLAUSE_EXIS_PUB transClauseExisPub,
+			CAL_CULATEINFO calCulateinfo,
+			DOMESTIC_INFO domesticInfo,
+			INTERNATION_INFO internationInfo,
+			FEATURE_TYPE featureType,
+			TAG tag,
+			OTHER_DESCRIPTION otherDescription,
+			ONLINE_PUBCOUNT onlinePubcount,
+			SALES_TAX salesTax,
+			PRODUCT_ADDRESS productAddress,
+			REGION region,
+			POST_CODE postCode,
+			ITEM_ID itemId,
+			PRODUCT_SUBTILTE productSubtitle,
+			EBAY_PRODUCT_URL ebayProductURL,
+			NO_PAYPAL noPaypai,
+			BUYER_REQ_1 buyerReq1,
+			BUYER_REQ_2 buyerReq2,
+			BUYER_REQ_3 buyerReq3,
+			BUYER_REQ_4 buyerReq4,
+			BUYER_REQ_4_1 buyerReq41,
+			PRODUCT_EAN productEAN,
+			PRODUCT_ISBN productISBN,
+			PRODUCT_UPC productUPC,
+			ACCEPT_BUYER_COUNTER acceptBuyerCounter,
+			ACCEPT_BUYER_COUNTER_MIN acceptBuyerCounterMin,
+			ACCEPT_BUYER_COUNTER_MAX acceptBuyerCounterMax,
+			PRODUCT_COUNT productCount,
+			to_char(PRODUCT_QUANTITY_SOLD) productQuantitySold,
+			to_char(DOMESTIC_OPT_DAY) domesticOptDay,
+			SHIP_LOCATION_IN shipLocationIn,
+			SHIP_LOCATION_OVER shipLocationOver,
+			to_char(PRODUCT_STARTPRICE) productStartPrice,
+			PRODUCT_STATUS productStatus,
+			SELLER_BASE_COUNT sellerBaseCount,
+			SELLER_DESCRIPTION sellerDescription,
+			OLD_DESCRIPTION oldDescription,
+			variations variations,
+			AUTO_PAY autoPay,
+			PRODUCT_MPN product_mpn,
+			PRODUCT_BRAND product_brand,
+			PRODUCT_UST_IDNR product_ust,
+			COPY_NUMBER copy_number,
+			END_PUBLICATION_DATE end_publication_date,
+			correlation_id
+	</sql>
+	<sql id="query_all_line_column">
+		    TEMPLATE_ID id,
+			TEMPLATE_NAME templateName,
+			EBAY_ACCOUNT ebayAccount,
+			SITE_ID siteId,
+			PUBLICATION_TYPE publicationType,
+			SKU sku,
+			ENDING_STATE ending_state,
+			PRODUCT_TITLE productTitle,
+			BUNDLED_PRODUCT bundledProduct,
+			PRODUCT_FIRST_CATEGORY_ID productFirstCategoryId,
+			PRODUCT_SECOND_CATEGORY_ID productSecondCategoryId,
+			STORE_FIRST_CATEGORY_ID storeFirstCategoryId,
+			STORE_SECOND_CATEGORY_ID storeSecondCategoryId,
+			PRODUCT_PROPERTIES productProperties,
+			ENABLED_FLAG enabledFlag,
+			CREATE_BY createBy,
+			CREATION_DATE creationDate,
+			LAST_UPDATE_BY lastUpdateBy,
+			LAST_UPDATE_DATE lastUpdateDate,
+			TOP_PROMOTION_TYPE topPromotionType,
+			FOOTER_PROMOTION_TYPE footerPromotionType,
+			IN_PROMOTION_TYPE inPromotionType,
+			COUNTER_TYPE counterType,
+			OPEN_PAGE_PROTECT openPageProtect,
+			TEMPLATE_TITLE templateTitle,
+			EBAY_IMAGES ebayImages,
+			TEMPLATE_IMAGES templateImages,
+			APP_COMMENT appComment,
+			COMMENTS comments,
+			DISCOUNT discount,
+			INDIVIDUAL individual,
+			PUBLICATION_DAYS publicationDays,
+			PRICE price,
+			RESERVER_PRICE reserverPrice,
+			BUYOUT_PRICE buyoutPrice,
+			AUCTION_ITEM auctionItem,
+			SECOND_TRADING secondTrading,
+			SECOND_TRADINFO secondTradinfo,
+			PAYPAI_ACCOUNT paypaiAccount,
+			SUPPORT_PAYPAI_INFO supportPaypaiInfo,
+			PAY_DESCRIPTION payDescription,
+			ALLOW_ALLBUYER allowAllbuyer,
+			OUT_SHIP_COUNTRY outShipCountry,
+			POLICY_TYPE policyType,
+			RETURN_DAYS returnDays,
+			ALLOW_DELAY allowDelay,
+			RETURN_TYPE returnType,
+			ADVERT_ID advert_id,
+			FARETAKEINHANDER faretakeinhander,
+			DEPRECIATION_RATE depreciationRate,
+			RETURN_DESCRIPTION returnDescription,
+			TRANS_CLAUSE_EXIS_PUB transClauseExisPub,
+			CAL_CULATEINFO calCulateinfo,
+			DOMESTIC_INFO domesticInfo,
+			INTERNATION_INFO internationInfo,
+			FEATURE_TYPE featureType,
+			TAG tag,
+			OTHER_DESCRIPTION otherDescription,
+			ONLINE_PUBCOUNT onlinePubcount,
+			SALES_TAX salesTax,
+			PRODUCT_ADDRESS productAddress,
+			REGION region,
+			POST_CODE postCode,
+			ITEM_ID itemId,
+			PRODUCT_SUBTILTE productSubtitle,
+			EBAY_PRODUCT_URL ebayProductURL,
+			NO_PAYPAL noPaypai,
+			BUYER_REQ_1 buyerReq1,
+			BUYER_REQ_2 buyerReq2,
+			BUYER_REQ_3 buyerReq3,
+			BUYER_REQ_4 buyerReq4,
+			BUYER_REQ_4_1 buyerReq41,
+			PRODUCT_EAN productEAN,
+			PRODUCT_ISBN productISBN,
+			PRODUCT_UPC productUPC,
+			ACCEPT_BUYER_COUNTER acceptBuyerCounter,
+			ACCEPT_BUYER_COUNTER_MIN acceptBuyerCounterMin,
+			ACCEPT_BUYER_COUNTER_MAX acceptBuyerCounterMax,
+			PRODUCT_COUNT productCount,
+			to_char(PRODUCT_QUANTITY_SOLD) productQuantitySold,
+			to_char(DOMESTIC_OPT_DAY) domesticOptDay,
+			SHIP_LOCATION_IN shipLocationIn,
+			SHIP_LOCATION_OVER shipLocationOver,
+			to_char(PRODUCT_STARTPRICE) productStartPrice,
+			PRODUCT_STATUS productStatus,
+			SELLER_BASE_COUNT sellerBaseCount,
+			SELLER_DESCRIPTION sellerDescription,
+			OLD_DESCRIPTION oldDescription,
+			variations variations,
+			AUTO_PAY autoPay,
+			PRODUCT_MPN product_mpn,
+			PRODUCT_BRAND product_brand,
+			PRODUCT_UST_IDNR product_ust,
+			COPY_NUMBER copy_number,
+			END_PUBLICATION_DATE end_publication_date,
+			correlation_id
+	</sql>
+	<select id="query" resultMap="pubResult">
+		 <include refid="select_base" />
+	</select>
+	<update id="updateLineCorrelation">
+	 update ebay_publication_line set CORRELATION_ID=#{correlation_id,jdbcType=BIGINT} where  TEMPLATE_ID = #{id}
+	</update>
+	<insert id="addLine" parameterType="com.it.ocs.publication.model.PublicationModel">
+		insert into ebay_publication_line
+										  (TEMPLATE_ID,
+										   TEMPLATE_NAME,
+										   CORRELATION_ID,
+										   EBAY_ACCOUNT,
+										   SITE_ID,
+										   PUBLICATION_TYPE,
+										   SKU,
+										   PRODUCT_TITLE,
+										   BUNDLED_PRODUCT,
+										   PRODUCT_FIRST_CATEGORY_ID,
+										   PRODUCT_SECOND_CATEGORY_ID,
+										   STORE_FIRST_CATEGORY_ID,
+										   STORE_SECOND_CATEGORY_ID,
+										   PRODUCT_PROPERTIES,
+										   ENABLED_FLAG,
+										   CREATE_BY,
+										   CREATION_DATE,
+										   LAST_UPDATE_BY,
+										   LAST_UPDATE_DATE,
+										   TOP_PROMOTION_TYPE,
+										   FOOTER_PROMOTION_TYPE,
+										   IN_PROMOTION_TYPE,
+										   COUNTER_TYPE,
+										   OPEN_PAGE_PROTECT,
+										   TEMPLATE_TITLE,
+										   EBAY_IMAGES,
+										   TEMPLATE_IMAGES,
+										   APP_COMMENT,
+										   DISCOUNT,
+										   INDIVIDUAL,
+										   PUBLICATION_DAYS,
+										   PRICE,
+										   RESERVER_PRICE,
+										   BUYOUT_PRICE,
+										   AUCTION_ITEM,
+										   SECOND_TRADING,
+										   SECOND_TRADINFO,
+										   PAYPAI_ACCOUNT,
+										   SUPPORT_PAYPAI_INFO,
+										   PAY_DESCRIPTION,
+										   ALLOW_ALLBUYER,
+										   OUT_SHIP_COUNTRY,
+										   POLICY_TYPE,
+										   RETURN_DAYS,
+										   ALLOW_DELAY,
+										   RETURN_TYPE,
+										   FARETAKEINHANDER,
+										   DEPRECIATION_RATE,
+										   RETURN_DESCRIPTION,
+										   TRANS_CLAUSE_EXIS_PUB,
+										   CAL_CULATEINFO,
+										   DOMESTIC_INFO,
+										   INTERNATION_INFO,
+										   FEATURE_TYPE,
+										   TAG,
+										   OTHER_DESCRIPTION,
+										   ONLINE_PUBCOUNT,
+										   SALES_TAX,
+										   PRODUCT_ADDRESS,
+										   REGION,
+										   POST_CODE,
+										   PRODUCT_SUBTILTE,
+										   NO_PAYPAL,
+										   BUYER_REQ_1,
+										   BUYER_REQ_2,
+										   BUYER_REQ_3,
+										   BUYER_REQ_4,
+										   BUYER_REQ_4_1,
+										   PRODUCT_EAN,
+										   PRODUCT_ISBN,
+										   PRODUCT_UPC,
+										   ACCEPT_BUYER_COUNTER,
+										   ACCEPT_BUYER_COUNTER_MIN,
+										   ACCEPT_BUYER_COUNTER_MAX,
+										   PRODUCT_COUNT,
+										   PRODUCT_QUANTITY_SOLD,
+										   DOMESTIC_OPT_DAY,
+										   SHIP_LOCATION_IN,
+										   SHIP_LOCATION_OVER,
+										   PRODUCT_STARTPRICE,
+										   PRODUCT_STATUS,
+										   SELLER_BASE_COUNT,
+										   SELLER_DESCRIPTION,
+										   variations,
+										   AUTO_PAY,
+										   PRODUCT_MPN,
+										   PRODUCT_BRAND,
+										   PRODUCT_UST_IDNR,
+										   QUANTITY_AVAILABLE,
+										   EBAY_PRODUCT_URL,
+										   ITEM_ID,
+										   ADVERT_ID ,
+										   END_PUBLICATION_DATE,
+										   PUBLICATION_DATE,
+										   TIMING_PUBLICATION_DATE
+										   )
+										values(
+										#{id,jdbcType=BIGINT},
+										#{templateName,jdbcType=VARCHAR},
+										#{correlation_id,jdbcType=BIGINT},
+										#{ebayAccount,jdbcType=VARCHAR},
+										#{siteId,jdbcType=BIGINT},
+										#{publicationType,jdbcType=VARCHAR},
+										#{sku,jdbcType=VARCHAR},
+										#{productTitle,jdbcType=VARCHAR},
+										#{bundledProduct,jdbcType=VARCHAR},
+										#{productFirstCategoryId,jdbcType=BIGINT},
+										#{productSecondCategoryId,jdbcType=BIGINT},
+										#{storeFirstCategoryId,jdbcType=BIGINT},
+										#{storeSecondCategoryId,jdbcType=BIGINT},
+										#{productProperties,jdbcType=VARCHAR},
+										#{enabledFlag,jdbcType=VARCHAR},
+										#{createBy,jdbcType=BIGINT},
+										sysdate,
+										#{lastUpdateBy,jdbcType=BIGINT},
+										sysdate,
+										#{topPromotionType,jdbcType=VARCHAR},
+										#{footerPromotionType,jdbcType=VARCHAR},
+										#{inPromotionType,jdbcType=VARCHAR},
+										#{counterType,jdbcType=VARCHAR},
+										#{openPageProtect,jdbcType=VARCHAR},
+										#{templateTitle,jdbcType=VARCHAR},
+										#{ebayImages,jdbcType=VARCHAR},
+										#{templateImages,jdbcType=VARCHAR},
+										#{appComment,jdbcType=VARCHAR},
+										#{discount,jdbcType=VARCHAR},
+										#{individual,jdbcType=VARCHAR},
+										#{publicationDays,jdbcType=VARCHAR},
+										#{price,jdbcType=VARCHAR},
+										#{reserverPrice,jdbcType=VARCHAR},
+										#{buyoutPrice,jdbcType=VARCHAR},
+										#{auctionItem,jdbcType=VARCHAR},
+										#{secondTrading,jdbcType=VARCHAR},
+										#{secondTradinfo,jdbcType=VARCHAR},
+										#{paypaiAccount,jdbcType=VARCHAR},
+										#{supportPaypaiInfo,jdbcType=VARCHAR},
+										#{payDescription,jdbcType=VARCHAR},
+										#{allowAllbuyer,jdbcType=VARCHAR},
+										#{outShipCountry,jdbcType=VARCHAR},
+										#{policyType,jdbcType=VARCHAR},
+										#{returnDays,jdbcType=VARCHAR},
+										#{allowDelay,jdbcType=VARCHAR},
+										#{returnType,jdbcType=VARCHAR},
+										#{faretakeinhander,jdbcType=VARCHAR},
+										#{depreciationRate,jdbcType=VARCHAR},
+										#{returnDescription,jdbcType=VARCHAR},
+										#{transClauseExisPub,jdbcType=VARCHAR},
+										#{calCulateinfo,jdbcType=VARCHAR},
+										#{domesticInfo,jdbcType=VARCHAR},
+										#{internationInfo,jdbcType=VARCHAR},
+										#{featureType,jdbcType=VARCHAR},
+										#{tag,jdbcType=VARCHAR},
+										#{otherDescription,jdbcType=VARCHAR},
+										#{onlinePubcount,jdbcType=VARCHAR},
+										#{salesTax,jdbcType=VARCHAR},
+										#{productAddress,jdbcType=VARCHAR},
+										#{region,jdbcType=VARCHAR},
+										#{postCode,jdbcType=VARCHAR},
+										#{productSubtitle,jdbcType=VARCHAR},
+										#{noPaypai,jdbcType=VARCHAR},
+										#{buyerReq1,jdbcType=VARCHAR},
+										#{buyerReq2,jdbcType=VARCHAR},
+										#{buyerReq3,jdbcType=VARCHAR},
+										#{buyerReq4,jdbcType=VARCHAR},
+										#{buyerReq41,jdbcType=VARCHAR},
+										#{productEAN,jdbcType=VARCHAR},
+										#{productISBN,jdbcType=VARCHAR},
+										#{productUPC,jdbcType=VARCHAR},
+										#{acceptBuyerCounter,jdbcType=VARCHAR},
+										#{acceptBuyerCounterMin,jdbcType=BIGINT},
+										#{acceptBuyerCounterMax,jdbcType=BIGINT},
+										#{productCount,jdbcType=BIGINT},
+										#{productQuantitySold,jdbcType=BIGINT},
+										#{domesticOptDay,jdbcType=BIGINT},
+										#{shipLocationIn,jdbcType=VARCHAR},
+										#{shipLocationOver,jdbcType=VARCHAR},
+										#{productStartPrice,jdbcType=BIGINT},
+										#{productStatus,jdbcType=BIGINT},
+										#{sellerBaseCount,jdbcType=BIGINT},
+										#{sellerDescription,jdbcType=VARCHAR},
+										#{variations,jdbcType=VARCHAR},
+										#{autoPay,jdbcType=VARCHAR},
+										#{product_mpn,jdbcType=VARCHAR},
+										#{product_brand,jdbcType=VARCHAR},
+										#{product_ust,jdbcType=VARCHAR},
+										#{productCount,jdbcType=BIGINT},
+										#{ebayProductURL,jdbcType=VARCHAR},
+										#{itemId,jdbcType=VARCHAR},
+										#{advert_id,jdbcType=BIGINT},
+										#{end_publication_date,jdbcType=TIMESTAMP},
+										#{publication_date,jdbcType=TIMESTAMP},
+										<choose>
+						                <when test="timing_publication_date != null">
+						                       #{timing_publication_date,jdbcType=TIMESTAMP}
+						                </when>
+						                <otherwise>
+						                       #{publication_date,jdbcType=TIMESTAMP}
+						                       
+						                </otherwise>
+						          		 </choose>
+										)
+	</insert>
+	<update id="updatePublicationInfo" parameterType="com.it.ocs.publication.model.PublicationModel">
+		update ebay_publication_info set COMMENTS=#{comments,jdbcType=VARCHAR}  where TEMPLATE_ID=#{id,jdbcType=BIGINT}
+	</update>
+	<insert id="add" parameterType="com.it.ocs.publication.model.PublicationModel">
+		insert into ebay_publication_info
+										  (TEMPLATE_ID,
+										   TEMPLATE_NAME,
+										   CORRELATION_ID,
+										   EBAY_ACCOUNT,
+										   SITE_ID,
+										   PUBLICATION_TYPE,
+										   SKU,
+										   PRODUCT_TITLE,
+										   BUNDLED_PRODUCT,
+										   PRODUCT_FIRST_CATEGORY_ID,
+										   PRODUCT_SECOND_CATEGORY_ID,
+										   STORE_FIRST_CATEGORY_ID,
+										   STORE_SECOND_CATEGORY_ID,
+										   PRODUCT_PROPERTIES,
+										   ENABLED_FLAG,
+										   CREATE_BY,
+										   CREATION_DATE,
+										   LAST_UPDATE_BY,
+										   LAST_UPDATE_DATE,
+										   TOP_PROMOTION_TYPE,
+										   FOOTER_PROMOTION_TYPE,
+										   IN_PROMOTION_TYPE,
+										   COUNTER_TYPE,
+										   OPEN_PAGE_PROTECT,
+										   TEMPLATE_TITLE,
+										   EBAY_IMAGES,
+										   TEMPLATE_IMAGES,
+										   APP_COMMENT,
+										   DISCOUNT,
+										   INDIVIDUAL,
+										   PUBLICATION_DAYS,
+										   PRICE,
+										   RESERVER_PRICE,
+										   BUYOUT_PRICE,
+										   AUCTION_ITEM,
+										   SECOND_TRADING,
+										   SECOND_TRADINFO,
+										   PAYPAI_ACCOUNT,
+										   SUPPORT_PAYPAI_INFO,
+										   PAY_DESCRIPTION,
+										   ALLOW_ALLBUYER,
+										   OUT_SHIP_COUNTRY,
+										   POLICY_TYPE,
+										   RETURN_DAYS,
+										   ALLOW_DELAY,
+										   RETURN_TYPE,
+										   FARETAKEINHANDER,
+										   DEPRECIATION_RATE,
+										   RETURN_DESCRIPTION,
+										   TRANS_CLAUSE_EXIS_PUB,
+										   CAL_CULATEINFO,
+										   DOMESTIC_INFO,
+										   INTERNATION_INFO,
+										   FEATURE_TYPE,
+										   TAG,
+										   OTHER_DESCRIPTION,
+										   ONLINE_PUBCOUNT,
+										   SALES_TAX,
+										   PRODUCT_ADDRESS,
+										   REGION,
+										   POST_CODE,
+										   PRODUCT_SUBTILTE,
+										   NO_PAYPAL,
+										   BUYER_REQ_1,
+										   BUYER_REQ_2,
+										   BUYER_REQ_3,
+										   BUYER_REQ_4,
+										   BUYER_REQ_4_1,
+										   PRODUCT_EAN,
+										   PRODUCT_ISBN,
+										   PRODUCT_UPC,
+										   ACCEPT_BUYER_COUNTER,
+										   ACCEPT_BUYER_COUNTER_MIN,
+										   ACCEPT_BUYER_COUNTER_MAX,
+										   PRODUCT_COUNT,
+										   PRODUCT_QUANTITY_SOLD,
+										   DOMESTIC_OPT_DAY,
+										   SHIP_LOCATION_IN,
+										   SHIP_LOCATION_OVER,
+										   PRODUCT_STARTPRICE,
+										   PRODUCT_STATUS,
+										   SELLER_BASE_COUNT,
+										   SELLER_DESCRIPTION,
+										   variations,
+										   AUTO_PAY,
+										   PRODUCT_MPN,
+										   PRODUCT_BRAND,
+										   PRODUCT_UST_IDNR,
+										   QUANTITY_AVAILABLE,
+										   EBAY_PRODUCT_URL,
+										   ITEM_ID,
+										   ADVERT_ID ,
+										   END_PUBLICATION_DATE,
+										   PUBLICATION_DATE,
+										   TIMING_PUBLICATION_DATE
+										   )
+										values(
+										#{id,jdbcType=BIGINT},
+										#{templateName,jdbcType=VARCHAR},
+										#{correlation_id,jdbcType=BIGINT},
+										#{ebayAccount,jdbcType=VARCHAR},
+										#{siteId,jdbcType=BIGINT},
+										#{publicationType,jdbcType=VARCHAR},
+										#{sku,jdbcType=VARCHAR},
+										#{productTitle,jdbcType=VARCHAR},
+										#{bundledProduct,jdbcType=VARCHAR},
+										#{productFirstCategoryId,jdbcType=BIGINT},
+										#{productSecondCategoryId,jdbcType=BIGINT},
+										#{storeFirstCategoryId,jdbcType=BIGINT},
+										#{storeSecondCategoryId,jdbcType=BIGINT},
+										#{productProperties,jdbcType=VARCHAR},
+										#{enabledFlag,jdbcType=VARCHAR},
+										#{createBy,jdbcType=BIGINT},
+										sysdate,
+										#{lastUpdateBy,jdbcType=BIGINT},
+										sysdate,
+										#{topPromotionType,jdbcType=VARCHAR},
+										#{footerPromotionType,jdbcType=VARCHAR},
+										#{inPromotionType,jdbcType=VARCHAR},
+										#{counterType,jdbcType=VARCHAR},
+										#{openPageProtect,jdbcType=VARCHAR},
+										#{templateTitle,jdbcType=VARCHAR},
+										#{ebayImages,jdbcType=VARCHAR},
+										#{templateImages,jdbcType=VARCHAR},
+										#{appComment,jdbcType=VARCHAR},
+										#{discount,jdbcType=VARCHAR},
+										#{individual,jdbcType=VARCHAR},
+										#{publicationDays,jdbcType=VARCHAR},
+										#{price,jdbcType=VARCHAR},
+										#{reserverPrice,jdbcType=VARCHAR},
+										#{buyoutPrice,jdbcType=VARCHAR},
+										#{auctionItem,jdbcType=VARCHAR},
+										#{secondTrading,jdbcType=VARCHAR},
+										#{secondTradinfo,jdbcType=VARCHAR},
+										#{paypaiAccount,jdbcType=VARCHAR},
+										#{supportPaypaiInfo,jdbcType=VARCHAR},
+										#{payDescription,jdbcType=VARCHAR},
+										#{allowAllbuyer,jdbcType=VARCHAR},
+										#{outShipCountry,jdbcType=VARCHAR},
+										#{policyType,jdbcType=VARCHAR},
+										#{returnDays,jdbcType=VARCHAR},
+										#{allowDelay,jdbcType=VARCHAR},
+										#{returnType,jdbcType=VARCHAR},
+										#{faretakeinhander,jdbcType=VARCHAR},
+										#{depreciationRate,jdbcType=VARCHAR},
+										#{returnDescription,jdbcType=VARCHAR},
+										#{transClauseExisPub,jdbcType=VARCHAR},
+										#{calCulateinfo,jdbcType=VARCHAR},
+										#{domesticInfo,jdbcType=VARCHAR},
+										#{internationInfo,jdbcType=VARCHAR},
+										#{featureType,jdbcType=VARCHAR},
+										#{tag,jdbcType=VARCHAR},
+										#{otherDescription,jdbcType=VARCHAR},
+										#{onlinePubcount,jdbcType=VARCHAR},
+										#{salesTax,jdbcType=VARCHAR},
+										#{productAddress,jdbcType=VARCHAR},
+										#{region,jdbcType=VARCHAR},
+										#{postCode,jdbcType=VARCHAR},
+										#{productSubtitle,jdbcType=VARCHAR},
+										#{noPaypai,jdbcType=VARCHAR},
+										#{buyerReq1,jdbcType=VARCHAR},
+										#{buyerReq2,jdbcType=VARCHAR},
+										#{buyerReq3,jdbcType=VARCHAR},
+										#{buyerReq4,jdbcType=VARCHAR},
+										#{buyerReq41,jdbcType=VARCHAR},
+										#{productEAN,jdbcType=VARCHAR},
+										#{productISBN,jdbcType=VARCHAR},
+										#{productUPC,jdbcType=VARCHAR},
+										#{acceptBuyerCounter,jdbcType=VARCHAR},
+										#{acceptBuyerCounterMin,jdbcType=BIGINT},
+										#{acceptBuyerCounterMax,jdbcType=BIGINT},
+										#{productCount,jdbcType=BIGINT},
+										#{productQuantitySold,jdbcType=BIGINT},
+										#{domesticOptDay,jdbcType=BIGINT},
+										#{shipLocationIn,jdbcType=VARCHAR},
+										#{shipLocationOver,jdbcType=VARCHAR},
+										#{productStartPrice,jdbcType=BIGINT},
+										#{productStatus,jdbcType=BIGINT},
+										#{sellerBaseCount,jdbcType=BIGINT},
+										#{sellerDescription,jdbcType=VARCHAR},
+										#{variations,jdbcType=VARCHAR},
+										#{autoPay,jdbcType=VARCHAR},
+										#{product_mpn,jdbcType=VARCHAR},
+										#{product_brand,jdbcType=VARCHAR},
+										#{product_ust,jdbcType=VARCHAR},
+										#{productCount,jdbcType=BIGINT},
+										#{ebayProductURL,jdbcType=VARCHAR},
+										#{itemId,jdbcType=VARCHAR},
+										#{advert_id,jdbcType=BIGINT},
+										#{end_publication_date,jdbcType=TIMESTAMP},
+										#{publication_date,jdbcType=TIMESTAMP},
+										<choose>
+						                <when test="timing_publication_date != null">
+						                       #{timing_publication_date,jdbcType=TIMESTAMP}
+						                </when>
+						                <otherwise>
+						                       #{publication_date,jdbcType=TIMESTAMP}
+						                       
+						                </otherwise>
+						          		 </choose>
+										)
+
+	</insert>
+	<insert id="lineAdd" parameterType="com.it.ocs.publication.model.PublicationModel">
+
+		insert into ebay_publication_info
+										  (TEMPLATE_ID,
+										   TEMPLATE_NAME,
+										   CORRELATION_ID,
+										   EBAY_ACCOUNT,
+										   SITE_ID,
+										   PUBLICATION_TYPE,
+										   SKU,
+										   PRODUCT_TITLE,
+										   BUNDLED_PRODUCT,
+										   PRODUCT_FIRST_CATEGORY_ID,
+										   PRODUCT_SECOND_CATEGORY_ID,
+										   STORE_FIRST_CATEGORY_ID,
+										   STORE_SECOND_CATEGORY_ID,
+										   PRODUCT_PROPERTIES,
+										   ENABLED_FLAG,
+										   CREATE_BY,
+										   CREATION_DATE,
+										   LAST_UPDATE_BY,
+										   LAST_UPDATE_DATE,
+										   TOP_PROMOTION_TYPE,
+										   FOOTER_PROMOTION_TYPE,
+										   IN_PROMOTION_TYPE,
+										   COUNTER_TYPE,
+										   OPEN_PAGE_PROTECT,
+										   TEMPLATE_TITLE,
+										   EBAY_IMAGES,
+										   TEMPLATE_IMAGES,
+										   APP_COMMENT,
+										   DISCOUNT,
+										   INDIVIDUAL,
+										   PUBLICATION_DAYS,
+										   PRICE,
+										   RESERVER_PRICE,
+										   BUYOUT_PRICE,
+										   AUCTION_ITEM,
+										   SECOND_TRADING,
+										   SECOND_TRADINFO,
+										   PAYPAI_ACCOUNT,
+										   SUPPORT_PAYPAI_INFO,
+										   PAY_DESCRIPTION,
+										   ALLOW_ALLBUYER,
+										   OUT_SHIP_COUNTRY,
+										   POLICY_TYPE,
+										   RETURN_DAYS,
+										   ALLOW_DELAY,
+										   RETURN_TYPE,
+										   FARETAKEINHANDER,
+										   DEPRECIATION_RATE,
+										   RETURN_DESCRIPTION,
+										   TRANS_CLAUSE_EXIS_PUB,
+										   CAL_CULATEINFO,
+										   DOMESTIC_INFO,
+										   INTERNATION_INFO,
+										   FEATURE_TYPE,
+										   TAG,
+										   OTHER_DESCRIPTION,
+										   ONLINE_PUBCOUNT,
+										   SALES_TAX,
+										   PRODUCT_ADDRESS,
+										   REGION,
+										   POST_CODE,
+										   PRODUCT_SUBTILTE,
+										   NO_PAYPAL,
+										   BUYER_REQ_1,
+										   BUYER_REQ_2,
+										   BUYER_REQ_3,
+										   BUYER_REQ_4,
+										   BUYER_REQ_4_1,
+										   PRODUCT_EAN,
+										   PRODUCT_ISBN,
+										   PRODUCT_UPC,
+										   ACCEPT_BUYER_COUNTER,
+										   ACCEPT_BUYER_COUNTER_MIN,
+										   ACCEPT_BUYER_COUNTER_MAX,
+										   PRODUCT_COUNT,
+										   PRODUCT_QUANTITY_SOLD,
+										   DOMESTIC_OPT_DAY,
+										   SHIP_LOCATION_IN,
+										   SHIP_LOCATION_OVER,
+										   PRODUCT_STARTPRICE,
+										   PRODUCT_STATUS,
+										   SELLER_BASE_COUNT,
+										   SELLER_DESCRIPTION,
+										   variations,
+										   AUTO_PAY,
+										   PRODUCT_MPN,
+										   PRODUCT_BRAND,
+										   PRODUCT_UST_IDNR,
+										   QUANTITY_AVAILABLE,
+										   EBAY_PRODUCT_URL,
+										   ITEM_ID,
+										   ADVERT_ID ,
+										   CORRELATION_ID,
+										   END_PUBLICATION_DATE,
+										   PUBLICATION_DATE,
+										   TIMING_PUBLICATION_DATE
+										   
+										   )
+										values(
+										#{id,jdbcType=BIGINT},
+										#{templateName,jdbcType=VARCHAR},
+										#{correlation_id,jdbcType=BIGINT},
+										#{ebayAccount,jdbcType=VARCHAR},
+										#{siteId,jdbcType=BIGINT},
+										#{publicationType,jdbcType=VARCHAR},
+										#{sku,jdbcType=VARCHAR},
+										#{productTitle,jdbcType=VARCHAR},
+										#{bundledProduct,jdbcType=VARCHAR},
+										#{productFirstCategoryId,jdbcType=BIGINT},
+										#{productSecondCategoryId,jdbcType=BIGINT},
+										#{storeFirstCategoryId,jdbcType=BIGINT},
+										#{storeSecondCategoryId,jdbcType=BIGINT},
+										#{productProperties,jdbcType=VARCHAR},
+										#{enabledFlag,jdbcType=VARCHAR},
+										#{createBy,jdbcType=BIGINT},
+										sysdate,
+										#{lastUpdateBy,jdbcType=BIGINT},
+										sysdate,
+										#{topPromotionType,jdbcType=VARCHAR},
+										#{footerPromotionType,jdbcType=VARCHAR},
+										#{inPromotionType,jdbcType=VARCHAR},
+										#{counterType,jdbcType=VARCHAR},
+										#{openPageProtect,jdbcType=VARCHAR},
+										#{templateTitle,jdbcType=VARCHAR},
+										#{ebayImages,jdbcType=VARCHAR},
+										#{templateImages,jdbcType=VARCHAR},
+										#{appComment,jdbcType=VARCHAR},
+										#{discount,jdbcType=VARCHAR},
+										#{individual,jdbcType=VARCHAR},
+										#{publicationDays,jdbcType=VARCHAR},
+										#{price,jdbcType=VARCHAR},
+										#{reserverPrice,jdbcType=VARCHAR},
+										#{buyoutPrice,jdbcType=VARCHAR},
+										#{auctionItem,jdbcType=VARCHAR},
+										#{secondTrading,jdbcType=VARCHAR},
+										#{secondTradinfo,jdbcType=VARCHAR},
+										#{paypaiAccount,jdbcType=VARCHAR},
+										#{supportPaypaiInfo,jdbcType=VARCHAR},
+										#{payDescription,jdbcType=VARCHAR},
+										#{allowAllbuyer,jdbcType=VARCHAR},
+										#{outShipCountry,jdbcType=VARCHAR},
+										#{policyType,jdbcType=VARCHAR},
+										#{returnDays,jdbcType=VARCHAR},
+										#{allowDelay,jdbcType=VARCHAR},
+										#{returnType,jdbcType=VARCHAR},
+										#{faretakeinhander,jdbcType=VARCHAR},
+										#{depreciationRate,jdbcType=VARCHAR},
+										#{returnDescription,jdbcType=VARCHAR},
+										#{transClauseExisPub,jdbcType=VARCHAR},
+										#{calCulateinfo,jdbcType=VARCHAR},
+										#{domesticInfo,jdbcType=VARCHAR},
+										#{internationInfo,jdbcType=VARCHAR},
+										#{featureType,jdbcType=VARCHAR},
+										#{tag,jdbcType=VARCHAR},
+										#{otherDescription,jdbcType=VARCHAR},
+										#{onlinePubcount,jdbcType=VARCHAR},
+										#{salesTax,jdbcType=VARCHAR},
+										#{productAddress,jdbcType=VARCHAR},
+										#{region,jdbcType=VARCHAR},
+										#{postCode,jdbcType=VARCHAR},
+										#{productSubtitle,jdbcType=VARCHAR},
+										#{noPaypai,jdbcType=VARCHAR},
+										#{buyerReq1,jdbcType=VARCHAR},
+										#{buyerReq2,jdbcType=VARCHAR},
+										#{buyerReq3,jdbcType=VARCHAR},
+										#{buyerReq4,jdbcType=VARCHAR},
+										#{buyerReq41,jdbcType=VARCHAR},
+										#{productEAN,jdbcType=VARCHAR},
+										#{productISBN,jdbcType=VARCHAR},
+										#{productUPC,jdbcType=VARCHAR},
+										#{acceptBuyerCounter,jdbcType=VARCHAR},
+										#{acceptBuyerCounterMin,jdbcType=BIGINT},
+										#{acceptBuyerCounterMax,jdbcType=BIGINT},
+										#{productCount,jdbcType=BIGINT},
+										#{productQuantitySold,jdbcType=BIGINT},
+										#{domesticOptDay,jdbcType=BIGINT},
+										#{shipLocationIn,jdbcType=VARCHAR},
+										#{shipLocationOver,jdbcType=VARCHAR},
+										#{productStartPrice,jdbcType=BIGINT},
+										#{productStatus,jdbcType=BIGINT},
+										#{sellerBaseCount,jdbcType=BIGINT},
+										#{sellerDescription,jdbcType=VARCHAR},
+										#{variations,jdbcType=VARCHAR},
+										#{autoPay,jdbcType=VARCHAR},
+										#{product_mpn,jdbcType=VARCHAR},
+										#{product_brand,jdbcType=VARCHAR},
+										#{product_ust,jdbcType=VARCHAR},
+										#{productCount,jdbcType=BIGINT},
+										#{ebayProductURL,jdbcType=VARCHAR},
+										#{itemId,jdbcType=VARCHAR},
+										#{advert_id,jdbcType=BIGINT},
+										#{CORRELATION_ID,jdbcType=BIGINT},
+										#{end_publication_date,jdbcType=TIMESTAMP},
+										#{publication_date,jdbcType=TIMESTAMP},
+										<choose>
+						                <when test="timing_publication_date != null">
+						                       #{timing_publication_date,jdbcType=TIMESTAMP}
+						                </when>
+						                <otherwise>
+						                       #{publication_date,jdbcType=TIMESTAMP}
+						                       
+						                </otherwise>
+						          		 </choose>
+										)
+
+	</insert>
+	<update id="updatePublicateCopyNumber">
+		update ebay_publication_info set COPY_NUMBER=#{copy_number,jdbcType=BIGINT} where TEMPLATE_ID=#{id,jdbcType=BIGINT}
+	</update>
+	<update id="lineUpdate">
+		update ebay_publication_line set
+				TEMPLATE_NAME = #{templateName,jdbcType=VARCHAR},
+				EBAY_ACCOUNT = #{ebayAccount,jdbcType=VARCHAR},
+				SITE_ID = #{siteId,jdbcType=BIGINT},
+				SKU = #{sku,jdbcType=VARCHAR},
+				PRODUCT_TITLE = #{productTitle,jdbcType=VARCHAR},
+				PRODUCT_FIRST_CATEGORY_ID = #{productFirstCategoryId,jdbcType=BIGINT},
+				PRODUCT_SECOND_CATEGORY_ID = #{productSecondCategoryId,jdbcType=BIGINT},
+				STORE_FIRST_CATEGORY_ID = #{storeFirstCategoryId,jdbcType=BIGINT},
+				STORE_SECOND_CATEGORY_ID = #{storeSecondCategoryId,jdbcType=BIGINT},
+				PRODUCT_PROPERTIES = #{productProperties,jdbcType=VARCHAR},
+				LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=BIGINT},
+				LAST_UPDATE_DATE = #{lastUpdationDate,jdbcType=TIMESTAMP},
+				TOP_PROMOTION_TYPE = #{topPromotionType,jdbcType=VARCHAR},
+				FOOTER_PROMOTION_TYPE = #{footerPromotionType,jdbcType=VARCHAR},
+				IN_PROMOTION_TYPE = #{inPromotionType,jdbcType=VARCHAR},
+				COUNTER_TYPE = #{counterType,jdbcType=VARCHAR},
+				OPEN_PAGE_PROTECT = #{openPageProtect,jdbcType=VARCHAR},
+				TEMPLATE_TITLE = #{templateTitle,jdbcType=VARCHAR},
+				EBAY_IMAGES = #{ebayImages,jdbcType=VARCHAR},
+				TEMPLATE_IMAGES = #{templateImages,jdbcType=VARCHAR},
+				APP_COMMENT = #{appComment,jdbcType=VARCHAR},
+				
+				DISCOUNT = #{discount,jdbcType=VARCHAR},
+				INDIVIDUAL = #{individual,jdbcType=VARCHAR},
+				PUBLICATION_DAYS = #{publicationDays,jdbcType=VARCHAR},
+				PRICE = #{price,jdbcType=VARCHAR},
+				RESERVER_PRICE = #{reserverPrice,jdbcType=VARCHAR},
+				BUYOUT_PRICE = #{buyoutPrice,jdbcType=VARCHAR},
+				AUCTION_ITEM = #{auctionItem,jdbcType=VARCHAR},
+				SECOND_TRADING = #{secondTrading,jdbcType=VARCHAR},
+				SECOND_TRADINFO = #{secondTradinfo,jdbcType=VARCHAR},
+				PAYPAI_ACCOUNT = #{paypaiAccount,jdbcType=VARCHAR},
+				SUPPORT_PAYPAI_INFO = #{supportPaypaiInfo,jdbcType=VARCHAR},
+				PAY_DESCRIPTION = #{payDescription,jdbcType=VARCHAR},
+				ALLOW_ALLBUYER = #{allowAllbuyer,jdbcType=VARCHAR},
+				OUT_SHIP_COUNTRY = #{outShipCountry,jdbcType=VARCHAR},
+				POLICY_TYPE = #{policyType,jdbcType=VARCHAR},
+				RETURN_DAYS = #{returnDays,jdbcType=VARCHAR},
+				ALLOW_DELAY = #{allowDelay,jdbcType=VARCHAR},
+				RETURN_TYPE = #{returnType,jdbcType=VARCHAR},
+				FARETAKEINHANDER = #{faretakeinhander,jdbcType=VARCHAR},
+				DEPRECIATION_RATE = #{depreciationRate,jdbcType=VARCHAR},
+				RETURN_DESCRIPTION = #{returnDescription,jdbcType=VARCHAR},
+				TRANS_CLAUSE_EXIS_PUB = #{transClauseExisPub,jdbcType=VARCHAR},
+				CAL_CULATEINFO = #{calCulateinfo,jdbcType=VARCHAR},
+				DOMESTIC_INFO = #{domesticInfo,jdbcType=VARCHAR},
+				INTERNATION_INFO = #{internationInfo,jdbcType=VARCHAR},
+				FEATURE_TYPE = #{featureType,jdbcType=VARCHAR},
+				TAG = #{tag,jdbcType=VARCHAR},
+				OTHER_DESCRIPTION = #{otherDescription,jdbcType=VARCHAR},
+				ONLINE_PUBCOUNT = #{onlinePubcount,jdbcType=VARCHAR},
+				SALES_TAX = #{salesTax,jdbcType=VARCHAR},
+				PRODUCT_ADDRESS = #{productAddress,jdbcType=VARCHAR},
+				REGION = #{region,jdbcType=VARCHAR},
+				POST_CODE = #{postCode,jdbcType=VARCHAR},
+				<!-- ITEM_ID = #{itemId,jdbcType=BIGINT}, -->
+				PRODUCT_SUBTILTE = #{productSubtitle,jdbcType=VARCHAR},
+				NO_PAYPAL = #{noPaypai,jdbcType=VARCHAR},
+				BUYER_REQ_1 = #{buyerReq1,jdbcType=VARCHAR},
+				BUYER_REQ_2 = #{buyerReq2,jdbcType=VARCHAR},
+				BUYER_REQ_3 = #{buyerReq3,jdbcType=VARCHAR},
+				BUYER_REQ_4 = #{buyerReq4,jdbcType=VARCHAR},
+				BUYER_REQ_4_1 = #{buyerReq41,jdbcType=VARCHAR},
+				PRODUCT_EAN = #{productEAN,jdbcType=VARCHAR},
+				PRODUCT_ISBN = #{productISBN,jdbcType=VARCHAR},
+				PRODUCT_UPC = #{productUPC,jdbcType=VARCHAR},
+				ACCEPT_BUYER_COUNTER = #{acceptBuyerCounter,jdbcType=VARCHAR},
+				ACCEPT_BUYER_COUNTER_MIN = #{acceptBuyerCounterMin,jdbcType=BIGINT},
+				ACCEPT_BUYER_COUNTER_MAX = #{acceptBuyerCounterMax,jdbcType=BIGINT},
+				PRODUCT_COUNT = #{productCount,jdbcType=BIGINT},
+				PRODUCT_QUANTITY_SOLD = #{productQuantitySold,jdbcType=BIGINT},
+				DOMESTIC_OPT_DAY = #{domesticOptDay,jdbcType=BIGINT},
+				SHIP_LOCATION_IN = #{shipLocationIn,jdbcType=VARCHAR},
+				SHIP_LOCATION_OVER = #{shipLocationOver,jdbcType=VARCHAR},
+				PRODUCT_STARTPRICE = #{productStartPrice,jdbcType=BIGINT},
+				PRODUCT_STATUS = #{productStatus,jdbcType=BIGINT},
+				SELLER_BASE_COUNT = #{sellerBaseCount,jdbcType=BIGINT},
+				SELLER_DESCRIPTION = #{sellerDescription,jdbcType=VARCHAR},
+				
+				AUTO_PAY = #{autoPay,jdbcType=VARCHAR},
+				PRODUCT_MPN = #{product_mpn,jdbcType=VARCHAR},
+				PRODUCT_BRAND = #{product_brand,jdbcType=VARCHAR},
+				PRODUCT_UST_IDNR=#{product_ust,jdbcType=VARCHAR},
+				PUBLICATION_TYPE=#{publicationType,jdbcType=VARCHAR},
+				ADVERT_ID = #{advert_id,jdbcType=BIGINT},
+				QUANTITY_AVAILABLE = #{productCount,jdbcType=BIGINT},
+				variations = #{variations,jdbcType=VARCHAR},
+				COMMENTS = #{comments,jdbcType=VARCHAR}
+				where TEMPLATE_ID = #{id}
+	</update>
+	<update id="update" parameterType="com.it.ocs.publication.model.PublicationModel">
+		update ebay_publication_info set
+				TEMPLATE_NAME = #{templateName,jdbcType=VARCHAR},
+				EBAY_ACCOUNT = #{ebayAccount,jdbcType=VARCHAR},
+				SITE_ID = #{siteId,jdbcType=BIGINT},
+				SKU = #{sku,jdbcType=VARCHAR},
+				PRODUCT_TITLE = #{productTitle,jdbcType=VARCHAR},
+				PRODUCT_FIRST_CATEGORY_ID = #{productFirstCategoryId,jdbcType=BIGINT},
+				PRODUCT_SECOND_CATEGORY_ID = #{productSecondCategoryId,jdbcType=BIGINT},
+				STORE_FIRST_CATEGORY_ID = #{storeFirstCategoryId,jdbcType=BIGINT},
+				STORE_SECOND_CATEGORY_ID = #{storeSecondCategoryId,jdbcType=BIGINT},
+				PRODUCT_PROPERTIES = #{productProperties,jdbcType=VARCHAR},
+				LAST_UPDATE_BY = #{lastUpdateBy,jdbcType=BIGINT},
+				LAST_UPDATE_DATE = #{lastUpdationDate,jdbcType=TIMESTAMP},
+				TOP_PROMOTION_TYPE = #{topPromotionType,jdbcType=VARCHAR},
+				FOOTER_PROMOTION_TYPE = #{footerPromotionType,jdbcType=VARCHAR},
+				IN_PROMOTION_TYPE = #{inPromotionType,jdbcType=VARCHAR},
+				COUNTER_TYPE = #{counterType,jdbcType=VARCHAR},
+				OPEN_PAGE_PROTECT = #{openPageProtect,jdbcType=VARCHAR},
+				TEMPLATE_TITLE = #{templateTitle,jdbcType=VARCHAR},
+				EBAY_IMAGES = #{ebayImages,jdbcType=VARCHAR},
+				TEMPLATE_IMAGES = #{templateImages,jdbcType=VARCHAR},
+				APP_COMMENT = #{appComment,jdbcType=VARCHAR},
+				DISCOUNT = #{discount,jdbcType=VARCHAR},
+				INDIVIDUAL = #{individual,jdbcType=VARCHAR},
+				PUBLICATION_DAYS = #{publicationDays,jdbcType=VARCHAR},
+				PRICE = #{price,jdbcType=VARCHAR},
+				RESERVER_PRICE = #{reserverPrice,jdbcType=VARCHAR},
+				BUYOUT_PRICE = #{buyoutPrice,jdbcType=VARCHAR},
+				AUCTION_ITEM = #{auctionItem,jdbcType=VARCHAR},
+				SECOND_TRADING = #{secondTrading,jdbcType=VARCHAR},
+				SECOND_TRADINFO = #{secondTradinfo,jdbcType=VARCHAR},
+				PAYPAI_ACCOUNT = #{paypaiAccount,jdbcType=VARCHAR},
+				SUPPORT_PAYPAI_INFO = #{supportPaypaiInfo,jdbcType=VARCHAR},
+				PAY_DESCRIPTION = #{payDescription,jdbcType=VARCHAR},
+				ALLOW_ALLBUYER = #{allowAllbuyer,jdbcType=VARCHAR},
+				OUT_SHIP_COUNTRY = #{outShipCountry,jdbcType=VARCHAR},
+				POLICY_TYPE = #{policyType,jdbcType=VARCHAR},
+				RETURN_DAYS = #{returnDays,jdbcType=VARCHAR},
+				ALLOW_DELAY = #{allowDelay,jdbcType=VARCHAR},
+				RETURN_TYPE = #{returnType,jdbcType=VARCHAR},
+				FARETAKEINHANDER = #{faretakeinhander,jdbcType=VARCHAR},
+				DEPRECIATION_RATE = #{depreciationRate,jdbcType=VARCHAR},
+				RETURN_DESCRIPTION = #{returnDescription,jdbcType=VARCHAR},
+				TRANS_CLAUSE_EXIS_PUB = #{transClauseExisPub,jdbcType=VARCHAR},
+				CAL_CULATEINFO = #{calCulateinfo,jdbcType=VARCHAR},
+				DOMESTIC_INFO = #{domesticInfo,jdbcType=VARCHAR},
+				INTERNATION_INFO = #{internationInfo,jdbcType=VARCHAR},
+				FEATURE_TYPE = #{featureType,jdbcType=VARCHAR},
+				TAG = #{tag,jdbcType=VARCHAR},
+				OTHER_DESCRIPTION = #{otherDescription,jdbcType=VARCHAR},
+				ONLINE_PUBCOUNT = #{onlinePubcount,jdbcType=VARCHAR},
+				SALES_TAX = #{salesTax,jdbcType=VARCHAR},
+				PRODUCT_ADDRESS = #{productAddress,jdbcType=VARCHAR},
+				REGION = #{region,jdbcType=VARCHAR},
+				POST_CODE = #{postCode,jdbcType=VARCHAR},
+				<!-- ITEM_ID = #{itemId,jdbcType=BIGINT}, -->
+				PRODUCT_SUBTILTE = #{productSubtitle,jdbcType=VARCHAR},
+				NO_PAYPAL = #{noPaypai,jdbcType=VARCHAR},
+				BUYER_REQ_1 = #{buyerReq1,jdbcType=VARCHAR},
+				BUYER_REQ_2 = #{buyerReq2,jdbcType=VARCHAR},
+				BUYER_REQ_3 = #{buyerReq3,jdbcType=VARCHAR},
+				BUYER_REQ_4 = #{buyerReq4,jdbcType=VARCHAR},
+				BUYER_REQ_4_1 = #{buyerReq41,jdbcType=VARCHAR},
+				PRODUCT_EAN = #{productEAN,jdbcType=VARCHAR},
+				PRODUCT_ISBN = #{productISBN,jdbcType=VARCHAR},
+				PRODUCT_UPC = #{productUPC,jdbcType=VARCHAR},
+				ACCEPT_BUYER_COUNTER = #{acceptBuyerCounter,jdbcType=VARCHAR},
+				ACCEPT_BUYER_COUNTER_MIN = #{acceptBuyerCounterMin,jdbcType=BIGINT},
+				ACCEPT_BUYER_COUNTER_MAX = #{acceptBuyerCounterMax,jdbcType=BIGINT},
+				PRODUCT_COUNT = #{productCount,jdbcType=BIGINT},
+				PRODUCT_QUANTITY_SOLD = #{productQuantitySold,jdbcType=BIGINT},
+				DOMESTIC_OPT_DAY = #{domesticOptDay,jdbcType=BIGINT},
+				SHIP_LOCATION_IN = #{shipLocationIn,jdbcType=VARCHAR},
+				SHIP_LOCATION_OVER = #{shipLocationOver,jdbcType=VARCHAR},
+				PRODUCT_STARTPRICE = #{productStartPrice,jdbcType=BIGINT},
+				PRODUCT_STATUS = #{productStatus,jdbcType=BIGINT},
+				SELLER_BASE_COUNT = #{sellerBaseCount,jdbcType=BIGINT},
+				SELLER_DESCRIPTION = #{sellerDescription,jdbcType=VARCHAR},
+				
+				AUTO_PAY = #{autoPay,jdbcType=VARCHAR},
+				PRODUCT_MPN = #{product_mpn,jdbcType=VARCHAR},
+				PRODUCT_BRAND = #{product_brand,jdbcType=VARCHAR},
+				PRODUCT_UST_IDNR=#{product_ust,jdbcType=VARCHAR},
+				PUBLICATION_TYPE=#{publicationType,jdbcType=VARCHAR},
+				ADVERT_ID = #{advert_id,jdbcType=BIGINT},
+				QUANTITY_AVAILABLE = #{productCount,jdbcType=BIGINT},
+				variations = #{variations,jdbcType=VARCHAR}
+				where TEMPLATE_ID = #{id}
+	</update>
+	<update id="updateInfo">
+		update ebay_publication_info set	
+			COMMENTS = #{comments,jdbcType=VARCHAR} where TEMPLATE_ID = #{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Long">
+		update EBAY_PUBLICATION_INFO set ENABLED_FLAG='N' where TEMPLATE_ID=#{id}
+	</update>
+	<select id="getItemDataModels" resultType="com.it.ocs.sys.model.ItemDataModel">
+	       select s.id, nvl(s.display_name, s.name) displayName,s.name name, s.parent_id parentId,(select path from ebay_add_item_structure where id = s.link)linkView,s.link link,s.format_sql formatSql
+	         from ebay_add_item_structure s
+	        where s.parent_id = #{id}
+	</select>
+	<select id="getItemNodeInfo" resultType="com.it.ocs.sys.model.ItemDataModel">
+		select s.id,
+           s.display_name displayName,
+           s.name name,
+           s.parent_id parentId,
+           (select t.path from ebay_add_item_structure t where t.id = s.link) linkView,
+           s.link link,
+           s.format_sql formatSql
+      from ebay_add_item_structure s
+		where s.id = #{id}
+	</select>
+	<update id="updateItemData">
+		update ebay_add_item_structure 
+		set display_name =#{displayName,jdbcType=VARCHAR},
+			link=#{link},
+			update_date=#{lastUpdationDate},
+			UPDATE_BY=#{lastUpdateBy}
+		where id = #{id}
+	</update>
+	<insert id="addItemData">
+		insert into ebay_add_item_structure(id,name,parent_id,display_name,path,link,update_date,update_by)
+		values(ebay_add_item_structure_seq.nextval,#{name},#{parentId},#{displayName,jdbcType=VARCHAR},(select path||'.'||#{name} from ebay_add_item_structure where id=#{parentId}),#{link,jdbcType=VARCHAR},#{creationDate},#{createBy})
+	</insert>
+	
+	<select id="selectAllLinePus" resultMap="pubResult">
+		select ITEM_ID,ebay_Account from EBAY_PUBLICATION_LINE where  END_PUBLICATION_DATE>sysdate 
+	</select>
+	<update id="updatePuHitCountByItemID">
+		update EBAY_PUBLICATION_LINE set 
+		HIT_COUNT=#{hit_count,jdbcType=BIGINT}, 
+		LAST_UPDATE_DATE=sysdate,
+		original_price = #{original_price,jdbcType=VARCHAR},
+		QUANTITYS = #{quantity_sold,jdbcType=BIGINT}
+		where ITEM_ID=#{itemId,jdbcType=VARCHAR}
+	</update>
+	<update id="batchLineUpdates" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update EBAY_PUBLICATION_LINE bao 
+		   set
+				SKU = #{item.sku,jdbcType=VARCHAR},
+				PRODUCT_TITLE = #{item.productTitle,jdbcType=VARCHAR},
+				PRODUCT_SUBTILTE = #{item.productSubtitle,jdbcType=VARCHAR},
+				PRICE = #{item.price,jdbcType=VARCHAR},
+				RESERVER_PRICE = #{item.reserverPrice,jdbcType=VARCHAR},
+				BUYOUT_PRICE = #{item.buyoutPrice,jdbcType=VARCHAR},
+				QUANTITY_AVAILABLE = #{item.productCount,jdbcType=BIGINT},
+				PRODUCT_COUNT = #{item.productCount,jdbcType=BIGINT}
+		   where bao.TEMPLATE_ID = #{item.id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+	<update id="batchUpdates" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update EBAY_PUBLICATION_INFO bao 
+		   set
+				SKU = #{item.sku,jdbcType=VARCHAR},
+				PRODUCT_TITLE = #{item.productTitle,jdbcType=VARCHAR},
+				PRODUCT_SUBTILTE = #{item.productSubtitle,jdbcType=VARCHAR},
+				PRICE = #{item.price,jdbcType=VARCHAR},
+				RESERVER_PRICE = #{item.reserverPrice,jdbcType=VARCHAR},
+				BUYOUT_PRICE = #{item.buyoutPrice,jdbcType=VARCHAR},
+				QUANTITY_AVAILABLE = #{item.quantity_available,jdbcType=BIGINT},
+				PRODUCT_COUNT = #{item.quantity_available,jdbcType=BIGINT}
+		   where bao.TEMPLATE_ID = #{item.id,jdbcType=VARCHAR}
+	   </foreach>
+	</update>
+	<update id="updatePublicationVariations">
+		update EBAY_PUBLICATION_LINE
+		set 
+			LAST_UPDATE_DATE=sysdate,
+			PRODUCT_COUNT = #{quantity_available,jdbcType=BIGINT},
+			VARIATIONS_QUANTITY_AVAILABLE = #{variations_quantity_available,jdbcType=VARCHAR}
+		where ITEM_ID=#{itemId}
+	</update>
+	<update id="updateAvailableByItemId">
+		 update EBAY_PUBLICATION_line set variations=#{variations,jdbcType=VARCHAR},QUANTITY_AVAILABLE=#{quantity_available,jdbcType=BIGINT} where ITEM_ID = #{itemId,jdbcType=BIGINT}
+	</update>
+	<select id="getEBayItemList" resultType="com.it.ocs.sys.model.EbayOnlineModel">
+      select   oa.id           id,
+           oa.itemid       itemId,
+           oa.ACCOUNT_NAME accountName,
+           oa.SITE_NAME    siteId
+    from ebay_online_data oa
+   where not exists(select item_id from ebay_publication_info_1 p where p.item_id = oa.itemid)
+	</select>
+	<select id="getEbayOnlineAll" resultType="com.it.ocs.sys.model.EbayOnlineModel">
+		select * from
+      ( 
+      select S.*,ROWNUM RN from (
+            select eb.itemid,eb.ebay_xml ebayXML from ebay_online_data  eb 
+           
+      ) S 
+		<![CDATA[	where ROWNUM<=#{page}
+		)
+			WHERE RN>=#{page}
+			]]>
+	</select>
+	<select id="getEbayOnLineCount" resultType="int">
+		select count(*) from ebay_online_data
+	</select>
+	<update id="updateEbayXML">
+		update ebay_online_data set ebay_xml = #{ebayXML},status = 1 where id = #{id}
+	</update>
+	<update id="excute">
+		${sql}
+	</update>
+	<select id="queryData" resultType="java.lang.String">
+		${sql}
+	</select>
+	<update id="updatePublicatePlan">
+		update ebay_publication_info 
+		set <include refid="update_is_not_null" />
+        where TEMPLATE_ID = #{id,jdbcType=BIGINT}
+	</update>
+	<select id="getPromoteList" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select template_Id value,template_name displayName from ebay_promote_template where promote_type = #{type} and ENABLED_FLAG = 'Y'
+	</select>
+	<select id="getPromoteItemIds" resultType="java.lang.String">
+		select item_Id from ebay_promote_template where template_id = #{templateId} 
+	</select>
+	<select id="getProductInfo" resultType="com.it.ocs.itemDescribe.model.EBayPromoteModel">
+		select p.ebay_images      imgUrl,
+		       p.template_name    title,
+		       p.ebay_product_url productAddress,
+		       p.price            price,
+		       p.publication_type buyNow,
+		       p.ORIGINAL_PRICE   originalPrice
+		  from ebay_publication_line p
+		 where p.item_id in (
+			 	<foreach collection="list" index="index" item="item" separator=",">
+					#{item}
+				</foreach>
+		        )
+		 and p.END_PUBLICATION_DATE>sysdate
+ 		 and p.ENABLED_FLAG = 'Y'
+		 
+
+	</select>
+	<select id="getSellerDescription" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		  select id value,name displayName from ebay_seller_description where site_id = #{siteId} and ENABLED_FLAG = 'Y'
+	</select>
+	<select id="getReturnPolicyData" resultType="com.it.ocs.synchronou.model.EBayReturnPolicyDetailModel">
+		select e.refund,
+	       e.returns_within,
+	       e.description,
+	       e.shippingcost_paidby,
+	       e.restocking_feevalue,
+	       e.returns_accepted
+	  from ebay_return_policy_detail e
+	 where e.site_id = #{siteId}
+	</select>
+	<delete id="deleteTransInfoByTID">
+		delete ebay_transport_pub_relation where temp_id=#{tid}
+	</delete>
+	<insert id="addPublicationTransInfo">
+		insert into ebay_transport_pub_relation
+		  (id,
+		   temp_id,
+		   tran_type_id,
+		   tran_type_name,
+		   tran_cost,
+		   tran_ex_cost,
+		   ak_hi_pr_cost,
+		   tran_kind,
+		   tran_order,
+		   ship_location_in)
+		values
+		  (ebay_transport_seq.nextval,
+		  #{tempId,jdbcType=DOUBLE},
+		  #{domesticShipId,jdbcType=DOUBLE},
+		  #{domesticShipType,jdbcType=VARCHAR},
+		  #{domesticShipCost,jdbcType=DOUBLE},
+		  #{domesticExtraCost,jdbcType=DOUBLE},
+		  #{domesticShipAkHiPr,jdbcType=DOUBLE},
+		  #{tranKind,jdbcType=DOUBLE},
+		  #{tranOrder,jdbcType=DOUBLE},
+		  #{shipLocationIn,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<insert id="addPublicationTransInfos" parameterType="java.util.List">
+		INSERT INTO ebay_transport_pub_relation(
+		   id,
+		   temp_id,
+		   tran_type_id,
+		   tran_type_name,
+		   tran_cost,
+		   tran_ex_cost,
+		   ak_hi_pr_cost,
+		   tran_kind,
+		   tran_order,
+		   ship_location_in)  
+		select ebay_transport_seq.nextval,c.* from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				
+				  #{item.tempId,jdbcType=DOUBLE},
+				  #{item.domesticShipId,jdbcType=VARCHAR},
+				  #{item.domesticShipType,jdbcType=VARCHAR},
+				  #{item.domesticShipCost,jdbcType=VARCHAR},
+				  #{item.domesticExtraCost,jdbcType=VARCHAR},
+				  #{item.domesticShipAkHiPr,jdbcType=VARCHAR},
+				  #{item.tranKind,jdbcType=VARCHAR},
+				  #{item.tranOrder,jdbcType=VARCHAR},
+				  #{item.shipLocationIn,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updatePublicationTransInfo">
+		update ebay_transport_pub_relation set 
+		  tran_type_id = #{domesticShipId,jdbcType=DOUBLE},
+		  tran_type_name = #{domesticShipType,jdbcType=VARCHAR},
+		  tran_cost = #{domesticShipCost,jdbcType=DOUBLE},
+		  tran_ex_cost = #{domesticExtraCost,jdbcType=DOUBLE},
+		  ak_hi_pr_cost = #{domesticShipAkHiPr,jdbcType=DOUBLE},
+		  ship_location_in = #{shipLocationIn,jdbcType=VARCHAR}
+		  where temp_id = #{tempId}
+		  and tran_kind = #{tranKind}
+		  and tran_order = #{tranOrder}
+	</update>
+	<delete id="clearTransByType">
+		delete ebay_transport_pub_relation where temp_id = #{tempLateId} and tran_kind = #{type}
+	</delete>
+	<select id="getPublictonTransById" resultType="com.it.ocs.publication.model.ShipOptionModel">
+		select et.tran_type_id domesticShipId,
+		       et.tran_type_name domesticShipType,
+		       et.tran_cost domesticShipCost,
+		       et.tran_ex_cost domesticExtraCost,
+		       et.ak_hi_pr_cost domesticShipAkHiPr,
+		       et.tran_kind tranKind,
+		       et.tran_order tranOrder,
+		       et.ship_location_in shipLocationIn
+		  from ebay_transport_pub_relation et
+		  where temp_id = #{id,jdbcType=BIGINT}
+	</select>
+	<select id="getTransTypeData" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select site_id      siteId,
+		       value        value,
+		       display_name displayName,
+		       data_type    dataType
+		  from ebay_base_data
+		 where site_id = #{siteId}
+		   and data_type in (1, 2)
+	</select>
+	<select id="getPaymentSupportData" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select value value,display_name displayName from ebay_base_data where data_type = 3 and site_id = #{siteId} 
+	</select>
+	<update id="updateById">
+		 update EBAY_PUBLICATION_INFO 
+	 	 set 
+	  		EBAY_PRODUCT_URL=#{ebayProductURL,jdbcType=VARCHAR} 
+	  		where TEMPLATE_ID=#{id}
+	</update>
+	<update id="updatePublicationById">
+	  update EBAY_PUBLICATION_line 
+	 	 set 
+	  		ITEM_ID=#{itemId}, EBAY_PRODUCT_URL=#{ebayProductURL,jdbcType=VARCHAR} ,PUBLICATION_DATE=#{publication_date}
+	  		<choose>
+                <when test="timing_publication_date != null">
+                       , TIMING_PUBLICATION_DATE=#{timing_publication_date}
+                </when>
+                <otherwise>
+                       , TIMING_PUBLICATION_DATE=#{publication_date}
+                       
+                </otherwise>
+           </choose>
+           ,END_PUBLICATION_DATE=#{end_publication_date}
+           ,QUANTITY_AVAILABLE=#{productCount,jdbcType=BIGINT}
+	  		where TEMPLATE_ID=#{id}
+	</update>
+	<sql id="save_as_query_page">
+		select id id,title title,site_id siteId,data data,data_type dataType from ebay_data_saveas where data_type = #{saveAsModel.dataType} and site_id = #{saveAsModel.siteId}
+	</sql>
+	<select id="queryByPageSaveAs" resultType="com.it.ocs.publication.model.PublicationSaveAsModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="save_as_query_page"></include>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]> 
+	</select>
+	<select id="countSaveAs" resultType="int">
+		select count(1) from  (<include refid="save_as_query_page"></include>)
+	</select>
+	<insert id="saveAs" >
+		insert into ebay_data_saveas
+		  (id, title, site_id, data, data_type)
+		values
+		  (ebay_data_saveas_SEQ.Nextval,#{title,jdbcType=VARCHAR},#{siteId,jdbcType=DOUBLE},#{data,jdbcType=VARCHAR},#{dataType,jdbcType=DOUBLE})
+	</insert>
+	<sql id="model_manager_query_page">
+		select id id,title title,site_id siteId,data data,data_type dataType from ebay_data_saveas where data_type = #{model.dataType}
+	</sql>
+	<select id="queryByPageModelManager" resultType="com.it.ocs.publication.model.PublicationSaveAsModel">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="model_manager_query_page"></include>
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{endRow}
+		)
+			WHERE RN>=#{startRow}
+		]]> 
+	</select>
+	<select id="countModelManager" resultType="int">
+		select count(1) from  (<include refid="model_manager_query_page"></include>)
+	</select>
+	<update id="updateSaveAs">
+		update ebay_data_saveas set 
+			title = #{title,jdbcType=VARCHAR},
+			site_id = #{siteId,jdbcType=DOUBLE},
+			data = #{data,jdbcType=VARCHAR}
+			where id = #{id}
+			and data_type = #{dataType}
+	</update>
+	<delete id="saveAsDelete">
+		delete ebay_data_saveas where id in (
+			<foreach collection="list" index="index" item="item" separator=",">
+				#{item}
+			</foreach>
+		)
+	</delete>
+	<select id="selectPublicByItemId" resultMap="pubResult">
+		select EBAY_ACCOUNT ebayAccount,TEMPLATE_ID id,variations  from EBAY_PUBLICATION_line where ITEM_ID=#{itemId,jdbcType=VARCHAR}
+	</select>
+	<select id="getSiteList" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select SITE_ID value,SITE displayName from EBAY_SITE_DETAILS_INFO where ENABLED_FLAG = 'Y'
+	</select>
+	<select id="checkSKUAndTitle" resultType="int">
+		select count(1) from ebay_publication_info e where e.sku = #{sku,jdbcType=VARCHAR} 
+		and e.ebay_Account=#{ebayAccount,jdbcType=VARCHAR}
+		and e.product_title = #{title,jdbcType=VARCHAR}
+		and e.site_Id=#{site,jdbcType=DECIMAL}
+		and e.END_PUBLICATION_DATE>sysdate
+		and e.template_id != #{templateId,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertPublicationLine">
+		insert into ebay_publication_line(TEMPLATE_ID,ITEM_ID,
+											PUBLICATION_DATE,
+											TIMING_PUBLICATION_DATE,
+											CREATION_DATE,
+											LAST_UPDATE_DATE) values(#{id},#{itemId},#{publication_date},#{publication_date},sysdate,sysdate) 
+	</insert>
+	<select id="countLinePub" resultType="int">
+		select count(1) from ebay_publication_line 
+		where  ENABLED_FLAG='Y'
+		<if test="siteId != null and siteId != ''">
+			and site_id = #{siteId}
+		</if>
+		<if test="correlation_id != null and correlation_id != ''">
+			and CORRELATION_ID = #{correlation_id}
+		</if>
+		<if test="conditions=='line'">
+		 and END_PUBLICATION_DATE>sysdate 
+		</if>
+		<if test="conditions=='timing'">
+		 and  TIMING_PUBLICATION_DATE>PUBLICATION_DATE
+		</if>
+		<if test="conditions=='downline'">
+		 and  END_PUBLICATION_DATE<![CDATA[<]]>sysdate
+		</if>
+	</select>
+	<!-- <select id="countPub" resultType="int">
+		select count(1) from ebay_publication_info 
+		where  ENABLED_FLAG='Y'
+		<if test="siteId != null and siteId != ''">
+			and site_id = #{siteId}
+		</if>
+		<if test="conditions=='all'">
+		 and item_id is not null 
+		</if>
+		<if test="conditions=='line'">
+		 and item_id is not null and END_PUBLICATION_DATE>sysdate
+		</if>
+		<if test="conditions=='timing'">
+		 and item_id is not null and TIMING_PUBLICATION_DATE>PUBLICATION_DATE
+		</if>
+		<if test="conditions=='downline'">
+		 and item_id is not null and END_PUBLICATION_DATE<![CDATA[<]]>sysdate
+		</if>
+		<if test="conditions=='main'">
+		 and item_id is  null 
+		</if>
+	</select> -->
+	
+	<update id="updatePublictionInfoEndDateByItemId">
+		update EBAY_PUBLICATION_line
+		set 
+			END_PUBLICATION_DATE=#{end_publication_date},
+			ENDING_REASON = #{ending_reason,jdbcType=VARCHAR},
+			ENDING_STATE='Y'
+		where ITEM_ID=#{itemId}
+	</update>
+	
+	<insert id="insertPlanPublications" parameterType="java.util.List">
+		INSERT INTO ebay_timing_Plan_info(
+				ID,
+				TEMPLATE_ID,
+				TEMPLATE_NAME,
+				SITE_ID,
+				FIRST_DATE,
+				FIRST_SITE_DATE,
+				CREATE_DATE
+			)  
+		select ebay_timing_plan_seq.Nextval,c.*,sysdate from (
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				#{item.template_id,jdbcType=BIGINT},
+				#{item.template_name,jdbcType=VARCHAR},
+				#{item.site_id,jdbcType=BIGINT},
+				#{item.first_date,jdbcType=TIMESTAMP},
+				#{item.first_site_date,jdbcType=TIMESTAMP}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<select id="getItemList" resultType="java.lang.String">
+		select itemId
+		  from ebay_online_data t
+		 where not exists (select t1.item_id
+		          from ebay_publication_info_1 t1
+		         where t1.item_id = t.itemId
+		           and t1.timing_publication_date is not null)
+		   and status = 1
+	</select>
+	<select id="getItemInfoXML" resultType="java.lang.String">
+		select ebay_xml from ebay_online_data where itemId = #{item}
+	</select>
+	<update id="updateItemInfo">
+		update ebay_publication_info_1 t
+		   set t.timing_publication_date = TO_TIMESTAMP(#{ListingDetails_StartTime},'yyyy-MM-dd hh24:mi:ss.ff')+0, 
+		       t.end_publication_date = TO_TIMESTAMP(#{ListingDetails_EndTime},'yyyy-MM-dd hh24:mi:ss.ff')+0
+		 where t.item_id = #{ItemID}
+	</update>
+	<sql id="query_a_lot_modify">
+		select * from ${param.table} where ENABLED_FLAG = 'Y'
+	</sql>
+	<sql id="queryL_a_lot_modify">
+		select * from ebay_publication_line where ENABLED_FLAG = 'Y'
+	</sql>
+	
+	<select id="getALotModifyList" resultType="java.util.HashMap">
+		<include refid="query_a_lot_modify"></include>
+				and TEMPLATE_ID in (${param.ids})
+				order by TEMPLATE_ID asc
+	</select>
+	<select id="getLineALotModifyList" resultType="java.util.HashMap">
+		select * from
+		  ( 
+			select S.*,ROWNUM RN from (
+				<include refid="queryL_a_lot_modify"></include>
+				${param.CONDITION}
+				order by TEMPLATE_ID asc
+			) S 
+		<![CDATA[
+			where ROWNUM<=#{end}
+		)
+			WHERE RN>=#{start}
+		]]> 
+	</select>
+	<select id="countALotModifyList" resultType="int">
+		select count(*) from (
+			<include refid="query_a_lot_modify"></include>
+			${param.CONDITION}
+			order by TEMPLATE_ID asc
+		)
+	</select>
+	<select id="countLALotModifyList" resultType="int">
+		select count(*) from (
+			<include refid="queryL_a_lot_modify"></include>
+			${param.CONDITION}
+			order by TEMPLATE_ID asc
+		)
+	</select>
+	<update id="updatePulicationByALot">
+		update ebay_publication_info set ${param.updateSet} where TEMPLATE_ID = #{param.TEMPLATE_ID}
+	</update>
+	<update id="updatePulicationLineByALot">
+		update ebay_publication_line set ${param.updateSet} where TEMPLATE_ID = #{param.TEMPLATE_ID}
+	</update>
+	<select id="getTransInfoById" resultType="java.util.HashMap">
+		select r.tran_type_name,
+		       r.tran_type_id,
+		       r.tran_order,
+		       r.tran_cost,
+		       r.tran_ex_cost,
+		       r.tran_kind,
+		       r.id,
+		       r.ak_hi_pr_cost,
+		       r.ship_location_in,
+		       r.temp_id
+		  from ebay_transport_pub_relation r
+		 where r.temp_id = #{tempId}
+	</select>
+	<update id="updateTrans">
+		declare
+			N_EXISTS NUMBER;
+		begin
+		  SELECT COUNT(*) INTO N_EXISTS FROM ebay_transport_pub_relation r WHERE R.TEMP_ID = #{TEMPLATE_ID} AND R.TRAN_KIND = #{TRAN_KIND};
+		  IF N_EXISTS = 0 THEN
+		    insert into ebay_transport_pub_relation
+		      (id,
+		       temp_id,
+		       tran_type_name,
+		       tran_cost,
+		       tran_ex_cost,
+		       tran_kind,
+		       tran_order)
+		    values
+		      (ebay_transport_seq.nextval, 
+		       #{TEMPLATE_ID},
+		       #{TRAN_TYPE_NAME,jdbcType=VARCHAR},
+		       #{TRAN_COST,jdbcType=BIGINT},
+		       #{TRAN_EX_COST,jdbcType=BIGINT},
+		       #{TRAN_KIND,jdbcType=BIGINT},
+		       1);
+		  ELSE
+		    update ebay_transport_pub_relation set  
+		     ${UPDATESET}
+		    where temp_id = #{TEMPLATE_ID}
+		    and tran_kind = #{TRAN_KIND,jdbcType=BIGINT};
+		  END IF;
+		end;
+	</update>
+	<select id="getTemplateBanner" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+		select e.id value,e.name displayName from EBAY_ADVERT_TEMPLATES e where e.enabled_flag = 'Y' and e.site_id = #{siteId}
+	</select>
+	<update id="updateAllPulicationByALot">
+		update ebay_publication_info set ${updateSet} 
+		where ENABLED_FLAG = 'Y' 
+		${CONDITION}
+	</update>
+	<update id="updateAllTrans">
+		declare
+			N_KIND NUMBER;
+		begin
+			N_KIND := #{TRAN_KIND,jdbcType=BIGINT};
+		  update ebay_transport_pub_relation set  
+		     ${UPDATESET}
+		    where temp_id IN (SELECT TEMPLATE_ID FROM ebay_publication_info where ENABLED_FLAG = 'Y'  ${CONDITION})
+		    and tran_kind = #{TRAN_KIND,jdbcType=BIGINT};
+		  
+		  insert into ebay_transport_pub_relation
+		      (id,
+		       temp_id,
+		       tran_type_name,
+		       tran_cost,
+		       tran_ex_cost,
+		       tran_kind,
+		       tran_order)
+		  SELECT ebay_transport_seq.nextval, 
+		       TEMPLATE_ID,
+		       #{TRAN_TYPE_NAME,jdbcType=VARCHAR},
+		       #{TRAN_COST,jdbcType=BIGINT},
+		       #{TRAN_EX_COST,jdbcType=BIGINT},
+		       #{TRAN_KIND,jdbcType=BIGINT},
+		       1   
+		  FROM ebay_publication_info 
+		  where TEMPLATE_ID NOT IN (SELECT temp_id FROM ebay_transport_pub_relation WHERE tran_kind = #{TRAN_KIND,jdbcType=BIGINT})
+		  AND ENABLED_FLAG = 'Y'  
+			${CONDITION};
+		end;
+	</update>
+	<select id="getItemPromoteInfoById" resultType="com.it.ocs.seller.model.EBayItemPromoteModel">
+		select item_id itemId, data_type dataType, rules rules,site_id siteId,account account
+		  from ebay_promote_template
+		 where template_id = #{templateId,jdbcType=BIGINT}
+		 and ENABLED_FLAG = 'Y'
+	</select>
+	<select id="getPImgByItemId" resultType="com.it.ocs.publication.model.PublicationModel">
+		select epl.EBAY_IMAGES ebayImages from ebay_publication_line epl where  epl.ITEM_ID=#{itemId,jdbcType=VARCHAR}
+	</select>
+
+	<update id="updateLinePuByOnline">
+	   update ebay_publication_line epl set 
+	   	 epl.RETURN_DESCRIPTION=#{returnDescription,jdbcType=VARCHAR}
+	     
+        where epl.item_id=#{itemId,jdbcType=VARCHAR} and epl.enabled_flag = 'Y'
+	</update>
+	<update id="updateLinePuByOnline2">
+	update ebay_publication_line epl set 
+		  epl.COMMENTS = #{comments,jdbcType=VARCHAR}
+        where epl.item_id=#{itemId,jdbcType=VARCHAR} and epl.enabled_flag = 'Y'
+	</update>
+	
+	<insert id="insertActiveItems" parameterType="java.util.List">
+		INSERT INTO ONLINE_ITEM_INFO(
+			ID,
+			CREATE_DATE,
+			UPDATE_DATE,
+			STATE,
+			ITEM_ID,
+			ACCOUNT,
+			TITLE,
+			VIEW_ITEM_URL,
+			CREATE_BY
+		)
+		select online_item_SEQ.Nextval,sysdate,sysdate,'Y',c.* from (
+			<foreach collection="list" index="index" item="item"
+				separator="union all">
+				select 
+				#{item.itemId,jdbcType=VARCHAR},
+				#{item.ebayAccount,jdbcType=VARCHAR},
+				#{item.productTitle,jdbcType=VARCHAR},
+				#{item.ebayProductURL,jdbcType=VARCHAR},
+				#{item.createBy}
+				from dual
+			</foreach>
+		)c
+	</insert>
+	<update id="updateItemStartByAccount">
+		UPDATE ONLINE_ITEM_INFO set STATE='N' where ACCOUNT=#{account,jdbcType=VARCHAR}
+	</update>
+	<select id="selectOnItemByID" resultType="com.it.ocs.publication.model.PublicationModel">
+		SELECT id id,ITEM_ID itemId FROM ONLINE_ITEM_INFO oii where oii.ITEM_ID=#{itemId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectRecentlyItemByID" resultType="com.it.ocs.publication.model.PublicationModel">
+		 select epl.TEMPLATE_ID id,epl.item_id itemId
+       from EBAY_PUBLICATION_LINE epl
+        where ((ceil((sysdate -
+                   to_date(to_char(epl.last_update_date, 'yyyy-mm-dd hh24:mi:ss'),
+                      'yyyy-mm-dd hh24:mi:ss')) * 24) > 2 ) or (ceil((sysdate -
+                   to_date(to_char(epl.last_update_date, 'yyyy-mm-dd hh24:mi:ss'),
+                      'yyyy-mm-dd hh24:mi:ss')) * 24) <![CDATA[<]]> 2 and epl.end_publication_date<![CDATA[<]]>sysdate )) and epl.item_id=#{itemId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectIsLineByAccount" resultType="com.it.ocs.publication.model.PublicationModel">
+		select epl.item_id itemId, epl.site_ID siteId
+		  from ebay_publication_line epl
+		 where epl.end_publication_date > sysdate
+		   and epl.enabled_flag = 'Y'
+		   and epl.ebay_account = #{account,jdbcType=VARCHAR}
+		   and epl.item_id not in (select oii.item_id
+		                             from online_item_info oii
+		                            where oii.account = #{account,jdbcType=VARCHAR}
+		                              and oii.state = 'Y')
+	</select>
+	<update id="updateActiveItems" parameterType="java.util.List">
+			<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+				UPDATE ONLINE_ITEM_INFO
+				set
+					STATE='Y',
+					UPDATE_DATE=#{item.lastUpdationDate,jdbcType=TIMESTAMP},
+					UPDATE_BY=#{item.createBy}
+				where ITEM_ID=#{item.itemId,jdbcType=VARCHAR}
+			</foreach>
+	</update> 
+	<update id="updateLinePuByOnline3">
+		update ebay_publication_line epl set 
+	      epl.PRODUCT_PROPERTIES = #{productProperties,jdbcType=VARCHAR},
+	      epl.POLICY_TYPE=#{policyType,jdbcType=VARCHAR},
+	      epl.LAST_UPDATE_DATE=sysdate,
+	      epl.RETURN_TYPE=#{returnType,jdbcType=VARCHAR},
+	      epl.RETURN_DAYS=#{returnDays,jdbcType=VARCHAR},
+	      epl.PAYPAI_ACCOUNT=#{paypaiAccount,jdbcType=VARCHAR},
+		   epl.ALLOW_DELAY=#{allowDelay,jdbcType=VARCHAR},
+	      epl.FARETAKEINHANDER=#{faretakeinhander,jdbcType=VARCHAR},
+	      epl.DEPRECIATION_RATE=#{depreciationRate,jdbcType=VARCHAR}, 
+		  epl.POST_CODE=#{postCode,jdbcType=VARCHAR},
+		  epl.PRODUCT_MPN=#{product_mpn,jdbcType=VARCHAR} ,
+		  epl.PRODUCT_UPC=#{productUPC,jdbcType=VARCHAR},
+		  epl.PRODUCT_BRAND=#{product_brand,jdbcType=VARCHAR},
+		  epl.PRODUCT_UST_IDNR=#{product_ust,jdbcType=VARCHAR},
+		  epl.SUPPORT_PAYPAI_INFO=#{supportPaypaiInfo,jdbcType=VARCHAR},
+		  epl.NO_PAYPAL =#{noPaypai,jdbcType=VARCHAR},
+		  epl.OUT_SHIP_COUNTRY = #{outShipCountry,jdbcType=VARCHAR},
+		  epl.BUYER_REQ_1 = #{buyerReq1,jdbcType=VARCHAR},
+		  epl.BUYER_REQ_2 = #{buyerReq2,jdbcType=VARCHAR},
+		  epl.BUYER_REQ_3 = #{buyerReq3,jdbcType=VARCHAR},
+		  epl.BUYER_REQ_4 = #{buyerReq4,jdbcType=VARCHAR},
+		  epl.BUYER_REQ_4_1 = #{buyerReq41,jdbcType=VARCHAR},
+		  epl.PRODUCT_EAN =#{productEAN,jdbcType=VARCHAR},
+		  epl.PRODUCT_ISBN=#{productISBN,jdbcType=VARCHAR}
+        where epl.item_id=#{itemId,jdbcType=VARCHAR} and epl.enabled_flag = 'Y'
+	</update>
+    <update id="updateLinePuByOnline4">
+       update ebay_publication_line epl set 
+	      PRODUCT_FIRST_CATEGORY_ID = #{productFirstCategoryId,jdbcType=BIGINT},
+				PRODUCT_SECOND_CATEGORY_ID = #{productSecondCategoryId,jdbcType=BIGINT},
+				STORE_FIRST_CATEGORY_ID = #{storeFirstCategoryId,jdbcType=BIGINT},
+				STORE_SECOND_CATEGORY_ID = #{storeSecondCategoryId,jdbcType=BIGINT},
+	      		EBAY_IMAGES = #{ebayImages,jdbcType=VARCHAR},
+	      		PUBLICATION_DAYS = #{publicationDays,jdbcType=VARCHAR},
+	      		REGION = #{region,jdbcType=VARCHAR},
+	      		PRODUCT_ADDRESS = #{productAddress,jdbcType=VARCHAR},
+	      		PAYPAI_ACCOUNT = #{paypaiAccount,jdbcType=VARCHAR},
+	      		SUPPORT_PAYPAI_INFO = #{supportPaypaiInfo,jdbcType=VARCHAR},
+	      		PRICE = #{price,jdbcType=VARCHAR},
+	      		PRODUCT_COUNT = #{productCount,jdbcType=BIGINT},
+	      		SHIP_LOCATION_OVER = #{shipLocationOver,jdbcType=VARCHAR},
+	      		ACCEPT_BUYER_COUNTER = #{acceptBuyerCounter,jdbcType=VARCHAR},
+	      		SKU = #{sku,jdbcType=VARCHAR},
+	      		ACCEPT_BUYER_COUNTER_MIN = #{acceptBuyerCounterMin,jdbcType=VARCHAR},
+	      		ACCEPT_BUYER_COUNTER_MAX = #{acceptBuyerCounterMax,jdbcType=VARCHAR},
+	      		EBAY_PRODUCT_URL = #{ebayProductURL,jdbcType=VARCHAR},
+	      		COUNTER_TYPE = #{counterType,jdbcType=VARCHAR},
+	      		INDIVIDUAL = #{individual,jdbcType=VARCHAR},
+ 				TEMPLATE_NAME = #{productTitle,jdbcType=VARCHAR},
+ 				PRODUCT_TITLE = #{productTitle,jdbcType=VARCHAR},
+ 				AUTO_PAY = #{autoPay,jdbcType=VARCHAR},
+ 				SITE_ID = #{siteId,jdbcType=BIGINT},
+ 				HIT_COUNT=#{hit_count,jdbcType=BIGINT},
+ 				original_price = #{original_price,jdbcType=VARCHAR},
+ 				DISCOUNT_START_DATE = #{discount_start_date,jdbcType=TIMESTAMP},
+ 				DISCOUNT_END_DATE = #{discount_end_date,jdbcType=TIMESTAMP},
+ 				QUANTITYS = #{quantity_sold,jdbcType=BIGINT},
+ 				EBAY_ACCOUNT = #{ebayAccount,jdbcType=VARCHAR},
+				END_PUBLICATION_DATE =#{end_publication_date},
+ 				RESERVER_PRICE = #{reserverPrice,jdbcType=VARCHAR},
+ 				PUBLICATION_TYPE=#{publicationType,jdbcType=VARCHAR},
+ 				variations = #{variations,jdbcType=VARCHAR}
+        where epl.item_id=#{itemId,jdbcType=VARCHAR} and epl.enabled_flag = 'Y'
+    </update>
+    <select id="transHasExist" resultType="int">
+    	select count(*)
+		  from ebay_transport_pub_relation et
+		  where temp_id = #{tempId}
+		   and tran_kind = #{tranKind}
+		  and tran_order = #{tranOrder}
+    </select>
+    <select id="getItemLabelByState" resultType="com.it.ocs.publication.model.ItemLabelModel">
+      select ID id,label_note labelNote,LABEL_NAME labelName from ITEM_LABEL where  ENABLED_FLAG='Y' and LABEL_STATE=#{labelState,jdbcType=VARCHAR}
+    </select>
+    <select id="getItemLabelPage"  resultType="com.it.ocs.publication.model.ItemLabelModel">
+    	select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  ID id,label_note labelNote,LABEL_NAME labelName  from ITEM_LABEL  where ENABLED_FLAG='Y'  <include refid="label_base_condition"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{end}
+			)
+				WHERE RN>=#{start}
+			]]>
+    </select>
+    <update id="labelRemove">
+    	update ITEM_LABEL set ENABLED_FLAG='N' where ID=#{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateItemLabels" parameterType="java.util.List">
+    	<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update ITEM_LABEL bao 
+		   set
+				LABEL_NAME = #{item.labelName,jdbcType=VARCHAR},
+				UPDATE_BY = #{item.lastUpdateBy,jdbcType=BIGINT},
+				UPDATE_DATE = #{item.lastUpdationDate,jdbcType=TIMESTAMP},
+				LABEL_NOTE = #{item.labelNote,jdbcType=VARCHAR}
+		   where ID = #{item.id,jdbcType=VARCHAR}
+		   </foreach>
+    </update>
+    <insert id="insertItemLabels" parameterType="java.util.List">
+       INSERT INTO ITEM_LABEL
+       (ID,LABEL_NAME,LABEL_STATE,LABEL_NOTE,CREATE_BY,CREATE_DATE,UPDATE_DATE) 
+       select MAPPING_SKU_SEQ.nextval,c.*,sysdate,sysdate from(
+       	<foreach collection="list" index="index" item="item"
+				separator="union all">
+	    select 
+       	#{item.labelName,jdbcType=VARCHAR},
+		#{item.labelState,jdbcType=VARCHAR},
+		#{item.labelNote,jdbcType=VARCHAR},
+		#{item.createBy,jdbcType=BIGINT}
+		from dual
+		</foreach>
+       )c
+    </insert>
+    <insert id="insertLableMiddles" parameterType="java.util.List">
+    	 INSERT INTO ITEM_LABLE_MIDDLE(ID,LABEL_ID,TEMPLATE_ID,CREATE_BY,CREATE_DATE) 
+       select lable_middle_SEQ.nextval,c.*,sysdate from(
+       	<foreach collection="list" index="index" item="item"
+				separator="union all">
+	    select 
+       	#{item.lebelId,jdbcType=BIGINT},
+		#{item.templateId,jdbcType=BIGINT},
+		#{item.createBy,jdbcType=BIGINT}
+		from dual
+		</foreach>
+       )c
+    </insert>
+    <select id="getLabelTotal" resultType="java.lang.Integer">
+    	select count(1) from ITEM_LABEL where ENABLED_FLAG='Y' <include refid="label_base_condition"/>
+    </select>
+    <sql id="label_base_condition">
+    	<if test="param.labelState!=null and param.labelState!=''">
+    		and LABEL_STATE=#{param.labelState}
+    	</if>
+    </sql>
+    <select id="getPulicationLineOldData" resultType="java.util.HashMap">
+    	select ${param.oldKeys} from ebay_publication_line where template_id = #{param.TEMPLATE_ID}
+    </select>
+    <delete id="deletePublicationTranInfo">
+    	delete ebay_transport_pub_relation where temp_id = #{tempId}
+    </delete>
+    <insert id="rollBackTranData">
+    	<foreach collection="list" index="index" item="item" open="begin" close="end;">
+    		insert into ebay_transport_pub_relation
+			  (ID,
+			   AK_HI_PR_COST,
+			   SHIP_LOCATION_IN,
+			   TEMP_ID,
+			   TRAN_COST,
+			   TRAN_EX_COST,
+			   TRAN_KIND,
+			   TRAN_ORDER,
+			   TRAN_TYPE_ID,
+			   TRAN_TYPE_NAME)
+			values
+			  (
+			   #{item.ID,jdbcType=BIGINT},
+			   #{item.AK_HI_PR_COST,jdbcType=BIGINT},
+			   #{item.SHIP_LOCATION_IN,jdbcType=VARCHAR},
+			   #{item.TEMP_ID,jdbcType=BIGINT},
+			   #{item.TRAN_COST,jdbcType=BIGINT},
+			   #{item.TRAN_EX_COST,jdbcType=BIGINT},
+			   #{item.TRAN_KIND,jdbcType=BIGINT},
+			   #{item.TRAN_ORDER,jdbcType=BIGINT},
+			   #{item.TRAN_TYPE_ID,jdbcType=BIGINT},
+			   #{item.TRAN_TYPE_NAME,jdbcType=VARCHAR}
+			   );
+    	</foreach>
+    </insert>
+    <select id="getLinkTemplateIdByLineId" resultType="java.lang.String">
+    	select wm_concat(l.correlation_id) from ebay_publication_line l where l.template_id in 
+    	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getModelTempData" resultType="com.it.ocs.publication.vo.ComboBoxVO">
+    	select s.id value, s.title displayName from ebay_data_saveas s 
+    	where s.data_type = #{param.type} 
+    	<if test="param.siteId!=null and param.siteId!=''">
+    		and  s.site_id = #{param.siteId}
+    	</if>
+    </select>
+    <select id="getModeSet" resultType="java.lang.String">
+    	select s.data from ebay_data_saveas s where s.id = #{id}
+    </select>
+    <select id="getImageInfoById" resultType="com.it.ocs.upload.vo.FileVO">
+    	select p.pic_id id,
+		       p.name name,
+		       p.save_path savePath,
+		       p.server_url serverUrl,
+		       p.is_upload isUpload,
+		       p.real_url ebayUrl
+		from EBAY_PIC_INFO p
+		where p.pic_id = #{imageId}
+    </select>
+    <select id="getImageInfoByServerUrl" resultType="com.it.ocs.upload.vo.FileVO">
+    	select p.pic_id id,
+		       p.name name,
+		       p.save_path savePath,
+		       p.server_url serverUrl,
+		       p.is_upload isUpload,
+		       p.real_url ebayUrl
+		from EBAY_PIC_INFO p
+		where p.server_url = #{url}
+    </select>
+    <update id="updateImageServerInfo">
+    	update EBAY_PIC_INFO p set p.server_url = #{serverUrl} ,p.is_upload = #{isUpload}
+    	where p.pic_id = #{id}
+    </update>
+    <select id="getLastEndTime" resultType="java.lang.String">
+    	select to_char(max(to_time), 'yyyy-MM-dd hh24:mi:ss') lastTime
+		  from ebay_item_synctime
+		 where  account = #{account}
+		 and type = #{type}
+    </select>
+    <select id="getTimeSetId" resultType="int">
+    	select ebay_item_synctime_SEQ.Nextval from dual
+    </select>
+    <insert id="addTimeSet">
+    	insert into ebay_item_synctime
+		  (id, from_time, type, account, create_date)
+		values
+		  (#{id}, to_timestamp(#{fromTime},'yyyy-MM-dd HH24:MI:ss.ff'),#{type}, #{account}, sysdate-8/24)
+    </insert>
+    <update id="updateTimeSet">
+    	update ebay_item_synctime set to_time = to_timestamp(#{toTime},'yyyy-MM-dd HH24:MI:ss.ff') where id = #{id}
+    </update>
+    <select id="itemIsExist" resultType="int">
+    	select count(*) from ebay_publication_line l where l.item_id = #{itemId} and l.product_title is not null
+    </select>
+    <update id="updateItemToLineData">
+    	update ebay_publication_line l
+           set l.product_count         = #{param.leaveQty},
+               l.product_quantity_sold = #{param.SellingStatus_QuantitySold},
+               l.quantitys         = #{param.Quantity},
+               l.end_publication_date  =  to_timestamp(#{param.ListingDetails_EndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+               l.price                 = #{param.SellingStatus_CurrentPrice,jdbcType=VARCHAR},
+               <if test="param.variations != null and param.variations != '' ">
+               		l.VARIATIONS        = #{param.variations,jdbcType=VARCHAR},
+               </if>
+               l.LAST_UPDATE_DATE = sysdate
+         WHERE l.ITEM_ID = #{param.ItemID}
+    </update>
+    <select id="getVariationByItemId" resultType="java.lang.String">
+    	select l.variations from ebay_publication_line l where l.ITEM_ID = #{itemId}
+    </select>
+    <update id="updateItemByOnline">
+    	update ebay_publication_line l
+           set l.product_count         = #{param.QuantityAvailable},
+               l.product_quantity_sold = #{param.Quantity_sold},
+               l.quantitys         = #{param.Quantity},
+               l.HIT_COUNT         = #{param.WatchCount,jdbcType=BIGINT},
+               l.ORIGINAL_PRICE    = #{param.PromotionalSaleDetails_OriginalPrice,jdbcType=VARCHAR},
+               <if test="param.PromotionalSaleDetails_EndTime != null and param.PromotionalSaleDetails_EndTime != '' ">
+               		l.DISCOUNT_END_DATE = to_timestamp(#{param.PromotionalSaleDetails_EndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+               </if>
+               <if test="param.PromotionalSaleDetails_StartTime != null and param.PromotionalSaleDetails_StartTime != '' ">
+               		l.DISCOUNT_START_DATE = to_timestamp(#{param.PromotionalSaleDetails_StartTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+               </if>
+               <if test="param.variations != null and param.variations != '' ">
+               		l.VARIATIONS        = #{param.variations,jdbcType=VARCHAR},
+               </if>
+               l.LAST_UPDATE_DATE = sysdate
+         WHERE l.ITEM_ID = #{param.ItemID}
+    </update>
+    <select id="variationHasError" resultType="int">
+    	select count(*)
+		  from ebay_publication_line l
+		 where l.item_id = #{itemId}
+		   and l.product_title is not null
+		   and l.publication_type = 'FixedPriceItem1'
+		   and l.variations is null
+    </select>
+    <update id="updateItemBySellerListApi">
+    	update ebay_publication_line l
+           set l.product_count         = #{param.leaveQty},
+               l.product_quantity_sold = #{param.SellingStatus_QuantitySold},
+               l.quantitys         = #{param.Quantity},
+               l.end_publication_date  =  to_timestamp(#{param.ListingDetails_EndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+               l.price                 = #{param.SellingStatus_CurrentPrice,jdbcType=VARCHAR},
+               l.ORIGINAL_PRICE    = #{param.PromotionalSaleDetails_OriginalPrice,jdbcType=VARCHAR},
+               l.EBAY_PRODUCT_URL = #{param.ListingDetails_ViewItemURL,jdbcType=VARCHAR},
+               <if test="param.PromotionalSaleDetails_EndTime != null and param.PromotionalSaleDetails_EndTime != '' ">
+               		l.DISCOUNT_END_DATE = to_timestamp(#{param.PromotionalSaleDetails_EndTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+               </if>
+               <if test="param.PromotionalSaleDetails_StartTime != null and param.PromotionalSaleDetails_StartTime != '' ">
+               		l.DISCOUNT_START_DATE = to_timestamp(#{param.PromotionalSaleDetails_StartTime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:MI:ss.ff')+8/24,
+               </if>
+               <if test="param.variations != null and param.variations != '' ">
+               		l.VARIATIONS        = #{param.variations,jdbcType=VARCHAR},
+               </if>
+               l.LAST_UPDATE_DATE = sysdate
+         WHERE l.ITEM_ID = #{param.ItemID}
+    </update>
+    <select id="getTransShipWide" resultType="com.it.ocs.publication.model.ShipLoactionModel">
+    	select s.site_id           siteId,
+		       s.shipping_location shippingLocation,
+		       s.description
+		  from ebay_base_shiplocation s
+		 where s.site_id = #{siteId}
+    	
+    </select>
+</mapper>

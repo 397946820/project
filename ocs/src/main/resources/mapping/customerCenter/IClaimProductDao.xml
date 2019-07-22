@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.customerCenter.dao.IClaimProductDao">
+	<resultMap type="com.it.ocs.customerCenter.model.ClaimProductModel" id="claimProductResult">
+		<id column="ID" property="id"  />
+		<result column="CLAIM_DATE" property="claim_date"  />
+		<result column="ORDER_ID" property="order_id"  />
+		<result column="SKU" property="sku"  />
+		<result column="PRODUCT_NUMBER" property="product_number"  />
+		<result column="AFTER_REASON" property="after_reason"  />
+		<result column="HANDLING" property="handling"  />
+		<result column="CLONE" property="clone"  />
+		<result column="trace_code" property="trace_code"  />
+	</resultMap>
+	 <insert id="insertClaimProduct" parameterType="java.util.List">
+		INSERT INTO CUSTOMER_CLAIM_PRODUCTS(
+			ID,
+			CLAIM_DATE,
+			ORDER_ID,
+			SKU,
+			PRODUCT_NUMBER,
+			AFTER_REASON,
+			HANDLING,
+			CLONE,
+			CREATE_BY,
+			trace_code,
+			CREATE_DATE,
+			UPDATE_DATE)  
+		select customer_claim_products_SEQ.NEXTVAL,c.*,sysdate,sysdate from(
+		<foreach collection="list" index="index" item="item"
+			separator="union all">
+			select
+				to_date(#{item.claim_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+				#{item.order_id,jdbcType=VARCHAR},
+				#{item.sku,jdbcType=VARCHAR},
+				#{item.product_number,jdbcType=BIGINT},
+				#{item.after_reason,jdbcType=VARCHAR},
+				#{item.handling,jdbcType=VARCHAR},
+				#{item.clone,jdbcType=VARCHAR},
+				#{item.create_by,jdbcType=BIGINT},
+				#{item.trace_code,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		) c
+	</insert>
+	<update id="updateClaimProduct" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			update CUSTOMER_CLAIM_PRODUCTS baoi
+			set 
+			CLAIM_DATE = to_date(#{item.claim_date,jdbcType=VARCHAR},'yyyy-mm-dd'),
+			ORDER_ID = #{item.order_id,jdbcType=VARCHAR},
+			SKU = #{item.sku,jdbcType=VARCHAR},
+			PRODUCT_NUMBER = #{item.product_number,jdbcType=BIGINT},
+			AFTER_REASON = #{item.after_reason,jdbcType=VARCHAR},
+			HANDLING = #{item.handling,jdbcType=VARCHAR},
+			CLONE = #{item.clone,jdbcType=VARCHAR},
+			UPDATE_DATE = sysdate,
+			trace_code=#{item.trace_code,jdbcType=VARCHAR}
+			where baoi.ID = #{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+	<update id="remove">
+	update CUSTOMER_CLAIM_PRODUCTS cp set cp.ENABLED_FLAG='N',cp.UPDATE_BY=#{userId,jdbcType=BIGINT} where cp.id=#{id,jdbcType=BIGINT}
+	</update>
+	<select id="selectClaimProduct" resultType="java.util.HashMap">
+	select <include refid="select_base"/> from CUSTOMER_CLAIM_PRODUCTS cp where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+	</select>
+	<sql id="select_base">
+		cp.ID,
+		to_char(cp.CLAIM_DATE,'yyyy-mm-dd') claim_date,
+		cp.ORDER_ID,
+		cp.SKU,
+		cp.PRODUCT_NUMBER,
+		cp.AFTER_REASON,
+		cp.HANDLING,
+		cp.CLONE,
+		cp.trace_code
+	</sql>
+	<sql id="base_map_conditions">
+		<if test="claimProduct.sku !=null and claimProduct.sku !=''"> 
+			and cp.SKU like '%'||#{claimProduct.sku}||'%'
+		</if>
+		<if test="claimProduct.order_id !=null and claimProduct.order_id !=''"> 
+			and cp.ORDER_ID like '%'||#{claimProduct.order_id}||'%'
+		</if>
+		<if test="claimProduct.product_number !=null and claimProduct.product_number !=''"> 
+			and cp.PRODUCT_NUMBER =#{claimProduct.product_number}
+		</if>
+		<if test="claimProduct.after_reason !=null and claimProduct.after_reason !=''"> 
+			and cp.AFTER_REASON like '%'||#{claimProduct.after_reason}||'%'
+		</if>
+		<if test="claimProduct.handling !=null and claimProduct.handling !=''"> 
+			and cp.HANDLING like '%'||#{claimProduct.handling}||'%'
+		</if>
+		<if test="claimProduct.clone !=null and claimProduct.clone !=''"> 
+			and cp.CLONE like '%'||#{claimProduct.clone}||'%'
+		</if>
+		<if test="claimProduct.startDate !=null and claimProduct.startDate !=''"> 
+			and cp.CLAIM_DATE >= to_date('${claimProduct.startDate}','YYYY-MM-DD')
+		</if>
+		<if test="claimProduct.endDate !=null and claimProduct.endDate !=''"> 
+			and cp.CLAIM_DATE <![CDATA[<=]]> to_date('${claimProduct.endDate}','YYYY-MM-DD')
+		</if>
+		<if test="claimProduct.trace_code !=null and claimProduct.trace_code !=''"> 
+			and cp.trace_code like '%' || #{claimProduct.trace_code,jdbcType=VARCHAR} || '%'
+		</if>
+	</sql>
+	<select id="selectClaimProductByOID" resultMap="claimProductResult">
+		select  <include refid="select_base"/>  from customer_claim_products cp where ENABLED_FLAG='Y' and cp.ORDER_ID=#{orderId,jdbcType=VARCHAR} 
+		<if test="id!=null">
+		and cp.ID!=#{id,jdbcType=BIGINT}
+		</if>
+		
+	</select>
+	<select id="selectClaimProducts" resultMap="claimProductResult">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  <include refid="select_base"/>  from customer_claim_products cp where ENABLED_FLAG='Y' <include refid="base_map_conditions"/>  
+					  <include refid="base_conditions"/>
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	<select id="getTotal" resultType="java.lang.Integer">
+		select count(1) from customer_claim_products cp where ENABLED_FLAG='Y' <include refid="base_map_conditions" />
+	</select>
+	<sql id="base_conditions">
+		<choose>
+			<when test="order!=null and order!=''">
+			order by 'cp.'||${sort} ${order}
+			</when>
+			<otherwise>
+			 order by cp.create_date desc
+			</otherwise>
+		</choose>
+		
+	</sql>
+</mapper>

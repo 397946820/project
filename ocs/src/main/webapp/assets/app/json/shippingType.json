@@ -1,0 +1,14 @@
+[
+	{
+		"shippingTypeName": "AF",
+		"shippingType": "AF"
+	},
+	{
+		"shippingTypeName": "SF",
+		"shippingType": "SF"
+	},
+	{
+		"shippingTypeName": "CO",
+		"shippingType": "CO"
+	}
+]

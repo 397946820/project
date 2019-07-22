@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.ILightMarkShipmentDao">
+	<resultMap type="com.it.ocs.salesStatistics.model.LightMarkShipmentModel" id="lightMarkShipment">
+		<result column="id" property="id"  />
+		<result column="actions" property="actions"  />
+		<result column="account" property="account"  />
+		<result column="marker" property="marker"  />
+		<result column="order_id" property="orderId"  />
+		<result column="item_id" property="itemId"  />
+		<result column="tracking_number_01" property="tn01"  />
+		<result column="carrier_01" property="carrier01"  />
+		<result column="tracking_number_02" property="tn02"  />
+		<result column="carrier_02" property="carrier02"  />
+		<result column="tracking_number_03" property="tn03"  />
+		<result column="carrier_03" property="carrier03"  />
+		<result column="tracking_number_04" property="tn04"  />
+		<result column="carrier_04" property="carrier04"  />
+		<result column="tn_upload_status" property="tnUploadStatus"  />
+		<result column="shipped_at" property="shippedAt"  />
+		<result column="cause" property="cause"  />
+		<result column="enabled_flag" property="enabledFlag"  />
+		<result column="created_at" property="createdAt"  />
+		<result column="updated_at" property="updatedAt"  />
+		<result column="platform" property="platform"  />
+		<result column="tn_init_at" property="tnInitAt"  />
+	</resultMap>
+	
+	<insert id="add">
+		insert into light_mark_shipment
+			   (id, actions, platform, account, marker, order_id, item_id, tracking_number_01, carrier_01, tn_upload_status, enabled_flag, created_at, updated_at, tn_init_at) 
+		values (light_mark_shipment_seq.nextval, #{param.actions,jdbcType=VARCHAR}, #{param.platform,jdbcType=VARCHAR}, #{param.account,jdbcType=VARCHAR},
+				#{param.marker,jdbcType=NUMERIC}, #{param.orderId,jdbcType=VARCHAR}, #{param.itemId,jdbcType=VARCHAR}, #{param.tn01,jdbcType=VARCHAR},
+				#{param.carrier01,jdbcType=VARCHAR}, #{param.tnUploadStatus,jdbcType=VARCHAR}, '1', sysdate, sysdate, #{param.tnInitAt,jdbcType=TIMESTAMP})
+	</insert>
+	
+	<update id="update">
+		update light_mark_shipment 
+		set 
+			<if test="param.actions != null and param.actions != ''">
+			actions=actions || ';' || #{param.actions,jdbcType=VARCHAR},
+			</if>
+			<if test="param.tn01 != null and param.tn01 != ''">
+			tracking_number_01=#{param.tn01,jdbcType=VARCHAR},
+			</if>
+			<if test="param.carrier01 != null and param.carrier01 != ''">
+			carrier_01=#{param.carrier01,jdbcType=VARCHAR},
+			</if>
+			<if test="param.tnUploadStatus != null and param.tnUploadStatus != ''">
+			tn_upload_status=#{param.tnUploadStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="param.shippedAt != null and param.shippedAt != ''">
+			shipped_at=#{param.shippedAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="param.cause != null and param.cause != ''">
+			cause=#{param.cause},
+			</if>
+			<if test="param.tnInitAt != null">
+			tn_init_at=#{param.tnInitAt},
+			</if>
+			updated_at=sysdate
+		where order_id=#{param.orderId} and item_id=#{param.itemId} and account=#{param.account} and platform=#{param.platform}
+	</update>
+	
+	<select id="query" resultMap="lightMarkShipment" parameterType="java.util.HashMap">
+		select ms.* from light_mark_shipment ms where 1=1
+		<if test="param.tnUploadStatus != null and param.tnUploadStatus != ''">
+		and ms.tn_upload_status=#{param.tnUploadStatus}
+		</if>
+		<if test="param.platform != null and param.platform != ''">
+		and ms.platform=#{param.platform}
+		</if>
+		<if test="param.containsKey('tn01_isnotnull')">
+		and ms.tracking_number_01 is not null
+		</if>
+		<if test="param.containsKey('carrier01_isnotnull')">
+		and ms.carrier_01 is not null
+		</if>
+	</select>
+	
+	<select id="queryOne" resultMap="lightMarkShipment" parameterType="java.util.HashMap">
+		select ms.* from light_mark_shipment ms 
+		where ms.order_id=#{param.orderId} and ms.item_id=#{param.itemId} and ms.account=#{param.account} and ms.platform=#{param.platform} and rownum=1
+	</select>
+	
+	<select id="get" resultMap="lightMarkShipment" parameterType="java.lang.Long">
+		select ms.* from light_mark_shipment ms where ms.id=#{id}
+	</select>
+	
+	<select id="queryLightProduct" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select	tbl.sku, tbl.qty
+	    from	(select lo.order_id order_id,
+				       	li.entity_id detail_id,
+				       	li.sku,
+				       	li.qty_ordered - li.qty_canceled - li.qty_refunded -  li.qty_shipped qty
+				from   	light_order lo, 
+		                (select a.entity_id, a.parent_id, a.sku, a.qty_ordered, a.qty_canceled, a.qty_refunded, a.qty_shipped, a.street from light_order_item a 
+		                 union all
+		                 select b.entity_id, b.parent_id, b.sku, b.qty_ordered, b.qty_canceled, b.qty_refunded, b.qty_shipped, b.street  from light_order_item_b b) li
+				where  	lo.entity_id = li.parent_id and li.sku not like 'OS%'
+				       	and li.sku not like 'B%' and li.sku is not null and street is not null
+				       	and li.qty_ordered - li.qty_canceled - li.qty_refunded - li.qty_shipped > 0
+				union all
+				select 	'w_' || lo.order_id || '_' || sf.times order_id,
+				       	li.entity_id detail_id,
+				       	sf.sku sku,
+				       	sf.qty qty
+				from   	light_order lo, light_order_item li, sys_return_order_final sf
+				where  	lo.entity_id = li.parent_id and lo.order_id = sf.order_id) tbl
+	    where	1=1 and tbl.order_id=#{param.orderId} and tbl.detail_id=#{param.detailId} and rownum=1
+	</select>
+	
+	<sql id="base_query">
+		select ms.* from light_mark_shipment ms where ms.platform=#{param.platform}
+		<if test="param.tnUploadStatus != null and param.tnUploadStatus != ''">
+			and ms.tn_upload_status=#{param.tnUploadStatus}
+		</if>
+		<if test="param.orderId != null and param.orderId != ''">
+			and (#{param.orderId} like '%' || to_char(ms.order_id) || '%' or ms.order_id like '%' || to_char(#{param.orderId}) || '%')
+		</if>
+		<if test="param.startCreatedAt != null and param.startCreatedAt != ''">
+			<![CDATA[and ms.created_at >= to_date(CONCAT(#{param.startCreatedAt}, ' 00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.endCreatedAt != null and param.endCreatedAt != ''">
+			<![CDATA[and ms.created_at <= to_date(CONCAT(#{param.endCreatedAt}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.startTnInitAt != null and param.startTnInitAt != ''">
+			<![CDATA[and ms.tn_init_at >= to_date(CONCAT(#{param.startTnInitAt}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="param.endTnInitAt != null and param.endTnInitAt != ''">
+			<![CDATA[and ms.tn_init_at <= to_date(CONCAT(#{param.endTnInitAt}, ' 23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+	</sql>
+	
+	<select id="count" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_query" />) t
+	</select>
+	
+	<select id="queryByPage" resultMap="lightMarkShipment" parameterType="java.util.HashMap">
+		select * 
+		from (select t.*, rownum rn from (select o.* from (<include refid="base_query" />) o order by o.created_at desc) t 
+		<![CDATA[ 
+		where rownum<=#{end}) t2 where t2.rn>=#{start}
+		]]>
+	</select>
+	
+	<select id="queryExportData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select o.*, u.username markertext from (<include refid="base_query" />) o, sys_user u where o.marker=u.user_id(+)
+	</select>
+</mapper>

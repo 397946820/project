@@ -1,0 +1,150 @@
+.icon3{display:inline-block; background:url('/ocs/assets/app/images/synchronou/ebay_icon.png') no-repeat;vertical-align: middle;}
+.size_16{width:16px;height:13px;margin: 0 5px}
+.no-shipped_time{background-position: -16px -14px;}
+.shipped_time{background-position: -38px -14px;}
+.has_pushed{background-position: -62px -15px;}
+.no-has_pushed{background-position: -86px -14px;}
+.Completed{background-position: -110px -14px;}
+.Active{background-position: -132px -14px;}
+.no-paid_time{width:9px;height:13px;background-position: -155px -13px;}
+.paid_time{width:9px;height:13px;background-position: -172px -13px;}
+.Cancelled{width:14px;height:14px;background-position: -194px -14px;}
+.CancelPending{width:14px;height:114px;background-position: -214px -14px;}
+
+.unreply{width:19px;height:13px;background-position: -16px -40px;}
+.read{width:19px;height:16px;background-position: -38px -40px;}
+.unread{width:19px;height:16px;background-position: -63px -40px;}
+.add-image-icon{width:22px;height:18px;background-position: -86px -40px;}
+.reply{width:19px;height:20px;background-position: -16px -59px;}
+.replied{width:18px;height:13px;background-position: -16px -83px;}
+.num_100{width:16px;height:11px;background-position: -38px -83px;}
+.country_size{width:18px;height:13px;}
+/*国家大图标*/
+/* */
+.num_0{background-position: -16px -104px;}
+.num_193{background-position: -38px -104px;}
+.num_203{background-position: -62px -104px;}
+.num_22{background-position: -86px -104px;}
+
+.num_210{background-position: -16px -125px;}
+.num_186{background-position: -38px -125px;}
+.num_6{background-position: -38px -125px;}
+.num_101{background-position: -62px -125px;}
+.num_22{background-position: -86px -125px;}
+
+.num_3{background-position: -16px -144px;}
+.num_146{background-position: -38px -144px;}
+.num_211{background-position: -62px -144px;}
+.num_2{background-position: -86px -144px;}
+.num_8{background-position: -86px -144px;}
+
+.num_123{background-position: -16px -164px;}
+.num_207{background-position: -16px -164px;}
+.num_71{background-position: -38px -164px;}
+.num_77{background-position: -62px -164px;}
+.num_23{background-position: -86px -164px;}
+
+.num_201{background-position: -16px -184px;}
+.num_212{background-position: -38px -184px;}
+.num_205{background-position: -62px -184px;}
+.num_7{background-position: -86px -184px;}
+
+.num_15{background-position: -16px -204px;}
+.num_5{background-position: -16px -204px;}
+.num_216{background-position: -38px -205px;}
+
+/*国家小图标*/
+/*.num_220{background-position: -16px -220px;}
+.num_212{background-position: -38px -220px;}
+.num_205{background-position: -62px -220px;}
+.num_7{background-position: -86px -236px;}
+.num_7{background-position: -86px -236px;}
+.num_7{background-position: -86px -236px;}*/
+/*多属性小图标、大图标*/
+.FixedPriceItem1{width:20px;height:20px;background-position: -86px -220px;}
+.FixedPriceItem{width:20px;height:20px;background-position: -111px -220px;}
+.Chinese{width:20px;height:20px;background-position: -134px -220px;}
+
+.propert2{width:20px;height:20px;background-position: -292px -4px;}
+.price{width:20px;height:20px;background-position: -290px -79px;}
+.tosell{width:20px;height:20px;background-position: -293px -43px;}
+
+.Negative{width:16px;height:16px;background-position: -16px -253px;}
+.Neutral{width:16px;height:16px;background-position: -38px -253px;}
+.Positive{width:16px;height:16px;background-position: -62px -253px;}
+	
+/*消息回复页面样式设置*/
+.message-sate{
+	display:inline-block;
+	transform:translate(0,0);
+}
+.message_tip{
+	display:none;
+    border: 1px solid grey;
+    height: 20px;
+    border-radius: 3px;
+    padding: 0 2px;
+    font-size: 8px;
+    transform: scale(0.8);
+    position: fixed;
+    background: #fff;
+    z-index: 10;
+    top: -2px;
+    right: 14px;
+   
+}
+.imgPreview{
+	/*position:absolute;
+	bottom:30px;
+	left:-40px;
+	height:100px;*/
+	padding: 0;
+    margin: 0;
+    background: #e4effe;
+}
+.imgPreview li{
+    display: inline-block;
+    width: 87px;
+    padding: 3px;
+    position: relative;
+}
+.imgPreview li img{
+    width: 80px;
+    height: 80px;
+    margin-right: 10px;
+    border: 1px solid grey;
+}
+.imgPreview li p{
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+.messageAddImgBtn span{padding-left:5px;}
+.messageAddImgBtn{
+	background: #5e83b5;
+    padding: 6px;
+    color: #ffffff;
+    border: 1px solid #4b71a4;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 13px;
+    margin-left: 19px;
+    line-height: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.delete-button{
+	    width: 15px;
+    height: 15px;
+    color: #ffffff;
+    line-height: 10px;
+    text-align: center;
+    background: #cd2c2c;
+    position: absolute;
+    top: -1px;
+    border-radius: 50%;
+    right: 0px;
+    cursor:pointer;
+}
+
+

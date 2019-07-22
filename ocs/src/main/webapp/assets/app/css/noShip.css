@@ -1,0 +1,45 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+body, input, select, button {
+	font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif,"宋体";
+}
+ul, dl, li {
+    list-style-type: none;
+}
+a{
+	text-decoration: none;
+}
+.international{
+	width: 800px;
+	overflow: hidden;
+	margin: 0 auto;
+	margin-bottom: 20px;
+}
+.left,.center,.right{
+	float: left;
+}
+.subRegion,.domestic{
+	margin-right: 50px;
+	margin-top: 10px;
+}
+.domestic{
+	margin-left:85px;
+	padding-bottom:30px;
+}
+.domestic .subRegion{
+	display:inline-block;
+}
+.content{
+	margin: 10px 0 0 20px;
+	display: none;
+}
+.showSelected{
+	width: 800px;
+	padding: 5px;
+	background-color: #f1f1f1;
+	margin-top: 10px;
+	margin: 0 auto;
+}

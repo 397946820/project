@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.customerCenter.dao.IBaseComboboxDao">
+	<resultMap type="com.it.ocs.customerCenter.model.BaseComboboxModel" id="baseComboboxResult">
+		<id column="ID" property="id"  />
+		<result column="COUNTRY" property="country"  />
+	</resultMap>
+	<select id="getValueByField" resultMap="baseComboboxResult">
+		${field} 
+	</select>
+	
+	<select id="selectMappingSkus" resultType="com.it.ocs.customerCenter.model.MetadataModel">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  ID id,SKU sku,CATAGORIES catagories ,PARENT_CATAGORIES parentCatagories from MAPPING_SKU_INFO where ENABLED_FLAG='Y' <include refid="select_base_condition"/>  order by CREATE_DATE desc 
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select>
+	<sql id="select_base_condition">
+	<if test="skuModel.sku !=null and skuModel.sku !=''">
+	  and (sku like '%'||#{skuModel.sku}||'%')
+			
+	</if>
+	</sql>
+	<!-- <select id="selectMappingCatagories" resultType="com.it.ocs.customerCenter.model.MetadataModel">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  ID id,PARENT_ID parentId,CATAGORIE_NAME catagorieName from MAPPING_CATAGORIES_INFO where ENABLED_FLAG='Y'
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select> -->
+	<!-- <select id="selectMappingParents" resultType="com.it.ocs.customerCenter.model.MetadataModel">
+		select * from
+			  ( 
+				select S.*,ROWNUM RN from (
+					select  ID id,PARENT_NAME parentName from MAPPING_PARENT_C_INFO where ENABLED_FLAG='Y'
+				) S 
+			<![CDATA[
+				where ROWNUM<=#{endRow}
+			)
+				WHERE RN>=#{startRow}
+			]]>
+	</select> -->
+	<select id="getSkuTotal" resultType="java.lang.Integer">
+		select count(1) from MAPPING_SKU_INFO where ENABLED_FLAG='Y'
+	</select>
+	<select id="getCatagoriesTotal" resultType="java.lang.Integer">
+		select count(1) from MAPPING_CATAGORIES_INFO where ENABLED_FLAG='Y'
+	</select>
+	<select id="getParentTotal" resultType="java.lang.Integer">
+		select count(1) from MAPPING_PARENT_C_INFO where ENABLED_FLAG='Y'
+	</select>
+	<insert id="insertMappingSkus" parameterType="java.util.List">
+		INSERT INTO MAPPING_SKU_INFO(ID,SKU,CATAGORIES,PARENT_CATAGORIES,CREATE_BY,CREATE_DATE) 
+       select mapping_sku_SEQ.nextval,c.*,sysdate from(
+       	<foreach collection="list" index="index" item="item"
+				separator="union all">
+	    select 
+		#{item.sku,jdbcType=VARCHAR},
+		#{item.catagories,jdbcType=VARCHAR},
+		#{item.parentCatagories,jdbcType=VARCHAR},
+		#{item.createBy,jdbcType=BIGINT}
+		from dual
+		</foreach>
+       )c
+	</insert>
+	<select id="selectParents" resultType="com.it.ocs.customerCenter.model.MetadataModel">
+		select distinct PARENT_CATAGORIES as parentCatagories from MAPPING_SKU_INFO where  ENABLED_FLAG='Y'
+	</select>
+	<select id="selectCatagories" resultType="com.it.ocs.customerCenter.model.MetadataModel">
+		select distinct CATAGORIES as catagories from MAPPING_SKU_INFO where  ENABLED_FLAG='Y'
+	</select>
+	<select id="selectMetadatesBySku" resultType="com.it.ocs.customerCenter.model.MetadataModel">
+		select　id,sku,CATAGORIES as catagories,PARENT_CATAGORIES as parentCatagories from MAPPING_SKU_INFO where SKU=#{sku,jdbcType=VARCHAR}
+	</select>
+	<update id="updateMappingSkus" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+		   update MAPPING_SKU_INFO bao 
+		   set
+				SKU = #{item.sku,jdbcType=VARCHAR},
+				CATAGORIES = #{item.catagories,jdbcType=VARCHAR},
+		        PARENT_CATAGORIES = #{item.parentCatagories,jdbcType=VARCHAR},
+				UPDATE_DATE = #{item.lastUpdationDate,jdbcType=TIMESTAMP}
+		   where ID = #{item.id,jdbcType=BIGINT}
+		   </foreach>
+	</update>
+	<update id="skuRemoveById">
+	    update MAPPING_SKU_INFO set  ENABLED_FLAG='N' where  ID=#{id,jdbcType=BIGINT}
+	</update>
+</mapper>

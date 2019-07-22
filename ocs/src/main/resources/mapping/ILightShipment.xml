@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.ILightShipmentDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID entityId,
+			   ORDER_ID orderId,
+			   SHIPMENT_INCREMENT_ID shipmentIncrementId,
+			   TRACKING_NUMBER trackingNumber,
+			   TRACK_NUMBER trackNumber,
+			   TITLE,
+			   CARRIER
+		FROM LIGHT_SHIPMENT
+	</sql>
+	
+	<select id="getLightShipsByOrderId" resultType="com.it.ocs.salesStatistics.model.LightShipmentModel">
+		<include refid="base_sql"/>
+		WHERE ORDER_ID = #{orderId}
+	</select>
+	
+	<select id="getShipmentIncrementIdByOrderId" resultType="java.lang.String">
+		SELECT DISTINCT SHIPMENT_INCREMENT_ID FROM LIGHT_SHIPMENT WHERE ORDER_ID = #{orderId}
+	</select>
+	
+	<select id="getByObject" resultType="com.it.ocs.salesStatistics.model.LightShipmentModel">
+		<include refid="base_sql"/>
+		WHERE ORDER_ID = #{param.orderId} AND TRACK_NUMBER = #{param.trackNumber} and CARRIER = #{param.carrier}
+	</select>
+
+	<insert id="add" parameterType="java.util.HashMap">
+		insert into LIGHT_SHIPMENT (ENTITY_ID, ORDER_ID, SHIPMENT_INCREMENT_ID, 
+	      TRACKING_NUMBER, CREATED_AT, UPDATED_AT, 
+	      TRACK_NUMBER, TITLE, CARRIER
+	      )
+	    values (LIGHT_SHIPMENT_SEQ.NEXTVAL, #{orderId,jdbcType=VARCHAR}, #{shipmentIncrementId,jdbcType=VARCHAR}, 
+	      #{trackingNumber,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, 
+	      #{trackNumber,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{carrier,jdbcType=VARCHAR}
+	      )
+	</insert>
+
+	<update id="update" parameterType="java.util.HashMap">
+		update LIGHT_SHIPMENT
+		<set>
+			<if test="orderId != null">
+				ORDER_ID = #{orderId,jdbcType=VARCHAR},
+			</if>
+			<if test="shipmentIncrementId != null">
+				SHIPMENT_INCREMENT_ID = #{shipmentIncrementId,jdbcType=VARCHAR},
+			</if>
+			<if test="trackingNumber != null">
+				TRACKING_NUMBER = #{trackingNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="trackNumber != null">
+				TRACK_NUMBER = #{trackNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="carrier != null">
+				CARRIER = #{carrier,jdbcType=VARCHAR},
+			</if>
+			<if test="createdAt != null">
+				CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedAt != null">
+				UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+</mapper>

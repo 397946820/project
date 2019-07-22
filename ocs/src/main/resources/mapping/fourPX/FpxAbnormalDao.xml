@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.fourPX.dao.FpxAbnormalDao">
+
+	<select id="generatePrimaryKey" resultType="java.lang.Long">
+		select fpx_seq.nextval from dual
+	</select>
+	
+	<insert id="insert">
+		insert into fpx_abnormal (id,parentId,parentType,action,reason,createdat)
+		values 
+		(#{item.id,jdbcType=NUMERIC},#{item.parentId,jdbcType=NUMERIC},#{item.parentType,jdbcType=VARCHAR}
+		,#{item.action,jdbcType=VARCHAR},#{item.reason,jdbcType=VARCHAR},#{item.createdat,jdbcType=TIMESTAMP}) 
+	</insert>
+	
+	<sql id="base_sql">
+		select a.*, b.orderid parentOrderId from fpx_abnormal a, (select o.id, o.orderid from fpx_out_warehouse o) b
+		where 1=1 and a.parentId=b.id
+		<if test="item.parentId != null">
+			and a.parentId=#{item.parentId,jdbcType=NUMERIC}
+		</if>
+		<if test="item.parentType != null and item.parentType != ''">
+			and a.parentType=#{item.parentType,jdbcType=VARCHAR}
+		</if>
+		<if test="item.action != null and item.action != ''">
+			and a.action=#{item.action,jdbcType=VARCHAR}
+		</if>
+		order by a.createdat desc
+	</sql>
+	
+	<select id="count" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from (<include refid="base_sql" />) t 
+	</select>
+	
+	<select id="selectByPage" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select * 
+		from (select t.*, rownum rn from (<include refid="base_sql" />) t 
+		<![CDATA[ 
+		where rownum<=#{end}) t2 where t2.rn>=#{start}
+		]]>
+	</select>
+</mapper>

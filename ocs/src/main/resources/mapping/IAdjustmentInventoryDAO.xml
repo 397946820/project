@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.amazon.dao.IAdjustmentInventoryDAO">
+	<insert id="save">
+		insert into amazon_inventory_adjustments(
+		ID,
+		ADJUSTED_DATE,
+		TRANSACTION_ITEM_ID,
+		SKU,
+		FNSKU,
+		PRODUCT_NAME,
+		QUANTITY,
+		FULFILLMENT_CENTER_ID,
+		REASON,
+		DISPOSITION,
+		REPORT_ID,
+		SITE
+		)values(
+		AMAZON_ADJUSTMENTS_SEQ.Nextval,
+		to_date(#{ADJUSTED_DATE,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+		#{TRANSACTION_ITEM_ID,jdbcType=VARCHAR},
+		#{SKU,jdbcType=VARCHAR},
+		#{FNSKU,jdbcType=VARCHAR},
+		#{PRODUCT_NAME,jdbcType=VARCHAR},
+		#{QUANTITY,jdbcType=VARCHAR},
+		#{FULFILLMENT_CENTER_ID,jdbcType=VARCHAR},
+		#{REASON,jdbcType=VARCHAR},
+		#{DISPOSITION,jdbcType=VARCHAR},
+		#{REPORT_ID,jdbcType=VARCHAR},
+		#{SITE,jdbcType=VARCHAR}
+		)
+	</insert>
+	<delete id="delByReportId" parameterType="java.lang.String">
+		delete
+		amazon_inventory_adjustments where REPORT_ID=#{id}
+	</delete>
+</mapper>

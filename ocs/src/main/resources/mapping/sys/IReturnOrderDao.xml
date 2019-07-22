@@ -1,0 +1,985 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.sys.dao.IReturnOrderDao">
+	<resultMap type="com.it.ocs.sys.model.ReturnOrderModel" id="BaseResultMap">
+		<id column="ID" property="id" jdbcType="DECIMAL" />
+		<result column="PLATFORM" property="platform" jdbcType="VARCHAR" />
+		<result column="ACCOUNT" property="account" jdbcType="VARCHAR" />
+		<result column="SITE" property="site" jdbcType="VARCHAR" />
+		<result column="ORDER_ID" property="orderId" jdbcType="VARCHAR" />
+		<result column="ORDER_TYPE" property="orderType" jdbcType="DECIMAL" />
+		<result column="CAUSE" property="cause" jdbcType="VARCHAR" />
+		<result column="DESCRIPTIONS" property="descriptions" jdbcType="VARCHAR" />
+		<result column="TRACKING_SERVICE" property="trackingService" jdbcType="VARCHAR" />
+		<result column="TRACKING_NUM" property="trackingNum" jdbcType="VARCHAR" />
+		<result column="DELIVERY_TIME" property="deliveryTime" jdbcType="TIMESTAMP" />
+		<result column="IS_CONSUMER_PAID" property="isConsumerPaid" jdbcType="DECIMAL" />
+		<result column="EDA_ORDER_NUM" property="edaOrderNum" jdbcType="VARCHAR" />
+		<result column="WAREHOUSE_NUM" property="warehouseNum" jdbcType="VARCHAR" />
+		<result column="RETURN_COST_TIME" property="returnCostTime" jdbcType="TIMESTAMP" />
+		<result column="REISSUED_ORDER_ID" property="reissuedOrderId" jdbcType="VARCHAR" />
+		<result column="REISSUED_ORDER_TIME" property="reissuedOrderTime" jdbcType="TIMESTAMP" />
+		<result column="APPROVE_USER" property="approveUser" jdbcType="DECIMAL" />
+		<result column="APPROVE_TIME" property="approveTime" jdbcType="TIMESTAMP" />
+		<result column="APPROVE_DESCRIPTION" property="approveDescription" jdbcType="VARCHAR" />
+		<result column="APPROVE_RESULT" property="approveResult" jdbcType="DECIMAL" />
+		<result column="CREATE_BY" property="createBy" jdbcType="DECIMAL" />
+		<result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="UPDATE_BY" property="updateBy" jdbcType="DECIMAL" />
+		<result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
+		<result column="CREATENAME" property="createName" jdbcType="VARCHAR" />
+		<result column="CURRENCY_CODE" property="currencyCode" jdbcType="VARCHAR" />
+		<result column="IS_RECEIVING" property="isReceiving" jdbcType="DECIMAL" />
+		<result column="IS_REISSUE" property="isReissue" jdbcType="DECIMAL" />
+		<result column="ENABLED_FLAG" property="enabledFlag" jdbcType="VARCHAR" />
+		<result column="ADJUSTMENT_POSITIVE" property="adjustmentPositive" jdbcType="DECIMAL" />
+		<result column="DELIVERY_WAREHOUSE" property="deliveryWarehouse" jdbcType="VARCHAR" />
+		<result column="DELIVERY_ADDRESS" property="deliveryAddress" jdbcType="VARCHAR" />
+		<result column="IS_CONFIRM_ORDER" property="isConfirmOrder" jdbcType="DECIMAL" />
+		<result column="SHIP_COST" property="shipCost" jdbcType="DECIMAL" />
+		<collection property="items" ofType="com.it.ocs.sys.model.ReturnOrderItemModel">
+			<id column="ENTITYID" property="entityId" jdbcType="DECIMAL" />
+			<result column="PARENT_ID" property="parentId" jdbcType="DECIMAL" />
+			<result column="SKU" property="sku" jdbcType="VARCHAR" />
+			<result column="QTY" property="qty" jdbcType="DECIMAL" />
+			<result column="RETURN_COST" property="returnCost" jdbcType="DECIMAL" />
+			<result column="BAD_PRODUCT_QTY" property="badProductQty" jdbcType="DECIMAL" />
+			<result column="PRODUCT_CASE_TYPE" property="productCaseType" jdbcType="VARCHAR" />
+			<result column="USE_HOUR_DAY" property="useHourDay" jdbcType="DECIMAL" />
+			<result column="QTY_ORDERED" property="qtyOrdered" jdbcType="DECIMAL" />
+			<result column="ROW_TOTAL" property="rowTotal" jdbcType="DECIMAL" />
+			<result column="LINE_NUMBER" property="lineNumber" jdbcType="DECIMAL" />
+			<result column="ASIN" property="asin" jdbcType="VARCHAR" />
+			<result column="CANCELLATION_TYPE" property="cancellationType" jdbcType="VARCHAR" />
+			<result column="ORDER_ITEM_ID" property="orderItemId" jdbcType="VARCHAR" />
+			<result column="M_SKU" property="mSku" jdbcType="VARCHAR" />
+			<result column="REMARKS" property="remarks" jdbcType="VARCHAR" />
+			<result column="TARCKING_SERVICE" property="tarckingService" jdbcType="VARCHAR" />
+			<result column="TARCKING_NUM" property="tarckingNum" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<sql id="sql_where">
+		<where>
+			AND R.CREATE_BY = U.USER_ID
+			<if test="param != null">
+				<if test="param.platform != null and param.platform != ''">
+					AND R.PLATFORM = #{param.platform}
+				</if>
+				<if test="param.account != null and param.account != ''">
+					AND R.ACCOUNT = #{param.account}
+				</if>
+				<if test="param.site != null and param.site != ''">
+					AND R.SITE = #{param.site}
+				</if>
+				<if test="param.orderId != null and param.orderId != ''">
+					AND R.ORDER_ID = #{param.orderId}
+				</if>
+				<if test="param.orderType != null and param.orderType != '' or param.orderType == 0">
+					AND R.ORDER_TYPE = #{param.orderType}
+				</if>
+				<if test="param.createName != null and param.createName != ''">
+					AND U.NICK LIKE #{param.createName} || '%'
+				</if>
+				<if test="param.cause != null and param.cause != ''">
+					AND R.CAUSE like #{param.cause} || '%'
+				</if>
+				<!-- <if test="param.createBy != null and param.createBy != ''">
+					AND R.CREATE_BY = #{param.createBy}
+				</if> -->
+				<if test="param.isReceiving != null and param.isReceiving != '' or param.isReceiving == 0">
+					AND R.IS_RECEIVING = #{param.isReceiving}
+				</if>
+				<if test="param.isReissue != null and param.isReissue != '' or param.isReissue == 0">
+					AND R.IS_REISSUE = #{param.isReissue}
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<sql id="sql_order">
+		<if test="sort != null and order != null">
+			ORDER BY R.${sort} ${order}
+		</if>
+		<if test="sort == null and order == null">
+			ORDER BY R.UPDATE_DATE DESC
+		</if>
+	</sql>
+	<select id="getById" resultType="java.util.Map">
+		select * from sys_return_order where id=#{id}
+	</select>
+	<select id="findAll" resultMap="BaseResultMap">
+		SELECT R.*,
+			   I.*
+		FROM (select *
+		from (select tmp_page.*, rownum row_id
+		from (SELECT R.*, U.NICK CREATENAME
+		FROM SYS_RETURN_ORDER R, SYS_USER U
+		<include refid="sql_where" />
+		<include refid="sql_order" />
+		)
+		tmp_page
+		where rownum <![CDATA[ <= ]]>
+		#{endRow})
+		where row_id <![CDATA[ >= ]]>
+		#{startRow}) R , 
+	   (SELECT I.ID ENTITYID,
+               I.PARENT_ID,
+               I.SKU,
+               I.QTY,
+               I.RETURN_COST,
+               I.BAD_PRODUCT_QTY,
+               I.PRODUCT_CASE_TYPE,
+               I.USE_HOUR_DAY,
+               I.QTY_ORDERED,
+               I.ROW_TOTAL,
+               I.LINE_NUMBER,
+               I.ASIN,
+               I.CANCELLATION_TYPE,
+               I.ORDER_ITEM_ID,
+               I.M_SKU,
+               I.REMARKS,
+               K.TARCKING_SERVICE,
+               K.TARCKING_NUM
+          FROM SYS_RETURN_ORDER_ITEM I, SYS_RETURN_ORDER_FINAL K
+         WHERE I.PARENT_ID = K.PARENT_ID(+)
+           AND I.SKU = K.SKU(+)) I
+		WHERE R.ID = I.PARENT_ID(+)
+		<include refid="sql_order" />
+	</select>
+	
+	<update id="cancelApplication">
+		UPDATE SYS_RETURN_ORDER SET ENABLED_FLAG = 'N' WHERE ID = #{id}
+	</update>
+
+	<select id="getAddress" resultType="com.it.ocs.sys.utils.CamelKeyMap">
+		<choose>
+			<when test="platform == 'amazon'">
+				SELECT R.NAME,
+				       R.COUNTRY_CODE COUNTRY,
+				       R.STATE_OR_REGION PROV_STATE,
+				       R.POSTAL_CODE POSTAL_CODE,
+				       R.PHONE,
+				       R.CITY,
+				       R.STREET ADDRESS_LINE1
+				  FROM AMAZON_ORDER R
+				 WHERE R.PLATFORM = #{account}
+				   AND R.ORDER_ID = #{orderId}
+			</when>
+			<when test="platform == 'ebay'">
+				SELECT JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'Street1') ADDRESS_LINE1,
+				       JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'Street2') ADDRESS_LINE2,
+				       JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'CityName') CITY,
+				       JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'Country') COUNTRY,
+				       JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'Name') NAME,
+				       case
+				         when JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'Phone') =
+				              'Invalid Request' then
+				          ''
+				         else
+				          JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'Phone')
+				       end PHONE,
+				       JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'PostalCode') POSTAL_CODE,
+				       JSON_EXT.GET_STRING(JSON(C.SHIPPING_ADDRESS), 'StateOrProvince') PROV_STATE
+				  FROM EBAY_ORDER R, EBAY_ORDER_SUB C
+				 WHERE R.ID = C.PARENT_ID
+				   AND R.ACCOUNT = #{account}
+				   AND R.ORDER_ID = #{orderId}
+			</when>
+			<when test="platform == 'light'">
+				SELECT B.STREET ADDRESS_LINE1,
+				       B.CITY,
+				       NVL(B.COUNTRY_ID, A.PLATFORM) COUNTRY,
+				       B.SHIPPING_FIRSTNAME || ' ' || B.SHIPPING_MIDDLENAME || ' ' ||
+				       B.SHIPPING_LASTNAME NAME,
+				       B.TELEPHONE PHONE,
+				       B.POSTCODE POSTAL_CODE,
+				       B.REGION PROV_STATE
+				  FROM LIGHT_ORDER A, LIGHT_ORDER_ITEM B
+				 WHERE A.ENTITY_ID = B.PARENT_ID
+				   AND A.PLATFORM = #{account}
+				   AND A.ORDER_ID = #{orderId}
+				   AND ROWNUM = 1
+			</when>
+			<when test="platform = 'walmart'">
+				SELECT ADDRESS1 ADDRESS_LINE1,
+				       ADDRESS2 ADDRESS_LINE2,
+				       CITY CITY,
+				       NAME NAME,
+				       STATE PROV_STATE,
+				       POSTAL_CODE POSTAL_CODE,
+				       CASE
+				         WHEN COUNTRY = 'USA' THEN
+				          'US'
+				         ELSE
+				          COUNTRY
+				       END COUNTRY,
+				       PHONE PHONE
+				  FROM WALMART_ORDER R
+				 WHERE R.COUNTRY = #{account}
+				   AND R.PURCHASE_ORDER_ID = #{orderId} 
+			</when>
+		</choose>
+	</select>
+
+	<select id="getTotal" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM SYS_RETURN_ORDER R, SYS_USER U
+		<include refid="sql_where" />
+	</select>
+
+	<select id="getReturnOrderCause" resultType="java.util.Map">
+		SELECT CAUSE PRODUCTCASETYPE, CAUSE PRODUCTCASETYPENAME FROM SYS_RETURN_ORDER_CAUSE WHERE CAUSE_TYPE = #{causeType}
+	</select>
+	
+	<select id="getReturnOrderCauseAll" resultType="java.util.Map">
+		SELECT CAUSE PRODUCTCASETYPE, CAUSE PRODUCTCASETYPENAME FROM SYS_RETURN_ORDER_CAUSE
+	</select>
+
+	<select id="getAccountByPlatform" resultType="java.lang.String">
+		<if test="platform == 'amazon'">
+			SELECT DISTINCT PLATFORM FROM AMAZON_ACCOUNT_MANAGER
+		</if>
+		<if test="platform == 'ebay'">
+			SELECT DISTINCT ACCOUNT FROM EBAY_ACCOUNT_MANAGER
+		</if>
+		<if test="platform == 'light'">
+			SELECT DISTINCT PLATFORM FROM LIGHT_ACCOUNT_MANAGER
+		</if>
+	</select>
+
+	<select id="getSiteByPlatformAndAccount" resultType="java.lang.String">
+		SELECT DISTINCT SITE FROM SYS_PLATFORM_ACCOUNT_SITE WHERE PLATFORM = #{platform} AND ACCOUNT = #{account}
+	</select>
+	
+	<select id="getPaypalTransactionnumber" resultType="java.lang.String">
+		select json_ext.get_string(json(b.external_transaction),
+                             'ExternalTransactionID')
+		  from ebay_order_sub b
+		 where b.parent_id =
+		       (select r.id
+		          from ebay_order r
+		         where r.order_id = #{orderId}
+		         and r.account = #{account})
+	</select>
+	
+	<select id="getPaypalAccount" resultType="java.lang.String">
+		select r.seller_email
+		  from ebay_order r
+		 where r.order_id = #{orderId}
+		   and r.account = #{account}
+	</select>
+	
+	<select id="getSku" resultType="java.lang.String">
+		select nvl(sku,#{sku}) from sys_sku_link where p_sku = #{sku}
+	</select>
+	
+	<select id="getCatagories" resultType="java.util.Map">
+		select msi.catagories catagories, msi.parent_catagories parentCategory
+		  from MAPPING_SKU_INFO msi
+		 where msi.enabled_flag = 'Y'
+		   and msi.sku = #{sku}
+	</select>
+	
+	<select id="getNickName" resultType="java.lang.String">
+		select r.nick
+		  from sys_user r
+		 where r.enabled_flag = 'Y'
+		   and r.user_id = (select CREATE_BY from SYS_RETURN_ORDER R where r.id = #{id})
+	</select>
+	
+	<select id="getDate" resultType="java.util.Date">
+		select CREATE_DATE from SYS_RETURN_ORDER R where r.id = #{id} 
+	</select>
+	
+	<select id="getCurrency" resultType="java.lang.String">
+		select r.currency_symbol from cal_currency_rate r where r.country_id = #{countryId}
+	</select>
+	
+	<select id="getOrderTime" resultType="java.util.Date">
+		<choose>
+			<when test="platform == 'amazon'">
+				select r.purchase_at + 8/24 from amazon_order r where r.order_id = #{orderId}
+			</when>
+			<when test="platform == 'ebay'">
+				select r.created_time + 8/24 from ebay_order r where r.order_id = #{orderId} and r.account = #{account}
+			</when>
+			<when test="platform == 'light'">
+				select r.light_created_at + 8/24 from light_order r where r.order_id = #{orderId}
+			</when>
+			<when test="platform == 'walmart'">
+				select r.order_date_utc + 8/24 from walmart_order r where r.purchase_order_id = #{orderId}
+			</when>
+		</choose>
+	</select>
+
+	<insert id="addRefundOrder">
+		insert into SYS_RETURN_ORDER_FINAL
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			
+				ID,
+			
+			<if test="platform != null">
+				PLATFORM,
+			</if>
+			<if test="account != null">
+				ACCOUNT,
+			</if>
+			<if test="site != null">
+				SITE,
+			</if>
+			<if test="orderId != null">
+				ORDER_ID,
+			</if>
+			<if test="sku != null">
+				SKU,
+			</if>
+			<if test="qty != null">
+				QTY,
+			</if>
+			<if test="inventoryQuantity != null">
+				INVENTORYQUANTITY,
+			</if>
+			<if test="returnCost != null">
+				RETURN_COST,
+			</if>
+			<if test="orderType != null">
+				ORDER_TYPE,
+			</if>
+			<if test="receiptno != null">
+				RECEIPTNO,
+			</if>
+			<if test="receivingTime != null">
+				RECEIVINGTIME,
+			</if>
+			<if test="createBy != null">
+				CREATE_BY,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE,
+			</if>
+			<if test="updateBy != null">
+				UPDATE_BY,
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE,
+			</if>
+			<if test="parentId != null">
+				PARENT_ID,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			
+				SYS_RETURN_ORDER_FINAL_SEQ.NEXTVAL,
+			
+			<if test="platform != null">
+				#{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="account != null">
+				#{account,jdbcType=VARCHAR},
+			</if>
+			<if test="site != null">
+				#{site,jdbcType=VARCHAR},
+			</if>
+			<if test="orderId != null">
+				#{orderId,jdbcType=VARCHAR},
+			</if>
+			<if test="sku != null">
+				#{sku,jdbcType=VARCHAR},
+			</if>
+			<if test="qty != null">
+				#{qty,jdbcType=DECIMAL},
+			</if>
+			<if test="inventoryQuantity != null">
+				#{inventoryQuantity,jdbcType=DECIMAL},
+			</if>
+			<if test="returnCost != null">
+				#{returnCost,jdbcType=DECIMAL},
+			</if>
+			<if test="orderType != null">
+				#{orderType,jdbcType=DECIMAL},
+			</if>
+			<if test="receiptno != null">
+				#{receiptno,jdbcType=VARCHAR},
+			</if>
+			<if test="receivingTime != null">
+				#{receivingTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createBy != null">
+				#{createBy,jdbcType=DECIMAL},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateBy != null">
+				#{updateBy,jdbcType=DECIMAL},
+			</if>
+			<if test="updateDate != null">
+				#{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="parentId != null">
+				#{parentId,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="addReturnOrder">
+		insert into SYS_RETURN_ORDER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			ID,
+
+			<if test="platform != null">
+				PLATFORM,
+			</if>
+			<if test="account != null">
+				ACCOUNT,
+			</if>
+			<if test="site != null">
+				SITE,
+			</if>
+			<if test="orderId != null">
+				ORDER_ID,
+			</if>
+			<if test="orderType != null">
+				ORDER_TYPE,
+			</if>
+			<if test="cause != null">
+				CAUSE,
+			</if>
+			<if test="descriptions != null">
+				DESCRIPTIONS,
+			</if>
+			<if test="trackingService != null">
+				TRACKING_SERVICE,
+			</if>
+			<if test="trackingNum != null">
+				TRACKING_NUM,
+			</if>
+			<if test="deliveryTime != null">
+				DELIVERY_TIME,
+			</if>
+			<if test="isConsumerPaid != null">
+				IS_CONSUMER_PAID,
+			</if>
+			<if test="edaOrderNum != null">
+				EDA_ORDER_NUM,
+			</if>
+			<if test="warehouseNum != null">
+				WAREHOUSE_NUM,
+			</if>
+			<if test="returnCostTime != null">
+				RETURN_COST_TIME,
+			</if>
+			<if test="reissuedOrderId != null">
+				REISSUED_ORDER_ID,
+			</if>
+			<if test="reissuedOrderTime != null">
+				REISSUED_ORDER_TIME,
+			</if>
+			<if test="approveUser != null">
+				APPROVE_USER,
+			</if>
+			<if test="approveTime != null">
+				APPROVE_TIME,
+			</if>
+			<if test="approveDescription != null">
+				APPROVE_DESCRIPTION,
+			</if>
+			<if test="approveResult != null">
+				APPROVE_RESULT,
+			</if>
+			<if test="createBy != null">
+				CREATE_BY,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE,
+			</if>
+			<if test="updateBy != null">
+				UPDATE_BY,
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE,
+			</if>
+			<if test="currencyCode != null">
+				CURRENCY_CODE,
+			</if>
+			<if test="adjustmentPositive != null">
+				ADJUSTMENT_POSITIVE,
+			</if>
+			<if test="deliveryWarehouse != null">
+				DELIVERY_WAREHOUSE,
+			</if>
+				DELIVERY_ADDRESS,
+			<if test="shipCost != null">
+				SHIP_COST,
+			</if>
+			<if test="payMethod != null">
+				PAY_METHOD
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			SYS_RETURN_ORDER_SEQ.NEXTVAL,
+
+			<if test="platform != null">
+				#{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="account != null">
+				#{account,jdbcType=VARCHAR},
+			</if>
+			<if test="site != null">
+				#{site,jdbcType=VARCHAR},
+			</if>
+			<if test="orderId != null">
+				#{orderId,jdbcType=VARCHAR},
+			</if>
+			<if test="orderType != null">
+				#{orderType,jdbcType=DECIMAL},
+			</if>
+			<if test="cause != null">
+				#{cause,jdbcType=VARCHAR},
+			</if>
+			<if test="descriptions != null">
+				#{descriptions,jdbcType=VARCHAR},
+			</if>
+			<if test="trackingService != null">
+				#{trackingService,jdbcType=VARCHAR},
+			</if>
+			<if test="trackingNum != null">
+				#{trackingNum,jdbcType=VARCHAR},
+			</if>
+			<if test="deliveryTime != null">
+				#{deliveryTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isConsumerPaid != null">
+				#{isConsumerPaid,jdbcType=DECIMAL},
+			</if>
+			<if test="edaOrderNum != null">
+				#{edaOrderNum,jdbcType=VARCHAR},
+			</if>
+			<if test="warehouseNum != null">
+				#{warehouseNum,jdbcType=VARCHAR},
+			</if>
+			<if test="returnCostTime != null">
+				#{returnCostTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="reissuedOrderId != null">
+				#{reissuedOrderId,jdbcType=VARCHAR},
+			</if>
+			<if test="reissuedOrderTime != null">
+				#{reissuedOrderTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveUser != null">
+				#{approveUser,jdbcType=DECIMAL},
+			</if>
+			<if test="approveTime != null">
+				#{approveTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveDescription != null">
+				#{approveDescription,jdbcType=VARCHAR},
+			</if>
+			<if test="approveResult != null">
+				#{approveResult,jdbcType=DECIMAL},
+			</if>
+			<if test="createBy != null">
+				#{createBy,jdbcType=DECIMAL},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateBy != null">
+				#{updateBy,jdbcType=DECIMAL},
+			</if>
+			<if test="updateDate != null">
+				#{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="currencyCode != null">
+				#{currencyCode,jdbcType=VARCHAR},
+			</if>
+			<if test="adjustmentPositive != null">
+				#{adjustmentPositive,jdbcType=DECIMAL},
+			</if>
+			<if test="deliveryWarehouse != null">
+				#{deliveryWarehouse,jdbcType=VARCHAR},
+			</if>
+				#{deliveryAddress,jdbcType=VARCHAR},
+			<if test="shipCost != null">
+				#{shipCost,jdbcType=DECIMAL},
+			</if>
+			<if test="payMethod != null">
+				#{payMethod,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="addReturnOrderItem">
+		insert into SYS_RETURN_ORDER_ITEM
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+
+			ID,
+
+
+			PARENT_ID,
+
+			<if test="sku != null">
+				SKU,
+			</if>
+			<if test="qty != null">
+				QTY,
+			</if>
+			<if test="returnCost != null">
+				RETURN_COST,
+			</if>
+			<if test="badProductQty != null">
+				BAD_PRODUCT_QTY,
+			</if>
+			<if test="productCaseType != null">
+				PRODUCT_CASE_TYPE,
+			</if>
+			<if test="useHourDay != null">
+				USE_HOUR_DAY,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE,
+			</if>
+			<if test="udpateDate != null">
+				UDPATE_DATE,
+			</if>
+			<if test="qtyOrdered != null">
+				QTY_ORDERED,
+			</if>
+			<if test="rowTotal != null">
+				ROW_TOTAL,
+			</if>
+			<if test="lineNumber != null">
+				LINE_NUMBER,
+			</if>
+			<if test="asin != null">
+				ASIN,
+			</if>
+			<if test="cancellationType != null">
+				CANCELLATION_TYPE,
+			</if>
+			<if test="orderItemId != null">
+				ORDER_ITEM_ID,
+			</if>
+			<if test="mSku != null">
+				M_SKU,
+			</if>
+			<if test="remarks != null">
+				REMARKS,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+
+			SYS_RETURN_ORDER_ITEM_SEQ.NEXTVAL,
+
+
+			SYS_RETURN_ORDER_SEQ.CURRVAL,
+
+			<if test="sku != null">
+				#{sku,jdbcType=VARCHAR},
+			</if>
+			<if test="qty != null">
+				#{qty,jdbcType=DECIMAL},
+			</if>
+			<if test="returnCost != null">
+				#{returnCost,jdbcType=DECIMAL},
+			</if>
+			<if test="badProductQty != null">
+				#{badProductQty,jdbcType=DECIMAL},
+			</if>
+			<if test="productCaseType != null">
+				#{productCaseType,jdbcType=VARCHAR},
+			</if>
+			<if test="useHourDay != null">
+				#{useHourDay,jdbcType=DECIMAL},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="udpateDate != null">
+				#{udpateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="qtyOrdered != null">
+				#{qtyOrdered,jdbcType=DECIMAL},
+			</if>
+			<if test="rowTotal != null">
+				#{rowTotal,jdbcType=DECIMAL},
+			</if>
+			<if test="lineNumber != null">
+				#{lineNumber,jdbcType=DECIMAL},
+			</if>
+			<if test="asin != null">
+				#{asin,jdbcType=VARCHAR},
+			</if>
+			<if test="cancellationType != null">
+				#{cancellationType,jdbcType=VARCHAR},
+			</if>
+			<if test="orderItemId != null">
+				#{orderItemId,jdbcType=DECIMAL},
+			</if>
+			<if test="mSku != null">
+				#{mSku,jdbcType=VARCHAR},
+			</if>
+			<if test="remarks != null">
+				#{remarks,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="updateReturnOrder">
+		update SYS_RETURN_ORDER
+		<set>
+			<if test="platform != null">
+				PLATFORM = #{platform,jdbcType=VARCHAR},
+			</if>
+			<if test="account != null">
+				ACCOUNT = #{account,jdbcType=VARCHAR},
+			</if>
+			<if test="site != null">
+				SITE = #{site,jdbcType=VARCHAR},
+			</if>
+			<if test="orderId != null">
+				ORDER_ID = #{orderId,jdbcType=VARCHAR},
+			</if>
+			<if test="orderType != null">
+				ORDER_TYPE = #{orderType,jdbcType=DECIMAL},
+			</if>
+			<if test="cause != null">
+				CAUSE = #{cause,jdbcType=VARCHAR},
+			</if>
+			<if test="descriptions != null">
+				DESCRIPTIONS = #{descriptions,jdbcType=VARCHAR},
+			</if>
+			<if test="trackingService != null">
+				TRACKING_SERVICE = #{trackingService,jdbcType=VARCHAR},
+			</if>
+			<if test="trackingNum != null">
+				TRACKING_NUM = #{trackingNum,jdbcType=VARCHAR},
+			</if>
+			<if test="deliveryTime != null">
+				DELIVERY_TIME = #{deliveryTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isConsumerPaid != null">
+				IS_CONSUMER_PAID = #{isConsumerPaid,jdbcType=DECIMAL},
+			</if>
+			<if test="edaOrderNum != null">
+				EDA_ORDER_NUM = #{edaOrderNum,jdbcType=VARCHAR},
+			</if>
+			<if test="warehouseNum != null">
+				WAREHOUSE_NUM = #{warehouseNum,jdbcType=VARCHAR},
+			</if>
+			<if test="returnCostTime != null">
+				RETURN_COST_TIME = #{returnCostTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="reissuedOrderId != null">
+				REISSUED_ORDER_ID = #{reissuedOrderId,jdbcType=VARCHAR},
+			</if>
+			<if test="reissuedOrderTime != null">
+				REISSUED_ORDER_TIME = #{reissuedOrderTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveUser != null">
+				APPROVE_USER = #{approveUser,jdbcType=DECIMAL},
+			</if>
+			<if test="approveTime != null">
+				APPROVE_TIME = #{approveTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveDescription != null">
+				APPROVE_DESCRIPTION = #{approveDescription,jdbcType=VARCHAR},
+			</if>
+			<if test="approveResult != null">
+				APPROVE_RESULT = #{approveResult,jdbcType=DECIMAL},
+			</if>
+			<if test="createBy != null">
+				CREATE_BY = #{createBy,jdbcType=DECIMAL},
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateBy != null">
+				UPDATE_BY = #{updateBy,jdbcType=DECIMAL},
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isReceiving != null">
+				IS_RECEIVING = #{isReceiving,jdbcType=DECIMAL},
+			</if>
+			<if test="isReissue != null">
+				IS_REISSUE = #{isReissue,jdbcType=DECIMAL},
+			</if>
+			<if test="isConfirmOrder != null">
+				IS_CONFIRM_ORDER = #{isConfirmOrder,jdbcType=DECIMAL},
+			</if>
+			<if test="adjustmentPositive != null">
+				ADJUSTMENT_POSITIVE = #{adjustmentPositive,jdbcType=DECIMAL},
+			</if>
+			<if test="deliveryWarehouse != null">
+				DELIVERY_WAREHOUSE = #{deliveryWarehouse,jdbcType=TIMESTAMP},
+			</if>
+				DELIVERY_ADDRESS = #{deliveryAddress,jdbcType=TIMESTAMP},
+			<if test="shipCost != null">
+				SHIP_COST = #{shipCost,jdbcType=DECIMAL},
+			</if>
+			
+		</set>
+		where ID = #{id,jdbcType=DECIMAL}
+	</update>
+
+	<update id="updateReturnOrderItem">
+		update SYS_RETURN_ORDER_ITEM
+		<set>
+			<if test="parentId != null">
+				PARENT_ID = #{parentId,jdbcType=DECIMAL},
+			</if>
+			<if test="sku != null">
+				SKU = #{sku,jdbcType=VARCHAR},
+			</if>
+			<if test="qty != null">
+				QTY = #{qty,jdbcType=DECIMAL},
+			</if>
+			<if test="returnCost != null">
+				RETURN_COST = #{returnCost,jdbcType=DECIMAL},
+			</if>
+			<if test="badProductQty != null">
+				BAD_PRODUCT_QTY = #{badProductQty,jdbcType=DECIMAL},
+			</if>
+			<if test="productCaseType != null">
+				PRODUCT_CASE_TYPE = #{productCaseType,jdbcType=VARCHAR},
+			</if>
+			<if test="useHourDay != null">
+				USE_HOUR_DAY = #{useHourDay,jdbcType=DECIMAL},
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="udpateDate != null">
+				UDPATE_DATE = #{udpateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="qtyOrdered != null">
+				QTY_ORDERED = #{qtyOrdered,jdbcType=DECIMAL},
+			</if>
+			<if test="rowTotal != null">
+				ROW_TOTAL = #{rowTotal,jdbcType=DECIMAL},
+			</if>
+			<if test="lineNumer != null">
+				LINE_NUMER = #{lineNumer,jdbcType=DECIMAL},
+			</if>
+			<if test="asin != null">
+				ASIN = #{asin,jdbcType=VARCHAR},
+			</if>
+			<if test="cancellationType != null">
+				CANCELLATION_TYPE = #{cancellationType,jdbcType=VARCHAR},
+			</if>
+			<if test="orderItemId != null">
+				ORDER_ITEM_ID = #{orderItemId,jdbcType=DECIMAL},
+			</if>
+			<if test="mSku != null">
+				M_SKU = #{mSku,jdbcType=VARCHAR},
+			</if>
+			<if test="remarks != null">
+				REMARKS = #{remarks,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{entityId,jdbcType=DECIMAL}
+	</update>
+	<insert id="addReturnGoodsOrder">
+		  	 <include refid="insertReturnOrderQry" />	
+	</insert>
+	 
+	 <select id="findInitSkuQty" resultType="int">
+	   SELECT NVL(B.QTY_ORDERED,0)
+					  FROM LIGHT_ORDER A, LIGHT_ORDER_ITEM B
+					 WHERE A.ENTITY_ID = B.PARENT_ID
+					   AND A.ORDER_ID =#{orderId,jdbcType=VARCHAR}
+					   AND A.ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+					   AND B.SKU =#{sku,jdbcType=VARCHAR}
+					   AND ROWNUM = 1
+	</select>
+	
+	 <select id="findOrderSkuQty" resultType="java.lang.Integer">
+	   SELECT NVL(B.QTY_ORDERED,0)
+					  FROM LIGHT_ORDER A, LIGHT_ORDER_ITEM B
+					 WHERE A.ENTITY_ID = B.PARENT_ID
+					   AND A.ORDER_ID =#{orderId,jdbcType=VARCHAR}
+					   AND A.ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+					   AND B.SKU =#{sku,jdbcType=VARCHAR}
+					   AND ROWNUM = 1
+	</select>
+	 
+	 <select id="findAlreadyApplyReturnSkuQty" resultType="int">
+				SELECT NVL(SUM(R.QTY_ORDERED),0) FROM  LIGHT_ORDER_RETURN  R WHERE R.ORDER_ID=#{orderId,jdbcType=VARCHAR}
+ 							AND R.SKU= #{sku,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findAlreadyReturnedSkuQty" resultType="java.lang.Integer">
+		select sum(oi.qty) as qty from sys_return_order o, sys_return_order_item 
+		oi where o.id=oi.parent_id and o.order_id=#{orderId,jdbcType=VARCHAR} and oi.sku=#{sku,jdbcType=VARCHAR} and oi.qty > 0
+		group by oi.sku
+	</select>
+	  
+	<sql id="insertReturnOrderQry">
+		INSERT INTO LIGHT_ORDER_RETURN 
+		     ( ORDER_RETURN_ID,
+		       RMA,
+		       ORDER_ID,
+		       CAUSE,
+		       SKU,
+		       
+		       QTY_ORDERED,
+		       TRACKING_NUM,
+		       STATUS,
+		       PLATEFORM,
+		       ACCOUNT,
+		       SITE,
+		       
+		       CREATED_BY,
+		       CREATED_AT,
+		       UPDATED_BY,
+		       UPDATED_AT 
+		       
+		      ) VALUES (
+		       LIGHT_ORDER_RETURN_SEQ.Nextval,
+		       #{rmaSeq,jdbcType=DECIMAL},
+		       #{orderId,jdbcType=VARCHAR},
+		       #{cause,jdbcType=VARCHAR},
+		       #{sku,jdbcType=VARCHAR},
+		       
+		       #{totalQtyOrdered,jdbcType=DECIMAL},
+		       trim(#{trackingNum,jdbcType=VARCHAR}),
+		       #{status,jdbcType=VARCHAR},
+		       #{platform,jdbcType=VARCHAR},
+		       #{account,jdbcType=VARCHAR},
+		       #{site,jdbcType=VARCHAR},
+		       
+				#{createBy,jdbcType=DECIMAL}, 
+				#{createDate,jdbcType=TIMESTAMP}, 
+				#{updateBy,jdbcType=DECIMAL},
+		   	    #{updateDate,jdbcType=TIMESTAMP}
+				 
+		       )
+	</sql>
+	
+	<select id="findOrderReturnSeq"   resultType="java.lang.Integer">
+		 SELECT
+	       LIGHT_ORDER_RETURN_RMA_SEQ.NEXTVAL AS ID
+	       FROM DUAL 
+	</select>
+	
+	<select id="findAppliedReturnOrders" resultType="com.it.ocs.salesStatistics.vo.ReturnGoodsOrderVo">
+		select o.entity_id as entityId,
+		       ro.order_id as orderId,
+		       o.platform as platform,
+		       roi.sku as sku,
+		       roi.qty as totalQtyOrdered,
+		       o.CUSTOMER_FIRSTNAME || ' ' || o.CUSTOMER_LASTNAME as name,
+		       ro.tracking_num as trackingNum,
+		       ro.eda_order_num as rmaSeq,
+		       ro.cause as cause,
+		       ro.create_date as createdAt
+		from  sys_return_order ro, sys_return_order_item roi, LIGHT_ORDER o, LIGHT_ORDER_ITEM oi
+		where ro.id=roi.parent_id and ro.order_id=o.order_id and o.entity_id=oi.parent_id and oi.sku=roi.sku and oi.sku not like 'B%' and o.entity_id=#{entityId}
+	</select>
+</mapper>

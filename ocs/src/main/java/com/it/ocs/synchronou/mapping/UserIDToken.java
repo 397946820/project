@@ -1,0 +1,35 @@
+//package com.it.ocs.synchronou.mapping;
+//
+//import java.util.HashMap;
+//
+//import com.ebay.soap.eBLBaseComponents.SiteCodeType;
+//import com.it.ocs.synchronou.util.ValidationUtil;
+//
+//public class UserIDToken {
+//	public static String[] searchUserArray(){
+//		String[] array = new String[5];
+//		array[0]="uk.le";
+//		array[1]="le.deutschland";
+//		array[2]="nm.deutschland";
+//		array[3]="uk.nm";
+//		array[4]="lightingever01";
+//		//array[5]="testuser_yangguanbao"
+//		return array;
+//	}
+//	public static String  searchTokenByUserID(String userID){
+//			
+//			HashMap<String, String> map = new HashMap<>();
+//			map.put("uk.le", "AgAAAA**AQAAAA**aAAAAA**u1RjWQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AEmYSiC5SDpQ2dj6x9nY+seQ**Xq8DAA**AAMAAA**nzc7lCXNjRxjfZiTVjNJ6hYFYlZxK+5R6x7rr5WSGrTGJTjr3ykfT4YvBuhdDheZSpftIpfgfQMA//5Y1AhRHhckFpPnVU+7t2R7pViACV9wyiDGh2UjZ/XRuh1v5dr6zqUQN8AIo47gJE+AXeeehIC7G77E0DY2/0p+IxIWCtqP9MNjAfMIPWYsOhX4OnqMQgBIQdcMZZ5/3PoQRj/0ELiTn3RqltZq/T9BnyNv14qXBfXcUiijizx2a0OZBv1dfIrog7/ohP/sqBgvgyl31Ebi78Qp/TgIZtjP9r44tbw7kmsk/X1jtjeeXYfKZ+JelJlYZLZX4DTCCobYAZ7E5sbPI7frJFyRBsm7gxV5sZeBPdwDC5hB9pOTQpM27CdOsz2e089ughAEQw8H9ZV+DXUR4Aw3BNr40QwAkh34dBDF7UFo6JU8bWYTeweFT2vAdxUhvEfFjb5FRMcU5A9LK6SUkcoXP5f2DOD9nloZQOw6X6rczVsDeXd2dCPGTK+vpf82gjY+NWbVanPjICAEwFQZqPQe2OesAcbbK5ztYmeftzAvIEoWR71fHMrKDNrVeEFzzP9a9Pdl/C1UZ5Ys/xlLU07BnqL/idcx0+2WdcW3ZKpwMD7M6NobbqAuHBE7pvezSZ1DAVl+h5mrEURUQdOUMCRV5nKNkOYooeORqtKVclyNAOMPnvJwgn1sr/gdLuzoYtgsREiKBv1wJmni2YwcU80d+uLmCk41nqG3n8unVN0CURR+8g5BGSNFVvl1");
+//			map.put("le.deutschland", "AgAAAA**AQAAAA**aAAAAA**gfdlWQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AEmYSiC5KLqAmdj6x9nY+seQ**Xq8DAA**AAMAAA**IPq7DTRP5XElKsTWz6rGpyF7VqeuX6rX0krokoyC5PY78kl8zIpYsjozzSNW3t6Ij1K5URRIHU4vLNl/g13qI5PuNA53d6Wso19NKDtgXX1T421WPXx/hyHQVlcMXe6UKnq59AEgnpL5tqKAhydaStciCCQUCcx/CqTLq76N1abDb+XX2/JV9CiiJEs6tGDfav7SnfU2TvHqpezXifSrvzJoHJ1NJHF1J5Qj+UCm+e2/kWB4mQYgws9LujqKOatAHr1RHS9cy9IVY0hcipAnLulgVMttOROcKyMWBP/ieOlS7U//zp9x09WWlsl/inGw3Gb1D0rDDjzyG+XTKCcmFNoGuufFb1PUMtYPqOn9D0VB+yoBEu2SA92w2Bj/7dP09UknQCeJ0BHzg+omLmSwGzjdct/EnssSYD0FVMt9NdlloR/mFhieKPTwyFId15ggGOg3kbffbSl7fYiedFXb/OA1Ss+IMgSfS5wkl6C98B40VRcBuSxxHjOb15mvPVm9VVmTwT/pAkp1TJ4n825rk4J1kLyHweTrUpyzrRqotipMr08Jupa+1M6gHNgZz4wyvhfKSL8dgYzsvhvJ11cGFUlYSir1ggcVdKIHKFJaxDlGloO1T7kKHYrVFup2r3xMeAHWIeEt1ReRg3rV+8OXCUNbM97bvjVHwJBaMoB0BW2umiWUZW0c3yFdwt1DDeeGj8wufWLn24VKvQxFK6WshUPFjDyuBIsVv9hHTDEc1uwNqfUY9FzKr8Y06kJphlNO");
+//			map.put("nm.deutschland", "AgAAAA**AQAAAA**aAAAAA**ofplWQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AGl4SpD5aKpwydj6x9nY+seQ**Xq8DAA**AAMAAA**KuvGRPGVXqFlp4QdKk4bGoY9yj91Y191OHsQD+elmqKivJEqyJ1cmVAOF7isTKa80qNuTX2oMo703rz5MQfDyS8i58nQYVl5oBflmEDT2GYxojidwSDuzX+2B0EtY9q/VkAwiujgm4WjaEFlZsuV07Yp/9g/IwllaW6NHILbqa1kBLHdCsPb0nbdoEhZaLgdiFIQCL5D6L0GWrgj1FdLO9ppunXdS9O15ZxLvtblrRlVR8WiMRCbCcrIilVIcKRAwJ6b7hk7wR2awJ7U0/FjPW2il+hTnzyjTuJtLPNV+cc76Itmv8vN2v1MbEzQtgfhG8M/ObhEF+C9PSd0NRs9qP/UB5v19VJWQOQFu0u4q3ei0c+BaJ0FTJWRD9HipQ5qNay85Go552T97Z37NCxPS1GWnqBkatkZPg+hH3eOJTQzi/aqwKLUBh4WHPNhRdB3ZOjgyN96nwJTqN2GdQNyTjUPaREw9sGEGXZEBdnI9awTLdZJkey4vrAbqW78cL0yZ5uxfKfoIxIdmnTkVKkHTsYy7qhRkJI+D8h6ERw6AnnOOqbuxezDDJYaNyuBcobfiv5qFYS5E23x+B9HX/jDUIW2T9yiDXg5Zn8jaft6xWyEKXLhAAnzlVJjYLbg/iZvTM0URllBLVHfchcShbRg+Wp0KwtJqWt8U0fwdqFlNpUWxYTYXm+o4sxILpCCmVEfl9xnWvssJe5KTljQ/HbRqoVfUCcTGycykK8sORRa4xsH4T7oTtVRhV+vexRkBRgB");
+//			map.put("uk.nm", "AgAAAA**AQAAAA**aAAAAA**3vplWQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AGl4SpD5eFpwydj6x9nY+seQ**Xq8DAA**AAMAAA**iydAm7Kq16duV/Musk4kXJRQmu77ZJqV7oQ+dPkGGilARK6NLpQuu9x+kS+2j7CcOVtGZfPg4jla4w+JwBnrr1vVtzQeV7/VwKuynHuEK4nqhWPi/JZhZ6zSNM+NbbIbI/a3TgvFkP5fyS2YSIALc6OCXH46jiQ77l+Qf7q2AkR8feOgTjlXRybuvDPXEk0MjfuAxb+wryC4JqiRkd6Y7gPHUAllXUBqI8JqL0RlD+Ewr3Hvsl6S892wnqSzlEkmrZm9YcO5hOco8xoMUDovZfXMAzcl56WlE+yZ6ghlJXTmX6BLXmj8VXSWGguG62ICT2waID1eM+aazxoRFgvqhua+tPKTJysql2TDrj/Rh0kT7O4VS+dVxrfHpzeovv+9O1DYyhSrOJfmi/gzvxAqTQt9hqpSe04omCXT4I04IUk+ZKPt0fYmFxH3T2bkscBUyXsxdbakRVWYGCr7jA4iegCSXUMbj4KQ1BRuVVRvAX2a63qcIfMWu9nB9IC4PdSogI3dccd1N6VmLPW/AlQSsGoPTtM2t4L8X6Gu1oitB6mkhvBWQ3CYfz8AjuV1CT2P/VJnSDplkqrYxxN7JeZL1/xeIETcBJ3KxWbhFEta4ERue9EYmBZtHCJ3BEmURV65kPpVfp8AZSGAGiXzOFGT2aYPLKUOtVe/qs9zte2GYSCdmvZ0tXIpZmMDY+zwSxClZ0WP+itTKzkXnrJSuhOGPCo3yITjpj7uO1r/0uJKOLwZ2MmIKH+yIhB3dYDg56MI");
+//			map.put("lightingever01", "AgAAAA**AQAAAA**aAAAAA**Xnu7WQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6ACk4epAZmDoQidj6x9nY+seQ**Xq8DAA**AAMAAA**0oKtKUAGw8ps/Q5vgr68nX5+drskXjIZ8vGvx1qeGIVCj7uaTk8vY7+5dJjLiLJPp8+jCoPPV1NFj98P+VpQ3YfK0RYNqYiL4BBVARe44RIqL0TTM7nOFaOo9IE3nGOynPnAdZJmU90+25uOPot3RfDiRjshCyF5C/DYeC79zxhslMdHYzxZNOO2NUgRhL5EL54bpyarnYNWofeMN4hDIN9OOylhArEHYEgEUnKIHCm9fptvO1fFEuSef9iQvhfiXy90P/9i2YNYfTvBG62sd2BFHaxEdOUAqsypKp39n50gCiHo8JclmrZLoiKVPSx7femP0oZVjG5hpxE44HXKIFxWW1TFUmyXRZYgEYvbHQ97G4pFQcZplr4iqP8hBpAMcKgDvKM2MIE18AGqk4sexozAlMJSxtrLo8agGQlw4Wo76opEXQoQAfFeyk00TURbX16fvCUNwB9IK/gzcFP6LjL33TPWZ/pZp2BY7unvwdT5z7jVKUsyt3ZA7neu/HIJpMHqGeBXMAMP+yBjgMFP0DPISlYhmKkq5sZ9VR+eJN13VI+QcbJIJiY9T4m0hYJAqIAMTiF5uaHU8b+p8QtzkH1CovfzCYn9NlKNQ5olC5M6p9cLmF0/G9q1w/KF/PO/FfjcbNLJEH/oBobVmw8SG9SPt5LtvE2qeQrsKZqyP1QXZMZMaon7pSyLfS4b6tDCPICkNGpf2XR/agjSA2DZBbrBsm7QTufmhEzDi4LQd1z4kQ+7ijI0KM2umjgpCLnp");
+//			map.put("testuser_yangguanbao", "AgAAAA**AQAAAA**aAAAAA**R+iCWQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wFk4GlDZeHow2dj6x9nY+seQ**0ScEAA**AAMAAA**XlRylrkXXCoY5UTwzSe/uNQwQLxTK6EYW/p15MKB454clz3lrKW9qzXAIq2oY/EUkzA2YiF2QbwrjfETbqAmBYWxqPr3ht5moulrZQr0y3sMoWTLA56ASPjsXm1TRojVEOezRvrAHKarQq+Gl2mGe9SS7VF7OBSG1TEPdc6BY59w3cEpZqt53j3FpHsjn0N3ZQoDb0NcyEfFRDw3CEPPWL1546z9x455lnjtOCnocwJg83gt3oDcCN+Uuq1KxoEAKboIjAIBr3VcV9mTbIu+gW65Kn2qdbUUtH/Qx22oU0xAjRSbQfpM0vfsfNmckrmgexjS7irpjQ9YFhMlEWM1i6Dk6iA0gubEijkKomxUl77vZCz7b3MV3urZJEbSNyPjGrrCRtH8lo6Th3o0lVdlVJhYmtx0Nw73pO+3UAI22V7lbf+SXqH6UI8dhZJ+zMLVGzgoB79aiEkTLeB+1VK83h21Iv1XdwAw/l5LI+4UwxR2rF4218ZTjRdQEOWgqokdxKsCiEVl7UdEF22+8lnRrjgYBESbkf136mqYvG4O5cFEVRKKVghD2VfTV4gwnWCkmIkrVxIbb0wvEfK2qA5Tas5BNFOazQPVmLchC6CjskzKXGS1ohy6TZ61QlfezEE4r5DHgpjyQOAkIpwKnmo8bD2zZY654lnOakEb4zRzIgVUks20FirrekeR9z/YCNyT0qsSk+6u2BE4oJV0hcVA0zeVzlaGTk0qiTlQjmCOL0/XXRcpFFWRQIhTVh+S2Pd8");
+//	
+//			if(map.get(userID)!=null){
+//				return map.get(userID);
+//			}else{
+//				return null;
+//			}
+//		}
+//}

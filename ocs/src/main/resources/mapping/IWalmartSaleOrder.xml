@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.salesStatistics.dao.IWalmartSaleOrderDao">
+	<sql id="sql_order_base">
+		SELECT ID,
+			   PURCHASE_ORDER_ID PURCHASEORDERID,
+			   CUSTOMER_ORDER_ID CUSTOMERORDERID,
+			   CUSTOMER_EMAIL_ID CUSTOMEREMAILID,
+			   ORDER_DATE_UTC ORDERDATEUTC,
+			   PHONE,
+			   ESTIMATED_DELIVERY_DATE_UTC ESTIMATEDDELIVERYDATEUTC,
+			   ESTIMATED_SHIP_DATE_UTC ESTIMATEDSHIPDATEUTC,
+			   METHOD_CODE METHODCODE,
+			   NAME,
+			   ADDRESS1,
+			   ADDRESS2,
+			   CITY,
+			   STATE,
+			   POSTAL_CODE POSTALCODE,
+			   COUNTRY,
+			   ADDRESS_TYPE ADDRESSTYPE,
+			   ORDER_LINE_TOTAL ORDERLINETOTAL,
+			   PROCESS_STATUS PROCESSSTATUS,
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+		FROM WALMART_ORDER O WHERE 1=1
+	</sql>
+	
+	<sql id="sql_order_line_base">
+		SELECT L.ID, 
+			   L.PARENT_ID PARENTID, 
+			   L.WALMART_ORDER_ID WALMARTORDER_D, 
+			   L.PURCHASE_ORDER_ID PURCHASEORDERID, 
+			   L.CUSTOMER_ORDER_ID CUSTOMERORDERID, 
+			   L.LINE_NUMBER LINENUMBER, 
+			   L.PRODUCT_NAME PRODUCTNAME, 
+			   L.SKU, 
+			   L.ITEM_PRICE ITEMPRICE, 
+			   L.ITEM_PRICE_CURRENCY ITEMPRICECURRENCY, 
+			   L.SHIPPING_PRICE SHIPPINGPRICE, 
+			   L.SHIPPING_PRICE_CURRENCY SHIPPINGPRICECURRENCY, 
+			   L.ORDER_LINE_QUANTITY_MEAS ORDERLINEQUANTITYMEAS, 
+			   L.ORDER_LINE_QUANTITY_AMOUNT ORDERLINEQUANTITYAMOUNT, 
+			   L.STATUS_DATE_UTC STATUSDATEUTC, 
+			   L.ORDER_LINE_STATUS ORDERLINESTATUS, 
+			   L.STATUS_QUANTITY_MEAS STATUSQUANTITYMEAS, 
+			   L.STATUS_QUANTITY_AMOUNT STATUSQUANTITYAMOUNT, 
+			   L.SHIP_DATE_TIME_UTC SHIPDATETIMEUTC, 
+			   L.SHIP_CARRIER SHIPCARRIER, 
+			   L.SHIP_METHOD_CODE SHIPMETHODCODE, 
+			   L.SHIP_TRACKING_NUMBER SHIPTRACKINGNUMBER, 
+			   L.SHIP_TRACKING_URL SHIPTRACKINGURL, 
+			   L.CREATED_AT CREATEDAT, 
+			   L.UPDATED_AT UPDATEDAT
+		FROM WALMART_ORDER_LINE L
+	</sql>
+	
+	<select id="getSaleOrderRefundByParentId" resultType="com.it.ocs.salesStatistics.vo.SaleOrderRefundVo">
+		SELECT NVL(K.SKU,L.SKU) SKU,
+			   L.SKU MSKU,
+		       L.ORDER_LINE_QUANTITY_AMOUNT * NVL(K.QTY,1) AS QTYORDERED,
+		       L.LINE_NUMBER LINENUMBER,
+		       L.ITEM_PRICE_CURRENCY ITEMPRICECURRENCY,
+		       CASE
+		         WHEN L.SHIPPING_PRICE IS NULL THEN
+		          L.ORDER_LINE_QUANTITY_AMOUNT * L.ITEM_PRICE
+		         ELSE
+		          L.ORDER_LINE_QUANTITY_AMOUNT * L.ITEM_PRICE + L.SHIPPING_PRICE
+		       END ROWTOTAL
+		  FROM WALMART_ORDER_LINE L, SYS_SKU_LINK K
+		 WHERE L.SKU = K.P_SKU(+)
+		   AND L.PARENT_ID = #{parentId}
+		 ORDER BY L.LINE_NUMBER
+	</select>
+	
+	<sql id="sql_where">
+		<if test="param != null">
+			<if test="param.customerOrderId != null and param.customerOrderId != ''">
+				AND O.CUSTOMER_ORDER_ID LIKE '${param.customerOrderId}%'
+			</if>
+			<if test="param.methodCode != null and param.methodCode != ''">
+				AND O.METHOD_CODE LIKE '${param.methodCode}%'
+			</if>
+			<if test="param.name != null and param.name != ''">
+				AND O.NAME LIKE '${param.name}%'
+			</if>
+			<if test="param.country != null and param.country != ''">
+				AND O.COUNTRY LIKE '${param.country}%'
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="sql_order">
+		<choose>
+			<when test="sort == null and order == null">
+				ORDER BY ORDER_DATE_UTC DESC
+			</when>
+			<otherwise>
+				ORDER BY ${sort} ${order}
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="queryList" resultType="com.it.ocs.salesStatistics.model.WalmartOrderModel">
+		<include refid="sql_order_base"/>
+		<include refid="sql_where"/>
+		<if test="param != null">
+			<choose>
+				<when test="param.orderAllStatus == 1">
+					AND O.ID IN (SELECT O.ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID AND L.ORDER_LINE_STATUS = 'Created')
+				</when>
+				<when test="param.orderAllStatus == 2">
+					AND O.ID IN (SELECT O.ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID AND L.ORDER_LINE_STATUS = 'Shipped')
+				</when>
+				<when test="param.orderAllStatus == 3">
+					AND O.ID IN (SELECT O.ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID AND L.ORDER_LINE_STATUS = 'Cancelled')
+				</when>
+				<when test="param.orderAllStatus == 4">
+					AND O.ID IN (SELECT O.ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID AND L.ORDER_LINE_STATUS = 'Acknowledged')
+				</when>
+			</choose>
+		</if>
+		<include refid="sql_order"/>
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Long">
+		<choose>
+			<when test="param.orderAllStatus == 0">
+				SELECT COUNT(*) FROM WALMART_ORDER O WHERE 1=1
+				<include refid="sql_where"/>
+			</when>
+			<when test="param.orderAllStatus == 1">
+				SELECT COUNT(*) FROM (SELECT L.PARENT_ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID
+				<include refid="sql_where"/> AND L.ORDER_LINE_STATUS = 'Created' GROUP BY L.PARENT_ID)
+			</when>
+			<when test="param.orderAllStatus == 2">
+				SELECT COUNT(*) FROM (SELECT L.PARENT_ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID
+				<include refid="sql_where"/> AND L.ORDER_LINE_STATUS = 'Shipped' GROUP BY L.PARENT_ID)
+			</when>
+			<when test="param.orderAllStatus == 3">
+				SELECT COUNT(*) FROM (SELECT L.PARENT_ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID
+				<include refid="sql_where"/> AND L.ORDER_LINE_STATUS = 'Cancelled' GROUP BY L.PARENT_ID)
+			</when>
+			<when test="param.orderAllStatus == 4">
+				SELECT COUNT(*) FROM (SELECT L.PARENT_ID FROM WALMART_ORDER O,WALMART_ORDER_LINE L WHERE O.ID = L.PARENT_ID
+				<include refid="sql_where"/> AND L.ORDER_LINE_STATUS = 'Acknowledged' GROUP BY L.PARENT_ID)
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getByOrderId" resultType="com.it.ocs.salesStatistics.model.WalmartOrderModel">
+		<include refid="sql_order_base"/>
+		AND PURCHASE_ORDER_ID = #{orderId}
+	</select>
+	
+	<select id="getWalmartOrderLineById" resultType="com.it.ocs.salesStatistics.model.WalmartOrderLineModel">
+		<include refid="sql_order_line_base"/>
+		WHERE PARENT_ID = #{parentId} ORDER BY LINE_NUMBER
+	</select>
+	
+	<select id="getTotalPriceById" resultType="java.lang.Double">
+		SELECT ROUND(SUM(ITEM_PRICE * ORDER_LINE_QUANTITY_AMOUNT + NVL(SHIPPING_PRICE,0)),4) FROM WALMART_ORDER_LINE
+		WHERE PARENT_ID = #{parentId}
+	</select>
+	
+	<select id="getById" resultType="com.it.ocs.salesStatistics.model.WalmartOrderLineModel">
+		<include refid="sql_order_line_base"/>
+		WHERE ID = #{id}
+	</select>
+	
+	<select id="isExist" resultType="java.lang.String">
+		SELECT ORDER_LINE_STATUS FROM WALMART_ORDER_LINE L WHERE PARENT_ID = #{parentId} AND ORDER_LINE_STATUS = 'Shipped'
+	</select>
+	
+	<select id="getExistWalmartOrderLineById" resultType="com.it.ocs.salesStatistics.model.WalmartOrderLineModel">
+		<include refid="sql_order_line_base"/> WHERE PARENT_ID = #{parentId} AND ORDER_LINE_STATUS = 'Shipped' ORDER BY LINE_NUMBER
+	</select>
+	
+	<select id="getWalmartOrderLineModelByLineNumber" resultType="com.it.ocs.salesStatistics.model.WalmartOrderLineModel">
+		<include refid="sql_order_line_base"/> , WALMART_ORDER O
+		WHERE O.ID = L.PARENT_ID AND O.PURCHASE_ORDER_ID = #{orderId} AND L.LINE_NUMBER = #{lineNumber}
+	</select>
+	<select id="hasSuccess" resultType="int">
+		    select count(*)
+		      from walmart_order_line l
+		     where l.purchase_order_id = #{orderId}
+		       and l.line_number = #{lineNumber}
+		       and l.ship_tracking_number is null
+		
+	</select>
+</mapper>

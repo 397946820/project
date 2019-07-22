@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.it.ocs.synchronou.dao.IEBayAccountDao">
+	<select id="getAccounts" resultType="com.it.ocs.synchronou.model.EbayAccountModel">
+		select distinct account account,TOKEN token,STORE store from ebay_account_manager
+	</select>
+	<select id="getAccountModelByName" resultType="com.it.ocs.synchronou.model.EbayAccountModel">
+		select distinct account account,TOKEN token from ebay_account_manager WHERE account = #{account,jdbcType=VARCHAR}
+	</select>
+	<select id="getAccountByAccount" resultType="com.it.ocs.synchronou.model.EbayAccountModel">
+		select distinct eam.account,eam.token from ebay_account_manager eam where eam.account=#{account}
+	</select>
+</mapper> 

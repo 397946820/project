@@ -1,0 +1,87 @@
+{
+	"0":[
+		{
+			"areaName":"阿拉斯加/夏威夷",
+			"value":"Alaska/Hawaii",
+			"id":"Alaska/Hawaii",
+			"code":"0"
+		},
+		{
+			"areaName":"APO/FPO",
+			"value":"APO/FPO",
+			"id":"APO/FPO",
+			"code":"0"
+		},
+		{
+			"areaName":"美国保护",
+			"value":"US Protectorates",
+			"value":"US Protectorates",
+			"code":"0"
+		}
+	],
+	"3":[
+		{
+			"areaName":"海峡群岛",
+			"value":"Channel Islands",
+			"value":"Channel Islands",
+			"code":"1"
+		},
+		{
+			"areaName":"马恩岛",
+			"value":"Isle of Man",
+			"value":"Isle of Man",
+			"code":"1"
+		},
+		{
+			"areaName":"怀特岛",
+			"value":"Isle of Wight",
+			"value":"Isle of Wight",
+			"code":"1"
+		},
+		{
+			"areaName":"北爱尔兰",
+			"value":"Northern Ireland",
+			"value":"Northern Ireland",
+			"code":"1"
+		},
+		{
+			"areaName":"锡利群岛",
+			"value":"Scilly Isles",
+			"value":"Scilly Isles",
+			"code":"1"
+		},
+		{
+			"areaName":"苏格兰高地",
+			"value":"Scottish Highlands",
+			"value":"Scottish Highlands",
+			"code":"1"
+		},
+		{
+			"areaName":"苏格兰群岛",
+			"value":"Scottish Islands",
+			"value":"Scottish Islands",
+			"code":"1"
+		}
+	],
+"77":[
+	{
+			"areaName":"东弗里西亚群岛",
+			"value":"Ostfriesische Inseln",
+			"value":"Ostfriesische Inseln",
+			"code":"2"
+	},
+	{
+			"areaName":"Hiddensee",
+			"value":"Hiddensee",
+			"value":"Hiddensee",
+			"code":"2"
+	},
+	{
+			"areaName":"北弗里西亚群岛",
+			"value":"Nordfriesische Inseln",
+			"value":"Nordfriesische Inseln",
+			"code":"2"
+	}
+]
+
+}

@@ -1,0 +1,111 @@
+<!--
+  ~ Copyright 2009-2012 xbltd.com All Rights Reserved.
+  ~
+  ~ NOTICE: All information contained herein is, and remains the property of xbltd.com
+  ~ and its suppliers, if any. The intellectual and technical concepts contained herein
+  ~ are proprietary to xbltd.com and its suppliers and may be covered by patents, patents
+  ~ in process, and are protected by trade secret or copyright law. Dissemination
+  ~ of this information or reproduction of this material is strictly forbidden unless
+  ~ prior written permission is obtained from xbltd.com.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task-3.0.xsd
+       http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd">
+	<task:annotation-driven/> 
+	<context:annotation-config/>  
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>  
+    <context:component-scan base-package="com.it.ocs.task.perform.*" />
+    <!--<bean name="methodInvokingJobDetail"-->
+    <!--class="org.springframework.scheduling.quartz.JobDetailBean">-->
+    <!--<property name="jobClass" value="com.xbltd.b2b.mall.timer.SplitTimerTask" />-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; 配置触发器 &ndash;&gt;-->
+    <!--<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+    <!--&lt;!&ndash; 这里不可以直接在属性jobDetail中引用taskJob，因为他要求的是一个jobDetail类型的对象，所以我们得通过MethodInvokingJobDetailFactoryBean来转一下 &ndash;&gt;-->
+    <!--<property name="jobDetail">-->
+    <!--<ref bean="methodInvokingJobDetail"/>-->
+    <!--</property>-->
+    <!--&lt;!&ndash; 每天的8点到21点每隔1分钟触发，具体说明见附录 &ndash;&gt;-->
+    <!--<property name="cronExpression">-->
+    <!--<value>0 * 08-21 * * ?</value>-->
+    <!--</property>-->
+
+    <!--</bean>-->
+
+    <!--<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+    <!--<property name="schedulerContextAsMap">-->
+    <!--<map>-->
+    <!--<entry key="accountService" value-ref="accountService"/>-->
+    <!--<entry key="orderService" value-ref="orderService"/>-->
+    <!--</map>-->
+    <!--</property>-->
+    <!--&lt;!&ndash; 添加触发器 &ndash;&gt;-->
+    <!--<property name="triggers">-->
+    <!--<list>-->
+    <!--<ref local="cronTrigger"/>-->
+    <!--</list>-->
+    <!--</property>-->
+    <!--</bean>-->
+    <!--自动查询提现的结果的job-->
+    <!--<bean name="queryWithdrawResultJob"-->
+          <!--class="org.springframework.scheduling.quartz.JobDetailBean">-->
+        <!--<property name="jobClass" value="com.xbltd.b2b.mall.timer.QueryTimerTask"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; 配置触发器 &ndash;&gt;-->
+    <!--<bean id="queryWithdrawCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+        <!--&lt;!&ndash; 这里不可以直接在属性jobDetail中引用taskJob，因为他要求的是一个jobDetail类型的对象，所以我们得通过MethodInvokingJobDetailFactoryBean来转一下 &ndash;&gt;-->
+        <!--<property name="jobDetail">-->
+            <!--<ref bean="queryWithdrawResultJob"/>-->
+        <!--</property>-->
+        <!--<property name="cronExpression">-->
+            <!--<value>${quartz.query.time}</value>-->
+        <!--</property>-->
+
+    <!--</bean>-->
+    <!--&lt;!&ndash; 自动提现的job &ndash;&gt;-->
+    <!--<bean name="withdrawJob"-->
+          <!--class="org.springframework.scheduling.quartz.JobDetailBean">-->
+        <!--<property name="jobClass" value="com.xbltd.b2b.mall.timer.WithdrawTimerTask"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; 配置触发器 &ndash;&gt;-->
+    <!--<bean id="withdrawCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+        <!--&lt;!&ndash; 这里不可以直接在属性jobDetail中引用taskJob，因为他要求的是一个jobDetail类型的对象，所以我们得通过MethodInvokingJobDetailFactoryBean来转一下 &ndash;&gt;-->
+        <!--<property name="jobDetail">-->
+            <!--<ref bean="withdrawJob"/>-->
+        <!--</property>-->
+        <!--<property name="cronExpression">-->
+            <!--<value>${quartz.withdraw.time}</value>-->
+        <!--</property>-->
+
+    <!--</bean>-->
+
+    <!--<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+        <!--<property name="schedulerContextAsMap">-->
+            <!--<map>-->
+                <!--<entry key="accountService" value-ref="accountService"/>-->
+                <!--<entry key="epayDsfService" value-ref="epayDsfService"/>-->
+                <!--<entry key="withdrawMoneyService" value-ref="withdrawMoneyService"/>-->
+                <!--<entry key="withdrawResultService" value-ref="withdrawResultService"/>-->
+            <!--</map>-->
+        <!--</property>-->
+        <!--&lt;!&ndash; 添加触发器 &ndash;&gt;-->
+        <!--<property name="triggers">-->
+            <!--<list>-->
+                <!--<ref local="queryWithdrawCronTrigger"/>-->
+                <!--<ref local="withdrawCronTrigger"/>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+</beans>

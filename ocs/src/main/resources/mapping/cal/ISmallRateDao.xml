@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.ocs.cal.dao.ISmallRateDao">
+	
+	<sql id="base_sql">
+		SELECT ENTITY_ID ENTITYID,
+			   PLATFORM, 
+			   REFERRAL_RATE REFERRALRATE, 
+			   GROSS_PROFIT_RATE GROSSPROFITRATE, 
+			   PAYPAL_FEE PAYPALFEE, 
+			   VAT, 
+			   ADVERTISING_RATE ADVERTISINGRATE, 
+			   CREATED_AT CREATEDAT,
+			   UPDATED_AT UPDATEDAT
+	    FROM CAL_SMALL_RATE
+	</sql>
+	
+	
+	<select id="query" resultType="com.it.ocs.cal.model.SmallRateModel">
+		<include refid="base_sql" />
+	</select>
+	
+	  <update id="update" parameterType="com.it.ocs.cal.model.SmallRateModel" >
+	    update CAL_SMALL_RATE
+	    <set >
+	      <if test="platform != null" >
+	        PLATFORM = #{platform,jdbcType=VARCHAR},
+	      </if>
+	      <if test="referralRate != null" >
+	        REFERRAL_RATE = #{referralRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="grossProfitRate != null" >
+	        GROSS_PROFIT_RATE = #{grossProfitRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="paypalFee != null" >
+	        PAYPAL_FEE = #{paypalFee,jdbcType=DECIMAL},
+	      </if>
+	      <if test="vat != null" >
+	        VAT = #{vat,jdbcType=DECIMAL},
+	      </if>
+	      <if test="advertisingRate != null" >
+	        ADVERTISING_RATE = #{advertisingRate,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createdAt != null" >
+	        CREATED_AT = #{createdAt,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updatedAt != null" >
+	        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+	      </if>
+	    </set>
+	    where ENTITY_ID = #{entityId,jdbcType=DECIMAL}
+	  </update>
+</mapper>

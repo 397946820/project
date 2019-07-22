@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+http://www.springframework.org/schema/aop 
+http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+http://www.springframework.org/schema/context   
+http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<!-- 自动扫描 -->
+	<context:component-scan base-package="com.it.ocs.*" />
+	<!--&lt;!&ndash; 配置shiro &ndash;&gt; -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login.jsp" />
+		<property name="successUrl" value="/WEB-INF/view/admin/main/index.ftl" />
+		<property name="unauthorizedUrl" value="/unauthorized_page.jsp" />
+		<property name="filterChainDefinitions">
+			<value>
+				/index = authc
+				/BuyerRequire/show = authc,perms[MJYQ]
+				/GoodPlace/show = authc,perms[WPSZD]
+				/advertisementFeatures/tolist = authc,perms[GGTS]	
+				/discount/tolist = authc,perms[ZK]
+				/payment/index = authc,perms[FK]
+				/returnpolicy/index = authc,perms[THZC]
+				/SellerDescription/show = authc,perms[MJMS]
+				/transportSetting/tolist = authc,perms[YSXX]
+				/noArriveRegion/tolist = authc,perms[BYSDQ]
+				/templateSetting/tolist = authc,perms[MBSZ]
+				/product/tolist = authc,perms[CPGL]
+				/IndexSynchronou/show = authc,perms[SPLM]
+				/CategorySpecifics/show = authc,perms[SPLMSX]
+				/StoreCategory/show = authc,perms[SDLM]
+				/SiteDetails/show = authc,perms[TBZD]
+				/CountryDetails/show = authc,perms[TBGJHDQ]
+				/UploadSiteHostedPictures/show = authc,perms[TPSC]
+				/salesStatistics/tolist = authc,perms[XSTJ]
+				/site/index = authc,perms[SYZD]
+				/publication/index = authc,perms[SYFB]
+				/pic/index = authc,perms[SYTP]
+				/picCategory/index = authc,perms[TPLM]
+				/productEntity/tolist = authc,perms[CPGL]
+				/productCost/tolist = authc,perms[CPCBGL]
+				/productOther/tolist = authc,perms[CPQTGL]
+				/tax/tolist = authc,perms[SGL]
+				/shipping/tolist = authc,perms[YFGL]
+				/currencyRate/tolist = authc,perms[HBHLGL]
+				/fbaRule/tolist = authc,perms[FBAGZGL]
+				/department/index = authc,perms[BMGL]
+				/user/index = authc,perms[YHGL]
+				/role/index = authc,perms[JSGL]
+				/project/index = authc,perms[XMGL]
+				/permission/index = authc,perms[QXGL]
+				/operatingProfitView/tolist = authc,perms[JYLRVIEW]
+				/itemDataStructureLink/index = authc,perms[KDSJJGYSGL]
+				/**/css = anon
+				/**/fckeditor = anon
+				/**/images = anon
+				/**/img = anon
+				/**/js = anon
+			</value>
+		</property>
+	</bean>
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myRealm" />
+	</bean>
+	<bean id="myRealm" class="com.it.ocs.shiro.LoginRealm" />
+
+</beans>
+    
